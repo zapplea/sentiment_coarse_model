@@ -17,3 +17,13 @@ Notes:
 1. Can run unittest af_unittest.py for each model. 
 2. Before run the unittest, need to change PATH in: sys.path.append('/home/liu121/dlnlp')
 3. For training, the hyper-parameter should be the same to these in unittest, but you can change values.
+
+input data instance:
+data=[[review, is_padding, attribute labels],...]
+1. review = [sentence_1, sentence_2 ,...,sentence_n]. sentence_i=[word_1,word_2,...,word_m]. Type of word_j is int, representing the code of a word and the reason is that we need to feed the review to lookup_table to extract embeddings. After the word is inputed to lookup_table, it is converted to word embeddings.
+2. is_padding is one_hot vector. Each scalar represents whether a sentence is padded, if it is, then the corresponding scalar is 0, otherwise it is 1.
+3.attribute_labels is vector of probability. Each scalar respresents possibility of this attributes represented in the review. 
+
+FIX_list:
+1. padded word also need a mask.
+2. complete table code
