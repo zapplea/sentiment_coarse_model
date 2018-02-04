@@ -1,5 +1,7 @@
 # sentiment_coarse_model
-paper: uploaded to dropbox
+
+Paper: uploaded to dropbox
+
 TODO_list:
 1. Need to complete sentiment_coarse_model/sentiment/util/coarse/atr_data_generator.py. it lacks the part of generating training data, but I provide function data_generator to feed data to training process. 
 2. Need to write a python file to call classifier and train it. Still, remember to add sys.path.append as in the af_unittest.py
