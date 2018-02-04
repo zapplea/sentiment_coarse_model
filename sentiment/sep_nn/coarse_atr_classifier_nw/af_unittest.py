@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/liu121/dlnlp')
+sys.path.append('/home/liu121/sentiment_coarse_model')
 import unittest
 from classifier import AttributeFunction
 from classifier import Classifier
