@@ -15,7 +15,7 @@ class DataGenerator:
         generate table for look up and the dictionary used to convert words in sentence to word id.
         :return: 
         """
-        vecfpath = '/datastore/che313/yibing_data/nosqldb/skipgram_v200_w5'
+        vecfpath = self.nn_config['wordembedding_file_path']
         word_embed = gensim.models.KeyedVectors.load_word2vec_format(vecfpath, binary=False, datatype=np.float32)
         embed_mat = word_embed.syn0
         vocabulary = word_embed.index2word
