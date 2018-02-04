@@ -5,9 +5,9 @@ TODO_list:
 2. Need to write a python file to call classifier and train it. Still, remember to add sys.path.append as in the af_unittest.py
 
 The model to train:
-(a-o)*e: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_1w
-(a-o)*h: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_nw
-(a-o)*h+(a-o)*e: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_1pNw
+1. (a-o)*e: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_1w
+2. (a-o)*h: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_nw
+3. (a-o)*h+(a-o)*e: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_1pNw
 
 Can run unittest af_unittest.py for each model. 
 Before run the unittest, need to change PATH in: sys.path.append('/home/liu121/dlnlp')
