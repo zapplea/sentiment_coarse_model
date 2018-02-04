@@ -1,0 +1,5 @@
+In this version, consider attributes as one word.
+
+Constraints:
+attribute dim = word embedding
+

@@ -1,0 +1,13 @@
+This is fine-grained modelself.nn_config['normal_senti_prototype_num']*3+self.nn_config['attribute_senti_prototype_num']*self.nn_config['attributes_num']
+
+be careful attribute matrix, it should not be generated for each sentence.
+
+Requirements:
+attribute dim = sentence word dim
+sentiment dim = word dim or h dim
+sentiment dim = lstm_cell_size
+to make life easy, lstm_cell_size = word dim
+
+If switch to the lstm version, the place use wordembedding should be changed to lstm
+
+In this model, the attribute and its sentiment are detected at the same time.

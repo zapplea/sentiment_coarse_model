@@ -1,0 +1,4 @@
+pypinyin
+keras==1.2.2
+jieba
+gensim

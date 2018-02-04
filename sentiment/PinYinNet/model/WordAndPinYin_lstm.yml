@@ -1,0 +1,15 @@
+"class_name: Sequential\nconfig:\n- class_name: Embedding\n  config:\n    W_constraint:\
+  \ null\n    W_regularizer: null\n    activity_regularizer: null\n    batch_input_shape:\
+  \ !!python/tuple [null, 200]\n    dropout: 0.0\n    init: uniform\n    input_dim:\
+  \ 8310\n    input_dtype: int32\n    input_length: 200\n    mask_zero: true\n   \
+  \ name: embedding_1\n    output_dim: 200\n    trainable: true\n- class_name: LSTM\n\
+  \  config: {U_regularizer: null, W_regularizer: null, activation: sigmoid, b_regularizer:\
+  \ null,\n    consume_less: cpu, dropout_U: 0.0, dropout_W: 0.0, forget_bias_init:\
+  \ one, go_backwards: false,\n    init: glorot_uniform, inner_activation: hard_sigmoid,\
+  \ inner_init: orthogonal,\n    input_dim: 200, input_length: null, name: lstm_1,\
+  \ output_dim: 50, return_sequences: false,\n    stateful: false, trainable: true,\
+  \ unroll: false}\n- class_name: Dropout\n  config: {name: dropout_1, p: 0.5, trainable:\
+  \ true}\n- class_name: Dense\n  config: {W_constraint: null, W_regularizer: null,\
+  \ activation: sigmoid, activity_regularizer: null,\n    b_constraint: null, b_regularizer:\
+  \ null, bias: true, init: glorot_uniform, input_dim: 50,\n    name: dense_1, output_dim:\
+  \ 1, trainable: true}\nkeras_version: 1.2.2\n"

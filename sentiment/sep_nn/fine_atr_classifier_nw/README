@@ -1,0 +1,4 @@
+In this version, consider attribute as several words.
+
+Constraints:
+attribute dim = lstm cell size
