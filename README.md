@@ -4,7 +4,7 @@ Paper: uploaded to dropbox
 
 
 TODO_list:
-1. Need to complete sentiment_coarse_model/sentiment/util/coarse/atr_data_generator.py. it lacks the part of generating training data, but I provide function data_generator to feed data to training process. 
+1. Need to complete sentiment_coarse_model/sentiment/util/coarse/atr_data_generator.py. it lacks the part of generating training data, but I provide function data_generator to feed data to training process. You need to use words2id dictionary to convert words in sentences to id at first, and also, need to pad the sentence to the same length(maximum length). The padded word denoted by '#PAD#' and the corrsponding vector is a zeros-vector.
 2. Need to write a python file to call classifier and train it. Still, remember to add sys.path.append as in the af_unittest.py
 
 
@@ -26,4 +26,3 @@ data=[[review, is_padding, attribute labels],...]
 
 FIX_list:
 1. padded word also need a mask.
-2. complete table code
