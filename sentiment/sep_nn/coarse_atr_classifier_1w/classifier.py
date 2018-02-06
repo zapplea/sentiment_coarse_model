@@ -166,6 +166,7 @@ class Classifier:
         """
         Wa = tf.get_variable(name='Sr_Wa',initializer=tf.random_uniform(shape=(self.nn_config['lstm_cell_size'],self.nn_config['attribute_dim']),
                                                                        dtype='float32'))
+        graph.add_to_collection('Wa', Wa)
         # Sr.shape = (number of sentences, number of attributes)
         relevance_score = tf.matmul(tf.matmul(Hl,Wa),A,transpose_b=True)
         graph.add_to_collection('Sr',relevance_score)
@@ -197,23 +198,42 @@ class Classifier:
         weight = tf.get_variable(name='sentence_lstm_w',
                                  initializer=tf.random_uniform(shape=(self.nn_config['word_dim'],
                                                                       self.nn_config['lstm_cell_size']),
-                                                               dtype='float32'))
+                                                               dtype='float32'),trainable=True)
         bias = tf.get_variable(name='sentence_lstm_b',
-                               initializer=tf.zeros(shape=(self.nn_config['lstm_cell_size']), dtype='float32'))
+                               initializer=tf.zeros(shape=(self.nn_config['lstm_cell_size']), dtype='float32'),trainable=True)
 
         X = tf.reshape(X, shape=(-1, self.nn_config['word_dim']))
+        graph.add_to_collection('weight', weight)
         Xt = tf.add(tf.matmul(X, weight), bias)
+        graph.add_to_collection('Xt', Xt)
         Xt = tf.reshape(Xt, shape=(-1, self.nn_config['words_num'], self.nn_config['lstm_cell_size']))
         # xt = tf.add(tf.expand_dims(tf.matmul(x, weight), axis=0), bias)
         cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
         init_state = cell.zero_state(batch_size=self.nn_config['sentences_num'], dtype='float32')
         # outputs.shape = (batch size, max_time, cell size)
-        outputs, _ = tf.nn.dynamic_rnn(cell, inputs=Xt, initial_state=init_state, time_major=False)
+        outputs, last_states = tf.nn.dynamic_rnn(cell, inputs=Xt, initial_state=init_state, time_major=False)
         graph.add_to_collection('sentence_lstm_outputs', outputs)
+        graph.add_to_collection('sentence_lstm_last_states', last_states)
+
         return outputs
 
     def optimizer(self, joint_losses, graph):
-        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(tf.reduce_mean(joint_losses))
+        #opt = tf.train.AdamOptimizer(self.nn_config['lr'])#.minimize(tf.reduce_mean(joint_losses))
+        # return a list of trainable variable in you model
+        max_gradient_norm = 5.0
+        params = tf.trainable_variables()
+
+        # create an optimizer
+        optt = tf.train.GradientDescentOptimizer(self.nn_config['lr'])
+
+        # compute gradients for params
+        gradients = tf.gradients(tf.reduce_mean(joint_losses), params)
+        graph.add_to_collection('gradients', gradients)
+        # process gradients
+        clipped_gradients, norm = tf.clip_by_global_norm(gradients, max_gradient_norm)
+
+        opt = optt.apply_gradients(zip(clipped_gradients, params))
+
         graph.add_to_collection('opt', opt)
         return opt
 
@@ -223,12 +243,13 @@ class Classifier:
         :return: shape = (batch_size, words numbers, word dim)
         """
         table = self.dg.table_generator()
-        table = tf.Variable(np.array(table), name='table')
+        table = tf.Variable(np.array(table), name='table',trainable=False)
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
     def classifier(self):
+
         graph = tf.Graph()
         with graph.as_default():
             R = self.reviews_input(graph=graph)
@@ -241,19 +262,24 @@ class Classifier:
         sentences_atr_score = []
         # shape = (batch size, number of sentences, number of attributes)
         sentences_relevance_weight = []
+
+
         for k in range(self.nn_config['batch_size']):
             with graph.as_default():
+                ##X shape()
                 X = R[k]
                 atr_label = y_att[k]
+                graph.add_to_collection('atr_label', atr_label)
                 # ispad.shape = (reviews batch size, number of sentences)
                 ispad = ispad_M[k]
+                graph.add_to_collection('ispad', ispad)
                 # lstm
                 if k>0:
                     reuse = True
                 else:
                     reuse = None
                 with tf.variable_scope('sentence_lstm',reuse=reuse):
-                    # H.shape = (sentences_num, max_time, cell size)
+                    # H.shape = (sentences_num, max_time, cell size),H is lstm output at every time step
                     H = self.sentence_lstm(X, graph=graph)
                     # get last hidden layer of all sentences
                     # Hl.shape = (sentences number, lstm cell size)
@@ -288,6 +314,7 @@ class Classifier:
             ispad = tf.reshape(ispad_M,shape=(-1,))
             # use ispad to set padded sentences' loss to zero
             opt = self.optimizer(joint_losses=ispad*sentences_loss, graph=graph)
+            graph.add_to_collection('sentences_loss', sentences_loss)
             saver = tf.train.Saver()
         return graph, saver
 
@@ -306,16 +333,28 @@ class Classifier:
             # train_step
             train_step = graph.get_collection('opt')[0]
             # attribute function
+
+            weight = graph.get_collection('weight')[0]
+            gradients = graph.get_collection('gradients')[0]
+
+
             init = tf.global_variables_initializer()
         with graph.device('/gpu:0'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
                 sess.run(init)
                 for i in range(self.nn_config['epoch']):
                     R_data,ispad_M_data,y_att_data = self.dg.data_generator(mode='train',batch_num=i)
-                    sess.run(train_step, feed_dict={R: R_data, y_att: y_att_data, ispad_M:ispad_M_data})
-                    if i!=0 and i%1000==0:
-                        R_data, ispad_M_data, y_att_data = self.dg.data_generator(mode='test')
-                        preds = sess.run(pred,feed_dict={R: R_data, y_att: y_att_data, ispad_M:ispad_M_data})
-                        mtr = Metrics(preds,y_att_data,self.nn_config)
-                        accuracy = mtr.eval()
+
+                    #_,_1,_2 = sess.run([train_step.compute_gradients(loss_),X,weight], feed_dict={R: R_data, y_att: y_att_data, ispad_M:ispad_M_data})
+                    _, _1, _2 = sess.run([train_step,gradients,weight],feed_dict={R: R_data, y_att: y_att_data, ispad_M: ispad_M_data})
+                    print('\n_1:\n',_1,'\n_2:\n',_2)
+                    if i!=0 and i% 100==0:
+                        accuracy = 0
+                        test_num = int(self.nn_config['test_data_size']/self.nn_config['batch_size'])
+                        for j in range(test_num):
+                            R_data, ispad_M_data, y_att_data = self.dg.data_generator(mode='test',batch_num=j)
+                            preds = sess.run(pred,feed_dict={R: R_data, y_att: y_att_data, ispad_M:ispad_M_data})
+                            mtr = Metrics(preds,y_att_data,self.nn_config)
+                            accuracy += mtr.eval()
+                        accuracy /=test_num
                         print('accuracy: {}'.format(str(accuracy)))

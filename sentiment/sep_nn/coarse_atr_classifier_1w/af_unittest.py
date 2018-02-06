@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/liu121/dlnlp')
+sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
 import unittest
 from classifier import AttributeFunction
 from classifier import Classifier
@@ -17,15 +17,16 @@ class AFTest(unittest.TestCase):
                           'words_num': 10,
                           'word_dim': seed['word_dim'],
                           'attribute_loss_theta': 1.0,
-                          'epoch': None,
-                          'lr': 0.003,  # learing rate
+                          'epoch': 3,
+                          'lr': 0.00003,  # learing rate
                           'lstm_cell_size': seed['lstm_cell_size'],
                           'atr_score_threshold': 0,  # attribute score threshold for prediction
                           'test_data_size':1000,
                           # reviews' hyper-parameter
                           'batch_size': 15,  # review batch size
                           'sentences_num': 10, # number of sentences in a review
-                          'label_atr_threshold': 0.3 # attribute threshold used to eliminate low possibility attributes
+                          'label_atr_threshold': 0.2 ,# attribute threshold used to eliminate low possibility attributes default 0.3
+                          'wordembedding_file_path': u'/home/lujunyu/dataset/word_embedding_zh/cn.skipgram.bin'
                           }
         self.graph=tf.Graph()
         self.af=AttributeFunction(self.nn_config)
