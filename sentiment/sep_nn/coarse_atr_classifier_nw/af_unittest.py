@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/liu121/dlnlp')
+sys.path.append('/home/liu121/sentiment_coarse_model')
 import unittest
 from classifier import AttributeFunction
 from classifier import Classifier
@@ -25,7 +25,8 @@ class AFTest(unittest.TestCase):
                           # reviews' hyper-parameter
                           'batch_size': 15,  # review batch size
                           'sentences_num': 10, # number of sentences in a review
-                          'label_atr_threshold': 0.3 # attribute threshold used to eliminate low possibility attributes
+                          'label_atr_threshold': 0.3, # attribute threshold used to eliminate low possibility attributes
+                          'wordembedding_file_path':''
                           }
         self.graph=tf.Graph()
         self.af=AttributeFunction(self.nn_config)
