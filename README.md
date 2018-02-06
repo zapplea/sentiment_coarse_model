@@ -28,3 +28,4 @@ data=[[review, is_padding, attribute labels],...]
 
 FIX_list:
 1. padded word also need a mask.
+2. add regularizer to loss
