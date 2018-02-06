@@ -19,6 +19,7 @@ class AFTest(unittest.TestCase):
                           'attribute_loss_theta': 1.0,
                           'epoch': None,
                           'lr': 0.003,  # learing rate
+                          'reg_rate': 0.03,  # regularizer rate
                           'lstm_cell_size': seed['lstm_cell_size'],
                           'atr_score_threshold': 0,  # attribute score threshold for prediction
                           'test_data_size':1000,

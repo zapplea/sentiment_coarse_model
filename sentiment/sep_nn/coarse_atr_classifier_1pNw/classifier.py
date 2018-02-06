@@ -15,10 +15,12 @@ class AttributeFunction:
             att_vec = tf.get_variable(name='att_vec' + str(i),
                                       initializer=tf.random_uniform(shape=(self.nn_config['attribute_dim'],),
                                                                     dtype='float32'))
+            graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(att_vec))
             A.append(att_vec)
         graph.add_to_collection('A', A)
         o = tf.get_variable(name='other_vec', initializer=tf.random_uniform(shape=(self.nn_config['attribute_dim'],),
                                                                             dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o))
         graph.add_to_collection('o', o)
         return A, o
 
@@ -168,6 +170,7 @@ class Classifier:
         Wa = tf.get_variable(name='Sr_Wa', initializer=tf.random_uniform(
             shape=(self.nn_config['lstm_cell_size'], self.nn_config['attribute_dim']),
             dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(Wa))
         # Sr.shape = (number of sentences, number of attributes)
         relevance_score = tf.matmul(tf.matmul(Hl, Wa), A, transpose_b=True)
         graph.add_to_collection('Sr', relevance_score)
@@ -190,7 +193,7 @@ class Classifier:
         return relevance_weight
 
     # should use variable share
-    def sentence_lstm(self, X, graph):
+    def sentence_lstm(self, X, reuse, graph):
         """
         return a lstm of a sentence
         :param X: sentences in a review
@@ -201,6 +204,8 @@ class Classifier:
                                  initializer=tf.random_uniform(shape=(self.nn_config['word_dim'],
                                                                       self.nn_config['lstm_cell_size']),
                                                                dtype='float32'))
+        if reuse == None:
+            graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(weight))
         bias = tf.get_variable(name='sentence_lstm_b',
                                initializer=tf.zeros(shape=(self.nn_config['lstm_cell_size']), dtype='float32'))
 
@@ -220,22 +225,40 @@ class Classifier:
         graph.add_to_collection('opt', opt)
         return opt
 
-    def lookup_table(self, X, graph):
+    def lookup_table(self, X, mask, graph):
         """
         :param X: shape = (batch_size, words numbers)
+        :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = self.dg.table_generator()
-        table = tf.Variable(np.array(table), name='table')
+        table = tf.placeholder(shape=(2074276, 300), dtype='float32')
+        graph.add_to_collection('table', table)
+        table = tf.Variable(table, name='table')
+
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
+        embeddings = tf.multiply(embeddings,mask)
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
+
+    def is_word_padding_input(self,X,graph):
+        """
+        To make the sentence have the same length, we need to pad each sentence with '#PAD#'. To avoid updating of the vector,
+        we need a mask to multiply the result of lookup table.
+        :param graph: 
+        :return: shape = (review number, sentence number, words number)
+        """
+        ones = tf.ones_like(X, dtype='int32')*2074275
+        is_one = tf.equal(X, ones)
+        mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask, axis=3), multiples=[1,1,1,200])
+        return mask
 
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
             R = self.reviews_input(graph=graph)
-            R = self.lookup_table(R, graph)
+            words_pad_M = self.is_word_padding_input(R, graph)
+            R = self.lookup_table(R, words_pad_M,graph)
             # one hot, 0 represent the setence is padded.
             ispad_M = self.is_sentence_padding_input(graph)
             y_att = self.attribute_labels_input(graph=graph)
@@ -257,7 +280,7 @@ class Classifier:
                     reuse = None
                 with tf.variable_scope('sentence_lstm', reuse=reuse):
                     # H.shape = (sentences_num, max_time, cell size)
-                    H = self.sentence_lstm(X, graph=graph)
+                    H = self.sentence_lstm(X, reuse=reuse, graph=graph)
                     # get last hidden layer of all sentences
                     # Hl.shape = (sentences number, lstm cell size)
                     Hl = tf.reshape(tf.transpose(H, [1, 0, 2])[-1], shape=(self.nn_config['sentences_num'],
@@ -293,7 +316,8 @@ class Classifier:
             # ispad.shape = (batch size * number of sentences)
             ispad = tf.reshape(ispad_M, shape=(-1,))
             # use ispad to set padded sentences' loss to zero
-            opt = self.optimizer(joint_losses=ispad * sentences_loss, graph=graph)
+            loss = tf.reduce_mean(ispad * sentences_loss) + tf.reduce_mean(tf.get_collection('reg'))
+            opt = self.optimizer(loss=loss, graph=graph)
             saver = tf.train.Saver()
         return graph, saver
 
@@ -305,6 +329,8 @@ class Classifier:
             R = graph.get_collection('R')[0]
             # sentence padding
             ispad_M = graph.get_collection('sentences_padding')[0]
+            # table
+            table = graph.get_collection('table')[0]
             # labels
             y_att = graph.get_collection('y_att')[0]
             # prediction
@@ -313,9 +339,10 @@ class Classifier:
             train_step = graph.get_collection('opt')[0]
             # attribute function
             init = tf.global_variables_initializer()
+        table_in = self.dg.table_generator()
         with graph.device('/gpu:0'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init)
+                sess.run(init, feed_dict={table: table_in})
                 for i in range(self.nn_config['epoch']):
                     R_data, ispad_M_data, y_att_data = self.dg.data_generator(mode='train', batch_num=i)
                     sess.run(train_step, feed_dict={R: R_data, y_att: y_att_data, ispad_M: ispad_M_data})
