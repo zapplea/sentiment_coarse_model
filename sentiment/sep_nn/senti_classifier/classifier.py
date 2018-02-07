@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from sentiment.util.coarse.atr_data_generator import DataGenerator
+from sentiment.util.coarse.senti_data_generator import DataGenerator
 from sentiment.util.coarse.metrics import  Metrics
 
 
@@ -291,12 +291,10 @@ class Classifier:
     def __init__(self, nn_config):
         self.nn_config = nn_config
         self.dg = DataGenerator(nn_config)
-        self.sf = SentiFunction(nn_config)
-        self.dg = DataGenerator()  # should give argument to DataGenerator
 
     def sentences_input(self, graph):
         X = tf.placeholder(
-            shape=(self.nn_config['batch_size'], self.nn_config['sentence_words_num']),
+            shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
             dtype='float32')
         graph.add_to_collection('X', X)
         return X
@@ -474,7 +472,7 @@ class Classifier:
         ones = tf.ones_like(X, dtype='int32')*2074275
         is_one = tf.equal(X, ones)
         mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
-        mask = tf.tile(tf.expand_dims(mask, axis=3), multiples=[1,1,1,200])
+        mask = tf.tile(tf.expand_dims(mask, axis=3), multiples=[1,1,300])
         return mask
 
     def classifier(self):

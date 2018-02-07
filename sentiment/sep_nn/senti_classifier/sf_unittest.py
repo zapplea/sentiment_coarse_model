@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
 import unittest
 from classifier import SentiFunction
 from classifier import Classifier
@@ -49,10 +49,17 @@ class SFTest(unittest.TestCase):
     def test_sentence_input(self):
         X_data = np.ones(shape=(self.nn_config['batch_size'],self.nn_config['words_num']))
         with self.graph.as_default():
-            X = self.cf.sentiment_input()
+            X = self.cf.sentences_input(self.graph)
         with self.sess as sess:
             result = sess.run(X,feed_dict={X:X_data})
         self.assertEqual(result.shape,(self.nn_config['batch_size'],self.nn_config['words_num']))
+
+
+    def test_is_word_padding_input(self):
+        X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num']))
+        with self.graph.as_default():
+            mask = self.cf.is_word_padding_input(X_data,self.graph)
+
     # def test_sentiment_matrix(self):
     #     with self.graph.as_default():
     #         W = self.sf.sentiment_matrix(self.graph)
