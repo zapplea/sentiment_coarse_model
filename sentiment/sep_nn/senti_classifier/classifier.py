@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
-from data_generator import DataGenerator
+from sentiment.util.coarse.atr_data_generator import DataGenerator
+from sentiment.util.coarse.metrics import  Metrics
 
 
 class SentiFunction:
@@ -295,7 +296,7 @@ class Classifier:
 
     def sentences_input(self, graph):
         X = tf.placeholder(
-            shape=(self.nn_config['batch_size'], self.nn_config['sentence_words_num'], self.nn_config['word_dim']),
+            shape=(self.nn_config['batch_size'], self.nn_config['sentence_words_num']),
             dtype='float32')
         graph.add_to_collection('X', X)
         return X
@@ -355,6 +356,7 @@ class Classifier:
                                  initializer=tf.random_uniform(shape=(self.nn_config['word_dim'],
                                                                       self.nn_config['lstm_cell_size']),
                                                                dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(weight))
         bias = tf.get_variable(name='sentence_lstm_b',
                                initializer=tf.zeros(shape=(self.nn_config['lstm_cell_size']), dtype='float32'))
 
@@ -446,22 +448,41 @@ class Classifier:
         graph.add_to_collection('joint_loss', joint_loss)
         return joint_loss
 
-    def lookup_table(self, X, graph):
+
+    def lookup_table(self, X, mask, graph):
         """
         :param X: shape = (batch_size, words numbers)
+        :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = self.dg.table_generator()
-        table = tf.Variable(np.array(table), name='table')
+        table = tf.placeholder(shape=(2074276, 300), dtype='float32')
+        graph.add_to_collection('table', table)
+        table = tf.Variable(table, name='table')
+
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
+        embeddings = tf.multiply(embeddings,mask)
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
+
+    def is_word_padding_input(self,X,graph):
+        """
+        To make the sentence have the same length, we need to pad each sentence with '#PAD#'. To avoid updating of the vector,
+        we need a mask to multiply the result of lookup table.
+        :param graph: 
+        :return: shape = (review number, sentence number, words number)
+        """
+        ones = tf.ones_like(X, dtype='int32')*2074275
+        is_one = tf.equal(X, ones)
+        mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask, axis=3), multiples=[1,1,1,200])
+        return mask
 
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
             X = self.sentences_input(graph=graph)
-            X = self.lookup_table(X, graph)
+            words_pad_M = self.is_word_padding_input(X, graph)
+            X = self.lookup_table(X, words_pad_M,graph)
             # lstm
             with tf.variable_scope('sentence_lstm'):
                 # H.shape = (batch size, max_time, cell size)
