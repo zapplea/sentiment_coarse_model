@@ -10,7 +10,7 @@ class AFTest(unittest.TestCase):
     def __init__(self,*args,**kwargs):
         super(AFTest, self).__init__(*args, **kwargs)
         seed = {'lstm_cell_size': 200,
-                'word_dim': 200
+                'word_dim': 300
                 }
         self.nn_config = {'attributes_num': 12,
                           'attribute_dim': seed['lstm_cell_size'],

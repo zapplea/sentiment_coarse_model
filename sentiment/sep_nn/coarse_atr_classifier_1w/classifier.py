@@ -248,7 +248,7 @@ class Classifier:
         :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = tf.placeholder(shape=(2074276, 300), dtype='float32')
+        table = tf.placeholder(shape=(2074276, self.nn_config['word_dim']), dtype='float32')
         graph.add_to_collection('table', table)
         table = tf.Variable(table, name='table')
 
@@ -267,7 +267,7 @@ class Classifier:
         ones = tf.ones_like(X, dtype='int32')*2074275
         is_one = tf.equal(X, ones)
         mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
-        mask = tf.tile(tf.expand_dims(mask, axis=3), multiples=[1,1,1,200])
+        mask = tf.tile(tf.expand_dims(mask, axis=3), multiples=[1,1,1,self.nn_config['word_dim']])
         return mask
 
     def classifier(self):
