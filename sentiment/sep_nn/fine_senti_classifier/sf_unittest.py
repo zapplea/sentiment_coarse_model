@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+sys.path.append('/home/yibing/Documents/sentiment_coarse_model')
 import unittest
 from classifier import SentiFunction
 from classifier import Classifier
@@ -321,11 +321,28 @@ class SFTest(unittest.TestCase):
                 attentions.append(attention)
                 # init = tf.global_variables_initializer()
         with self.sess as sess:
-            result = sess.run(attentions)
+            result = np.array(sess.run(attentions))
+            extors_mask_mat = sess.run(extors_mask_mat)
         self.assertEqual(np.array(result).shape,(3*self.nn_config['attributes_num']+3,
                                            self.nn_config['words_num'],
                                            3 * self.nn_config['normal_senti_prototype_num'] +
                                            self.nn_config['attributes_num'] * self.nn_config['attribute_senti_prototype_num']))
+
+        test_data = np.tile(np.expand_dims(extors_mask_mat, axis=1), reps=[1, self.nn_config['words_num'], 1])
+        for i in range(3*self.nn_config['attributes_num']):
+            for j in range(self.nn_config['words_num']):
+                test_data[i][j]=test_data[i][j]*0.125
+
+        for i in range(3*self.nn_config['attributes_num'],3*self.nn_config['attributes_num']+3):
+            for j in range(self.nn_config['words_num']):
+                test_data[i][j] = test_data[i][j]*0.25
+
+        self.assertTrue(np.all(test_data == np.array(result)))
+
+    def test_attended_sentiment(self):
+        with self.graph.as_default():
+
+
 
 
 
