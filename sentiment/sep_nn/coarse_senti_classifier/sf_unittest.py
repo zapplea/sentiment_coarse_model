@@ -291,47 +291,55 @@ class SFTest(unittest.TestCase):
     #     test_data = np.ones(shape=(self.nn_config['attributes_num']+1,self.nn_config['lstm_cell_size']),dtype='float32')*0.99
     #     self.assertTrue(np.all(np.array(result)-test_data>0.009))
 
-    # def test_words_attribute_mat2vec(self):
-    #     h_data = np.ones(shape=(self.nn_config['words_num'],self.nn_config['lstm_cell_size']),dtype='float32')
-    #     A_mat_data = np.ones(shape=(self.nn_config['attributes_num'] + 1, self.nn_config['attribute_mat_size'], self.nn_config['attribute_dim']),
-    #                          dtype='float32')
-    #     with self.graph.as_default():
-    #         words_A = self.sf.words_attribute_mat2vec(h_data, A_mat_data,self.graph)
-    #     with self.sess as sess:
-    #         result = sess.run(words_A)
-    #     self.assertEqual(np.array(result).shape,(self.nn_config['words_num'],self.nn_config['attributes_num']+1,self.nn_config['attribute_dim']))
-    #
-    #     test_data = np.ones_like(np.array(result),dtype='float32')
-    #     self.assertTrue(np.all(np.array(result)-test_data == 0))
+    def test_words_attribute_mat2vec(self):
+        h_data = np.ones(shape=(self.nn_config['words_num'],self.nn_config['lstm_cell_size']),dtype='float32')
+        A_mat_data = np.ones(shape=(self.nn_config['attributes_num'] + 1, self.nn_config['attribute_mat_size'], self.nn_config['attribute_dim']),
+                             dtype='float32')
+        with self.graph.as_default():
+            words_A = self.sf.words_attribute_mat2vec(h_data, A_mat_data,self.graph)
+        with self.sess as sess:
+            result = sess.run(words_A)
+        self.assertEqual(np.array(result).shape,(self.nn_config['words_num'],self.nn_config['attributes_num']+1,self.nn_config['attribute_dim']))
+
+        test_data = np.ones_like(np.array(result),dtype='float32')
+        self.assertTrue(np.all(np.array(result)-test_data == 0))
 
     def test_sentiment_attention(self):
         h_data = np.ones(shape=(self.nn_config['words_num'], self.nn_config['lstm_cell_size']), dtype='float32')
-        W = np.ones(shape=(self.nn_config['normal_senti_prototype_num'] * 3 +
-                           self.nn_config['attribute_senti_prototype_num'] *self.nn_config['attributes_num'],
-                           self.nn_config['sentiment_dim']),
-                    dtype='float32')
+        W = np.ones()
         with self.graph.as_default():
             extors_mat = self.cf.senti_extors_mat(self.graph)
-            extors_mask_mat = self.cf.extors_mask(extors=extors_mat, graph=self.graph)
+            W = self.sf.sentiment_matrix(self.graph)
             W = tf.multiply(W,extors_mat)
         with self.graph.as_default():
-            attentions = []
-            for i in range(3*self.nn_config['attributes_num']+3):
-                attention = self.sf.sentiment_attention(h=h_data, W=W[i], m=extors_mask_mat[i], graph=self.graph)
-                attentions.append(attention)
-                # init = tf.global_variables_initializer()
-        with self.sess as sess:
-            result = sess.run(attentions)
-        self.assertEqual(np.array(result).shape,(3*self.nn_config['attributes_num']+3,
-                                           self.nn_config['words_num'],
-                                           3 * self.nn_config['normal_senti_prototype_num'] +
-                                           self.nn_config['attributes_num'] * self.nn_config['attribute_senti_prototype_num']))
 
+            self.sf.sentiment_attention()
+            init = tf.global_variables_initializer()
 
 
     # ##################################################################################################################
 
-
+    # def test_sentiment_attention(self):
+    #     E = self.cf.sentiment_extract_mat()
+    #     W = np.ones(shape=(self.nn_config['normal_senti_prototype_num']*3+self.nn_config['attribute_senti_prototype_num']*self.nn_config['attributes_num'],
+    #                                             self.nn_config['sentiment_dim']),dtype='float32')
+    #     W = np.multiply(E,W)
+    #     M = self.cf.extor_mask_mat()
+    #     attentions = []
+    #     with self.graph.as_default():
+    #         for j in range(3*self.nn_config['attributes_num']):
+    #             attention = self.sf.sentiment_attention(self.x, W[j], M[j], self.graph)
+    #             attentions.append(attention)
+    #         init = tf.global_variables_initializer()
+    #     with self.sess:
+    #         self.sess.run(init)
+    #         result = self.sess.run(attentions)
+    #         # print('result.shape',np.array(result).shape)
+    #         self.assertEqual(np.array(result).shape,(3*self.nn_config['attributes_num'],
+    #                                                  self.nn_config['words_num'],
+    #                                                  self.nn_config['normal_senti_prototype_num']*3+
+    #                                                  self.nn_config['attribute_senti_prototype_num']*
+    #                                                  self.nn_config['attributes_num']))
     #
     # def test_attended_sentiment(self):
     #     E = self.cf.sentiment_extract_mat()
