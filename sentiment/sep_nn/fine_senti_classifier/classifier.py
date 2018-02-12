@@ -54,7 +54,8 @@ class SentiFunction:
     def attribute_distribution(self, A, h, graph):
         """
         distribution of all attributes in this sentence
-        :param A: all attributes
+        :param A: A.shape = (attributes number +1 , attributes dim(=lstm cell size)) or 
+                  A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell size))
         :param h: one sentence
         :param graph: 
         :return: shape = (number of attributes+1, number of words)
@@ -64,6 +65,7 @@ class SentiFunction:
             # A_dist = (number of attributes+1,number of words)
             A_dist = tf.nn.softmax(tf.matmul(A, h, transpose_b=True))
         else:
+            print('is_mat')
             # A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell dim))
             # new_A.shape = (number of words, number of attributes+1)
             new_A = []
@@ -71,7 +73,8 @@ class SentiFunction:
                 word_embed = h[i]
                 # wi_A.shape = (number of attributes+1, attribute dim(=lstm cell dim))
                 wi_A = A[i]
-                new_A.append(tf.reduce_sum(tf.multiply(wi_A, word_embed), axis=1, keep_dims=True))
+                new_A.append(tf.reduce_sum(tf.multiply(wi_A, word_embed), axis=1))
+            print('out is mat')
             A_dist = tf.nn.softmax(tf.transpose(new_A))
         graph.add_to_collection('attribute_distribution', A_dist)
         return A_dist
@@ -86,9 +89,9 @@ class SentiFunction:
     def vi(self, i, a_dist, V, graph):
         """
         :param i: the position of hi
-        :param a_dist: distribution of one attribute
-        :param V: 
-        :return: vi of attribute a at position i. shape = (relative position dim)
+        :param a_dist: shape = (number of words, ); one attribute's distribution in a sentence.
+        :param V: shape = (number of relative position, relative position dim)
+        :return: vi of attribute a at position i. shape = (relative position dim,)
         """
         a_dist = tf.expand_dims(a_dist, axis=1)
         a_dist = tf.tile(a_dist, multiples=[1, self.nn_config['rp_dim']])
@@ -96,7 +99,7 @@ class SentiFunction:
         for k in range(self.nn_config['words_num']):
             ak = a_dist[k]
             if abs(k - i) < self.nn_config['rps_num']:
-                v_r = V[k - i]
+                v_r = V[abs(k - i)]
             else:
                 last = self.nn_config['rps_num'] - 1
                 v_r = V[last]
@@ -107,8 +110,8 @@ class SentiFunction:
     def Vi(self, A_dist, V, graph):
         """
 
-        :param A_dist: shape = (number of attributes +1, number of words, relative position dim)
-        :param V: 
+        :param A_dist: shape = (number of attributes+1, number of words)
+        :param V: shape = (number of relative position, relative position dim)
         :param graph: 
         :return: realtive position vector of each attribute at each position.
                 shape = (number of attributes+1, number of words, relative position dim)
@@ -120,7 +123,7 @@ class SentiFunction:
             # a_vi.shape=(number of words, relative position dim)
             a_vi = []
             for j in range(self.nn_config['words_num']):
-                # v.shape=(relative position dim)
+                # v.shape=(relative position dim,)
                 v = self.vi(j, a_dist, V, graph)
                 a_vi.append(v)
             A_vi.append(a_vi)
@@ -133,8 +136,7 @@ class SentiFunction:
         :param graph: 
         :return: beta weight, shape=(rp_dim)
         """
-        b = tf.get_variable(name='beta',
-                            initializer=tf.random_uniform(shape=(self.nn_config['rp_dim'],), dtype='float32'))
+        b = tf.get_variable(name='beta',initializer=tf.random_uniform(shape=(self.nn_config['rp_dim'],), dtype='float32'))
         graph.add_to_collection('beta', b)
         return b
 
@@ -555,7 +557,7 @@ class Classifier:
                     w = self.sf.attended_sentiment(W[j], attention, graph)
                     item1.append(tf.reduce_sum(tf.multiply(w, h), axis=1))
                 # all attributes distribution for one sentence
-                # A.shape = (number of words, number of attributes, attribute dim(=lstm cell dim))
+                # A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell dim))
                 # or A.shape = (number of attributes+1, attribute dim)
                 A_dist = self.sf.attribute_distribution(A=A, h=h, graph=graph)
                 # A_dist.shape = (number of attributes+1, number of words)
