@@ -18,64 +18,82 @@ class SentiFunction:
         graph.add_to_collection('W', W)
         return W
 
-    def sentiment_attention(self, h, W, m, graph):
+    def sentiment_attention(self, H, W, m, graph):
         """
-        :param h: is a sentence. (number of words, lstm cell size)
-        :param W: sentiment expression for sentence x; shape = (number of sentiment prototypes, lstm cell size)
-        :param m: mask to eliminate influence of 0
-        :return: shape = (number of words, number of sentiment prototypes)
+        :param h: shape = (batch size, number of words, lstm cell size)
+        :param W: shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size). 3*attribute numbers is
+        3 sentiment for each attributes; 3 is sentiment for non-attribute entity, it only has normal sentiment, not attribute
+        specific sentiment.
+        :param m: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
+        :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
         """
-
-        temp = tf.multiply(m, tf.exp(tf.matmul(h, W, transpose_b=True)))
-        # denominator of softmax
-        den = tf.reduce_sum(temp, axis=1, keep_dims=True)
-        den = tf.tile(den, multiples=[1, self.nn_config['normal_senti_prototype_num'] * 3 + self.nn_config[
-            'attribute_senti_prototype_num'] * self.nn_config['attributes_num']])
-        attention = tf.truediv(temp, den)
+        # H.shape = (batch size, words num, 3+3*attributes number, word dim)
+        H = tf.tile(tf.expand_dims(H,axis=2),multiples=[1,1,3*self.nn_config['attributes_num']+3,1])
+        # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
+        H = tf.tile(tf.expand_dims(H,axis=3),multiples=[1,1,1,self.nn_config['normal_senti_prototype_num'] * 3 +
+                                                        self.nn_config['attribute_senti_prototype_num'] *self.nn_config['attributes_num'],
+                                                        1])
+        # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
+        temp = tf.multiply(m,tf.log(tf.reduce_sum(tf.multiply(H,W),axis=4)))
+        # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
+        denominator = tf.reduce_sum(temp,axis=3,keep_dims=True)
+        denominator = tf.tile(denominator,multiples=[1,1,1,
+                                       self.nn_config['normal_senti_prototype_num'] * 3 +
+                                       self.nn_config['attribute_senti_prototype_num'] *self.nn_config['attributes_num']])
+        attention = tf.truediv(temp,denominator)
         graph.add_to_collection('senti_attention', attention)
         return attention
 
     def attended_sentiment(self, W, attention, graph):
         """
-
-        :param W: one (yi,ai)
-        :param attention: (number of words, number of prototypes)
+        :param W: all (yi,ai); shape = (3*number of attribute +3, sentiment prototypes, sentiment dim)
+        :param attention: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes)
         :param graph: 
-        :return: w.shape=(number of words in a sentence,sentiment_dim) 
+        :return: (batch size,number of words, 3+3*attributes number, sentiment dim)
         """
-        attention = tf.expand_dims(attention, axis=2)
-        # attention.shape = (number of words, number of sentiment prototypes, sentiment dim)
-        attention = tf.tile(attention, multiples=[1, 1, self.nn_config['sentiment_dim']])
-        w = tf.reduce_sum(tf.multiply(attention, W), axis=1)
-        graph.add_to_collection('w', w)
-        return w
+        # attention.shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes,sentiment dim)
+        attention = tf.tile(tf.expand_dims(attention, axis=3),multiples=[1,1,1,self.nn_config['sentiment_dim']])
+        #
+        attended_W = tf.reduce_sum(tf.multiply(attention, W), axis=3)
+        graph.add_to_collection('attended_W', attended_W)
+        return attended_W
+
+    def item1(self,W,H,graph):
+        """
+        
+        :param W: shape = (batch size,number of words, 3+3*attributes number, sentiment dim)
+        :param H: shape = (batch size, number of words, word dim)
+        :return: shape = (batch size,number of words, 3+3*attributes number)
+        """
+        # H.shape = (batch size,number of words, 3+3*attributes number, sentiment dim)
+        H=tf.tile(tf.expand_dims(H,axis=2),multiples=[1,1,3*self.nn_config['attributes_num']+3,1])
+        item1_score = tf.reduce_sum(tf.multiply(W,H),axis=3)
+        graph.add_to_collection('item1_score',item1_score)
+        return item1_score
 
     # association between attribute and sentiment: towards specific attribute
-    def attribute_distribution(self, A, h, graph):
+    def attribute_distribution(self, A, H, graph):
         """
         distribution of all attributes in this sentence
         :param A: A.shape = (attributes number +1 , attributes dim(=lstm cell size)) or 
-                  A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell size))
-        :param h: one sentence
+                  A.shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
+        :param H: batch size, words num, word dim
         :param graph: 
-        :return: shape = (number of attributes+1, number of words)
+        :return: shape = (batch size, number of attributes+1, wrods number)
         """
         if not self.nn_config['is_mat']:
-            # A.shape=(number of attributes+1, attribute dim(=word dim))
-            # A_dist = (number of attributes+1,number of words)
-            A_dist = tf.nn.softmax(tf.matmul(A, h, transpose_b=True))
+            H = tf.reshape(H,shape=(-1,self.nn_config['word_dim']))
+            # A.shape=(number of attributes+1, attribute dim(=lstm cell size))
+            # A_dist = (batch size,number of attributes+1,number of words)
+            A_dist = tf.nn.softmax(tf.reshape(tf.matmul(A, H, transpose_b=True),
+                                              shape=(-1,self.nn_config['attributes_num']+1,self.nn_config['words_num'])))
         else:
-            print('is_mat')
-            # A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell dim))
-            # new_A.shape = (number of words, number of attributes+1)
-            new_A = []
-            for i in range(self.nn_config['words_num']):
-                word_embed = h[i]
-                # wi_A.shape = (number of attributes+1, attribute dim(=lstm cell dim))
-                wi_A = A[i]
-                new_A.append(tf.reduce_sum(tf.multiply(wi_A, word_embed), axis=1))
-            print('out is mat')
-            A_dist = tf.nn.softmax(tf.transpose(new_A))
+            # A.shape = (batch size, number of words, number of attributes+1, attribute dim(=lstm cell dim))
+            # H.shape = (batch size, number of words, number of attributes+1, word dim)
+            H = tf.tile(tf.expand_dims(H,axis=2),multiples=[1,1,self.nn_config['attributes_num']+1,1])
+            # A_dist.shape = (batch size, attributes number, words number)
+            A_dist = tf.nn.softmax(tf.transpose(tf.reduce_sum(tf.multiply(A,H),axis=3),[0,2,1]))
+
         graph.add_to_collection('attribute_distribution', A_dist)
         return A_dist
 
@@ -86,49 +104,43 @@ class SentiFunction:
         graph.add_to_collection('V', V)
         return V
 
-    def vi(self, i, a_dist, V, graph):
+    def relative_pos_ids(self,graph):
         """
-        :param i: the position of hi
-        :param a_dist: shape = (number of words, ); one attribute's distribution in a sentence.
-        :param V: shape = (number of relative position, relative position dim)
-        :return: vi of attribute a at position i. shape = (relative position dim,)
+        :param graph: 
+        :return: shape = (number of words, number of words)
         """
-        a_dist = tf.expand_dims(a_dist, axis=1)
-        a_dist = tf.tile(a_dist, multiples=[1, self.nn_config['rp_dim']])
-        vi = []
-        for k in range(self.nn_config['words_num']):
-            ak = a_dist[k]
-            if abs(k - i) < self.nn_config['rps_num']:
-                v_r = V[abs(k - i)]
-            else:
-                last = self.nn_config['rps_num'] - 1
-                v_r = V[last]
-            vi.append(tf.multiply(ak, v_r))
-        vi = tf.reduce_sum(vi, axis=0)
-        return vi
+        id4sentence = []
+        for i in range(self.nn_config['words_num']):
+            id4word_i = []
+            for j in range(self.nn_config['words_num']):
+                if abs(i-j)<self.nn_config['rps_num']:
+                    id4word_i.append(abs(i-j))
+                else:
+                    id4word_i.append(self.nn_config['rps_num']-1)
+            id4sentence.append(id4word_i)
+        rp_ids = tf.constant(id4sentence,dtype='int32')
+        graph.add_to_collection('relative_pos_ids',rp_ids)
+        return  rp_ids
 
-    def Vi(self, A_dist, V, graph):
+    def Vi(self, A_dist, V, rp_ids, graph):
         """
-
-        :param A_dist: shape = (number of attributes+1, number of words)
+        :param A_dist: shape = (batch size, number of attributes+1, number of words)
         :param V: shape = (number of relative position, relative position dim)
+        :param rp_ids: shape = (number of words, number of words)
         :param graph: 
         :return: realtive position vector of each attribute at each position.
-                shape = (number of attributes+1, number of words, relative position dim)
+        shape = (batch size, number of attributes+1, number of words, relative position dim)
         """
-        # A_vi.shape=(attributes number+1, number of words, relative position dim)
-        A_vi = []
-        for i in range(self.nn_config['attributes_num']+1):
-            a_dist = A_dist[i]
-            # a_vi.shape=(number of words, relative position dim)
-            a_vi = []
-            for j in range(self.nn_config['words_num']):
-                # v.shape=(relative position dim,)
-                v = self.vi(j, a_dist, V, graph)
-                a_vi.append(v)
-            A_vi.append(a_vi)
-        graph.add_to_collection('A_vi', A_vi)
-        return A_vi
+        # rp_mat.shape = (number of words, number of words, rp_dim)
+        rp_mat=tf.nn.embedding_lookup(V,rp_ids)
+        # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rp_dim']])
+        # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
+        # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+        A_Vi = tf.reduce_sum(tf.multiply(A_dist,rp_mat),axis=3)
+        graph.add_to_collection('A_Vi', A_Vi)
+        return A_Vi
 
     def beta(self, graph):
         """
@@ -143,90 +155,80 @@ class SentiFunction:
     # sentiment score
     def score(self, item1, item2, graph):
         """
-        :param item1: shape = (3*number of attributes+3, number of words in a sentence)
-        :param item2: shape = (number of attributes+1, number of words in a sentence)
+        :param item1: shape = (batch size,number of words, 3+3*attributes number)
+        :param item2: shape=(batch size, number of attributes+1, number of words)
         :param graph: 
-        :return: (3*number of attributes+1,) this is all combinations of yi and ai
+        :return: (batch size, 3*number of attributes+3) this is all combinations of yi and ai
         """
-        # item2.shape = (3*self.nn_config['attributes_num'],self.nn_config['words_num'])
-        item2 = tf.reshape(tf.tile(tf.expand_dims(item2, axis=1), [1, 3, 1]),
-                           shape=(3 * self.nn_config['attributes_num']+3, self.nn_config['words_num']))
-
-
-
-        score = tf.reduce_max(tf.add(item1, item2), axis=1)
+        # item1.shape = (batch size, 3+3*attributes number, number of words)
+        item1 = tf.transpose(item1,[0,2,1])
+        # item2.shape = (batch size, 3+3*attributes number, number of words)
+        item2 = tf.reshape(tf.tile(tf.expand_dims(item2, axis=2), [1,1, 3, 1]),
+                           shape=(-1,3 * self.nn_config['attributes_num']+3, self.nn_config['words_num']))
+        score = tf.reduce_max(tf.add(item1, item2), axis=2)
         graph.add_to_collection('senti_score', score)
         return score
 
-    def max_f_senti_score(self, senti_label, score, graph):
+    def max_false_senti_score(self, Y_senti, score, graph):
         """
 
-        :param senti_label: shape=(attributes numbers, 3) 
-        :param score: shape=(attributes numbers, 3)
+        :param Y_senti: shape=(batch size, attributes numbers+1, 3)
+        :param score: shape=(batch size, 3*attributes numbers+3)
         :param graph: 
-        :return: shape = (number of attributes,3)
+        :return: shape = (batch size, number of attributes+1,3)
         """
+        # score.shape = (batch size, attributes numbers+1, 3)
+        score = tf.reshape(score,shape=(-1,self.nn_config['attributes_num']+1,3))
         # if value is 1 then it is true, otherwise flase
-        condition = tf.equal(tf.ones_like(senti_label, dtype='float32'), senti_label)
-        # max_score.shape = (number of attributes, 1)
-        max_fscore = tf.reduce_max(tf.where(condition,
-                                            tf.ones_like(score, dtype='float32') * tf.constant(-np.inf, dtype='float32'),
-                                            score),
-                                   axis=1, keep_dims=True)
+        condition = tf.equal(tf.ones_like(Y_senti, dtype='float32'), Y_senti)
+        # mask.shape = (batch size, attributes numbers+1, 3)
+        mask = tf.where(condition,
+                        tf.ones_like(score,dtype='float32')*tf.constant(-np.inf,dtype='float32'),
+                        tf.zeros_like(score,dtype='float32'))
+        # shape = (batch size, number of attributes+1,1)
+        max_fscore = tf.reduce_max(tf.add(score,mask),axis=2,keep_dims=True)
+
         # consider when attribute contains all sentiment in a sentence.
         max_fscore = tf.where(tf.is_inf(max_fscore), tf.zeros_like(max_fscore, dtype='float32'), max_fscore)
-        max_fscore = tf.tile(max_fscore, multiples=[1, 3])
-        graph.add_to_collection('max_f_senti_score', max_fscore)
+        # max_fscore.shape = (batch size, number of attributes+1, 3)
+        max_fscore = tf.tile(max_fscore, multiples=[1,1,3])
+        graph.add_to_collection('max_false_senti_score', max_fscore)
         return max_fscore
 
-    def senti_loss_mask(self, atr_label, senti_label):
-        """
-        calculate mask for sentiment loss. a 0 position is determined by three elements: prediction of attribute score,
-        attribute labels and sentiment labels. if the attribute is not detected, not a true label or a sentiment is false, 
-        then its sentiment loss ly should be zero.
-        :param atr_label: shape = (number of attributes+1, )
-        :param senti_label: shape = (number of attributes, 3)
-        :return: 
-        """
-        atr_label = tf.tile(tf.expand_dims(atr_label, axis=1), multiples=[1, 3])
-        return atr_label * senti_label
-
-    def loss(self, senti_label, score, atr_label, graph):
+    def loss(self, Y_senti, score, max_false_score, graph):
         """
         shape of loss = (sentiment)
         :param senti_label: shape=(attributes numbers+1, 3) the second part is one-hot to represent which sentiment it is.
-        :param score: shape=(3*attributes numbers+3,)
+        :param score: shape=(batch size, 3*number of attributes+3)
         :param atr_label: shape = (attribute numbers+1,)
         :param graph:
         :return: loss for a sentence for all true attributes and mask all false attributes.
         """
-        score = tf.reshape(score, shape=(self.nn_config['attributes_num']+1, 3))
-        # max_f_score.shape = (number of attributes+1, 3)
-        max_f_score = self.max_f_senti_score(senti_label, score, graph)
+        # score.shape = (batch size, attribute number +1, 3)
+        score = tf.reshape(score, shape=(-1,self.nn_config['attributes_num']+1, 3))
         theta = tf.constant(self.nn_config['sentiment_loss_theta'], dtype='float32')
-        # loss shape = (number of attributes+1, 3)
-        senti_loss = tf.add(tf.subtract(theta, score), max_f_score)
-        # mask.shape=(number of attributes+1,3)
-        mask = self.senti_loss_mask(atr_label, senti_label)
-        masked_loss = tf.multiply(mask, senti_loss)
-        final_loss = tf.reduce_sum(masked_loss)
-        graph.add_to_collection('senti_loss', final_loss)
-        return final_loss
+        # senti_loss.shape = (batch size, attribute number +1, 3)
+        senti_loss=tf.add(tf.subtract(theta,score),max_false_score)
+        masked_loss = tf.multiply(Y_senti,senti_loss)
+        batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(masked_loss,axis=2),axis=1))
+        graph.add_to_collection('senti_loss', batch_loss)
+        return batch_loss
 
-    def prediction(self,score,atr_label,graph):
+    def prediction(self,score,Y_atr,graph):
         """
-        :param score: shape = (3*attributes numbers+3,)
-        :param atr_label: shape = (attributes numbers+1,)
+        :param score: shape = (batch size, 3*attributes numbers+3)
+        :param Y_atr: shape = (batch size, attributes numbers+1)
         :param graph: 
         :return: 
         """
-        score = tf.reshape(score, shape=(self.nn_config['attributes_num'], 3))
-        atr_label = tf.tile(tf.expand_dims(atr_label, axis=1), multiples=[1, 3])
-        # atr_label.shape = (attributes numbers, 3)
-        score = tf.multiply(atr_label,score)
-        condition = tf.greater(score,self.nn_config['senti_pred_threshold'])
-        pred = tf.where(condition,tf.ones_like(score,dtype='float32'),tf.zeros_like(score,dtype='float32'))
-        graph.add_to_collection('prediction',pred)
+        # score.shape = (batch size, attribute number +1, 3)
+        score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3))
+        # Y_atr.shape = (batch size, attributes numbers+1,3)
+        Y_atr = tf.tile(tf.expand_dims(Y_atr, axis=2), multiples=[1,1, 3])
+        score = tf.multiply(Y_atr,score)
+        condition = tf.greater(score, self.nn_config['senti_pred_threshold'])
+        pred = tf.where(condition, tf.ones_like(score, dtype='float32'), tf.zeros_like(score, dtype='float32'))
+        graph.add_to_collection('prediction', pred)
         return pred
 
     # ===============================================
@@ -239,16 +241,12 @@ class SentiFunction:
         :return: shape = (number of attributes+1, attributes dim)
         """
         # A is matrix of attribute vector
-        A = []
-        for i in range(self.nn_config['attributes_num']):
-            att_vec = tf.get_variable(name='att_vec' + str(i),
-                                      initializer=tf.random_uniform(shape=(self.nn_config['attribute_dim'],),
-                                                                    dtype='float32'))
-            A.append(att_vec)
-        graph.add_to_collection('A', A)
+        A = tf.get_variable(name='A_vec',initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],self.nn_config['attribute_dim']),
+                                                                       dtype='float32'))
+        graph.add_to_collection('A_vec', A)
         o = tf.get_variable(name='other_vec', initializer=tf.random_uniform(shape=(self.nn_config['attribute_dim'],),
                                                                             dtype='float32'))
-        graph.add_to_collection('o', o)
+        graph.add_to_collection('o_vec', o)
         A= tf.concat([A,tf.expand_dims(o,axis=0)],axis=0)
         return A
 
@@ -258,14 +256,10 @@ class SentiFunction:
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        # all attribute mention matrix are the same, but some a padded with 0 vector. We use mask to avoid the training process
-        A_mat = []
-        for i in range(self.nn_config['attributes_num']):
-            att_mat = tf.get_variable(name='att_mat' + str(i),
-                                      initializer=tf.random_uniform(shape=(self.nn_config['attribute_mat_size'],
-                                                                           self.nn_config['attribute_dim']),
-                                                                    dtype='float32'))
-            A_mat.append(att_mat)
+        A_mat = tf.get_variable(name='A_mat',initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],
+                                                                                  self.nn_config['attribute_mat_size'],
+                                                                                  self.nn_config['attribute_dim']),
+                                                                           dtype='float32'))
         graph.add_to_collection('A_mat', A_mat)
         o_mat = tf.get_variable(name='other_vec',
                                 initializer=tf.random_uniform(shape=(self.nn_config['attribute_mat_size'],
@@ -277,51 +271,23 @@ class SentiFunction:
 
         return A_mat
 
-    def attribute_mat_attention(self, att_mat, word_embed, graph):
-        """
-        attribute attetion for one attribute and one word
-        :param att_mat: (attribute_mat_size,attribute dim); attribute dim = lstm cell size
-        :param word_embed: shape = (lstm cell size,)
-        :param graph: 
-        :return: shape=(attribute matrix size, attribute dim),  attribute dim is the same to lstm cell dim
-        """
-        attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(att_mat, word_embed), axis=1))
-        attention = tf.expand_dims(attention, axis=1)
-        attention = tf.tile(attention, multiples=[1, self.nn_config['attribute_dim']])
-        graph.add_to_collection('att_mat_attention', attention)
-        return attention
-
-    def attribute_mat2vec(self, word_embed, A_mat, graph):
-        """
-        
-        :param word_embed: shape = (lstm cell size, )
-        :param A_mat: (number of attributes, number of attribute mention prototypes,attribute dim)
-        :param graph: 
-        :return: shape = (number of attributes, attribute dim)
-        """
-        # A is matrix attribute matrix
-        A = []
-        for att_mat in A_mat:
-            attention = self.attribute_mat_attention(att_mat, word_embed, graph)
-            att_vec = tf.reduce_sum(tf.multiply(attention, att_mat), axis=0)
-            A.append(att_vec)
-        graph.add_to_collection('A', A)
-        return A
-
-    def words_attribute_mat2vec(self, x, A_mat, graph):
+    def words_attribute_mat2vec(self, H, A_mat, graph):
         """
         convert attribtes matrix to attributes vector for each words in a sentence. A_mat include non-attribute mention matrix.
-        :param x: 
-        :param A_mat: 
-        :param o_mat: 
+        :param H: shape = (batch size, number of words, word dim)
+        :param A_mat: (number of atr, atr mat size, atr dim)
         :param graph: 
-        :return: shape = (number of words, number of attributes, attribute dim(=lstm cell dim))
+        :return: shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
         """
-        words_A = []
-        for i in range(self.nn_config['words_num']):
-            word_embed = x[i]
-            A= self.attribute_mat2vec(word_embed, A_mat, graph)
-            words_A.append(A)
+        # H.shape = (batch size, words number, attribute number, word dim)
+        H = tf.tile(tf.expand_dims(H,axis=2),multiples=[1,1,self.nn_config['attributes_num']+1,1])
+        # H.shape = (batch size, words number, attribute number, attribute mat size, word dim)
+        H = tf.tile(tf.expand_dims(H,axis=3),multiples=[1,1,1,self.nn_config['attribute_mat_size'],1])
+        # attention.shape = (batch size, words number, attribute number, attribute mat size)
+        attention=tf.nn.softmax(tf.reduce_sum(tf.multiply(H,A_mat),axis=4))
+        # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        attention = tf.tile(tf.expand_dims(attention,axis=4),multiples=[1,1,1,1,self.nn_config['attribute_dim']])
+        words_A = tf.reduce_sum(tf.multiply(attention,A_mat),axis=3)
         graph.add_to_collection('words_attributes', words_A)
         return words_A
 
@@ -335,7 +301,7 @@ class Classifier:
     def sentences_input(self, graph):
         X = tf.placeholder(
             shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
-            dtype='float32')
+            dtype='int32')
         graph.add_to_collection('X', X)
         return X
 
@@ -345,9 +311,9 @@ class Classifier:
         :param graph: 
         :return: shape = (batch size, attributes number)
         """
-        y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1), dtype='float32')
-        graph.add_to_collection('y_att', y_att)
-        return y_att
+        Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1), dtype='float32')
+        graph.add_to_collection('y_att', Y_att)
+        return Y_att
 
     def sentiment_labels_input(self, graph):
         """
@@ -462,8 +428,8 @@ class Classifier:
         graph.add_to_collection('extors_mask',mask)
         return mask
 
-    def optimizer(self, losses, graph):
-        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(tf.reduce_mean(losses))
+    def optimizer(self, loss, graph):
+        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
         graph.add_to_collection('opt', opt)
         return opt
 
@@ -473,7 +439,7 @@ class Classifier:
         :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = tf.placeholder(shape=(2074276, self.nn_config['word_dim']), dtype='float32')
+        table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']), dtype='float32')
         graph.add_to_collection('table', table)
         table = tf.Variable(table, name='table')
 
@@ -489,7 +455,8 @@ class Classifier:
         :param graph: 
         :return: shape = (review number, sentence number, words number)
         """
-        ones = tf.ones_like(X, dtype='int32')*2074275
+        X = tf.cast(X,dtype='float32')
+        ones = tf.ones_like(X, dtype='float32')*self.nn_config['padding_word_index']
         is_one = tf.equal(X, ones)
         mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
         mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1,1,self.nn_config['word_dim']])
@@ -500,18 +467,20 @@ class Classifier:
         with graph.as_default():
             X = self.sentences_input(graph=graph)
             words_pad_M = self.is_word_padding_input(X, graph)
-            X = self.lookup_table(X, words_pad_M,graph)
+            X = self.lookup_table(words_pad_M,X,graph)
             # lstm
             with tf.variable_scope('sentence_lstm'):
                 # H.shape = (batch size, max_time, cell size)
                 H = self.sentence_lstm(X, graph=graph)
 
-            y_att = self.attribute_labels_input(graph=graph)
-            y_senti = self.sentiment_labels_input(graph=graph)
+            Y_att = self.attribute_labels_input(graph=graph)
+            Y_senti = self.sentiment_labels_input(graph=graph)
             if not self.nn_config['is_mat']:
                 A = self.sf.attribute_vec(graph)
             else:
                 A = self.sf.attribute_mat(graph)
+                # A.shape = shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
+                A = self.sf.words_attribute_mat2vec(H=H, A_mat=A, graph=graph)
             # sentiment expression prototypes matrix
             # shape = (3*numbers of normal sentiment prototype + attributes_numbers*attribute specific sentiment prototypes)
             W = self.sf.sentiment_matrix(graph)
@@ -522,59 +491,34 @@ class Classifier:
             extors_mask_mat = self.extors_mask(extors=extors_mat,graph=graph)
             # relative position matrix
             V = self.sf.relative_pos_matrix(graph)
+            # relative position ids
+            # shape = (number of words, number of words)
+            rp_ids = self.sf.relative_pos_ids(graph)
+
             beta = self.sf.beta(graph)
             # extract sentiment expression corresponding to sentiment and attribute from W for all attributes
             # W.shape=(number of attributes*3+3, size of original W); shape of original W =(3*normal sentiment prototypes + attribute number * attribute sentiment prototypes, sentiment dim)
             W = tf.multiply(extors_mat, W)
-        losses = []
-        predictions = []
-        for i in range(self.nn_config['batch_size']):
-            with graph.as_default():
-                # x.shape=(words number, word dim)
-                x = X[i]
-                h = H[i]
-                atr_label = y_att[i]
-                senti_label = y_senti[i]
-                # if the attribute is represented by a mat, we need to convert it to a vector based on a word
-                if self.nn_config['is_mat']:
-                    # A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell dim))
-                    A = self.sf.words_attribute_mat2vec(x=h, A_mat=A, graph=graph)
-                    # A = []
-                    # for l in range(len(words_A_o)):
-                    #     A.append(words_A_o[l][0])
-                    #     o.append(words_A_o[l][1])
-
-            # sentiment function
-            with graph.as_default():
-
-                # item1 shape (3*number of attributes+3, number of words in a sentence)
-                item1 = []
-                for j in range(3 * self.nn_config['attributes_num']+3):
-                    # attention.shape=(number of words, number of sentiment prototypes)
-                    attention = self.sf.sentiment_attention(h, W[j], extors_mask_mat[j], graph)
-                    # w.shape =(number of words in sentence, sentiment dim); w represents sentiment expression for
-                    # each words in sentence
-                    w = self.sf.attended_sentiment(W[j], attention, graph)
-                    item1.append(tf.reduce_sum(tf.multiply(w, h), axis=1))
-                # all attributes distribution for one sentence
-                # A.shape = (number of words, number of attributes+1, attribute dim(=lstm cell dim))
-                # or A.shape = (number of attributes+1, attribute dim)
-                A_dist = self.sf.attribute_distribution(A=A, h=h, graph=graph)
-                # A_dist.shape = (number of attributes+1, number of words)
-                A_vi = self.sf.Vi(A_dist=A_dist, V=V, graph=graph)
-                # item2.shape=(number of attributes+1, number of words in a sentence)
-                item2 = tf.reduce_sum(tf.multiply(A_vi, beta), axis=2)
-                # senti_socre.shape = (3*number of attributes+1,)
-                senti_score = self.sf.score(item1, item2, graph)
-                # sentim_loss.shape = (number of attributes+1, 3)
-                senti_loss = self.sf.loss(senti_label, senti_score, atr_label, graph)
-                losses.append(senti_loss)
-                # prediction
-                senti_pred = self.sf.prediction(score=senti_score,atr_label=atr_label,graph=graph)
-                predictions.append(senti_pred)
-
-        with graph.as_default():
-            opt = self.optimizer(losses=losses, graph=graph)
+            # shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes)
+            attention = self.sf.sentiment_attention(H, W, extors_mask_mat, graph)
+            # attended_W.shape = (batch size,number of words, 3+3*attributes number, sentiment dim)
+            attended_W = self.sf.attended_sentiment(W, attention, graph)
+            # shape = (batch size,number of words, 3+3*attributes number)
+            item1 = self.sf.item1(attended_W,H,graph)
+            # A_dist.shape = (batch size, number of attributes+1, wrods number)
+            A_dist = self.sf.attribute_distribution(A=A, H=H, graph=graph)
+            # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+            A_Vi = self.sf.Vi(A_dist=A_dist, V=V,rp_ids=rp_ids,graph=graph)
+            # item2.shape=(batch size, number of attributes+1, number of words)
+            item2 = tf.reduce_sum(tf.multiply(A_Vi, beta), axis=3)
+            # senti_socre.shape = (batch size, 3*number of attributes+3)
+            senti_score = self.sf.score(item1, item2, graph)
+            # max_false_score.shape = (batch size, attributes number, 3)
+            max_false_score = self.sf.max_false_senti_score(Y_senti, senti_score, graph)
+            #
+            senti_loss = self.sf.loss(Y_senti, senti_score, max_false_score, graph)
+            opt = self.optimizer(senti_loss,graph)
+            senti_pred = self.sf.prediction(score=senti_score, Y_atr=Y_att, graph=graph)
             saver = tf.train.Saver()
         return graph, saver
 

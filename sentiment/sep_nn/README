@@ -1,5 +1,9 @@
 In this directory, we realize sentiment model separately, and train them separately.
 
+
+Constraints to Hyper-parameter:
+1. rps_num <= words_num
+
 Hyper-parameters:
 seed = {'lstm_cell_size':30,
         'word_dim':30

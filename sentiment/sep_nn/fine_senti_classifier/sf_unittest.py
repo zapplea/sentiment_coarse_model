@@ -5,6 +5,7 @@ from classifier import SentiFunction
 from classifier import Classifier
 import tensorflow as tf
 import numpy as np
+import math
 
 class SFTest(unittest.TestCase):
     def __init__(self,*args,**kwargs):
@@ -31,7 +32,9 @@ class SFTest(unittest.TestCase):
                           'lstm_cell_size': seed['lstm_cell_size'],
                           'atr_threshold': 0,  # attribute score threshold
                           'reg_rate': 0.03,
-                          'senti_pred_threshold':0
+                          'senti_pred_threshold':0,
+                          'lookup_table_words_num':2981402, # 2074276 for Chinese word embedding
+                          'padding_word_index':1
                           }
         self.graph=tf.Graph()
         # self.af = AttributeFunction(self.nn_config)
@@ -81,9 +84,10 @@ class SFTest(unittest.TestCase):
     #     self.assertTrue(np.all(result == X_data))
 
     # def test_is_word_padding_input(self):
-    #     X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num']),dtype='int32')
-    #     X_data[1][4]=2074275
-    #     X_data[5][6]=2074275
+    #     X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num']),dtype='int32')*3
+    #     X_data[2][3]=4
+    #     X_data[1][4]=1
+    #     X_data[5][6]=1
     #     with self.graph.as_default():
     #         mask = self.cf.is_word_padding_input(X_data,self.graph)
     #     with self.sess as sess:
@@ -92,19 +96,20 @@ class SFTest(unittest.TestCase):
     #     self.assertEqual(result.shape,(self.nn_config['batch_size'],self.nn_config['words_num'],self.nn_config['word_dim']))
     #
     #     # value
+    #     self.assertTrue(np.all(result[2][3] == np.ones(shape=(self.nn_config['word_dim'],),dtype='float32')))
     #     self.assertTrue(np.all(result[6][7] == np.ones(shape=(self.nn_config['word_dim'],),dtype='float32')))
     #     self.assertTrue(np.all(result[1][4] == np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')))
     #     self.assertTrue(np.all(result[5][6] == np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')))
 
     # def test_lookup_table(self):
     #     # data
-    #     table_in = np.ones(shape=(2074276, self.nn_config['word_dim']),dtype='float32')
+    #     table_in = np.ones(shape=(2981402, self.nn_config['word_dim']),dtype='float32')
     #     table_in[10000] = np.ones(shape=(self.nn_config['word_dim'],),dtype='float32')*6
-    #     table_in[2074275] = np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')
-    #     X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num']), dtype='int32')
+    #     table_in[1] = np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')
+    #     X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num']), dtype='int32')*7
     #     X_data[9][5] = 10000
-    #     X_data[1][4] = 2074275
-    #     X_data[5][6] = 2074275
+    #     X_data[1][4] = 1
+    #     X_data[5][6] = 1
     #     # words mask
     #     with self.graph.as_default():
     #         mask = self.cf.is_word_padding_input(X_data,self.graph)
@@ -125,17 +130,17 @@ class SFTest(unittest.TestCase):
     #     self.assertTrue(np.all(result[9][5] == np.ones(shape=(self.nn_config['word_dim'],),dtype='float32')*6))
     #     self.assertTrue(np.all(result[5][6] == np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')))
 
-    # def test_sentence_lstm(self):
-    #     X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num'],self.nn_config['word_dim']),
-    #                      dtype='float32')
-    #     with self.graph.as_default():
-    #         outputs = self.cf.sentence_lstm(X_data,graph=self.graph)
-    #         init=tf.global_variables_initializer()
-    #     with self.sess as sess:
-    #         sess.run(init)
-    #         result = sess.run(outputs)
-    #     self.assertEqual(np.array(result).shape,
-    #                      (self.nn_config['batch_size'],self.nn_config['words_num'],self.nn_config['lstm_cell_size']))
+    def test_sentence_lstm(self):
+        X_data = np.ones(shape=(self.nn_config['batch_size'], self.nn_config['words_num'],self.nn_config['word_dim']),
+                         dtype='float32')
+        with self.graph.as_default():
+            outputs = self.cf.sentence_lstm(X_data,graph=self.graph)
+            init=tf.global_variables_initializer()
+        with self.sess as sess:
+            sess.run(init)
+            result = sess.run(outputs)
+        self.assertEqual(np.array(result).shape,
+                         (self.nn_config['batch_size'],self.nn_config['words_num'],self.nn_config['lstm_cell_size']))
 
     # def test_attribute_labels_input(self):
     #     atr_labels_data = np.ones(shape=(self.nn_config['batch_size'],self.nn_config['attributes_num']+1),dtype='float32')
@@ -292,17 +297,19 @@ class SFTest(unittest.TestCase):
     #     self.assertTrue(np.all(np.array(result)-test_data>0.009))
 
     # def test_words_attribute_mat2vec(self):
-    #     h_data = np.ones(shape=(self.nn_config['words_num'],self.nn_config['lstm_cell_size']),dtype='float32')
+    #     H_data = np.ones(shape=(self.nn_config['batch_size'],self.nn_config['words_num'],self.nn_config['lstm_cell_size']),dtype='float32')
     #     A_mat_data = np.ones(shape=(self.nn_config['attributes_num'] + 1, self.nn_config['attribute_mat_size'], self.nn_config['attribute_dim']),
     #                          dtype='float32')
+    #
     #     with self.graph.as_default():
-    #         words_A = self.sf.words_attribute_mat2vec(h_data, A_mat_data,self.graph)
+    #         words_A = self.sf.words_attribute_mat2vec(H_data, A_mat_data,self.graph)
     #     with self.sess as sess:
     #         result = sess.run(words_A)
-    #     self.assertEqual(np.array(result).shape,(self.nn_config['words_num'],self.nn_config['attributes_num']+1,self.nn_config['attribute_dim']))
     #
-    #     test_data = np.ones_like(np.array(result),dtype='float32')
-    #     self.assertTrue(np.all(np.array(result)-test_data == 0))
+    #     self.assertEqual(result.shape,(self.nn_config['batch_size'],self.nn_config['words_num'],self.nn_config['attributes_num']+1,self.nn_config['attribute_dim']))
+    #
+    #     # test_data = np.ones_like(np.array(result),dtype='float32')
+    #     # self.assertTrue(np.all(np.array(result)-test_data == 0))
 
     # def test_sentiment_attention(self):
     #     h_data = np.ones(shape=(self.nn_config['words_num'], self.nn_config['lstm_cell_size']), dtype='float32')
@@ -448,300 +455,141 @@ class SFTest(unittest.TestCase):
     #     test_data = np.tile(np.expand_dims(test_data,axis=0),reps=[self.nn_config['attributes_num']+1,1,1])
     #     self.assertTrue(np.all(test_data == result))
 
-    def test_item2(self):
-        A_vi = np.ones(shape=(self.nn_config['attributes_num']+1,
-                              self.nn_config['words_num'],
-                              self.nn_config['rp_dim']),
-                       dtype='float32')
-        beta = np.ones(shape=(self.nn_config['rp_dim'],),
-                       dtype='float32')
-        with self.graph.as_default():
-            item2 = tf.reduce_sum(tf.multiply(A_vi, beta), axis=2)
-        with self.sess as sess:
-            result = sess.run(item2)
-        self.assertEqual(result.shape, (self.nn_config['attributes_num']+1,
-                                        self.nn_config['words_num']))
-
-    # ##################################################################################################################
-
-
-    #
-    # def test_attended_sentiment(self):
-    #     E = self.cf.sentiment_extract_mat()
-    #     W = np.ones(shape=(self.nn_config['normal_senti_prototype_num'] * 3 +
-    #                        self.nn_config['attribute_senti_prototype_num'] *
-    #                        self.nn_config['attributes_num'],
-    #                        self.nn_config['sentiment_dim']),
-    #                 dtype='float32')
-    #     W = np.multiply(E, W)
-    #     M = self.cf.extor_mask_mat()
-    #     with self.graph.as_default():
-    #         W_vec = []
-    #         for j in range(3*self.nn_config['attributes_num']):
-    #             attention = self.sf.sentiment_attention(self.x,W[j],M[j],self.graph)
-    #             w = self.sf.attended_sentiment(W[j],attention,self.graph)
-    #             W_vec.append(w)
-    #         init = tf.global_variables_initializer()
-    #     with self.sess:
-    #         self.sess.run(init)
-    #         result = self.sess.run(W_vec)
-    #
-    #     self.assertEqual(np.array(result).shape,(3*self.nn_config['attributes_num'],self.nn_config['words_num'],self.nn_config['sentiment_dim']))
-    #
-    # def test_attribute_distribution(self):
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
-    #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x,A_mat=A,o_mat=o,graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #         init = tf.global_variables_initializer()
-    #     with self.sess as sess:
-    #         sess.run(init)
-    #         result = sess.run(A_dist)
-    #     self.assertEqual(result.shape,(self.nn_config['attributes_num'],self.nn_config['words_num']))
-
-    # def test_vi(self):
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
-    #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x, A_mat=A, o_mat=o, graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #
-    #     with self.graph.as_default():
-    #         a_dist = A_dist[0]
-    #         V = self.sf.relative_pos_matrix(self.graph)
-    #         # vis.shape = (number of words, relative position dim)
-    #         vis = []
-    #         for i in range(self.nn_config['words_num']):
-    #             vi = self.sf.vi(i,a_dist=a_dist,V=V,graph=self.graph)
-    #             vis.append(vi)
-    #         init = tf.global_variables_initializer()
-    #     with self.sess as sess:
-    #         sess.run(init)
-    #         result = sess.run(vis)
-    #     self.assertEqual(np.array(result).shape,(self.nn_config['words_num'],self.nn_config['rp_dim']))
-    #
-    # def test_Vi(self):
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
-    #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x,A_mat=A,o_mat=o,graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #         V = self.sf.relative_pos_matrix(self.graph)
-    #         Vi = self.sf.Vi(A_dist,V,self.graph)
-    #         init = tf.global_variables_initializer()
-    #     with self.sess as sess:
-    #         sess.run(init)
-    #         result = sess.run(Vi)
-    #     self.assertEqual(np.array(result).shape,(self.nn_config['attributes_num'],self.nn_config['words_num'],self.nn_config['rp_dim']))
-    #
-    # def test_beta(self):
-    #     with self.graph.as_default():
-    #         beta = self.sf.beta(self.graph)
-    #         init = tf.global_variables_initializer()
-    #     with self.sess as sess:
-    #         sess.run(init)
-    #         result = sess.run(beta)
-    #     self.assertEqual(result.shape,(self.nn_config['rp_dim'],))
-    #
     # def test_item2(self):
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
+    #     A_vi = np.ones(shape=(self.nn_config['attributes_num']+1,
+    #                           self.nn_config['words_num'],
+    #                           self.nn_config['rp_dim']),
+    #                    dtype='float32')
+    #     beta = np.ones(shape=(self.nn_config['rp_dim'],),
+    #                    dtype='float32')
     #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x, A_mat=A, o_mat=o, graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #         V = self.sf.relative_pos_matrix(self.graph)
-    #         Vi = self.sf.Vi(A_dist, V, self.graph)
-    #         beta = self.sf.beta(self.graph)
-    #         # item2.shape = (attribtes number, words number)
-    #         item2 = tf.reduce_sum(tf.multiply(Vi,beta),axis=2)
-    #         init = tf.global_variables_initializer()
+    #         item2 = tf.reduce_sum(tf.multiply(A_vi, beta), axis=2)
     #     with self.sess as sess:
-    #         sess.run(init)
     #         result = sess.run(item2)
-    #     self.assertEqual(result.shape,(self.nn_config['attributes_num'],self.nn_config['words_num']))
-    #
-    # def test_item1(self):
-    #     E = self.cf.sentiment_extract_mat()
-    #     W = np.ones(shape=(self.nn_config['normal_senti_prototype_num'] * 3 +
-    #                        self.nn_config['attribute_senti_prototype_num'] *
-    #                        self.nn_config['attributes_num'],
-    #                        self.nn_config['sentiment_dim']),
-    #                 dtype='float32')
-    #     W = np.multiply(E, W)
-    #     M = self.cf.extor_mask_mat()
-    #     item1=[]
-    #     with self.graph.as_default():
-    #         for j in range(3 * self.nn_config['attributes_num']):
-    #             attention = self.sf.sentiment_attention(self.x, W[j], M[j], self.graph)
-    #             w = self.sf.attended_sentiment(W[j], attention, self.graph)
-    #             item1.append(tf.reduce_sum(tf.multiply(w, self.x), axis=1))
-    #         init = tf.global_variables_initializer()
-    #     with self.sess:
-    #         self.sess.run(init)
-    #         result = self.sess.run(item1)
-    #     self.assertEqual(np.array(result).shape,(3*self.nn_config['attributes_num'],self.nn_config['words_num']))
-    #
+    #     self.assertEqual(result.shape, (self.nn_config['attributes_num']+1,
+    #                                     self.nn_config['words_num']))
+
     # def test_score(self):
-    #     E = self.cf.sentiment_extract_mat()
-    #     W = np.ones(shape=(self.nn_config['normal_senti_prototype_num'] * 3 +
-    #                        self.nn_config['attribute_senti_prototype_num'] *
-    #                        self.nn_config['attributes_num'],
-    #                        self.nn_config['sentiment_dim']),
-    #                 dtype='float32')
-    #     W = np.multiply(E, W)
-    #     M = self.cf.extor_mask_mat()
-    #     item1 = []
+    #     item1 = np.ones(shape=(3*self.nn_config['attributes_num']+3,self.nn_config['words_num']),
+    #                     dtype='float32')
+    #     item2 = np.ones(shape=(self.nn_config['attributes_num']+1,self.nn_config['words_num']),
+    #                     dtype='float32')
     #     with self.graph.as_default():
-    #         for j in range(3 * self.nn_config['attributes_num']):
-    #             attention = self.sf.sentiment_attention(self.x, W[j], M[j], self.graph)
-    #             w = self.sf.attended_sentiment(W[j], attention, self.graph)
-    #             item1.append(tf.reduce_sum(tf.multiply(w, self.x), axis=1))
-    #
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
-    #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x, A_mat=A, o_mat=o, graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #         V = self.sf.relative_pos_matrix(self.graph)
-    #         Vi = self.sf.Vi(A_dist, V, self.graph)
-    #         beta = self.sf.beta(self.graph)
-    #         # item2.shape = (attribtes number, words number)
-    #         item2 = tf.reduce_sum(tf.multiply(Vi, beta), axis=2)
     #         score = self.sf.score(item1,item2,self.graph)
-    #         init = tf.global_variables_initializer()
     #     with self.sess as sess:
-    #         sess.run(init)
     #         result = sess.run(score)
-    #     self.assertEqual(result.shape,(3*self.nn_config['attributes_num'],))
+    #     self.assertEqual(result.shape,(3*self.nn_config['attributes_num']+3,))
     #
+    #     test_data = np.ones_like(result,dtype='float32')*2
+    #     self.assertTrue(np.all(test_data == result))
+
     # def test_max_f_senti_score(self):
-    #     # the senti_label is sentiment label for
-    #     senti_label = np.random.randint(0,1,size=(self.nn_config['attributes_num'],3)).astype('float32')
-    #     E = self.cf.sentiment_extract_mat()
-    #     W = np.ones(shape=(self.nn_config['normal_senti_prototype_num'] * 3 +
-    #                        self.nn_config['attribute_senti_prototype_num'] *
-    #                        self.nn_config['attributes_num'],
-    #                        self.nn_config['sentiment_dim']),
-    #                 dtype='float32')
-    #     W = np.multiply(E, W)
-    #     M = self.cf.extor_mask_mat()
-    #     item1 = []
-    #     with self.graph.as_default():
-    #         for j in range(3 * self.nn_config['attributes_num']):
-    #             attention = self.sf.sentiment_attention(self.x, W[j], M[j], self.graph)
-    #             w = self.sf.attended_sentiment(W[j], attention, self.graph)
-    #             item1.append(tf.reduce_sum(tf.multiply(w, self.x), axis=1))
+    #     score = np.ones(shape=(3*self.nn_config['attributes_num']+3,),
+    #                     dtype='float32')
+    #     score = np.reshape(score,newshape=(self.nn_config['attributes_num']+1,3))
+    #     for i in range(score.shape[0]):
+    #         score[i] = np.array([1,2,3],dtype='float32')
     #
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
+    #     senti_label = np.zeros(shape=(self.nn_config['attributes_num']+1,3),
+    #                            dtype='float32')
+    #     for i in range(0,int(math.ceil(senti_label.shape[0]/3))):
+    #         senti_label[i] = np.array([1,0,0],dtype='float32')
+    #     for i in range(int(math.ceil(senti_label.shape[0]/3)),int(math.ceil(senti_label.shape[0]*2/3))):
+    #         senti_label[i] = np.array([0,1,1],dtype='float32')
+    #     for i in range(int(math.ceil(senti_label.shape[0]*2/3)),senti_label.shape[0]):
+    #         senti_label[i] = np.array([1,1,1],dtype='float32')
+    #
     #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x, A_mat=A, o_mat=o, graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #         V = self.sf.relative_pos_matrix(self.graph)
-    #         Vi = self.sf.Vi(A_dist, V, self.graph)
-    #         beta = self.sf.beta(self.graph)
-    #         # item2.shape = (attribtes number, words number)
-    #         item2 = tf.reduce_sum(tf.multiply(Vi, beta), axis=2)
-    #         score = self.sf.score(item1, item2, self.graph)
-    #         score = tf.reshape(score, shape=(self.nn_config['attributes_num'], 3))
-    #         max_fscore = self.sf.max_f_senti_score(senti_label=senti_label,score=score,graph=self.graph)
-    #         init = tf.global_variables_initializer()
+    #         max_fscore = self.sf.max_f_senti_score(senti_label,score,self.graph)
     #     with self.sess as sess:
-    #         sess.run(init)
     #         result = sess.run(max_fscore)
-    #     self.assertEqual(result.shape,(self.nn_config['attributes_num'],))
+    #     self.assertEqual(result.shape, (self.nn_config['attributes_num']+1,3))
     #
-    # def test_loss(self):
-    #     # attributes label for one sentence. one-hot
-    #     atr_label = np.random.randint(0, 1, size=(self.nn_config['attributes_num'])).astype('float32')
-    #     # the senti_label is sentiment label for
-    #     senti_label = []
-    #     for i in range(atr_label.shape[0]):
-    #         if atr_label[i] == 1:
-    #             one_index = np.random.randint(0, 2, size=1)
-    #             label = np.zeros(shape=(3,),dtype='float32')
-    #             label[one_index] = 1
-    #             senti_label.append(label)
-    #         else:
-    #             label = np.zeros(shape=(3,), dtype='float32')
-    #             senti_label.append(label)
-    #     senti_label = np.array(senti_label,dtype='float32')
+    #     test_data = np.ones_like(result,dtype='float32')
     #
-    #     E = self.cf.sentiment_extract_mat()
-    #     W = np.ones(shape=(self.nn_config['normal_senti_prototype_num'] * 3 +
-    #                        self.nn_config['attribute_senti_prototype_num'] *
-    #                        self.nn_config['attributes_num'],
-    #                        self.nn_config['sentiment_dim']),
-    #                 dtype='float32')
-    #     W = np.multiply(E, W)
-    #     M = self.cf.extor_mask_mat()
-    #     item1 = []
+    #     for i in range(0,int(math.ceil(senti_label.shape[0]/3))):
+    #         test_data[i] = np.array([3,3,3],dtype='float32')
+    #     for i in range(int(math.ceil(senti_label.shape[0]/3)),int(math.ceil(senti_label.shape[0]*2/3))):
+    #         test_data[i] = np.array([1,1,1],dtype='float32')
+    #     for i in range(int(math.ceil(senti_label.shape[0]*2/3)),senti_label.shape[0]):
+    #         test_data[i] = np.array([0,0,0],dtype='float32')
+    #
+    #     self.assertTrue(np.all(result == test_data))
+    #
+    # def test_senti_loss_mask(self):
+    #     atr_label = np.zeros(shape=(self.nn_config['attributes_num']+1,),dtype='float32')
+    #     for i in range(0,int(math.ceil(atr_label.shape[0]/2))):
+    #         atr_label[i] = 1
+    #
+    #     senti_label = np.zeros(shape=(self.nn_config['attributes_num']+1,3))
+    #     for i in range(0,senti_label.shape[0]):
+    #         senti_label[i] = [1,0,0]
+    #
     #     with self.graph.as_default():
-    #         for j in range(3 * self.nn_config['attributes_num']):
-    #             attention = self.sf.sentiment_attention(self.x, W[j], M[j], self.graph)
-    #             w = self.sf.attended_sentiment(W[j], attention, self.graph)
-    #             item1.append(tf.reduce_sum(tf.multiply(w, self.x), axis=1))
+    #         mask = self.sf.senti_loss_mask(atr_label,senti_label)
     #
-    #     A = self.A_mat
-    #     o = self.o_mat
-    #     x = self.x
-    #     with self.graph.as_default():
-    #         words_A_o = self.af.words_attribute_mat2vec(x=x, A_mat=A, o_mat=o, graph=self.graph)
-    #         A = []
-    #         o = []
-    #         for l in range(len(words_A_o)):
-    #             A.append(words_A_o[l][0])
-    #             o.append(words_A_o[l][1])
-    #         A_dist = self.sf.attribute_distribution(A=A, h=x, graph=self.graph)
-    #         V = self.sf.relative_pos_matrix(self.graph)
-    #         Vi = self.sf.Vi(A_dist, V, self.graph)
-    #         beta = self.sf.beta(self.graph)
-    #         # item2.shape = (attribtes number, words number)
-    #         item2 = tf.reduce_sum(tf.multiply(Vi, beta), axis=2)
-    #         score = self.sf.score(item1, item2, self.graph)
-    #         loss = self.sf.loss(senti_label=senti_label,score=score,atr_label=atr_label,graph=self.graph)
-    #         init = tf.global_variables_initializer()
     #     with self.sess as sess:
-    #         sess.run(init)
+    #         result = sess.run(mask)
+    #     self.assertEqual(result.shape,(self.nn_config['attributes_num']+1,3))
+    #
+    #     test_data = np.zeros_like(result,dtype='float32')
+    #     for i in range(0,int(math.ceil(atr_label.shape[0]/2))):
+    #         test_data[i] = [1,0,0]
+    #
+    #     self.assertTrue(np.all(test_data == result))
+
+    # def test_loss(self):
+    #     # attribute labels
+    #     atr_label = np.zeros(shape=(self.nn_config['attributes_num'] + 1,), dtype='float32')
+    #     for i in range(0, int(math.ceil(atr_label.shape[0] / 2))):
+    #         atr_label[i] = 1
+    #     # sentiment labels
+    #     senti_label = np.zeros(shape=(self.nn_config['attributes_num'] + 1, 3))
+    #     for i in range(0, int(math.ceil(senti_label.shape[0]))):
+    #         senti_label[i] = [1, 0, 0]
+    #     # score
+    #     score = np.ones(shape=(3 * self.nn_config['attributes_num'] + 3,),
+    #                     dtype='float32')
+    #     score = np.reshape(score, newshape=(self.nn_config['attributes_num'] + 1, 3))
+    #     for i in range(score.shape[0]):
+    #         score[i] = np.array([1, 2, 3], dtype='float32')
+    #
+    #     with self.graph.as_default():
+    #         loss = self.sf.loss(senti_label,score,atr_label,self.graph)
+    #
+    #     with self.sess as sess:
     #         result = sess.run(loss)
-    #     self.assertEqual(result.shape, (self.nn_config['attributes_num'],))
+    #     self.assertEqual(result.shape,())
+    #
+    #     test_data = np.array(int(math.ceil((self.nn_config['attributes_num']+1)/2))*3,dtype='float32')
+    #     self.assertTrue(test_data == result)
+
+    # def test_prediction(self):
+    #     # attribute labels
+    #     atr_label = np.zeros(shape=(self.nn_config['attributes_num'] + 1,), dtype='float32')
+    #     for i in range(0, int(math.ceil(atr_label.shape[0] / 2))):
+    #         atr_label[i] = 1
+    #     # score
+    #     score = np.ones(shape=(3 * self.nn_config['attributes_num'] + 3,),
+    #                     dtype='float32')
+    #     score = np.reshape(score, newshape=(self.nn_config['attributes_num'] + 1, 3))
+    #     for i in range(score.shape[0]):
+    #         score[i] = np.array([-1, -0.2, 1], dtype='float32')
+    #
+    #     with self.graph.as_default():
+    #         pred = self.sf.prediction(score,atr_label,self.graph)
+    #     with self.sess as sess:
+    #         result = sess.run(pred)
+    #
+    #     self.assertEqual(result.shape,(self.nn_config['attributes_num']+1,3))
+    #
+    #     test_data = np.zeros_like(result,dtype='float32')
+    #     for i in range(0, int(math.ceil(atr_label.shape[0] / 2))):
+    #         test_data[i][2] = 1
+    #     self.assertTrue(np.all(test_data == result))
+
+    # def test_classifier(self):
+    #     graph,saver = self.cf.classifier()
 
 
 if __name__ == "__main__":
