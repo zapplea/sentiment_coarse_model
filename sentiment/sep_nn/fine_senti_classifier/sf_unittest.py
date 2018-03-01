@@ -1,5 +1,6 @@
 import sys
-sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+# sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+sys.path.append('/home/liu121/sentiment_coarse_model')
 import unittest
 from classifier import SentiFunction
 from classifier import Classifier

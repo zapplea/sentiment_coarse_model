@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 from sentiment.util.coarse.senti_data_generator import DataGenerator
-from sentiment.util.coarse.metrics import  Metrics
 
 
 class SentiFunction:
