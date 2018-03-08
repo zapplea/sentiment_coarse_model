@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from sentiment.util.coarse.senti_data_generator import DataGenerator
+
 
 
 class SentiFunction:
@@ -14,6 +14,7 @@ class SentiFunction:
             self.nn_config['normal_senti_prototype_num'] * 3 + self.nn_config['attribute_senti_prototype_num'] *
             self.nn_config['attributes_num'],
             self.nn_config['sentiment_dim']), dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         graph.add_to_collection('W', W)
         return W
 
@@ -33,9 +34,11 @@ class SentiFunction:
                                                         self.nn_config['attribute_senti_prototype_num'] *self.nn_config['attributes_num'],
                                                         1])
         # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
-        temp = tf.multiply(m,tf.log(tf.reduce_sum(tf.multiply(H,W),axis=4)))
+        temp = tf.multiply(m,tf.exp(tf.reduce_sum(tf.multiply(H,W),axis=4)))
+
         # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
         denominator = tf.reduce_sum(temp,axis=3,keep_dims=True)
+
         denominator = tf.tile(denominator,multiples=[1,1,1,
                                        self.nn_config['normal_senti_prototype_num'] * 3 +
                                        self.nn_config['attribute_senti_prototype_num'] *self.nn_config['attributes_num']])
@@ -50,9 +53,8 @@ class SentiFunction:
         :param graph: 
         :return: (batch size,number of words, 3+3*attributes number, sentiment dim)
         """
-        # attention.shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes,sentiment dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=3),multiples=[1,1,1,self.nn_config['sentiment_dim']])
-        #
+        # attention.shape = (batch size, number of words, 3+3*attributes number, number of sentiment prototypes, sentiment dim)
+        attention = tf.tile(tf.expand_dims(attention, axis=4),multiples=[1,1,1,1,self.nn_config['sentiment_dim']])
         attended_W = tf.reduce_sum(tf.multiply(attention, W), axis=3)
         graph.add_to_collection('attended_W', attended_W)
         return attended_W
@@ -81,11 +83,11 @@ class SentiFunction:
         :return: shape = (batch size, number of attributes+1, wrods number)
         """
         if not self.nn_config['is_mat']:
-            H = tf.reshape(H,shape=(-1,self.nn_config['word_dim']))
+            H = tf.reshape(H,shape=(-1,self.nn_config['lstm_cell_size']))
             # A.shape=(number of attributes+1, attribute dim(=lstm cell size))
             # A_dist = (batch size,number of attributes+1,number of words)
-            A_dist = tf.nn.softmax(tf.reshape(tf.matmul(A, H, transpose_b=True),
-                                              shape=(-1,self.nn_config['attributes_num']+1,self.nn_config['words_num'])))
+            A_dist = tf.nn.softmax(tf.transpose(tf.reshape(tf.matmul(A, H, transpose_b=True),
+                                              shape=(self.nn_config['attributes_num']+1,-1,self.nn_config['words_num'])),[1,0,2]))
         else:
             # A.shape = (batch size, number of words, number of attributes+1, attribute dim(=lstm cell dim))
             # H.shape = (batch size, number of words, number of attributes+1, word dim)
@@ -100,6 +102,7 @@ class SentiFunction:
         V = tf.get_variable(name='relative_pos',
                             initializer=tf.random_uniform(shape=(self.nn_config['rps_num'], self.nn_config['rp_dim']),
                                                           dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
         graph.add_to_collection('V', V)
         return V
 
@@ -148,6 +151,7 @@ class SentiFunction:
         :return: beta weight, shape=(rp_dim)
         """
         b = tf.get_variable(name='beta',initializer=tf.random_uniform(shape=(self.nn_config['rp_dim'],), dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
         graph.add_to_collection('beta', b)
         return b
 
@@ -196,10 +200,9 @@ class SentiFunction:
 
     def loss(self, Y_senti, score, max_false_score, graph):
         """
-        shape of loss = (sentiment)
-        :param senti_label: shape=(attributes numbers+1, 3) the second part is one-hot to represent which sentiment it is.
+        :param Y_senti: shape=(batch size,attributes numbers+1, 3) the second part is one-hot to represent which sentiment it is.
         :param score: shape=(batch size, 3*number of attributes+3)
-        :param atr_label: shape = (attribute numbers+1,)
+        :param max_false_score: shape = (batch size, number of attributes +1, 3)
         :param graph:
         :return: loss for a sentence for all true attributes and mask all false attributes.
         """
@@ -208,8 +211,16 @@ class SentiFunction:
         theta = tf.constant(self.nn_config['sentiment_loss_theta'], dtype='float32')
         # senti_loss.shape = (batch size, attribute number +1, 3)
         senti_loss=tf.add(tf.subtract(theta,score),max_false_score)
+        # masked_loss.shape = (batch size, attribute number +1, 3)
         masked_loss = tf.multiply(Y_senti,senti_loss)
-        batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(masked_loss,axis=2),axis=1))
+        #
+        zeros_loss = tf.zeros_like(masked_loss,dtype='float32')
+        # masked_loss.shape = (batch size, attribute number +1, 3,1)
+        zeros_loss = tf.expand_dims(zeros_loss,axis=3)
+        masked_loss = tf.expand_dims(masked_loss,axis=3)
+        loss = tf.reduce_max(tf.concat([zeros_loss,masked_loss],axis=3),axis=3)
+
+        batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(loss,axis=2),axis=1))+tf.reduce_mean(graph.get_collection('reg'))
         graph.add_to_collection('senti_loss', batch_loss)
         return batch_loss
 
@@ -242,9 +253,11 @@ class SentiFunction:
         # A is matrix of attribute vector
         A = tf.get_variable(name='A_vec',initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],self.nn_config['attribute_dim']),
                                                                        dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A))
         graph.add_to_collection('A_vec', A)
         o = tf.get_variable(name='other_vec', initializer=tf.random_uniform(shape=(self.nn_config['attribute_dim'],),
                                                                             dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o))
         graph.add_to_collection('o_vec', o)
         A= tf.concat([A,tf.expand_dims(o,axis=0)],axis=0)
         return A
@@ -259,11 +272,13 @@ class SentiFunction:
                                                                                   self.nn_config['attribute_mat_size'],
                                                                                   self.nn_config['attribute_dim']),
                                                                            dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
         o_mat = tf.get_variable(name='other_vec',
                                 initializer=tf.random_uniform(shape=(self.nn_config['attribute_mat_size'],
                                                                      self.nn_config['attribute_dim']),
                                                               dtype='float32'))
+        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o_mat))
         graph.add_to_collection('o_mat', o_mat)
 
         A_mat = tf.concat([A_mat,tf.expand_dims(o_mat,axis=0)],axis=0)
@@ -278,9 +293,9 @@ class SentiFunction:
         :param graph: 
         :return: shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
         """
-        # H.shape = (batch size, words number, attribute number, word dim)
+        # H.shape = (batch size, words number, attribute number+1, word dim)
         H = tf.tile(tf.expand_dims(H,axis=2),multiples=[1,1,self.nn_config['attributes_num']+1,1])
-        # H.shape = (batch size, words number, attribute number, attribute mat size, word dim)
+        # H.shape = (batch size, words number, attribute number+1, attribute mat size, word dim)
         H = tf.tile(tf.expand_dims(H,axis=3),multiples=[1,1,1,self.nn_config['attribute_mat_size'],1])
         # attention.shape = (batch size, words number, attribute number, attribute mat size)
         attention=tf.nn.softmax(tf.reduce_sum(tf.multiply(H,A_mat),axis=4))
@@ -292,10 +307,10 @@ class SentiFunction:
 
 
 class Classifier:
-    def __init__(self, nn_config):
+    def __init__(self, nn_config,data_generator):
         self.nn_config = nn_config
         self.sf = SentiFunction(nn_config)
-        self.dg = DataGenerator(nn_config)
+        self.dg = data_generator
 
     def sentences_input(self, graph):
         X = tf.placeholder(
@@ -311,7 +326,7 @@ class Classifier:
         :return: shape = (batch size, attributes number)
         """
         Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1), dtype='float32')
-        graph.add_to_collection('y_att', Y_att)
+        graph.add_to_collection('Y_att', Y_att)
         return Y_att
 
     def sentiment_labels_input(self, graph):
@@ -319,12 +334,12 @@ class Classifier:
         :param graph: 
         :return: shape=[batch_size, number of attributes, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-        y_senti = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1, 3),dtype='float32')
-        graph.add_to_collection('y_senti', y_senti)
-        return y_senti
+        Y_senti = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1, 3),dtype='float32')
+        graph.add_to_collection('Y_senti', Y_senti)
+        return Y_senti
 
     # should use variable share
-    def sentence_lstm(self, X,graph):
+    def sentence_lstm(self, X,mask,graph):
         """
         return a lstm of a sentence
         :param x: a sentence
@@ -337,7 +352,7 @@ class Classifier:
                                                                dtype='float32'))
         bias = tf.get_variable(name='sentence_lstm_b',
                                initializer=tf.zeros(shape=(self.nn_config['lstm_cell_size']), dtype='float32'))
-        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(weight)
+        graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(weight))
 
         X = tf.reshape(X, shape=(-1, self.nn_config['word_dim']))
         Xt = tf.add(tf.matmul(X, weight), bias)
@@ -347,8 +362,18 @@ class Classifier:
         init_state = cell.zero_state(batch_size=self.nn_config['batch_size'], dtype='float32')
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell, inputs=Xt, initial_state=init_state, time_major=False)
+        outputs = tf.multiply(outputs, mask)
         graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
+
+    def lstm_mask(self,X):
+        # need to pad the #PAD# words to zeros, otherwise, they will be junks.
+        X = tf.cast(X, dtype='float32')
+        ones = tf.ones_like(X, dtype='float32') * self.nn_config['padding_word_index']
+        is_one = tf.equal(X, ones)
+        mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1, 1, self.nn_config['lstm_cell_size']])
+        return mask
 
     def senti_extors_mat(self, graph):
         """
@@ -466,11 +491,15 @@ class Classifier:
         with graph.as_default():
             X = self.sentences_input(graph=graph)
             words_pad_M = self.is_word_padding_input(X, graph)
-            X = self.lookup_table(words_pad_M,X,graph)
+            lstm_mask = self.lstm_mask(X)
+            X = self.lookup_table(X,words_pad_M,graph)
             # lstm
             with tf.variable_scope('sentence_lstm'):
                 # H.shape = (batch size, max_time, cell size)
-                H = self.sentence_lstm(X, graph=graph)
+                H = self.sentence_lstm(X,lstm_mask, graph=graph)
+                #
+                graph.add_to_collection('reg',
+                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
 
             Y_att = self.attribute_labels_input(graph=graph)
             Y_senti = self.sentiment_labels_input(graph=graph)
@@ -525,19 +554,21 @@ class Classifier:
         graph, saver = self.classifier()
         with graph.as_default():
             # input
-            X = graph.get_collection('X')
+            X = graph.get_collection('X')[0]
             # labels
-            y_att = graph.get_collection('y_att')
-            y_senti = graph.get_collection('y_senti')
+            Y_att = graph.get_collection('Y_att')[0]
+            Y_senti = graph.get_collection('Y_senti')[0]
+            # lookup table
+            table = graph.get_collection('table')[0]
             # train_step
             train_step = graph.get_collection('train_step')
             # attribute function
             init = tf.global_variables_initializer()
         with graph.device('/gpu:1'):
+            table_data = self.dg.table_generator()
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init)
+                sess.run(init,feed_dict={table:table_data})
                 for i in range(self.nn_config['epoch']):
-                    sentences, att_labels, senti_labels = self.dg.gen(i) + 3
-                    senti_extors = self.sentiment_extract_mat()
+                    sentences, Y_att_data, Y_senti_data = self.dg.data_generator(i) + 3
                     sess.run(init)
-                    sess.run(train_step, feed_dict={X: sentences, y_att: att_labels, y_senti: senti_labels})
+                    sess.run(train_step, feed_dict={X: sentences, Y_att: Y_att_data, Y_senti: Y_senti_data})
