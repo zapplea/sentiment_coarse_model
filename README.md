@@ -2,10 +2,6 @@
 
 Paper: uploaded to dropbox
 
-
-
-
-
 The model to train:
 1. (a-o)*e: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_1w
 2. (a-o)*h: sentiment_coarse_model/sentiment/sep_nn/coarse_atr_classifier_nw
@@ -15,6 +11,7 @@ Notes:
 1. Can run unittest af_unittest.py for each model. 
 2. Before run the unittest, need to change PATH in: sys.path.append('/home/liu121/dlnlp')
 3. For training, the hyper-parameter should be the same to these in unittest, but you can change values.
+
 
 input data format:
 attribute function:
