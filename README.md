@@ -3,11 +3,7 @@
 Paper: uploaded to dropbox
 
 
-TODO_list:
-1. Need to complete sentiment_coarse_model/sentiment/util/coarse/atr_data_generator.py. it lacks the part of generating training data, but I provide function data_generator to feed data to training process. 
-2. Find a Chinese word embedding(https://github.com/Kyubyong/wordvectors) and fullfile its path to nn_config['wordembedding_file_path']. The wordembedding file is loaded by function generate_embedding() in atr_data_generator.py. This function generate table for lookup and a "words to id" dictionary. When generating data, you need to use "words to id" dictionary to convert words in sentences to id at first. 
-3. When generating the data, you need to pad the sentence to the same length(maximum length). The padded word denoted by '#PAD#' and the corrsponding vector is a zeros-vector. The unknow words are denoted by '#UNK#' and its vector is mean of the other words' vectors. 
-2. Need to write a python file to call classifier and train it. Still, remember to add sys.path.append as in the af_unittest.py
+
 
 
 The model to train:
@@ -20,12 +16,44 @@ Notes:
 2. Before run the unittest, need to change PATH in: sys.path.append('/home/liu121/dlnlp')
 3. For training, the hyper-parameter should be the same to these in unittest, but you can change values.
 
-input data instance:
-data=[[review, is_padding, attribute labels],...]
-1. review = [sentence_1, sentence_2 ,...,sentence_n]. sentence_i=[word_1,word_2,...,word_m]. Type of word_j is int, representing the code of a word and the reason is that we need to feed the review to lookup_table to extract embeddings. After the word is inputed to lookup_table, it is converted to word embeddings.
-2. is_padding is one_hot vector. Each scalar represents whether a sentence is padded, if it is, then the corresponding scalar is 0, otherwise it is 1.
-3.attribute_labels is vector of probability. Each scalar respresents possibility of this attributes represented in the review. 
+input data format:
+attribute function:
+1. ground truth: shape = (batch size, attribute numbers); use binary way to represent whether a attribute is activated
+in a sentence.
+eg. [[1,0,1,...],[0,0,1,...],...]
+2. sentences: shape = (batch size, words number); use a number to represent each word, the number is corresponding to
+the index of the word in word embedding tables.
+eg. [[1,4,6,8,...],[7,1,5,10,...],]
+3. word embeddings table: shape = (number of words, word dimension); this table contain word embeddings.
+Its structure would be:
+word1 [0.223, -4.222, ....]
+word2 [0.883, 0.333, ....]
+... ...
+The table should also provide a dictionary to map word to index, and this index is input of sentence
 
-FIX_list:
-1. padded word also need a mask.
-2. add regularizer to loss
+sentiment function:
+1. sentiment ground truth: shape =(batch size, attributes number +1, 3); The reason we use attributes number +1 is that we need to
+consider none-attribute in sentiment function. "3" is the number of polarity: negative, neutral, positive
+use binary way to represent whether a attribute's sentiment is activated. For non-attribute, its sentiment should always be neutral.
+If a attribute doesn't activated in a sentence, its sentiment should be [0,0,0]
+
+2. attribute ground truth: shape = (batch size, attribute numbers); use binary way to represent whether a attribute is activated
+in a sentence. The reason we need to provide attribute ground truth in here is that we assume we know which attribute is activated in the sentence.
+eg. [[1,0,1,...],[0,0,1,...],...]
+
+3. sentences: shape = (batch size, words number); use a number to represent each word, the number is corresponding to
+the index of the word in word embedding tables.
+eg. [[1,4,6,8,...],[7,1,5,10,...],]
+
+4. word embeddings table: shape = (number of words, word dimension); this table contain word embeddings.
+Its structure would be:
+word1 [0.223, -4.222, ....]
+word2 [0.883, 0.333, ....]
+... ...
+The table should also provide a dictionary to map word to index, and this index is input of sentence
+
+
+notes:
+1. length of sentence is different, so need to pad the sentence to the same length. Check the longest length of a sentence,
+and pad all sentence to the same length.
+2. batch size is the number of sentences.
