@@ -569,32 +569,32 @@ class SFTest(unittest.TestCase):
     #     test_data = np.mean(np.sum(np.sum(test_data,axis=2),axis=1))
     #     self.assertTrue(np.all(test_data == result))
 
-    # def test_prediction(self):
-    #     # attribute labels
-    #     atr_label = np.zeros(shape=(self.nn_config['attributes_num'] + 1,), dtype='float32')
-    #     for i in range(0, int(math.ceil(atr_label.shape[0] / 2))):
-    #         atr_label[i] = 1
-    #     # score
-    #     score = np.ones(shape=(3 * self.nn_config['attributes_num'] + 3,),
-    #                     dtype='float32')
-    #     score = np.reshape(score, newshape=(self.nn_config['attributes_num'] + 1, 3))
-    #     for i in range(score.shape[0]):
-    #         score[i] = np.array([-1, -0.2, 1], dtype='float32')
-    #
-    #     with self.graph.as_default():
-    #         pred = self.sf.prediction(score,atr_label,self.graph)
-    #     with self.sess as sess:
-    #         result = sess.run(pred)
-    #
-    #     self.assertEqual(result.shape,(self.nn_config['attributes_num']+1,3))
-    #
-    #     test_data = np.zeros_like(result,dtype='float32')
-    #     for i in range(0, int(math.ceil(atr_label.shape[0] / 2))):
-    #         test_data[i][2] = 1
-    #     self.assertTrue(np.all(test_data == result))
+    def test_prediction(self):
+        # attribute labels
+        Y_atr = np.zeros(shape=(self.nn_config['batch_size'],self.nn_config['attributes_num'] + 1), dtype='float32')
+        for i in range(0, int(math.ceil(Y_atr.shape[0] / 2))):
+            Y_atr[i] = 1
+        # score
+        score = np.ones(shape=(self.nn_config['batch_size'],3 * self.nn_config['attributes_num'] + 3,),
+                        dtype='float32')
 
-    def test_classifier(self):
-        graph,saver = self.cf.classifier()
+        with self.graph.as_default():
+            pred = self.sf.prediction(score,Y_atr,self.graph)
+        with self.sess as sess:
+            result = sess.run(pred)
+
+        self.assertEqual(result.shape,(self.nn_config['batch_size'],self.nn_config['attributes_num']+1,3))
+
+    # def test_accuracy(self):
+    #     Y_senti = np.array([[[0,1,0],[0,0,1],[0,0,0]],[[0,0,1],[0,1,0],[1,0,1]]],dtype='float32')
+    #     pred = np.array([[[0,1,0],[0,0,0],[0,0,0]],[[0,0,0],[0,1,0],[1,0,0]]],dtype='float32')
+    #     with self.graph.as_default():
+    #         accuracy = self.sf.accuracy(Y_senti,pred,self.graph)
+    #     result = self.sess.run(accuracy)
+    #     self.assertEqual(result,np.array(0.5,dtype='float32'))
+
+    # def test_classifier(self):
+    #     graph,saver = self.cf.classifier()
 
 
 if __name__ == "__main__":

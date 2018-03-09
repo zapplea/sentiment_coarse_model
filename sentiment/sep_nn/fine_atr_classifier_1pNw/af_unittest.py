@@ -18,14 +18,14 @@ class AttributeFunctionTest(unittest.TestCase):
     def __init__(self,*args,**kwargs):
         super(AttributeFunctionTest, self).__init__(*args, **kwargs)
 
-        seed = {'lstm_cell_size': 30,
+        seed = {'lstm_cell_size': 300,
                 'word_dim': 300
                 }
         self.nn_config = {'attributes_num': 20,
                           'attribute_senti_prototype_num': 4,
                           'normal_senti_prototype_num': 4,  # number of specific sentiment of each attribute
                           'sentiment_dim': seed['lstm_cell_size'],  # dim of a sentiment expression prototype.
-                          'attribute_dim': seed['word_dim'],
+                          'attribute_dim': seed['lstm_cell_size'],
                           'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
                           'words_num': 10,
                           'word_dim': seed['word_dim'],

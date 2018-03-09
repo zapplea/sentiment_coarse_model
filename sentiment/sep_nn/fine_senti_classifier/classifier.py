@@ -220,7 +220,7 @@ class SentiFunction:
         masked_loss = tf.expand_dims(masked_loss,axis=3)
         loss = tf.reduce_max(tf.concat([zeros_loss,masked_loss],axis=3),axis=3)
 
-        batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(loss,axis=2),axis=1))+tf.reduce_mean(graph.get_collection('reg'))
+        batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(loss,axis=2),axis=1))+tf.multiply(1/self.nn_config['batch_size'],tf.reduce_sum(graph.get_collection('reg')))
         graph.add_to_collection('senti_loss', batch_loss)
         return batch_loss
 
@@ -240,6 +240,24 @@ class SentiFunction:
         pred = tf.where(condition, tf.ones_like(score, dtype='float32'), tf.zeros_like(score, dtype='float32'))
         graph.add_to_collection('prediction', pred)
         return pred
+
+    def accuracy(self,Y_senti,pred,graph):
+        """
+
+        :param Y_senti: shape = (batch size, attributes number +1,3)
+        :param pred: shape = ()
+        :param graph: 
+        :return: 
+        """
+        condition = tf.equal(Y_senti, pred)
+        cmp = tf.reduce_sum(
+            tf.where(condition, tf.zeros_like(Y_senti, dtype='float32'), tf.ones_like(Y_senti, dtype='float32')), axis=2)
+        condition = tf.equal(cmp, tf.zeros_like(cmp))
+        accuracy = tf.reduce_mean(
+            tf.where(condition, tf.ones_like(cmp, dtype='float32'), tf.zeros_like(cmp, dtype='float32')))
+        graph.add_to_collection('accuracy', accuracy)
+        return accuracy
+
 
     # ===============================================
     # ============= attribute function ==============
@@ -332,7 +350,7 @@ class Classifier:
     def sentiment_labels_input(self, graph):
         """
         :param graph: 
-        :return: shape=[batch_size, number of attributes, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
+        :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
         Y_senti = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1, 3),dtype='float32')
         graph.add_to_collection('Y_senti', Y_senti)
@@ -547,6 +565,7 @@ class Classifier:
             senti_loss = self.sf.loss(Y_senti, senti_score, max_false_score, graph)
             opt = self.optimizer(senti_loss,graph)
             senti_pred = self.sf.prediction(score=senti_score, Y_atr=Y_att, graph=graph)
+            accuracy = self.sf.accuracy(Y_senti=Y_senti,pred=senti_pred,graph=graph)
             saver = tf.train.Saver()
         return graph, saver
 
@@ -561,7 +580,11 @@ class Classifier:
             # lookup table
             table = graph.get_collection('table')[0]
             # train_step
-            train_step = graph.get_collection('train_step')
+            train_step = graph.get_collection('train_step')[0]
+            # loss
+            loss = graph.get_collection('senti_loss')[0]
+            # accuracy
+            accuracy = graph.get_collection('accuracy')[0]
             # attribute function
             init = tf.global_variables_initializer()
         with graph.device('/gpu:1'):
@@ -570,5 +593,22 @@ class Classifier:
                 sess.run(init,feed_dict={table:table_data})
                 for i in range(self.nn_config['epoch']):
                     sentences, Y_att_data, Y_senti_data = self.dg.data_generator(i) + 3
-                    sess.run(init)
                     sess.run(train_step, feed_dict={X: sentences, Y_att: Y_att_data, Y_senti: Y_senti_data})
+
+                    if i%5000 == 0 and i!=0:
+                        sentences,Y_att_data, Y_senti_data = self.dg.data_generator('test')
+                        valid_size = Y_att_data.shape[0]
+                        p = 0
+                        l = 0
+                        count = 0
+                        batch_size = self.nn_config['batch_size']
+                        for i in range(valid_size // batch_size):
+                            count += 1
+                            p += sess.run(accuracy, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                                                               Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size],
+                                                               Y_senti:Y_senti_data[i * batch_size:i * batch_size + batch_size]})
+                            l += sess.run(loss, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                                                           Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size],
+                                                           Y_senti: Y_senti_data[i * batch_size:i * batch_size + batch_size]})
+                        p = p / count
+                        l = l / count

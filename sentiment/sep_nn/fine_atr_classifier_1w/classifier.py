@@ -120,7 +120,7 @@ class AttributeFunction:
         return score
 
     def prediction(self, score, graph):
-        condition = tf.greater(score, tf.ones_like(score, dtype='float32') * self.nn_config['atr_threshold'])
+        condition = tf.greater(score, tf.ones_like(score, dtype='float32') * self.nn_config['atr_pred_threshold'])
         pred = tf.where(condition, tf.ones_like(score, dtype='float32'), tf.zeros_like(score, dtype='float32'))
         graph.add_to_collection('atr_pred', pred)
         return pred
@@ -171,22 +171,20 @@ class AttributeFunction:
         for i in range(self.nn_config['batch_size']):
             item1[i][0]=1
         nonatr_mask = tf.where(condition,tf.constant(item1,dtype='float32'),Y_att)
-
         #
         theta = tf.constant(self.nn_config['attribute_loss_theta'], dtype='float32')
         # loss.shape = (batch size, attributes num)
-        loss = tf.multiply(tf.add(tf.subtract(theta,tf.multiply( Y_att,score)), max_fscore),nonatr_mask)
+        loss = tf.multiply(tf.add(tf.subtract(theta,tf.multiply(Y_att,score)), max_fscore),nonatr_mask)
         zero_loss = tf.zeros_like(loss,dtype='float32')
 
         loss = tf.expand_dims(loss,axis=2)
         zero_loss = tf.expand_dims(zero_loss,axis=2)
         # loss.shape = (batch size, attributes num)
         loss = tf.reduce_max(tf.concat([loss,zero_loss],axis=2),axis=2)
-        result = loss
-        loss = tf.reduce_mean(tf.reduce_sum(loss,axis=1))
+        loss = tf.reduce_mean(tf.reduce_sum(loss,axis=1))+tf.multiply(1/self.nn_config['batch_size'],tf.reduce_sum(graph.get_collection('reg')))
         graph.add_to_collection('atr_loss', loss)
 
-        return result
+        return loss
 
 class Classifier:
     def __init__(self, nn_config,data_generator):
@@ -306,6 +304,7 @@ class Classifier:
             max_fscore = self.af.max_false_score(score,Y_att,graph)
             loss = self.af.loss(score,max_fscore, Y_att, graph)
             pred = self.af.prediction(score,graph)
+            accuracy = self.af.accuracy(Y_att,pred,graph)
         with graph.as_default():
             opt = self.optimizer(loss, graph=graph)
             saver = tf.train.Saver()
@@ -315,17 +314,39 @@ class Classifier:
         graph, saver = self.classifier()
         with graph.as_default():
             # input
-            X = graph.get_collection('X')
+            X = graph.get_collection('X')[0]
             # labels
-            y_att = graph.get_collection('Y_att')
+            Y_att = graph.get_collection('Y_att')[0]
             # train_step
-            train_step = graph.get_collection('train_step')
+            train_step = graph.get_collection('train_step')[0]
+            #
+            table = graph.get_collection('table')[0]
+            #
+            accuracy = graph.get_collection('accuracy')[0]
+            #
+            loss = graph.get_collection('atr_loss')[0]
             # attribute function
             init = tf.global_variables_initializer()
+        table_data = self.dg.table_generator()
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init)
+                sess.run(init,feed_dict={table:table_data})
                 for i in range(self.nn_config['epoch']):
-                    sentences, att_labels, senti_labels = self.dg.data_generator(i) + 3
-                    sess.run(init)
-                    sess.run(train_step, feed_dict={X: sentences, y_att: att_labels, y_senti: senti_labels})
+                    sentences, Y_att_data = self.dg.data_generator('train',i)
+                    sess.run(train_step, feed_dict={X: sentences, Y_att:Y_att_data})
+
+                    if i%5000 == 0 and i!=0:
+                        sentences,Y_att_data = self.dg.data_generator('test')
+                        valid_size = Y_att_data.shape[0]
+                        p = 0
+                        l = 0
+                        count = 0
+                        batch_size = self.nn_config['batch_size']
+                        for i in range(valid_size // batch_size):
+                            count += 1
+                            p += sess.run(accuracy, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                                                                Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]})
+                            l += sess.run(loss, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                                                           Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]})
+                        p = p / count
+                        l = l / count
