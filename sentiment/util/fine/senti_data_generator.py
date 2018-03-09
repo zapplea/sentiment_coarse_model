@@ -1,6 +1,6 @@
 class DataGenerator():
     def __init__(self,data_config):
-        self.data_config = data_config
+        self.data_config = {}
 
     def data_generator(self):
         pass
