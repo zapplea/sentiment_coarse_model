@@ -130,6 +130,9 @@ class DataGenerator():
         return np.array(sentence)
 
 class DataGenerator_random():
+    """
+    Random DataGenerator for test
+    """
     def __init__(self, data_config):
         self.data_config = data_config
         self.word_embed = gensim.models.KeyedVectors.load_word2vec_format(
