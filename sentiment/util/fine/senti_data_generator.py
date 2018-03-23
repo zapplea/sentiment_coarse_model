@@ -57,12 +57,19 @@ class DataGenerator():
 
     def table_generator(self):
         """
-        
-        :return: 
+        Generate word embedding matirx
+        :return: word embeddings table: shape = (number of words, word dimension) word1 [0.223, -4.222, ....] word2 [0.883, 0.333, ....] ... ...
         """
         return self.word_embed.syn0, self.dictionary
 
     def get_aspect_id(self,data,start,end):
+        """
+        Generate attribute ground truth
+        :param data: 
+        :param start: 
+        :param end: 
+        :return: shape = (batch size, attribute numbers) eg. [[1,0,1,...],[0,0,1,...],...]
+        """
         aspect = []
         for i in np.arange(start,end):
             vec = np.zeros(len(self.aspect_dic))
@@ -72,6 +79,13 @@ class DataGenerator():
         return np.array(aspect)
 
     def get_sentiment_id(self,data,start,end):
+        """
+        Generate sentiment ground truth
+        :param data: 
+        :param start: 
+        :param end: 
+        :return:  shape =(batch size, attributes number +1, 3) 
+        """
         sentiment = []
         for i in np.arange(start,end):
             vec = []
@@ -86,6 +100,13 @@ class DataGenerator():
         return np.array(sentiment)
 
     def get_word_id(self,data,start,end):
+        """
+        Generate sentences id matrix
+        :param data: 
+        :param start: 
+        :param end: 
+        :return: shape = (batch size, words number) eg. [[1,4,6,8,...],[7,1,5,10,...],]
+        """
 
         outtab = ' ' * len(string.punctuation)
         intab = string.punctuation
