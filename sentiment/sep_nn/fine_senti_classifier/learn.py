@@ -33,8 +33,8 @@ if __name__ == "__main__":
                    'words_num': 20,
                    'word_dim': seed['word_dim'],
                    'is_mat': True,
-                   'epoch': 1000,#10000
-                   'batch_size':5,
+                   'epoch': 10000,#10000
+                   'batch_size':30,
                    'lstm_cell_size': seed['lstm_cell_size'],
                    'lookup_table_words_num': 3000000,  # 2074276 for Chinese word embedding
                    'padding_word_index': 0,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
                    'sentiment_loss_theta': 1.0,
                    'rps_num': 5,  # number of relative positions
                    'rp_dim': 100,  # dimension of relative position
-                   'lr': 0.03,  # learing rate
+                   'lr': 0.003,  # learing rate
                    'reg_rate': 0.3,
                    'senti_pred_threshold': 0.5,
                    'report_filePath': '/datastore/liu121/nosqldb2/sentiA/report1.txt'
@@ -75,7 +75,8 @@ if __name__ == "__main__":
                     'report_filePath': '/datastore/liu121/nosqldb2/sentiA/report2.txt'
                 }]
     data_config ={
-        'data_file_path':'~/dataset/semeval2016/absa_resturant.csv',
+        'source_file_path':'~/dataset/semeval2016/absa_resturant.csv',
+        'data_file_path':'/home/lujunyu/repository/sentiment_coarse_model/restaurant_data.pkl',
         'wordembedding_file_path':'~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
         'testset_size': 1000,
