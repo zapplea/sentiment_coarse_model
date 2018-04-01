@@ -36,7 +36,6 @@ if __name__ == "__main__":
                     'reg_rate': 0.03,
                     'lr': 0.003,  # learing rate
                     'atr_pred_threshold': 0, # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-                    'attribute_loss_theta': 1.0,
                 },
                 {  # fixed parameter
                     'attributes_num': 20,
@@ -54,7 +53,6 @@ if __name__ == "__main__":
                     'reg_rate': 0.03,
                     'lr': 0.003,  # learing rate
                     'atr_pred_threshold': 0, # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-                    'attribute_loss_theta': 1.0,
                 }
                   ]
     data_config = {}

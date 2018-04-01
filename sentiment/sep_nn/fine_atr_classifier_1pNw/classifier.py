@@ -210,32 +210,31 @@ class Classifier:
         graph.add_to_collection('Y_att', Y_att)
         return Y_att
 
+    def sequence_length(self, X, graph):
+        """
+
+        :param X: (batch size, max words num)
+        :param graph: 
+        :return: (batch size,)
+        """
+        paddings = tf.ones_like(X, dtype='int32')*self.nn_config['padding_word_index']
+        condition = tf.equal(paddings, X)
+        seq_len = tf.reduce_sum(tf.where(condition, tf.zeros_like(X, dtype='int32'), tf.ones_like(X, dtype='int32')),
+                                axis=1, name='seq_len')
+        return seq_len
+
     # should use variable share
-    def sentence_lstm(self, X, mask, graph):
+    def sentence_lstm(self, X, seq_len, graph):
         """
         return a lstm of a sentence
         :param X: shape = (batch size, words number, word dim)
-        :param mask: shape = (batch size, words number, lstm cell size)
+        :param seq_len: shape = (batch size,) show the number of words in a batch
         :param graph: 
         :return: 
         """
-        weight = tf.get_variable(name='sentence_lstm_w',
-                                 initializer=tf.random_uniform(shape=(self.nn_config['word_dim'],
-                                                                      self.nn_config['lstm_cell_size']),
-                                                               dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(weight))
-        bias = tf.get_variable(name='sentence_lstm_b',
-                               initializer=tf.zeros(shape=(self.nn_config['lstm_cell_size']), dtype='float32'))
-
-        X = tf.reshape(X, shape=(-1, self.nn_config['word_dim']))
-        Xt = tf.add(tf.matmul(X, weight), bias)
-        Xt = tf.reshape(Xt, shape=(-1, self.nn_config['words_num'], self.nn_config['lstm_cell_size']))
-        # xt = tf.add(tf.expand_dims(tf.matmul(x, weight), axis=0), bias)
         cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
-        init_state = cell.zero_state(batch_size=self.nn_config['batch_size'], dtype='float32')
         # outputs.shape = (batch size, max_time, cell size)
-        outputs, _ = tf.nn.dynamic_rnn(cell, inputs=Xt, initial_state=init_state, time_major=False)
-        outputs = tf.multiply(outputs, mask)
+        outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False,sequence_length=seq_len,dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
 
@@ -285,14 +284,14 @@ class Classifier:
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
-            X = self.sentences_input(graph=graph)
-            words_pad_M = self.is_word_padding_input(X, graph)
-            lstm_mask = self.lstm_mask(X)
-            X = self.lookup_table(X, words_pad_M, graph)
+            X_ids = self.sentences_input(graph=graph)
+            words_pad_M = self.is_word_padding_input(X_ids, graph)
+            X = self.lookup_table(X_ids, words_pad_M, graph)
             # lstm
             with tf.variable_scope('sentence_lstm'):
+                seq_len = self.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
-                H = self.sentence_lstm(X, lstm_mask, graph=graph)
+                H = self.sentence_lstm(X, seq_len, graph=graph)
                 graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes+1)

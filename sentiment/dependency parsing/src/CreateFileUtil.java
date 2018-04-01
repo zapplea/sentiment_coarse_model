@@ -6,8 +6,6 @@ import java.io.OutputStreamWriter;
 public class CreateFileUtil {
 
     public static void createJsonFile(String filePath) {
-
-
         // 生成json格式文件
         try {
             File file = new File(filePath);
@@ -21,8 +19,6 @@ public class CreateFileUtil {
         }catch (Exception e) {
                 e.printStackTrace();
             }
-
-
     }
 
     public static boolean append(String jsonString, String filePath) {
@@ -40,7 +36,6 @@ public class CreateFileUtil {
             flag = false;
             e.printStackTrace();
         }
-
         return flag;
     }
 }

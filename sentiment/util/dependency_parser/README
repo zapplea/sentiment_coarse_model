@@ -1,0 +1,8 @@
+dependency_generator.py:
+the unknow words is represented by '#UNK#'.
+
+At first the sentence contains 'ROOT', then in sentence_encoder we delete it.
+
+Need to add 'dependency_parsing_filePath' to data_config
+
+The table of relative distance is arranged based on index of words in the original sentence.

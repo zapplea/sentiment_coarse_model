@@ -1,6 +1,7 @@
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import edu.stanford.nlp.process.DocumentPreprocessor; //You should copy stanford-english-corenlp-2018-02-27-models/edu to this diretory or add path to library.
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.*;
@@ -65,6 +66,4 @@ public class StanfordParser {
         }
         cf.append(SB.subSequence(0, SB.length()-2).toString()+"\n}",filePath);
     }
-
-
 }
