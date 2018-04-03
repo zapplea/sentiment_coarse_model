@@ -134,9 +134,10 @@ class AttributeFunction:
         :return: 
         """
         condition = tf.equal(Y_att,pred)
-        cmp = tf.reduce_sum(tf.where(condition,tf.zeros_like(Y_att,dtype='float32'),tf.ones_like(Y_att,dtype='float32')),axis=1)
-        condition = tf.equal(cmp,tf.zeros_like(cmp))
-        accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(cmp,dtype='float32'),tf.zeros_like(cmp,dtype='float32')))
+        # cmp = tf.reduce_sum(tf.where(condition,tf.zeros_like(Y_att,dtype='float32'),tf.ones_like(Y_att,dtype='float32')),axis=1)
+        # condition = tf.equal(cmp,tf.zeros_like(cmp))
+        # accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(cmp,dtype='float32'),tf.zeros_like(cmp,dtype='float32')))
+        accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(Y_att,dtype='float32'),tf.zeros_like(Y_att,dtype='float32')))
         graph.add_to_collection('accuracy',accuracy)
         return accuracy
 
@@ -195,7 +196,7 @@ class Classifier:
     def sentences_input(self, graph):
         X = tf.placeholder(
             shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
-            dtype='float32')
+            dtype='int32')
         graph.add_to_collection('X', X)
         return X
 
@@ -268,7 +269,7 @@ class Classifier:
         """
         table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']), dtype='float32')
         graph.add_to_collection('table', table)
-        table = tf.Variable(table, name='table')
+        #table = tf.Variable(table, name='table')
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings,mask)
         graph.add_to_collection('lookup_table', embeddings)
@@ -316,25 +317,46 @@ class Classifier:
             # labels
             Y_att = graph.get_collection('Y_att')[0]
             # train_step
-            train_step = graph.get_collection('train_step')[0]
+            train_step = graph.get_collection('opt')[0]
             #
             table = graph.get_collection('table')[0]
             #
             accuracy = graph.get_collection('accuracy')[0]
             #
             loss = graph.get_collection('atr_loss')[0]
+
+            pred = graph.get_collection('atr_pred')[0]
+
             # attribute function
             init = tf.global_variables_initializer()
-        table_data = self.dg.table_generator()
+        table_data,_ = self.dg.table_generator()
+        train_set_size = self.dg.data_size - self.dg.data_config['testset_size']
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init,feed_dict={table:table_data})
+                sess.run(init)
+                batch_num = int(train_set_size / self.nn_config['batch_size'])
+                print('start',batch_num)
                 for i in range(self.nn_config['epoch']):
-                    sentences, Y_att_data = self.dg.data_generator('train',i)
-                    sess.run(train_step, feed_dict={X: sentences, Y_att:Y_att_data})
+                    loss_vec = []
+                    accuracy_vec = []
+                    for j in range(batch_num):
+                        sentences, Y_att_data = self.dg.data_generator('train', j)
+                        _, train_loss, train_accuracy,pred_data = sess.run([train_step, loss, accuracy,pred],
+                                                                            feed_dict={X: sentences, Y_att: Y_att_data,
+                                                                                       table: table_data})
+                        loss_vec.append(train_loss)
+                        accuracy_vec.append(train_accuracy)
+                        # print(pred_data == Y_att_data)
+                    print('Epoch:', i, 'Accuracy:%.10f' % np.mean(accuracy_vec), 'Training loss:%.10f' % np.mean(loss_vec))
+                        # # tvars = tf.trainable_variables()
+                        # tvars_vals = sess.run(tvars)
+                        #
+                        # for var, val in zip(tvars, tvars_vals):
+                        #     print(var.name, val)  # Prints the name of the variable alongside its value.
 
-                    if i%5000 == 0 and i!=0:
-                        sentences,Y_att_data = self.dg.data_generator('test')
+                    if i % 5 == 0 and i != 0:
+                        print('Test.....')
+                        sentences, Y_att_data = self.dg.data_generator('test', i)
                         valid_size = Y_att_data.shape[0]
                         p = 0
                         l = 0
@@ -343,8 +365,13 @@ class Classifier:
                         for i in range(valid_size // batch_size):
                             count += 1
                             p += sess.run(accuracy, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                                                Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]})
+                                                               Y_att: Y_att_data[
+                                                                      i * batch_size:i * batch_size + batch_size],
+                                                               table: table_data})
                             l += sess.run(loss, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                                           Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]})
+                                                           Y_att: Y_att_data[
+                                                                  i * batch_size:i * batch_size + batch_size],
+                                                           table: table_data})
                         p = p / count
                         l = l / count
+                        print('Accuracy:%.10f' % p, 'Testing loss:', l)
