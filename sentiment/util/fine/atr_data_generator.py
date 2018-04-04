@@ -15,10 +15,10 @@ class DataGenerator():
         for i in range(len(self.vocabulary)):
             self.dictionary[self.vocabulary[i]] = i
 
-        self.train_sentiment_ground_truth, self.train_attribute_ground_truth, self.train_sentence_ground_truth,self.train_aspect_dic = self.load_train_data()
-        self.test_sentiment_ground_truth, self.test_attribute_ground_truth, self.test_sentence_ground_truth, self.test_aspect_dic = self.load_test_data()
-        self.train_data_size = len(self.train_sentiment_ground_truth)
-        self.test_data_size = len(self.test_sentiment_ground_truth)
+        self.train_attribute_ground_truth, self.train_sentence_ground_truth,self.aspect_dic = self.load_train_data()
+        self.test_attribute_ground_truth, self.test_sentence_ground_truth = self.load_test_data(self.aspect_dic,)
+        self.train_data_size = len(self.train_attribute_ground_truth)
+        self.test_data_size = len(self.test_attribute_ground_truth)
 
 
 
@@ -135,7 +135,6 @@ class DataGenerator():
     def load_train_data(self):
         if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
             f = open(self.data_config['train_data_file_path'],'rb')
-            sentiment_ground_truth = pickle.load(f)
             attribute_ground_truth = pickle.load(f)
             sentence_ground_truth  = pickle.load(f)
             train_aspect_dic = pickle.load(f)
@@ -144,27 +143,20 @@ class DataGenerator():
             f = open(self.data_config['train_data_file_path'], 'wb')
             tmp = pd.read_csv(self.data_config['train_source_file_path'], index_col=0)
             train_aspect_dic = {}
-            train_sent_dic = {}
             for i, aspect in enumerate(tmp['category'].unique()):
                 train_aspect_dic[aspect] = i
             print('Aspect id:', train_aspect_dic.keys())
-            for i, sentiment in enumerate(tmp['polarity'].unique()):
-                train_sent_dic[sentiment] = i
-            print('Sentiment id:', train_sent_dic.keys())
-            sentiment_ground_truth = self.get_sentiment_id(tmp,train_aspect_dic,train_sent_dic)
-            pickle.dump(sentiment_ground_truth,f)
             attribute_ground_truth = self.get_aspect_id(tmp,train_aspect_dic)
             pickle.dump(attribute_ground_truth, f)
             sentence_ground_truth = self.get_word_id(tmp)
             pickle.dump(sentence_ground_truth, f)
             pickle.dump(train_aspect_dic,f)
             f.close()
-        return sentiment_ground_truth, attribute_ground_truth, sentence_ground_truth , train_aspect_dic
+        return attribute_ground_truth, sentence_ground_truth , train_aspect_dic
 
-    def load_test_data(self):
+    def load_test_data(self,test_aspect_dic):
         if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
             f = open(self.data_config['test_data_file_path'],'rb')
-            sentiment_ground_truth = pickle.load(f)
             attribute_ground_truth = pickle.load(f)
             sentence_ground_truth  = pickle.load(f)
             test_aspect_dic = pickle.load(f)
@@ -172,22 +164,11 @@ class DataGenerator():
         else:
             f = open(self.data_config['test_data_file_path'], 'wb')
             tmp = pd.read_csv(self.data_config['test_source_file_path'], index_col=0)
-            test_aspect_dic = {}
-            test_sent_dic = {}
-            for i, aspect in enumerate(tmp['category'].unique()):
-                test_aspect_dic[aspect] = i
-            test_aspect_dic[np.nan] = test_aspect_dic[list(test_aspect_dic.keys())[-1]]
-            print('Aspect id:', test_aspect_dic.keys())
-            for i, sentiment in enumerate(tmp['polarity'].unique()):
-                test_sent_dic[sentiment] = i
-            print('Sentiment id:', test_sent_dic.keys())
-            sentiment_ground_truth = self.get_sentiment_id(tmp,test_aspect_dic,test_sent_dic)
-            pickle.dump(sentiment_ground_truth,f)
             attribute_ground_truth = self.get_aspect_id(tmp,test_aspect_dic)
             pickle.dump(attribute_ground_truth, f)
             sentence_ground_truth = self.get_word_id(tmp)
             pickle.dump(sentence_ground_truth, f)
             pickle.dump(test_aspect_dic,f)
             f.close()
-        return sentiment_ground_truth, attribute_ground_truth, sentence_ground_truth , test_aspect_dic
+        return attribute_ground_truth, sentence_ground_truth
 
