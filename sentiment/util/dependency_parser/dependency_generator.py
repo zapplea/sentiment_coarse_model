@@ -293,6 +293,7 @@ class DependencyGenerator:
             if table_length > max_table_length:
                 max_table_length = table_length
         encoded_tables = []
+        print('max_path_length: ',max_path_length)
         for table in tables:
             encoded_tables.append(self.tables_encoder(table, max_path_length,max_table_length,max_sentence_length))
         self.write(encoded_tables,encoded_sentences)

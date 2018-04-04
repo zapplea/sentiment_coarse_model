@@ -14,6 +14,7 @@ if __name__ == "__main__":
                    'lstm_cell_size': seed['lstm_cell_size'],
                    'lookup_table_words_num': 3000000,  # 2074276 for Chinese word embedding
                    'padding_word_index': 0,
+                   'max_path_length':None,
                    # flexible parameter
                    'attribute_senti_prototype_num': 4,
                    'normal_senti_prototype_num': 4,  # number of specific sentiment of each attribute

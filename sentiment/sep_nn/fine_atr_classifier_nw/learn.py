@@ -7,11 +7,25 @@ else:
 
 from sentiment.sep_nn.fine_senti_classifier.classifier import Classifier
 from sentiment.util.fine.atr_data_generator import DataGenerator
+from sentiment.util.fine.metrics import Metrics
 
 def main(nn_config,data_config):
     dg = DataGenerator(data_config)
     cl = Classifier(nn_config,dg)
-    cl.train()
+    epochs_pred_labels,epochs_loss,true_labels = cl.train()
+    # TODO: To feed sentence and attributes to the model, we need to convert words and attributes to ids
+    # TODO: need to provide two dictionaries: 1. can convert id of attributes to text
+    # TODO:                                   2. can convert id of a word in sentence to text
+    # TODO: Write two functions in util/fine/atr_data_generator.py to provide them.
+    # TODO: function name: atr_dictionary_generator(); word_dictionary_generator()
+    atr_dictioanry = dg.atr_dictionary_generator()
+    word_dictionary = dg.word_dictionary_generator()
+
+    for i in range(len(epochs_pred_labels)):
+        pred_labels = epochs_pred_labels[i]
+        loss = epochs_loss[i]
+        metrics_dic = Metrics.measure(true_labels,pred_labels,atr_dictioanry)
+
 
 
 if __name__ == "__main__":

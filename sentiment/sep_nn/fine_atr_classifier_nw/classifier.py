@@ -125,22 +125,22 @@ class AttributeFunction:
         graph.add_to_collection('atr_pred', pred)
         return pred
 
-    def accuracy(self, Y_att, pred, graph):
-        """
-
-        :param Y_att: shape = (batch size, attributes number)
-        :param pred: shape = (batch size, attributes number)
-        :param graph: 
-        :return: 
-        """
-        condition = tf.equal(Y_att, pred)
-        cmp = tf.reduce_sum(
-            tf.where(condition, tf.zeros_like(Y_att, dtype='float32'), tf.ones_like(Y_att, dtype='float32')), axis=1)
-        condition = tf.equal(cmp, tf.zeros_like(cmp))
-        accuracy = tf.reduce_mean(
-            tf.where(condition, tf.ones_like(cmp, dtype='float32'), tf.zeros_like(cmp, dtype='float32')))
-        graph.add_to_collection('accuracy', accuracy)
-        return accuracy
+    # def accuracy(self, Y_att, pred, graph):
+    #     """
+    #
+    #     :param Y_att: shape = (batch size, attributes number)
+    #     :param pred: shape = (batch size, attributes number)
+    #     :param graph:
+    #     :return:
+    #     """
+    #     condition = tf.equal(Y_att, pred)
+    #     cmp = tf.reduce_sum(
+    #         tf.where(condition, tf.zeros_like(Y_att, dtype='float32'), tf.ones_like(Y_att, dtype='float32')), axis=1)
+    #     condition = tf.equal(cmp, tf.zeros_like(cmp))
+    #     accuracy = tf.reduce_mean(
+    #         tf.where(condition, tf.ones_like(cmp, dtype='float32'), tf.zeros_like(cmp, dtype='float32')))
+    #     graph.add_to_collection('accuracy', accuracy)
+    #     return accuracy
 
     def max_false_score(self, score, Y_att, graph):
         """
@@ -310,7 +310,7 @@ class Classifier:
             max_fscore = self.af.max_false_score(score, Y_att, graph)
             loss = self.af.loss(score, max_fscore, Y_att, graph)
             pred = self.af.prediction(score, graph)
-            accuracy = self.af.accuracy(Y_att, pred, graph)
+            # accuracy = self.af.accuracy(Y_att, pred, graph)
         with graph.as_default():
             opt = self.optimizer(loss, graph=graph)
             saver = tf.train.Saver()
@@ -328,33 +328,43 @@ class Classifier:
             #
             table = graph.get_collection('table')[0]
             #
-            accuracy = graph.get_collection('accuracy')[0]
-            #
             loss = graph.get_collection('atr_loss')[0]
+            # prediction
+            pred = graph.get_collection('atr_pred')[0]
             # attribute function
             init = tf.global_variables_initializer()
         table_data = self.dg.table_generator()
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
                 sess.run(init, feed_dict={table: table_data})
+                epochs_pred_labels = []
+                epochs_loss=[]
                 for i in range(self.nn_config['epoch']):
                     sentences, Y_att_data = self.dg.data_generator('train', i)
                     sess.run(train_step, feed_dict={X: sentences, Y_att: Y_att_data})
 
                     if i % 5000 == 0 and i != 0:
                         sentences, Y_att_data = self.dg.data_generator('test')
+                        true_labels = Y_att_data
                         valid_size = Y_att_data.shape[0]
-                        p = 0
-                        l = 0
+                        one_epoch_pred_labels= []
+                        one_epoch_loss = 0
                         count = 0
                         batch_size = self.nn_config['batch_size']
+                        # TODO: in this setting, some test data will be wasted, so need to change it to a better way.
+                        # TODO: or batch size should be factor of the number of test data set.
                         for i in range(valid_size // batch_size):
                             count += 1
-                            p += sess.run(accuracy, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                                               Y_att: Y_att_data[
-                                                                      i * batch_size:i * batch_size + batch_size]})
-                            l += sess.run(loss, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                                           Y_att: Y_att_data[
-                                                                  i * batch_size:i * batch_size + batch_size]})
-                        p = p / count
-                        l = l / count
+                            partial_loss, partial_pred = sess.run([loss,pred], feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                                                                                       Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]})
+                            one_epoch_loss+=partial_loss
+                            one_epoch_pred_labels.append(partial_pred)
+
+                        one_epoch_pred_labels = np.concatenate(one_epoch_pred_labels,axis=0).astype('int32')
+                        # TODO: Just ust binary way ,not to concatenate them
+                        epochs_pred_labels.append(np.reshape(one_epoch_pred_labels,newshape=(-1,)))
+
+                        one_epoch_loss = one_epoch_loss / count
+                        epochs_loss.append(one_epoch_loss)
+                pred_labels = np.reshape(np.array(epochs_prediction),newshape=(-1,))
+        return pred_labels,epochs_loss,true_labels

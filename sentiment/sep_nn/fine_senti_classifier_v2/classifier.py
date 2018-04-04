@@ -124,25 +124,45 @@ class SentiFunction:
         graph.add_to_collection('relative_pos_ids',rp_ids)
         return  rp_ids
 
-    def Vi(self, A_dist, V, rp_ids, graph):
+    # def Vi(self, A_dist, V, rp_ids, graph):
+    #     """
+    #     :param A_dist: shape = (batch size, number of attributes+1, number of words)
+    #     :param V: shape = (number of relative position, relative position dim)
+    #     :param rp_ids: shape = (number of words, number of words)
+    #     :param graph:
+    #     :return: realtive position vector of each attribute at each position.
+    #     shape = (batch size, number of attributes+1, number of words, relative position dim)
+    #     """
+    #     # rp_mat.shape = (number of words, number of words, rp_dim)
+    #     rp_mat=tf.nn.embedding_lookup(V,rp_ids)
+    #     # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
+    #     A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rp_dim']])
+    #     # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
+    #     A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
+    #     # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+    #     A_Vi = tf.reduce_sum(tf.multiply(A_dist,rp_mat),axis=3)
+    #     graph.add_to_collection('A_Vi', A_Vi)
+    #     return A_Vi
+
+    def Vi(self,A_dist,PD,graph):
         """
-        :param A_dist: shape = (batch size, number of attributes+1, number of words)
-        :param V: shape = (number of relative position, relative position dim)
-        :param rp_ids: shape = (number of words, number of words)
-        :param graph: 
-        :return: realtive position vector of each attribute at each position.
-        shape = (batch size, number of attributes+1, number of words, relative position dim)
+        
+        :param A_dist: (batch size, number of attributes+1, wrods number)
+        :param PD: (batch size, words num, words num, lstm cell size)
+        :return: 
         """
-        # rp_mat.shape = (number of words, number of words, rp_dim)
-        rp_mat=tf.nn.embedding_lookup(V,rp_ids)
-        # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
-        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rp_dim']])
-        # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
-        A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
-        # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
-        A_Vi = tf.reduce_sum(tf.multiply(A_dist,rp_mat),axis=3)
-        graph.add_to_collection('A_Vi', A_Vi)
+        # PD.shape = (batch size, attributes num +1, words num, words num, lstm cell size)
+        PD = tf.tile(tf.expand_dims(PD,axis=1),multiples=[1,self.nn_config['attributes_num']+1,1,1,1])
+
+        # A_dist.shape = (batch size, attributes num+1, words num, words num)
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1])
+        # A_dist.shape = (batch size, attributes num+1, words num, words num, lstm cell size)
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=4),multiples=[1,1,1,1,self.nn_config['lstm_cell_size']])
+        # A_Vi.shape = (batch size, attributes num+1, words num, lstm cell size)
+        A_Vi = tf.reduce_sum(tf.multiply(PD,A_dist),axis=3)
+        graph.add_to_collection('A_Vi',A_Vi)
         return A_Vi
+
 
     def beta(self, graph):
         """
@@ -369,7 +389,6 @@ class Classifier:
                                 axis=1, name='seq_len')
         return seq_len
 
-    # should use variable share
     def sentence_lstm(self, X, seq_len, graph):
         """
         return a lstm of a sentence
@@ -382,6 +401,73 @@ class Classifier:
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False,sequence_length=seq_len,dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)
+        return outputs
+
+    # TODO: Path Dependency
+    def path_dependency_table_input(self,graph):
+        """
+        :param graph: 
+        :return: 
+        """
+        PD = tf.placeholder(shape=(self.nn_config['batch_size'],
+                                                self.nn_config['words_num'],
+                                                self.nn_config['words_num'],
+                                                self.nn_config['max_path_length']),
+                                         dtype='int32')
+        graph.add_to_collection('path_dependency',PD)
+        return PD
+
+    def path_sequence_length(self,PD):
+        """
+        The PD is words id
+        :param PD: matrix of path dependency (batch size, words num, words num, max path length): (sentences number, 
+                                                                                            words num, 
+                                                                                            tables number for each word, 
+                                                                                            length of path)
+        :return: (batch size, words num, words num)
+        """
+        PD = tf.reshape(PD,shape=(-1,self.nn_config['max_path_length']))
+        paddings = tf.ones_like(PD, dtype='int32') * self.nn_config['padding_word_index']
+        condition = tf.equal(paddings, PD)
+        seq_len = tf.reduce_sum(tf.where(condition, tf.zeros_like(PD, dtype='int32'), tf.ones_like(PD, dtype='int32')),
+                                axis=1, name='path_seq_len')
+        return seq_len
+
+
+
+
+    def path_dependency_bilstm(self,PD,seq_len,graph):
+        """
+        
+        :param PD: matrix of path dependency (batch size, words num, words num, max path length, word dim): (sentences number, 
+                                                                                                              words num, 
+                                                                                                              tables number for each word, 
+                                                                                                              words num for each row in a table,
+                                                                                                              word dim)
+        :param seq_len: (batch size*words num*words num, )
+        :param graph: 
+        :return: 
+        """
+        PD = tf.reshape(PD,shape=(-1,self.nn_config['max_path_length'],self.nn_config['word_dim']))
+        fw_cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
+        bw_cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
+        # outputs.shape = (-1,max words num, lstm cell size)
+        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,
+                                                     cell_bw=bw_cell,
+                                                     inputs=PD,
+                                                     sequence_length=seq_len,
+                                                     time_major=False)
+        # instance_index stands for the index of dependency path
+        instance_index = tf.expand_dims(tf.range(limit=self.nn_config['batch_size']*self.nn_config['words_num']*self.nn_config['words_num']),
+                                        axis=1)
+        # instance_length_index stands for the length of the instance
+        instance_length_index = tf.expand_dims(seq_len-1,axis=1)
+        slice_index = tf.concat([instance_index,instance_length_index],axis=1)
+        outputs = tf.gather_nd(outputs,slice_index)
+        outputs = tf.reshape(outputs,shape=(self.nn_config['batch_size'],
+                                            self.nn_config['words_num'],
+                                            self.nn_config['words_num'],
+                                            self.nn_config['lstm_cell_size']))
         return outputs
 
     def lstm_mask(self,X):
@@ -407,8 +493,6 @@ class Classifier:
         extors = tf.constant(extors, dtype='float32')
         graph.add_to_collection('senti_extractor', extors)
         return extors
-
-
 
     # @ normal_function
     def extor_expandNtile(self, extor, proto_num):
@@ -490,17 +574,17 @@ class Classifier:
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
-    def is_word_padding_input(self,X,graph):
+    def is_word_padding_input(self,ids,graph):
         """
         To make the sentence have the same length, we need to pad each sentence with '#PAD#'. To avoid updating of the vector,
         we need a mask to multiply the result of lookup table.
         :param graph: 
         :return: shape = (review number, sentence number, words number)
         """
-        X = tf.cast(X,dtype='float32')
-        ones = tf.ones_like(X, dtype='float32')*self.nn_config['padding_word_index']
-        is_one = tf.equal(X, ones)
-        mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
+        ids = tf.cast(ids,dtype='float32')
+        ones = tf.ones_like(ids, dtype='float32')*self.nn_config['padding_word_index']
+        is_one = tf.equal(ids, ones)
+        mask = tf.where(is_one, tf.zeros_like(ids, dtype='float32'), tf.ones_like(ids, dtype='float32'))
         mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1,1,self.nn_config['word_dim']])
         return mask
 
@@ -516,8 +600,31 @@ class Classifier:
                 # H.shape = (batch size, max_time, cell size)
                 H = self.sentence_lstm(X,seq_len, graph=graph)
                 #
+                graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
+            # path dependency
+            # PD_ids.shape = ()
+            PD_ids = self.path_dependency_table_input(graph)
+            path_dependence_pad_M = self.is_word_padding_input(tf.reshape(PD_ids,shape=(-1,self.nn_config['max_path_length'])),graph)
+            # PD.shape = (batch size, words num, words num, max path length, word dim)
+            PD = self.lookup_table(PD_ids,
+                                   tf.reshape(path_dependence_pad_M,
+                                              shape=(self.nn_config['batch_size'],
+                                                     self.nn_config['words_num'],
+                                                     self.nn_config['words_num'],
+                                                     self.nn_config['max_path_length'])),
+                                   graph)
+            with tf.variable_scope('dependency_path_bilstm'):
+                seq_len = self.path_sequence_length(PD_ids)
+                # pd_H.shape=(batch size, words num, words num, lstm cell size)
+                pd_H = self.path_dependency_bilstm(PD,seq_len,graph)
                 graph.add_to_collection('reg',
-                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
+                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                            graph.get_tensor_by_name(
+                                                'dependency_path_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+                graph.add_to_collection('reg',
+                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                            graph.get_tensor_by_name(
+                                                'dependency_path_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
 
             Y_att = self.attribute_labels_input(graph=graph)
             Y_senti = self.sentiment_labels_input(graph=graph)
@@ -535,11 +642,6 @@ class Classifier:
             extors_mat = self.senti_extors_mat(graph)
             # extors_mask_mat.shape = (3*attributes number+3, sentiment prototypes number)
             extors_mask_mat = self.extors_mask(extors=extors_mat,graph=graph)
-            # relative position matrix
-            V = self.sf.relative_pos_matrix(graph)
-            # relative position ids
-            # shape = (number of words, number of words)
-            rp_ids = self.sf.relative_pos_ids(graph)
 
             beta = self.sf.beta(graph)
             # extract sentiment expression corresponding to sentiment and attribute from W for all attributes
@@ -553,8 +655,10 @@ class Classifier:
             item1 = self.sf.item1(attended_W,H,graph)
             # A_dist.shape = (batch size, number of attributes+1, wrods number)
             A_dist = self.sf.attribute_distribution(A=A, H=H, graph=graph)
+
             # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
-            A_Vi = self.sf.Vi(A_dist=A_dist, V=V,rp_ids=rp_ids,graph=graph)
+            A_Vi = self.sf.Vi(A_dist=A_dist,PD=pd_H,graph=graph)
+
             # item2.shape=(batch size, number of attributes+1, number of words)
             item2 = tf.reduce_sum(tf.multiply(A_Vi, beta), axis=3)
             # senti_socre.shape = (batch size, 3*number of attributes+3)
