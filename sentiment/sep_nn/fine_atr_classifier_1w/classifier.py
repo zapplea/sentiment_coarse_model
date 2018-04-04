@@ -380,13 +380,8 @@ class Classifier:
                         # print(sum(pred_data == Y_att_data))
                         # print('TP',TP_data,'FP',FP_data,'FN',FN_data,'precision',precision_data,'recall',recall_data)
                     print('Epoch:', i, 'Accuracy:%.10f' % np.mean(accuracy_vec), 'Training loss:%.10f' % np.mean(loss_vec))
-                        # # tvars = tf.trainable_variables()
-                        # tvars_vals = sess.run(tvars)
-                        #
-                        # for var, val in zip(tvars, tvars_vals):
-                        #     print(var.name, val)  # Prints the name of the variable alongside its value.
 
-                    if i % 2 == 0 and i != 0:
+                    if i % 5 == 0 and i != 0:
                         print('Test.....')
                         sentences, Y_att_data = self.dg.test_data_generator()
                         valid_size = Y_att_data.shape[0]

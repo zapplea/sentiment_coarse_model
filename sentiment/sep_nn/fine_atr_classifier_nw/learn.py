@@ -69,7 +69,7 @@ if __name__ == "__main__":
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 10,
-            'batch_size': 30,
+            'batch_size': 40,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 30000000,  # 2074276 for Chinese word embedding
             'padding_word_index': 0,  # the index of #PAD# in word embeddings list

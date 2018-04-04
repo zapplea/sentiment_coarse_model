@@ -397,7 +397,7 @@ class Classifier:
                     print('Epoch:', i, 'F1 sorce:%.10f' % np.mean(accuracy_vec),'Training loss:%.10f' % np.mean(loss_vec),
                           'Precision:%.10f' % np.mean(precision_vec),'Recall:%.10f' % np.mean(recall_vec),)
 
-                    if i % 2 == 0 and i != 0:
+                    if i % 5 == 0 and i != 0:
                         print('Test.....')
                         sentences, Y_att_data = self.dg.test_data_generator()
                         valid_size = Y_att_data.shape[0]
