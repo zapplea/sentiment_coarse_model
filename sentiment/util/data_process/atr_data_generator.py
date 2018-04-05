@@ -32,6 +32,8 @@ class DataGenerator():
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
             for j in data[data['sentence_id'] == data.iloc[i]['sentence_id']]['category'].unique():
+                    print(j)
+                    exit()
                     vec[aspect_dic[j]] = 1
             aspect.append(vec)
         print(aspect)
@@ -102,7 +104,7 @@ class DataGenerator():
             train_aspect_dic = {}
             for i, aspect in enumerate(tmp['category'].unique()):
                 train_aspect_dic[aspect] = i
-            print('Aspect id:', train_aspect_dic.keys())
+            # print('Aspect id:', train_aspect_dic.keys())
             attribute_ground_truth = self.get_aspect_id(tmp,train_aspect_dic)
             # pickle.dump(attribute_ground_truth, f)
             # sentence_ground_truth = self.get_word_id(tmp)
