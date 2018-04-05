@@ -34,11 +34,10 @@ class DataGenerator():
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
             for j in data[data['sentence_id'] == data.iloc[i]['sentence_id']]['category'].unique():
-                    print(j)
                     vec[aspect_dic[j]] = 1
-            exit()
+                    aspect_freq[j]['freq']+=1
             aspect.append(vec)
-        print(aspect)
+        print(aspect_freq)
         exit()
         return np.array(aspect)
 
