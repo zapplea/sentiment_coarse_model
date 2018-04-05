@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+sys.path.append('/home/liu121/sentiment_coarse_model')
 
 from sentiment.util.data_process.atr_data_generator import DataGenerator
 
@@ -7,8 +7,6 @@ class AttributeCount:
     def __init__(self,data_config):
         self.data_config = data_config
         dg = DataGenerator(data_config)
-        self.tra_labels = dg.train_attribute_ground_truth
-        self.tes_labels = dg.test_attribute_ground_truth
         self.labels_dic = dg.aspect_dic
         print(self.labels_dic)
 
