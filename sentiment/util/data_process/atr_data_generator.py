@@ -27,14 +27,16 @@ class DataGenerator():
         :param end: 
         :return: shape = (batch size, attribute numbers) eg. [[1,0,1,...],[0,0,1,...],...]
         """
-        print(aspect_dic)
+        aspect_freq={}
+        for key in aspect_dic:
+            aspect_freq[key] = {'key':aspect_dic[key],'freq':0}
         aspect = []
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
             for j in data[data['sentence_id'] == data.iloc[i]['sentence_id']]['category'].unique():
                     print(j)
-                    exit()
                     vec[aspect_dic[j]] = 1
+            exit()
             aspect.append(vec)
         print(aspect)
         exit()
