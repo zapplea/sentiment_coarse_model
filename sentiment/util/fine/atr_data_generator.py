@@ -22,6 +22,7 @@ class DataGenerator():
 
 
 
+
     def train_data_generator(self,batch_num):
         """
            This function return training/validation/test data for classifier. batch_num*batch_size is start point of the batch. 
@@ -72,14 +73,18 @@ class DataGenerator():
         :param end: 
         :return: shape = (batch size, attribute numbers) eg. [[1,0,1,...],[0,0,1,...],...]
         """
-        print(aspect_dic)
         aspect = []
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
+            print(data['sentence_id'])
             for j in data[data['sentence_id'] == data.iloc[i]['sentence_id']]['category'].unique():
                     vec[aspect_dic[j]] = 1
             aspect.append(vec)
-        return np.array(aspect)
+        aspect = np.array(aspect)
+        if np.nan in aspect_dic.keys():
+            aspect  = np.delete(aspect,obj=aspect_dic[np.nan],axis=1)
+        print(aspect.shape)
+        return aspect
 
     def get_sentiment_id(self,data,aspect_dic,sent_dic):
         """
@@ -146,27 +151,38 @@ class DataGenerator():
             for i, aspect in enumerate(tmp['category'].unique()):
                 train_aspect_dic[aspect] = i
             print('Aspect id:', train_aspect_dic.keys())
+            self.train_data_mask = tmp['sentence'].drop_duplicates().index
             attribute_ground_truth = self.get_aspect_id(tmp,train_aspect_dic)
+            attribute_ground_truth = attribute_ground_truth[self.train_data_mask]
             pickle.dump(attribute_ground_truth, f)
             sentence_ground_truth = self.get_word_id(tmp)
+            sentence_ground_truth = sentence_ground_truth[self.train_data_mask]
             pickle.dump(sentence_ground_truth, f)
             pickle.dump(train_aspect_dic,f)
             f.close()
-        return attribute_ground_truth, sentence_ground_truth , train_aspect_dic
+        dic = {}
+        i = 0
+        for item in train_aspect_dic.keys():
+            if item == item:
+                dic[item] = i
+                i += 1
+        return attribute_ground_truth, sentence_ground_truth , dic
 
     def load_test_data(self,test_aspect_dic):
         if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
             f = open(self.data_config['test_data_file_path'],'rb')
             attribute_ground_truth = pickle.load(f)
             sentence_ground_truth  = pickle.load(f)
-            test_aspect_dic = pickle.load(f)
             f.close()
         else:
             f = open(self.data_config['test_data_file_path'], 'wb')
             tmp = pd.read_csv(self.data_config['test_source_file_path'], index_col=0)
+            self.test_data_mask = tmp['sentence'].drop_duplicates().index
             attribute_ground_truth = self.get_aspect_id(tmp,test_aspect_dic)
+            attribute_ground_truth = attribute_ground_truth[self.test_data_mask]
             pickle.dump(attribute_ground_truth, f)
             sentence_ground_truth = self.get_word_id(tmp)
+            sentence_ground_truth = sentence_ground_truth[self.test_data_mask]
             pickle.dump(sentence_ground_truth, f)
             pickle.dump(test_aspect_dic,f)
             f.close()
