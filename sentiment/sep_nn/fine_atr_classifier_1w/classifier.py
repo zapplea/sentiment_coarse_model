@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import sklearn as sk
 
 
 class AttributeFunction:
@@ -133,13 +134,33 @@ class AttributeFunction:
         :param graph: 
         :return: 
         """
-        condition = tf.equal(Y_att,pred)
+        # condition = tf.equal(Y_att,pred)
         # cmp = tf.reduce_sum(tf.where(condition,tf.zeros_like(Y_att,dtype='float32'),tf.ones_like(Y_att,dtype='float32')),axis=1)
         # condition = tf.equal(cmp,tf.zeros_like(cmp))
         # accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(cmp,dtype='float32'),tf.zeros_like(cmp,dtype='float32')))
-        accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(Y_att,dtype='float32'),tf.zeros_like(Y_att,dtype='float32')))
-        graph.add_to_collection('accuracy',accuracy)
-        return accuracy
+        # accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(Y_att,dtype='float32'),tf.zeros_like(Y_att,dtype='float32')))
+
+        TP = tf.cast(tf.count_nonzero(pred * Y_att),tf.float32)
+
+        TN = tf.cast(tf.count_nonzero((pred - 1) * (Y_att - 1)),tf.float32)
+        FP = tf.cast(tf.count_nonzero(pred * (Y_att - 1)),tf.float32)
+        graph.add_to_collection('TP', TP)
+        graph.add_to_collection('FP', FP)
+
+        FN = tf.cast(tf.count_nonzero((pred - 1) * Y_att),tf.float32)
+        graph.add_to_collection('FN', FN)
+
+        precision = tf.divide(TP, tf.add(TP + FP , 0.001))
+        graph.add_to_collection('precision', precision)
+
+        recall = tf.divide(TP, tf.add(TP + FN , 0.001))
+        graph.add_to_collection('recall', recall)
+        f1 =  tf.divide(2 * precision * recall , tf.add(precision + recall, 0.001))
+        graph.add_to_collection('f1', f1)
+
+        # graph.add_to_collection('accuracy',accuracy)
+
+        return f1
 
     def max_false_score(self,score,Y_att,graph):
         """
@@ -175,7 +196,7 @@ class AttributeFunction:
         #
         theta = tf.constant(self.nn_config['attribute_loss_theta'], dtype='float32')
         # loss.shape = (batch size, attributes num)
-        loss = tf.multiply(tf.add(tf.subtract(theta,tf.multiply(Y_att,score)), max_fscore),nonatr_mask)
+        loss = tf.multiply(tf.add(100 * tf.subtract(theta,tf.multiply(Y_att,score)), 2 * max_fscore),nonatr_mask)
         zero_loss = tf.zeros_like(loss,dtype='float32')
 
         loss = tf.expand_dims(loss,axis=2)
@@ -321,42 +342,48 @@ class Classifier:
             #
             table = graph.get_collection('table')[0]
             #
-            accuracy = graph.get_collection('accuracy')[0]
+            f1 = graph.get_collection('f1')[0]
             #
             loss = graph.get_collection('atr_loss')[0]
 
             pred = graph.get_collection('atr_pred')[0]
 
+            TP = graph.get_collection('TP')[0]
+            FP = graph.get_collection('FP')[0]
+            FN = graph.get_collection('FN')[0]
+            recall = graph.get_collection('recall')[0]
+            precision = graph.get_collection('precision')[0]
+            score = graph.get_collection('score')[0]
+
             # attribute function
             init = tf.global_variables_initializer()
         table_data,_ = self.dg.table_generator()
-        train_set_size = self.dg.data_size - self.dg.data_config['testset_size']
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
                 sess.run(init)
-                batch_num = int(train_set_size / self.nn_config['batch_size'])
-                print('start',batch_num)
+                batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
+                print('Train set size: ',self.dg.train_data_size,'Test set size:',self.dg.test_data_size)
                 for i in range(self.nn_config['epoch']):
                     loss_vec = []
                     accuracy_vec = []
                     for j in range(batch_num):
-                        sentences, Y_att_data = self.dg.data_generator('train', j)
-                        _, train_loss, train_accuracy,pred_data = sess.run([train_step, loss, accuracy,pred],
+                        sentences, Y_att_data = self.dg.train_data_generator(j)
+                        _, train_loss, train_f1_score,TP_data,FP_data,FN_data,precision_data,recall_data, pred_data,score_data\
+                            = sess.run([train_step, loss, f1,TP,FP,FN,precision,recall,pred,score],
                                                                             feed_dict={X: sentences, Y_att: Y_att_data,
                                                                                        table: table_data})
                         loss_vec.append(train_loss)
-                        accuracy_vec.append(train_accuracy)
-                        # print(pred_data == Y_att_data)
+                        accuracy_vec.append(train_f1_score)
+                        # print(train_accuracy)
+                        # print(pred_data)
+                        # print(score_data)
+                        # print(sum(pred_data == Y_att_data))
+                        # print('TP',TP_data,'FP',FP_data,'FN',FN_data,'precision',precision_data,'recall',recall_data)
                     print('Epoch:', i, 'Accuracy:%.10f' % np.mean(accuracy_vec), 'Training loss:%.10f' % np.mean(loss_vec))
-                        # # tvars = tf.trainable_variables()
-                        # tvars_vals = sess.run(tvars)
-                        #
-                        # for var, val in zip(tvars, tvars_vals):
-                        #     print(var.name, val)  # Prints the name of the variable alongside its value.
 
                     if i % 5 == 0 and i != 0:
                         print('Test.....')
-                        sentences, Y_att_data = self.dg.data_generator('test', i)
+                        sentences, Y_att_data = self.dg.test_data_generator()
                         valid_size = Y_att_data.shape[0]
                         p = 0
                         l = 0
@@ -364,7 +391,7 @@ class Classifier:
                         batch_size = self.nn_config['batch_size']
                         for i in range(valid_size // batch_size):
                             count += 1
-                            p += sess.run(accuracy, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                            p += sess.run(f1, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
                                                                Y_att: Y_att_data[
                                                                       i * batch_size:i * batch_size + batch_size],
                                                                table: table_data})
@@ -374,4 +401,4 @@ class Classifier:
                                                            table: table_data})
                         p = p / count
                         l = l / count
-                        print('Accuracy:%.10f' % p, 'Testing loss:', l)
+                        print('F1 score:%.10f' % p, 'Testing loss:', l)

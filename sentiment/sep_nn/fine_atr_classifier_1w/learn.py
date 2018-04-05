@@ -30,7 +30,7 @@ if __name__ == "__main__":
                     'words_num': 20,
                     'word_dim': seed['word_dim'],
                     'is_mat': True,
-                    'epoch': 10,
+                    'epoch': 10000,
                     'batch_size': 30,
                     'lstm_cell_size': seed['lstm_cell_size'],
                     'lookup_table_words_num': 3000000,  # 2074276 for Chinese word embedding
@@ -51,7 +51,7 @@ if __name__ == "__main__":
                     'epoch': 10,
                     'batch_size': 30,
                     'lstm_cell_size': seed['lstm_cell_size'],
-                    'lookup_table_words_num': 30000000,  # 2074276 for Chinese word embedding
+                    'lookup_table_words_num': 3000000,  # 2074276 for Chinese word embedding
                     'padding_word_index': 0,  # the index of #PAD# in word embeddings list
                     # flexible parameter
                     'reg_rate': 0.03,
@@ -67,21 +67,23 @@ if __name__ == "__main__":
                     'word_dim': seed['word_dim'],
                     'is_mat': True,
                     'epoch': 10,
-                    'batch_size': 30,
+                    'batch_size': 40,
                     'lstm_cell_size': seed['lstm_cell_size'],
-                    'lookup_table_words_num': 30000000,  # 2074276 for Chinese word embedding
+                    'lookup_table_words_num': 3000000,  # 2074276 for Chinese word embedding
                     'padding_word_index': 0,  # the index of #PAD# in word embeddings list
                     # flexible parameter
                     'reg_rate': 0.03,
-                    'lr': 0.03,  # learing rate
+                    'lr': 0.003,  # learing rate
                     'atr_pred_threshold': 0,
                 # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
                     'attribute_loss_theta': 1.0,
                 }
                   ]
     data_config = {
-        'source_file_path': '~/dataset/semeval2016/absa_resturant.csv',
-        'data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/restaurant attribute data.pkl',
+        'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
+        'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/restaurant attribute data train.pkl',
+        'test_source_file_path': '~/dataset/semeval2016/absa_resturant_test.csv',
+        'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/restaurant attribute data test.pkl',
         'wordembedding_file_path': '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
         'testset_size': 1000,
@@ -89,6 +91,6 @@ if __name__ == "__main__":
         'words_num': nn_configs[0]['words_num'],
         'padding_word_index': nn_configs[0]['padding_word_index']
     }
-    for nn_config in nn_configs:
-        main(nn_config,data_config)
-    # main(nn_configs[0],data_config)
+    # for nn_config in nn_configs:
+    #     main(nn_config,data_config)
+    main(nn_configs[0],data_config)
