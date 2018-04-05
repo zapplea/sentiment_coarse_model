@@ -7,8 +7,8 @@ class AttributeCount:
     def __init__(self,data_config):
         self.data_config = data_config
         dg = DataGenerator(data_config)
-        self.tra_labels = dg.train_sentence_ground_truth
-        self.tes_labels = dg.test_sentence_ground_truth
+        self.tra_labels = dg.train_attribute_ground_truth
+        self.tes_labels = dg.test_attribute_ground_truth
         self.labels_dic = dg.aspect_dic
         print(self.labels_dic)
 
