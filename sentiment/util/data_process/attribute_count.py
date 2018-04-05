@@ -7,8 +7,8 @@ class AttributeCount:
     def __init__(self,data_config):
         self.data_config = data_config
         dg = DataGenerator(data_config)
-        self.labels_dic = dg.aspect_dic
-        print(self.labels_dic)
+        self.aspect_freq = dg.aspect_freq
+        print(self.aspect_freq)
 
 
 if __name__ == "__main__":
