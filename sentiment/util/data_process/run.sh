@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --get-user-env
 #SBATCH --job-name="liu121"
-#SBATCH --time=01s:00:00
+#SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --mem=200GB
 #SBATCH --ntasks-per-node=1
