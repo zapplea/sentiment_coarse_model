@@ -29,7 +29,7 @@ class DataGenerator():
         """
         aspect_freq={}
         for key in aspect_dic:
-            aspect_freq[key] = {'key':aspect_dic[key],'freq':0}
+            aspect_freq[key] = {'key':aspect_dic[key],'freq':0,'ratio':0}
         aspect = []
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
@@ -37,6 +37,11 @@ class DataGenerator():
                     vec[aspect_dic[j]] = 1
                     aspect_freq[j]['freq']+=1
             aspect.append(vec)
+        sum=0
+        for key in aspect_freq:
+            sum+=aspect_freq[key]['freq']
+        for key in aspect_freq:
+            aspect_freq[key]['ratio'] = aspect_freq[key]['freq']/sum
         print(aspect_freq)
         exit()
         return np.array(aspect)
