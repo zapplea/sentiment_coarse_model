@@ -125,24 +125,6 @@ class AttributeFunction:
         graph.add_to_collection('atr_pred', pred)
         return pred
 
-<<<<<<< HEAD
-    # def accuracy(self, Y_att, pred, graph):
-    #     """
-    #
-    #     :param Y_att: shape = (batch size, attributes number)
-    #     :param pred: shape = (batch size, attributes number)
-    #     :param graph:
-    #     :return:
-    #     """
-    #     condition = tf.equal(Y_att, pred)
-    #     cmp = tf.reduce_sum(
-    #         tf.where(condition, tf.zeros_like(Y_att, dtype='float32'), tf.ones_like(Y_att, dtype='float32')), axis=1)
-    #     condition = tf.equal(cmp, tf.zeros_like(cmp))
-    #     accuracy = tf.reduce_mean(
-    #         tf.where(condition, tf.ones_like(cmp, dtype='float32'), tf.zeros_like(cmp, dtype='float32')))
-    #     graph.add_to_collection('accuracy', accuracy)
-    #     return accuracy
-=======
     def accuracy(self, Y_att, pred, graph):
         """
 
@@ -177,7 +159,6 @@ class AttributeFunction:
         graph.add_to_collection('f1', f1)
 
         return f1
->>>>>>> 148b5ce90f8fdebfe376f6e2af632c556aaa121d
 
     def max_false_score(self, score, Y_att, graph):
         """
