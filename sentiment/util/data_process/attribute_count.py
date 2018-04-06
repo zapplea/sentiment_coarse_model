@@ -24,3 +24,4 @@ if __name__ == "__main__":
         'test_data_file_path': '/datastore/liu121/senti_data/semeval2016/restaurant_attribute_data_test.pkl',
     }
     ac = AttributeCount(data_config)
+    ac.write()
