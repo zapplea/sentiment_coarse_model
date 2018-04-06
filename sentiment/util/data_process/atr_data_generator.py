@@ -29,7 +29,7 @@ class DataGenerator():
         """
         aspect_freq={}
         for key in aspect_dic:
-            aspect_freq[key] = {'key':aspect_dic[key],'freq':0,'ratio':0}
+            aspect_freq[key] = {'key':aspect_dic[key],'freq':0,'ratio':None}
         aspect = []
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
@@ -41,7 +41,7 @@ class DataGenerator():
         for key in aspect_freq:
             sum+=aspect_freq[key]['freq']
         for key in aspect_freq:
-            aspect_freq[key]['ratio'] = aspect_freq[key]['freq']/sum
+            aspect_freq[key]['ratio'] = str(int(aspect_freq[key]['freq']/sum*100))+'%'
         return aspect_freq
 
     # def get_sentiment_id(self,data,aspect_dic,sent_dic):
