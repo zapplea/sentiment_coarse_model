@@ -126,6 +126,7 @@ class DependencyGenerator:
         sentences = []
         for i in range(len(self.dp_result)):
             instance = self.dp_result[str(i)]
+            print('path_dependency:\n',instance)
             relations = []
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
