@@ -43,7 +43,6 @@ class DependencyGenerator:
         :param relations: [{'rel','parent','child'}, ...]
         :return: 
         """
-        print(relations)
         sentence = {}
         for relation in relations:
             parent = relation['parent']
@@ -51,8 +50,6 @@ class DependencyGenerator:
 
             child = relation['child']
             sentence[child['index']] = child['word']
-        print(sentence)
-        exit()
         result = []
         for i in range(len(sentence)):
             result.append(sentence[i])
@@ -121,15 +118,50 @@ class DependencyGenerator:
                 node.parent = parent['index']
         return tree
 
+    def index_calibrator(self,relations):
+        # original index
+        org_indexes = set()
+        for relation in relations:
+            parent = relation['parent']
+            child = relation['child']
+            org_indexes.add(parent['index'])
+            org_indexes.add(child['index'])
+        index_list = sorted(list(org_indexes))
+        gap=[]
+        for i in range(len(index_list)-1):
+            if i == 0:
+                continue
+            cur = index_list[i]
+            target = index_list[i+1]
+            while (cur+1)<target:
+                gap.append(cur)
+                cur+=1
+
+        for relation in relations:
+            parent = relation['parent']
+            child = relation['child']
+            for gap_index in gap:
+                if parent['index']>gap_index:
+                    parent['index']=parent['index']-1
+                else:
+                    break
+            for gap_index in gap:
+                if child['index']>gap_index:
+                    child['index']=child['index']-1
+                else:
+                    break
+        return relations
+
     def construct_forest(self):
         forest = []
         sentences = []
         for i in range(len(self.dp_result)):
             instance = self.dp_result[str(i)]
-            print('path_dependency:\n',instance)
             relations = []
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
+            # TODO: since dependency parser will delete punctuations in the word, so, need to modify the index.
+            relations = self.index_calibrator(relations)
             # sentence = ['ROOT',word1, word2, ...]
             sentence = self.recover_original_sentence(relations)
             tree = self.construct_tree(relations, sentence)
@@ -267,7 +299,7 @@ class DependencyGenerator:
         max_sentence_length = max_sentence_length - 1
         encoded_sentences = []
         for sentence in sentences:
-            # delete root
+            # TODO: delete 'ROOT' in sentence
             sentence = sentence[1:]
             encoded_sentence = []
             for word in sentence:
