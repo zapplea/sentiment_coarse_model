@@ -136,7 +136,7 @@ class DependencyGenerator:
             while (cur+1)<target:
                 gap.append(cur)
                 cur+=1
-
+        print('gap:\n',gap)
         for relation in relations:
             parent = relation['parent']
             child = relation['child']
