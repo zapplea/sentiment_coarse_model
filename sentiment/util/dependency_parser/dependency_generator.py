@@ -61,6 +61,8 @@ class DependencyGenerator:
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
+        print('dp_result')
+        print('==========')
         index = dp_result.find('(')
         relation = dp_result[:index]
         # words = 'word1-index1, word2-index2'
@@ -165,12 +167,7 @@ class DependencyGenerator:
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
             # TODO: since dependency parser will delete punctuations in the word, so, need to modify the index.
-            # print('========')
-            # print(relations)
-            # print('++++++++')
             relations = self.index_calibrator(relations)
-            # print(relations)
-            # print('========')
             # sentence = ['ROOT',word1, word2, ...]
             sentence = self.recover_original_sentence(relations)
             tree = self.construct_tree(relations, sentence)
