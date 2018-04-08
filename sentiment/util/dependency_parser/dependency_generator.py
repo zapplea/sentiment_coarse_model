@@ -43,6 +43,7 @@ class DependencyGenerator:
         :param relations: [{'rel','parent','child'}, ...]
         :return: 
         """
+        print(relations)
         sentence = {}
         for relation in relations:
             parent = relation['parent']
