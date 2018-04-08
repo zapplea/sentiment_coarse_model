@@ -122,7 +122,7 @@ class DependencyGenerator:
         forest = []
         sentences = []
         for i in range(len(self.dp_result)):
-            instance = self.dp_result[i]
+            instance = self.dp_result[str(i)]
             relations = []
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
