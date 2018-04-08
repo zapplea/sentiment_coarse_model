@@ -140,16 +140,20 @@ class DependencyGenerator:
         for relation in relations:
             parent = relation['parent']
             child = relation['child']
+            difference = 0
             for gap_index in gap:
                 if parent['index']>gap_index:
-                    parent['index']=parent['index']-1
+                    difference +=1
                 else:
                     break
+            parent['index'] = parent['index'] - difference
+            difference = 0
             for gap_index in gap:
                 if child['index']>gap_index:
-                    child['index']=child['index']-1
+                    difference+=1
                 else:
                     break
+            child['index'] = child['index'] - difference
         return relations
 
     def construct_forest(self):
