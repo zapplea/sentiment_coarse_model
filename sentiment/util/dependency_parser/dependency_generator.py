@@ -316,4 +316,5 @@ if __name__ == '__main__':
 
     nn_config = {'padding_word_index': 0}
     for data_config in data_configs:
-        DependencyGenerator(nn_config,data_config)
+        pd_gen = DependencyGenerator(nn_config,data_config)
+        pd_gen.main()
