@@ -318,3 +318,4 @@ if __name__ == '__main__':
     for data_config in data_configs:
         pd_gen = DependencyGenerator(nn_config,data_config)
         pd_gen.main()
+    print('finish')
