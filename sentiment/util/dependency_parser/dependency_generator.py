@@ -50,6 +50,8 @@ class DependencyGenerator:
 
             child = relation['child']
             sentence[child['index']] = child['word']
+        print(sentence)
+        exit()
         result = []
         for i in range(len(sentence)):
             result.append(sentence[i])
