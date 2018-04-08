@@ -307,11 +307,11 @@ if __name__ == '__main__':
     data_configs = [{
                         'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train.json',
                         'relative_distance_table':'/datastore/liu121/senti_data/pd/train_pd.table',
-                        'dictionary_filePath':'/datastore/liu121/senti_data'},
+                        'dictionary_filePath':'/datastore/liu121/senti_data/en_word2id_dictionary.json'},
                    {
                        'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test.json',
                        'relative_distance_table':'/datastore/liu121/senti_data/pd/test_pd.table',
-                       'dictionary_filePath': '/datastore/liu121/senti_data'}
+                       'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
 
     nn_config = {'padding_word_index': 0}
