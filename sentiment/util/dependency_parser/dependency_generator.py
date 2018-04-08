@@ -61,7 +61,7 @@ class DependencyGenerator:
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
-        print('dp_result')
+        print(dp_result)
         print('==========')
         index = dp_result.find('(')
         relation = dp_result[:index]
