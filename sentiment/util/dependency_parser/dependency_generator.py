@@ -18,17 +18,22 @@ class Node:
 # TODO: have already got one.
 # TODO: this class produce dependency path and tokenize sentences.
 class DependencyGenerator:
-    def __init__(self, nn_config, data_config, dictionary):
+    def __init__(self, nn_config, data_config):
         self.nn_config = nn_config
         self.data_config = data_config
         self.dp_result = self.load()
-        self.dictionary = dictionary
+        self.dictionary = self.load_dictionary()
+
+    def load_dictionary(self):
+        with open(self.data_config['dictionary_filePath'],'r') as f:
+            dic = json.load(f)
+        return dic
 
     def load(self):
         """
         :return:{0:['dp(word-1,word-2)',...],...} 
         """
-        with open(self.data_config['dependency_parsing_filePath']) as f:
+        with open(self.data_config['dependency_parsing_filePath'],'r') as f:
             dp_result = json.load(f)
         return dp_result
 
@@ -299,5 +304,16 @@ class DependencyGenerator:
         self.write(encoded_tables,encoded_sentences)
 
 if __name__ == '__main__':
-    data_config = {'dependency_parsing_filePath':None,
-                   'relative_distance_table':None}
+    data_configs = [{
+                        'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train.json',
+                        'relative_distance_table':'/datastore/liu121/senti_data/pd/train_pd.table',
+                        'dictionary_filePath':'/datastore/liu121/senti_data'},
+                   {
+                       'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test.json',
+                       'relative_distance_table':'/datastore/liu121/senti_data/pd/test_pd.table',
+                       'dictionary_filePath': '/datastore/liu121/senti_data'}
+                   ]
+
+    nn_config = {'padding_word_index': 0}
+    for data_config in data_configs:
+        DependencyGenerator(nn_config,data_config)

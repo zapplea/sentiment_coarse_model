@@ -1,1 +1,7 @@
 In this file, we use path dependency to replace relative distance matrix.
+
+placeholder in module:
+    1. feature dim
+    2. attribute labels
+    3. sentiment label
+    4. path dependency label (replace the original relative distance table)
