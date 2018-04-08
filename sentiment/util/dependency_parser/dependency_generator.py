@@ -134,9 +134,9 @@ class DependencyGenerator:
             cur = index_list[i]
             target = index_list[i+1]
             while (cur+1)<target:
-                gap.append(cur)
                 cur+=1
-        print('gap:\n',gap)
+                gap.append(cur)
+        # print('gap:\n',gap)
         for relation in relations:
             parent = relation['parent']
             child = relation['child']
@@ -161,12 +161,12 @@ class DependencyGenerator:
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
             # TODO: since dependency parser will delete punctuations in the word, so, need to modify the index.
-            print('========')
-            print(relations)
-            print('++++++++')
+            # print('========')
+            # print(relations)
+            # print('++++++++')
             relations = self.index_calibrator(relations)
-            print(relations)
-            print('========')
+            # print(relations)
+            # print('========')
             # sentence = ['ROOT',word1, word2, ...]
             sentence = self.recover_original_sentence(relations)
             tree = self.construct_tree(relations, sentence)
