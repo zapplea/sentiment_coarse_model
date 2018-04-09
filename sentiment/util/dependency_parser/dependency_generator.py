@@ -39,7 +39,7 @@ class DependencyGenerator:
             new_dp_result={}
             for key in dp_result:
                 new_dp_result[key]=dp_result[key][0]
-        return dp_result
+        return new_dp_result
 
     def recover_original_sentence(self, relations):
         """
