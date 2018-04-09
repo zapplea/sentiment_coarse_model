@@ -178,8 +178,6 @@ class DependencyGenerator:
             tree = self.construct_tree(relations, sentence)
             sentences.append(sentence)
             forest.append(tree)
-            if i == 960:
-                exit()
         return forest, sentences
 
     def path_to_root(self, tree, node):
