@@ -64,6 +64,7 @@ class DependencyGenerator:
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
+        print(dp_result)
         index = dp_result.find('(')
         relation = dp_result[:index]
         # words = 'word1-index1, word2-index2'
@@ -73,6 +74,7 @@ class DependencyGenerator:
         # delete ',' in the first item
         ls[0] = ls[0][:-1]
         words = []
+        print(ls)
         for s in ls:
             index = s.rfind('-')
             words.append({'word': s[:index], 'index': int(s[index + 1:])})
