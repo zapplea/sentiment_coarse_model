@@ -106,7 +106,7 @@ class AttributeFunction:
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score, [1, 0, 2])
             # mask.shape = (batch size, attributes number, words num)
-            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num']])
+            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
         else:
             # X.shape = (batch size, words num, attributes num, attribute dim)
@@ -116,7 +116,7 @@ class AttributeFunction:
             # score.shape = (batch size, attributes num, words num)
             score = tf.transpose(score, [0, 2, 1])
             # mask.shape = (batch size, attributes number, words num)
-            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num']])
+            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
         return score
 
