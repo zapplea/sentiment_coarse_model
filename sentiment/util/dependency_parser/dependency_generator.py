@@ -70,9 +70,9 @@ class DependencyGenerator:
         # words = 'word1-index1, word2-index2'
         words = dp_result[index + 1:-1]
         # ls = ['word1-index1,','word2-index2']
-        ls = words.split()
-        # delete ',' in the first item
-        ls[0] = ls[0][:-1]
+        ls = words.split(',')
+        # # delete ',' in the first item
+        # ls[0] = ls[0][:-1]
         words = []
         print(ls)
         for s in ls:
@@ -178,6 +178,8 @@ class DependencyGenerator:
             tree = self.construct_tree(relations, sentence)
             sentences.append(sentence)
             forest.append(tree)
+            if i == 960:
+                exit()
         return forest, sentences
 
     def path_to_root(self, tree, node):
