@@ -165,13 +165,14 @@ class DependencyGenerator:
         for i in range(len(self.dp_result)):
             print(i)
             instance = self.dp_result[str(i)]
-            print(instance)
-            print('===========')
+            print('original instance:\n',instance)
             relations = []
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
             # TODO: since dependency parser will delete punctuations in the word, so, need to modify the index.
             relations = self.index_calibrator(relations)
+            print('index calibrated instance:\n',relations)
+            print('===========')
             # sentence = ['ROOT',word1, word2, ...]
             sentence = self.recover_original_sentence(relations)
             tree = self.construct_tree(relations, sentence)
