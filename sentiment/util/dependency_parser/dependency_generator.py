@@ -57,12 +57,9 @@ class DependencyGenerator:
 
     def recover_dp_relation(self, dp_result):
         """
-
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
-        print(dp_result)
-        print('==========')
         index = dp_result.find('(')
         relation = dp_result[:index]
         # words = 'word1-index1, word2-index2'
@@ -347,11 +344,11 @@ class DependencyGenerator:
 
 if __name__ == '__main__':
     data_configs = [{
-                        'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train.json',
+                        'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train_non-collapsed.json',
                         'relative_distance_table':'/datastore/liu121/senti_data/pd/train_pd.table',
                         'dictionary_filePath':'/datastore/liu121/senti_data/en_word2id_dictionary.json'},
                    {
-                       'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test.json',
+                       'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test_non-collapsed.json',
                        'relative_distance_table':'/datastore/liu121/senti_data/pd/test_pd.table',
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
