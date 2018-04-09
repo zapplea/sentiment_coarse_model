@@ -64,7 +64,6 @@ class DependencyGenerator:
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
-        print(dp_result)
         index = dp_result.find('(')
         relation = dp_result[:index]
         # words = 'word1-index1, word2-index2'
@@ -74,7 +73,6 @@ class DependencyGenerator:
         # # delete ',' in the first item
         # ls[0] = ls[0][:-1]
         words = []
-        print(ls)
         for s in ls:
             index = s.rfind('-')
             words.append({'word': s[:index], 'index': int(s[index + 1:])})
@@ -163,16 +161,12 @@ class DependencyGenerator:
         forest = []
         sentences = []
         for i in range(len(self.dp_result)):
-            print(i)
             instance = self.dp_result[str(i)]
-            print('original instance:\n',instance)
             relations = []
             for relation in instance:
                 relations.append(self.recover_dp_relation(relation))
-            # TODO: since dependency parser will delete punctuations in the word, so, need to modify the index.
+            # Finished TODO: since dependency parser will delete punctuations in the word, so, need to modify the index.
             relations = self.index_calibrator(relations)
-            print('index calibrated instance:\n',relations)
-            print('===========')
             # sentence = ['ROOT',word1, word2, ...]
             sentence = self.recover_original_sentence(relations)
             tree = self.construct_tree(relations, sentence)

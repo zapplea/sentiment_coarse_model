@@ -89,15 +89,17 @@ class AttributeFunction:
         graph.add_to_collection('words_nonattribute', words_o)
         return words_o
 
-    def score(self,A,X,graph):
+    def score(self,A,X,mask,graph):
         """
         
         :param A: shape = (number of attributes, attribute dim) or
-                  shape = (batch size, words number, attributes num, attribute dim)
-        :param X: shape = (batch size, words number, word dim)
+                  shape = (batch size, max words number, attributes num, attribute dim)
+        :param X: shape = (batch size, max words number, word dim)
+        :param mask: shape = (batch size, max words number)
         :param graph: 
         :return: (batch size, attributes num)
         """
+        # finished TODO: should eliminate the influence of #PAD# when calculate reduce max
         if not self.nn_config['is_mat']:
             X = tf.reshape(X,shape=(-1,self.nn_config['word_dim']))
             # score.shape = (attributes num,batch size*words num)
@@ -106,6 +108,9 @@ class AttributeFunction:
             score = tf.reshape(score,(self.nn_config['attributes_num'],-1,self.nn_config['words_num']))
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score,[1,0,2])
+            # mask.shape = (batch size, attributes number, words num)
+            mask = tf.tile(tf.expand_dims(mask,axis=1),multiples=[1,self.nn_config['attributes_num']])
+            score = tf.add(score,mask)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score,axis=2)
         else:
@@ -115,6 +120,9 @@ class AttributeFunction:
             score = tf.reduce_sum(tf.multiply(A,X),axis=3)
             # score.shape = (batch size, attributes num, words num)
             score = tf.transpose(score,[0,2,1])
+            # mask.shape = (batch size, attributes number, words num)
+            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num']])
+            score = tf.add(score, mask)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score,axis=2)
         graph.add_to_collection('score',score)
@@ -239,6 +247,19 @@ class Classifier:
                                 axis=1, name='seq_len')
         return seq_len
 
+    def mask_for_pad_in_score(self,X,graph):
+        """
+        This mask is used in score, to eliminate the influence of pad words when reduce_max. This this mask need to add to the score.
+        Since 0*inf = nan
+        :param X: the value is word id. shape=(batch size, max words num)
+        :param graph: 
+        :return: 
+        """
+        paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
+        condition = tf.equal(paddings, X)
+        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        return mask
+
     # should use variable share
     def sentence_lstm(self, X, seq_len, graph):
         """
@@ -253,15 +274,6 @@ class Classifier:
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False,sequence_length=seq_len,dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
-
-    def lstm_mask(self,X):
-        # need to pad the #PAD# words to zeros, otherwise, they will be junks.
-        X = tf.cast(X, dtype='float32')
-        ones = tf.ones_like(X, dtype='float32') * self.nn_config['padding_word_index']
-        is_one = tf.equal(X, ones)
-        mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
-        mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1, 1, self.nn_config['lstm_cell_size']])
-        return mask
 
     def optimizer(self, loss, graph):
         opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
@@ -319,8 +331,9 @@ class Classifier:
                 A = self.af.words_attribute_mat2vec(X,A,graph)
                 o = self.af.words_nonattribute_mat2vec(X,o,graph)
                 A = A-o
-
-            score = self.af.score(A,X,graph)
+            #
+            mask = self.mask_for_pad_in_score(X_ids,graph)
+            score = self.af.score(A,X,mask,graph)
             max_fscore = self.af.max_false_score(score,Y_att,graph)
             loss = self.af.loss(score,max_fscore, Y_att, graph)
             pred = self.af.prediction(score,graph)

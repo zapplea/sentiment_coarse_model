@@ -88,7 +88,7 @@ class AttributeFunction:
         graph.add_to_collection('words_nonattribute', words_o)
         return words_o
 
-    def score(self, A, X, graph):
+    def score(self, A, X,mask, graph):
         """
 
         :param A: shape = (number of attributes, attribute dim) or
@@ -105,8 +105,9 @@ class AttributeFunction:
             score = tf.reshape(score, (self.nn_config['attributes_num'], -1, self.nn_config['words_num']))
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score, [1, 0, 2])
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
+            # mask.shape = (batch size, attributes number, words num)
+            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num']])
+            score = tf.add(score, mask)
         else:
             # X.shape = (batch size, words num, attributes num, attribute dim)
             X = tf.tile(tf.expand_dims(X, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
@@ -114,9 +115,9 @@ class AttributeFunction:
             score = tf.reduce_sum(tf.multiply(A, X), axis=3)
             # score.shape = (batch size, attributes num, words num)
             score = tf.transpose(score, [0, 2, 1])
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
-        graph.add_to_collection('score', score)
+            # mask.shape = (batch size, attributes number, words num)
+            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num']])
+            score = tf.add(score, mask)
         return score
 
     def prediction(self, score, graph):
@@ -223,6 +224,19 @@ class Classifier:
                                 axis=1, name='seq_len')
         return seq_len
 
+    def mask_for_pad_in_score(self,X,graph):
+        """
+        This mask is used in score, to eliminate the influence of pad words when reduce_max. This this mask need to add to the score.
+        Since 0*inf = nan
+        :param X: the value is word id. shape=(batch size, max words num)
+        :param graph: 
+        :return: 
+        """
+        paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
+        condition = tf.equal(paddings, X)
+        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        return mask
+
     # should use variable share
     def sentence_lstm(self, X, seq_len, graph):
         """
@@ -309,13 +323,23 @@ class Classifier:
                 o_e = self.af.words_nonattribute_mat2vec(X,A,graph)
                 A_e = A_e-o_e
             if not self.nn_config['is_mat']:
-                score_lstm = self.af.score(A, H, graph)
-                score_e = self.af.score(A,X,graph)
+                mask = self.mask_for_pad_in_score(X_ids,graph)
+                score_lstm = self.af.score(A, H,mask, graph)
+                # score.shape = (batch size, attributes num, words num)
+                score_e = self.af.score(A,X,mask,graph)
+                # score.shape = (batch size, attributes num, words num)
                 score = tf.add(score_lstm,score_e)
+                # score.shape = (batch size, attributes num)
+                score = tf.reduce_max(score, axis=2)
             else:
-                score_lstm = self.af.score(A_lstm,H,graph)
-                score_e = self.af.score(A_e,X,graph)
+                mask = self.mask_for_pad_in_score(X_ids, graph)
+                score_lstm = self.af.score(A_lstm,H,mask,graph)
+                # score.shape = (batch size, attributes num, words num)
+                score_e = self.af.score(A_e,X,mask,graph)
+                # score.shape = (batch size, attributes num, words num)
                 score = tf.add(score_lstm, score_e)
+                # score.shape = (batch size, attributes num)
+                score = tf.reduce_max(score, axis=2)
 
             max_fscore = self.af.max_false_score(score, Y_att, graph)
             loss = self.af.loss(score, max_fscore, Y_att, graph)

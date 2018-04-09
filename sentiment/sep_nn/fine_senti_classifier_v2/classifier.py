@@ -183,6 +183,7 @@ class SentiFunction:
         :param graph: 
         :return: (batch size, 3*number of attributes+3) this is all combinations of yi and ai
         """
+        # TODO: should eliminate the influence of #PAD# when calculate reduce max
         # item1.shape = (batch size, 3+3*attributes number, number of words)
         item1 = tf.transpose(item1,[0,2,1])
         # item2.shape = (batch size, 3+3*attributes number, number of words)
