@@ -27,7 +27,11 @@ class DependencyGenerator:
     def load_dictionary(self):
         with open(self.data_config['dictionary_filePath'],'r') as f:
             dic = json.load(f)
-        return dic
+            # FINISHED TODO: in non-collasped parser, the output is {'0':[[path1, path2,...]]}. need to eliminate the redundant []
+            new_dic = {}
+            for key in dic:
+                new_dic[key]=dic[key][0]
+        return new_dic
 
     def load(self):
         """
