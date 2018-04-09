@@ -132,8 +132,6 @@ class DependencyGenerator:
         index_list = sorted(list(org_indexes))
         gap=[]
         for i in range(len(index_list)-1):
-            if i == 0:
-                continue
             cur = index_list[i]
             target = index_list[i+1]
             while (cur+1)<target:
