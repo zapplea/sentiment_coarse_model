@@ -27,18 +27,18 @@ class DependencyGenerator:
     def load_dictionary(self):
         with open(self.data_config['dictionary_filePath'],'r') as f:
             dic = json.load(f)
-            # FINISHED TODO: in non-collasped parser, the output is {'0':[[path1, path2,...]]}. need to eliminate the redundant []
-            new_dic = {}
-            for key in dic:
-                new_dic[key]=dic[key][0]
-        return new_dic
+        return dic
 
     def load(self):
         """
         :return:{0:['dp(word-1,word-2)',...],...} 
         """
+        # finish TODO: in non-collasped parser, the output is {'0':[[path1, path2,...]]}. need to eliminate the redundant []
         with open(self.data_config['dependency_parsing_filePath'],'r') as f:
             dp_result = json.load(f)
+            new_dp_result={}
+            for key in dp_result:
+                new_dp_result[key]=dp_result[key][0]
         return dp_result
 
     def recover_original_sentence(self, relations):
@@ -348,11 +348,11 @@ class DependencyGenerator:
 
 if __name__ == '__main__':
     data_configs = [{
-                        'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train_non-collapsed.json',
+                        'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train.json',
                         'relative_distance_table':'/datastore/liu121/senti_data/pd/train_pd.table',
                         'dictionary_filePath':'/datastore/liu121/senti_data/en_word2id_dictionary.json'},
                    {
-                       'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test_non-collapsed.json',
+                       'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test.json',
                        'relative_distance_table':'/datastore/liu121/senti_data/pd/test_pd.table',
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
