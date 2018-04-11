@@ -1,0 +1,11 @@
+attribute_dim = word_embedding dim
+
+TODO:
+add function smartInitiater to atr_data_generator.py, it returns attribute mention vector used to initializer the attribute
+mention matrix. You can add a new item, 'smartInit':'data file path', to data_config.
+eg. Assume there are two attributes: FOOD#PRICE, FOOD#SERVICE
+the smartinitiator should return word embedding of [[[FOOD],[PRICE]],[[FOOD],[SERVICE]]].
+
+The position of attribute mention matrix should be the same to the out put layer.
+eg. Assume in the output layer: score of FOOD#PRICE is at neuron 0, score of FOOD#SERVICE is at neuron 1
+Then [[FOOD],[PRICE]] should be at position 0 in the attribute mention matrix, and [[FOOD],[SERVICE]] at position 1.

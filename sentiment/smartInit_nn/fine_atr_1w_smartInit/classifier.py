@@ -1,3 +1,13 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+from sentiment.smartInit_nn.smart_init.smart_initiator import SmartInitiator
+
 import tensorflow as tf
 import numpy as np
 
@@ -24,16 +34,13 @@ class AttributeFunction:
         graph.add_to_collection('o_vec', o)
         return A,o
 
-    def attribute_mat(self, graph):
+    def attribute_mat(self, smartInit, graph):
         """
 
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        A_mat = tf.get_variable(name='A_mat', initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],
-                                                                                   self.nn_config['attribute_mat_size'],
-                                                                                   self.nn_config['attribute_dim']),
-                                                                            dtype='float32'))
+        A_mat = tf.get_variable(name='A_mat', initializer=smartInit)
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
         o_mat = tf.get_variable(name='other_vec',
@@ -88,17 +95,15 @@ class AttributeFunction:
         graph.add_to_collection('words_nonattribute', words_o)
         return words_o
 
-    def score(self,A,X,mask,graph):
+    def score(self,A,X,graph):
         """
         
         :param A: shape = (number of attributes, attribute dim) or
-                  shape = (batch size, max words number, attributes num, attribute dim)
-        :param X: shape = (batch size, max words number, word dim)
-        :param mask: shape = (batch size, max words number)
+                  shape = (batch size, words number, attributes num, attribute dim)
+        :param X: shape = (batch size, words number, word dim)
         :param graph: 
         :return: (batch size, attributes num)
         """
-        # finished TODO: should eliminate the influence of #PAD# when calculate reduce max
         if not self.nn_config['is_mat']:
             X = tf.reshape(X,shape=(-1,self.nn_config['word_dim']))
             # score.shape = (attributes num,batch size*words num)
@@ -107,9 +112,6 @@ class AttributeFunction:
             score = tf.reshape(score,(self.nn_config['attributes_num'],-1,self.nn_config['words_num']))
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score,[1,0,2])
-            # mask.shape = (batch size, attributes number, words num)
-            mask = tf.tile(tf.expand_dims(mask,axis=1),multiples=[1,self.nn_config['attributes_num'],1])
-            score = tf.add(score,mask)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score,axis=2)
         else:
@@ -119,9 +121,6 @@ class AttributeFunction:
             score = tf.reduce_sum(tf.multiply(A,X),axis=3)
             # score.shape = (batch size, attributes num, words num)
             score = tf.transpose(score,[0,2,1])
-            # mask.shape = (batch size, attributes number, words num)
-            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
-            score = tf.add(score, mask)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score,axis=2)
         graph.add_to_collection('score',score)
@@ -233,6 +232,26 @@ class Classifier:
         graph.add_to_collection('Y_att', Y_att)
         return Y_att
 
+    # def smart_initiator(self,graph):
+    #     """
+    #
+    #     :param attributes: ndarray, shape=(attribute numbers ,2, attribute dim)
+    #     :return:
+    #     """
+    #     # TODO: need to be careful to one attribute: STYLE_OPTIONS, should split them to two words and mean.
+    #     # random_mat.shape = (attributes number, attribute mat size-2, attribute dim)
+    #     mentions_mat = tf.placeholder(shape=(self.nn_config['attributes_num'],
+    #                                          2,
+    #                                          self.nn_config['attribute_dim']),
+    #                                   dtype='float32')
+    #     random_mat = tf.random_normal(shape=(self.nn_config['attributes_num'],
+    #                                          self.nn_config['attribute_mat_size'] - 2,
+    #                                          self.nn_config['attribute_dim']),
+    #                                   dtype='float32')
+    #     attributes_mat = tf.concat([mentions_mat, random_mat], axis=1)
+    #     graph.add_to_collection('smartInit',attributes_mat)
+    #     return attributes_mat
+
     def sequence_length(self, X, graph):
         """
 
@@ -245,19 +264,6 @@ class Classifier:
         seq_len = tf.reduce_sum(tf.where(condition, tf.zeros_like(X, dtype='int32'), tf.ones_like(X, dtype='int32')),
                                 axis=1, name='seq_len')
         return seq_len
-
-    def mask_for_pad_in_score(self,X,graph):
-        """
-        This mask is used in score, to eliminate the influence of pad words when reduce_max. This this mask need to add to the score.
-        Since 0*inf = nan
-        :param X: the value is word id. shape=(batch size, max words num)
-        :param graph: 
-        :return: 
-        """
-        paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
-        condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
-        return mask
 
     # should use variable share
     def sentence_lstm(self, X, seq_len, graph):
@@ -273,6 +279,15 @@ class Classifier:
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False,sequence_length=seq_len,dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
+
+    def lstm_mask(self,X):
+        # need to pad the #PAD# words to zeros, otherwise, they will be junks.
+        X = tf.cast(X, dtype='float32')
+        ones = tf.ones_like(X, dtype='float32') * self.nn_config['padding_word_index']
+        is_one = tf.equal(X, ones)
+        mask = tf.where(is_one, tf.zeros_like(X, dtype='float32'), tf.ones_like(X, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1, 1, self.nn_config['lstm_cell_size']])
+        return mask
 
     def optimizer(self, loss, graph):
         opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
@@ -301,7 +316,7 @@ class Classifier:
         """
         table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']), dtype='float32')
         graph.add_to_collection('table', table)
-        table = tf.Variable(table, name='table')
+        #table = tf.Variable(table, name='table')
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings,mask)
         graph.add_to_collection('lookup_table', embeddings)
@@ -321,18 +336,18 @@ class Classifier:
                 graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes+1)
             Y_att = self.attribute_labels_input(graph=graph)
+            smartInit = SmartInitiator(graph)
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
             else:
-                A, o = self.af.attribute_mat(graph)
+                A, o = self.af.attribute_mat(smartInit,graph)
                 # A.shape = (batch size, words num, attributes number, attribute dim)
                 A = self.af.words_attribute_mat2vec(X,A,graph)
                 o = self.af.words_nonattribute_mat2vec(X,o,graph)
                 A = A-o
-            #
-            mask = self.mask_for_pad_in_score(X_ids,graph)
-            score = self.af.score(A,X,mask,graph)
+
+            score = self.af.score(A,X,graph)
             max_fscore = self.af.max_false_score(score,Y_att,graph)
             loss = self.af.loss(score,max_fscore, Y_att, graph)
             pred = self.af.prediction(score,graph)
@@ -366,13 +381,16 @@ class Classifier:
             recall = graph.get_collection('recall')[0]
             precision = graph.get_collection('precision')[0]
             score = graph.get_collection('score')[0]
+            smartInit = graph.get_collection('smartInit')[0]
 
             # attribute function
             init = tf.global_variables_initializer()
         table_data,_ = self.dg.table_generator()
+        # TODO: get data of smartInit
+        smartInit_data = self.dg.smartInitiater()
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init, feed_dict={table: table_data})
+                sess.run(init,feed_dict={smartInit:smartInit_data,table: table_data})
                 batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
                 print('Train set size: ',self.dg.train_data_size,'Test set size:',self.dg.test_data_size)
                 for i in range(self.nn_config['epoch']):

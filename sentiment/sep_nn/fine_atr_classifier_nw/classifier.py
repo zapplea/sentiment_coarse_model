@@ -304,7 +304,7 @@ class Classifier:
         table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
                                dtype='float32')
         graph.add_to_collection('table', table)
-        #table = tf.Variable(table, name='table')
+        table = tf.Variable(table, name='table')
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings, mask)
         graph.add_to_collection('lookup_table', embeddings)
@@ -375,7 +375,7 @@ class Classifier:
         table_data, _ = self.dg.table_generator()
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init)
+                sess.run(init,feed_dict={table: table_data})
                 tvars = tf.trainable_variables()
                 tvars_vals = sess.run(tvars)
 
@@ -393,8 +393,7 @@ class Classifier:
                         sentences, Y_att_data = self.dg.train_data_generator(j)
                         _, train_loss, train_f1_score, TP_data, FP_data, FN_data, precision_data, recall_data, pred_data, score_data \
                             = sess.run([train_step, loss, f1, TP, FP, FN, precision, recall, pred, score],
-                                       feed_dict={X: sentences, Y_att: Y_att_data,
-                                                  table: table_data})
+                                       feed_dict={X: sentences, Y_att: Y_att_data})
                         loss_vec.append(train_loss)
                         accuracy_vec.append(train_f1_score)
                         precision_vec.append(precision_data)
@@ -421,12 +420,10 @@ class Classifier:
                             count += 1
                             p += sess.run(f1, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
                                                                Y_att: Y_att_data[
-                                                                      i * batch_size:i * batch_size + batch_size],
-                                                               table: table_data})
+                                                                      i * batch_size:i * batch_size + batch_size]})
                             l += sess.run(loss, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
                                                            Y_att: Y_att_data[
-                                                                  i * batch_size:i * batch_size + batch_size],
-                                                           table: table_data})
+                                                                  i * batch_size:i * batch_size + batch_size]})
                         p = p / count
                         l = l / count
                         print('F1 score:%.10f' % p, 'Testing loss:', l)

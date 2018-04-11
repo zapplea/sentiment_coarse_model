@@ -156,19 +156,24 @@ class SentiFunction:
         return b
 
     # sentiment score
-    def score(self, item1, item2, graph):
+    def score(self, item1, item2, mask, graph):
         """
         :param item1: shape = (batch size,number of words, 3+3*attributes number)
         :param item2: shape=(batch size, number of attributes+1, number of words)
         :param graph: 
         :return: (batch size, 3*number of attributes+3) this is all combinations of yi and ai
         """
+        # TODO: should eliminate the influence of #PAD# when calculate reduce max
         # item1.shape = (batch size, 3+3*attributes number, number of words)
         item1 = tf.transpose(item1,[0,2,1])
         # item2.shape = (batch size, 3+3*attributes number, number of words)
         item2 = tf.reshape(tf.tile(tf.expand_dims(item2, axis=2), [1,1, 3, 1]),
                            shape=(-1,3 * self.nn_config['attributes_num']+3, self.nn_config['words_num']))
-        score = tf.reduce_max(tf.add(item1, item2), axis=2)
+        score = tf.add(item1,item2)
+        # mask.shape = (batch size, attributes number, words num)
+        mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, 3+3*self.nn_config['attributes_num'],1])
+        score = tf.add(score, mask)
+        score = tf.reduce_max(score, axis=2)
         graph.add_to_collection('senti_score', score)
         return score
 
@@ -369,6 +374,19 @@ class Classifier:
                                 axis=1, name='seq_len')
         return seq_len
 
+    def mask_for_pad_in_score(self,X,graph):
+        """
+        This mask is used in score, to eliminate the influence of pad words when reduce_max. This this mask need to add to the score.
+        Since 0*inf = nan
+        :param X: the value is word id. shape=(batch size, max words num)
+        :param graph: 
+        :return: 
+        """
+        paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
+        condition = tf.equal(paddings, X)
+        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        return mask
+
     # should use variable share
     def sentence_lstm(self, X, seq_len, graph):
         """
@@ -557,6 +575,8 @@ class Classifier:
             A_Vi = self.sf.Vi(A_dist=A_dist, V=V,rp_ids=rp_ids,graph=graph)
             # item2.shape=(batch size, number of attributes+1, number of words)
             item2 = tf.reduce_sum(tf.multiply(A_Vi, beta), axis=3)
+            # mask for score to eliminate the influence of padding word
+            mask = self.mask_for_pad_in_score(X_ids, graph)
             # senti_socre.shape = (batch size, 3*number of attributes+3)
             senti_score = self.sf.score(item1, item2, graph)
             # max_false_score.shape = (batch size, attributes number, 3)

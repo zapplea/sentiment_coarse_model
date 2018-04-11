@@ -106,8 +106,11 @@ class AttributeFunction:
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score, [1, 0, 2])
             # mask.shape = (batch size, attributes number, words num)
+            # use mask to eliminate the influence of
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
+            # score.shape = (batch size, attributes num)
+            score = tf.reduce_max(score, axis=2)
         else:
             # X.shape = (batch size, words num, attributes num, attribute dim)
             X = tf.tile(tf.expand_dims(X, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
@@ -118,6 +121,8 @@ class AttributeFunction:
             # mask.shape = (batch size, attributes number, words num)
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
+            # score.shape = (batch size, attributes num)
+            score = tf.reduce_max(score, axis=2)
         return score
 
     def prediction(self, score, graph):
