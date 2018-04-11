@@ -476,10 +476,10 @@ class Classifier:
                                                      sequence_length=seq_len,
                                                      time_major=False)
         # instance_index stands for the index of dependency path
-        instance_index = tf.expand_dims(tf.range(limit=self.nn_config['batch_size']*self.nn_config['words_num']*self.nn_config['words_num']),
-                                        axis=1)
+        instance_index = tf.cast(tf.expand_dims(tf.range(start = 0, limit=self.nn_config['batch_size']*self.nn_config['words_num']*self.nn_config['words_num']),
+                                        axis=1),dtype='int32')
         # instance_length_index stands for the length of the instance
-        instance_length_index = tf.expand_dims(seq_len-1,axis=1)
+        instance_length_index = tf.cast(tf.expand_dims(seq_len-1,axis=1),dtype='int32')
         slice_index = tf.concat([instance_index,instance_length_index],axis=1)
         outputs = tf.gather_nd(outputs,slice_index)
         outputs = tf.reshape(outputs,shape=(self.nn_config['batch_size'],
