@@ -1,4 +1,4 @@
-In this directory, we implement smart initialization to attribute mention matrix.
+In this directory, we implement sentiment model separately, and train them separately.
 
 Constraints to Hyper-parameter:
 1w: attribute_dim = word_embedding dim

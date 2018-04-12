@@ -1,5 +1,3 @@
-In this directory, we implement smart initialization to attribute mention matrix.
-
 Constraints to Hyper-parameter:
 1w: attribute_dim = word_embedding dim
 nw: attribute dim = lstm cell size
