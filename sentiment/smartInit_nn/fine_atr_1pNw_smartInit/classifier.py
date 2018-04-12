@@ -382,7 +382,7 @@ class Classifier:
             init = tf.global_variables_initializer()
         table_data = self.dg.table_generator()
         # TODO: get data of smartInit
-        smartInit_data = self.dg.smartInitiater()
+        smartInit_data = self.dg.smart_initiator()
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
                 sess.run(init, feed_dict={smartInit:smartInit_data,table: table_data})
