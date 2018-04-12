@@ -336,7 +336,7 @@ class Classifier:
                 graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes+1)
             Y_att = self.attribute_labels_input(graph=graph)
-            smartInit = SmartInitiator(graph)
+            smartInit = SmartInitiator(self.nn_config)
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o

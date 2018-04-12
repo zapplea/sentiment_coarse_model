@@ -19,3 +19,6 @@ use parameter is_mat to choose attribute mention matrix(True) and attribute vect
 max_review_length: the maximal number of sentences in a review.
 
 ## basic parameters:
+
+## main change in program:
+The aspect should be copied, to fit the size of batch size * max review len.

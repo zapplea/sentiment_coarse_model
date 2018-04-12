@@ -4,13 +4,23 @@ class RelScore:
     def __init__(self,nn_config):
         self.nn_config = nn_config
 
+    def aspect_probability_input(self,graph):
+        """
+        Input the probability of each aspect
+        :param graph: (batch size, attributes num)
+        :return: 
+        """
+        aspect_prob = tf.placeholder(name='aspect_prob',shape=(None,self.nn_config['attributes_num']),dtype='float32')
+        return aspect_prob
+
     def sentence_lstm(self, X, seq_len, graph):
         """
         return a lstm of a sentence
-        :param X: shape = (batch size, words number, word dim)
+        :param X: shape = (batch size * max review length, words number, word dim)
         :param seq_len: shape = (batch,) show the number of words in a batch
         :param graph: 
-        :return: ()
+        :return: outputs.shape = (batch size * max review length, words number, word dim);
+                 last_hidden.shape = (batch size * max review length, word dim)
         """
         cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
         # outputs.shape = (batch size, max_time, cell size)
@@ -39,14 +49,38 @@ class RelScore:
         reviews = tf.reshape(sentences,(-1,self.nn_config['max_review_length'],self.nn_config['words_num'],feature_dim))
         return reviews
 
-    def relevance_score_atr(self, h):
+    def relevance_prob_atr(self, atr_score, graph):
+        """
+        :param atr_score: (batch size, max review length, attributes num)
+        :return: shape = (batch size, max review length, attributes num) , in dimension 2 values are the same
+        """
+        # prob.shape = (batch size, attributes num, max review length); p(x;a)
+        rel_prob = tf.nn.softmax(tf.transpose(atr_score,perm=[0,2,1]),axis=2)
+        # prob.shape = (batch size,max review length, attributes num)
+        rel_prob = tf.transpose(rel_prob,perm=[0,2,1])
+        return rel_prob
+
+    def aspect_prob(self,aspect_prob,graph):
         """
         
-        :param h: shape=(batch size * max review length, words num, word dim)
+        :param aspect_prob: shape=(batch size, attributes num)
+        :param graph: 
+        :return: (batch size, max review length, attributes num)
+        """
+        # aspect_prob.shape = (batch size, max review length, attributes num)
+        aspect_prob = tf.tile(tf.expand_dims(aspect_prob,axis=1),multiples=[1,self.nn_config['max_review_length'],1])
+        return aspect_prob
+
+    def score(self,aspect_prob,rel_prob,atr_score):
+        """
+        
+        :param aspect_prob: (batch size, max review length, attributes num)
+        :param rel_prob: (batch size, max review length, attributes num)
+        :param atr_score: (batch size, max review length, attributes num)
         :return: 
         """
-        W = tf.get_variable(name='',shape=,)
-        bias =
+        score = tf.multiply(rel_prob,tf.multiply(aspect_prob,atr_score))
+        return score
 
-    def relevance_score_senti(self,H):
+    def relevance_prob_senti(self,H):
         pass
