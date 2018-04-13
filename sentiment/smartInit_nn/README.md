@@ -16,3 +16,38 @@ use parameter is_mat to choose attribute mention matrix(True) and attribute vect
 1. fine_atr_1w_smartInit, from fine_atr_classifier_1w; 
 2. fine_atr_nw_smartInit, from fine_atr_classifier_nw;
 3. fine_atr_1pNw_smartInit, from fine_atr_classifier_1pNw.
+
+# Parameter
+## new constrain
+the value of attribute_mat_size should be equal to or greater than 3
+
+## basic parameter
+'attributes_num': number of attributes, need to eliminate non-attribute
+
+'attribute_dim': dimension of attribute,
+
+'attribute_mat_size': number of attribute mention prototypes in a attribute matrix
+
+'words_num': maximal length of sentence,
+
+'word_dim': word dimension,
+
+'is_mat': whether to use attribute mention matrix,
+
+'epoch': number of epoches,
+
+'batch_size': size of a batch,
+
+'lstm_cell_size': size of lstm cell,
+
+'lookup_table_words_num': number of lookup table,  # 300w for google news, 2074276 for Chinese word embedding
+
+'padding_word_index': the index of #PAD# in word embeddings list
+
+'reg_rate': coefficient of regularizer,
+
+'lr': learing rate
+
+'atr_pred_threshold': if attribute socre is greater than the threshold, then the class is set to 1 in pred_label,
+
+'attribute_loss_theta': in max margin loss, used as bound.
