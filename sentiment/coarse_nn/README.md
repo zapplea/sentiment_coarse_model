@@ -13,7 +13,7 @@ since we change the regularization to reduce_mean(loss)+1/m*regularizer == reduc
 ## basic attribute function module:
 use parameter is_mat to choose attribute mention matrix(True) and attribute vector(False).
 
-1.fine_atr_classifier_1w : use word embedding to scan the sentence
+1. fine_atr_classifier_1w : use word embedding to scan the sentence
 
 2. fine_atr_classifier_nw: use lstm lifted embedding to scan the sentence
 
