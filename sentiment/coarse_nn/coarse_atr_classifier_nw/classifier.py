@@ -9,7 +9,7 @@ elif os.getlogin() == 'liu121':
 from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
 
 import tensorflow as tf
-
+import numpy as np
 
 
 class AttributeFunction:
@@ -271,7 +271,7 @@ class Classifier:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='float32'))
         return mask
 
     # should use variable share

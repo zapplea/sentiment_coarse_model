@@ -115,8 +115,6 @@ class AttributeFunction:
             # mask.shape = (batch size, attributes number, words num)
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
         else:
             # X.shape = (batch size, words num, attributes num, attribute dim)
             X = tf.tile(tf.expand_dims(X, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
@@ -127,12 +125,10 @@ class AttributeFunction:
             # mask.shape = (batch size, attributes number, words num)
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
         return score
 
     def prediction(self, score, graph):
-        condition = tf.greater(score, tf.ones_like(score, dtype='float32') * self.nn_config['atr_threshold'])
+        condition = tf.greater(score, tf.ones_like(score, dtype='float32') * self.nn_config['atr_pred_threshold'])
         pred = tf.where(condition, tf.ones_like(score, dtype='float32'), tf.zeros_like(score, dtype='float32'))
         graph.add_to_collection('atr_pred', pred)
         return pred
@@ -248,7 +244,7 @@ class Classifier:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='float32'))
         return mask
 
     # should use variable share
@@ -330,20 +326,14 @@ class Classifier:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
             else:
-                print('before1')
                 A, o = self.af.attribute_mat(smartInit.smart_initiater(graph), graph)
                 # A.shape = (batch size, words num, attributes number, attribute dim)
                 A_lstm = self.af.words_attribute_mat2vec(H, A, graph)
-                print('before4')
                 o_lstm = self.af.words_nonattribute_mat2vec(H, o, graph)
-                print('before5')
                 A_lstm = A_lstm - o_lstm
-                print('before6')
                 A_e = self.af.words_attribute_mat2vec(X,A,graph)
-                print('before7')
-                o_e = self.af.words_nonattribute_mat2vec(X,A,graph)
+                o_e = self.af.words_nonattribute_mat2vec(X,o,graph)
                 A_e = A_e-o_e
-            print('before2')
             if not self.nn_config['is_mat']:
                 mask = self.mask_for_pad_in_score(X_ids,graph)
                 score_lstm = self.af.score(A, H,mask, graph)
@@ -362,7 +352,6 @@ class Classifier:
                 score = tf.add(score_lstm, score_e)
                 # score.shape = (batch size, attributes num)
                 score = tf.reduce_max(score, axis=2)
-            print('before3')
             max_fscore = self.af.max_false_score(score, Y_att, graph)
             loss = self.af.loss(score, max_fscore, Y_att, graph)
             pred = self.af.prediction(score, graph)

@@ -13,3 +13,19 @@ use parameter is_mat to choose attribute mention matrix(True) and attribute vect
 2. fine_atr_classifier_nw: use lstm lifted embedding to scan the sentence
 3. fine_atr_classifier_1pNw: use word embedding and lstm lifted embedding together to scan the sentence.
 
+# Parameters
+'attributes_num': 13,
+'attribute_dim': seed['word_dim'],
+'attribute_mat_size': number of attribute mention prototypes in a attribute matrix
+'words_num': 20,
+'word_dim': seed['word_dim'],
+'is_mat': True,
+'epoch': 10,
+'batch_size': 40,
+'lstm_cell_size': seed['lstm_cell_size'],
+'lookup_table_words_num': 30000000,  # 2074276 for Chinese word embedding
+'padding_word_index': 0,  # the index of #PAD# in word embeddings list
+'reg_rate': 0.03,
+'lr': 0.03,  # learing rate
+'atr_pred_threshold': 0,
+'attribute_loss_theta': 1.0,

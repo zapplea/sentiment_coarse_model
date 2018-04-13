@@ -5,7 +5,7 @@ if os.getlogin() == 'yibing':
 else:
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
-from sentiment.smartInit_nn.fine_atr_1pNw_smartInit.classifier import Classifier
+from sentiment.sep_nn.fine_atr_classifier_1pNw.classifier import Classifier
 
 import unittest
 
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.dg = DataGenerator()
 
     def test_classifier(self):
-        print('is_mat: ', self.nn_config['is_mat'])
+        print('is_mat: ',self.nn_config['is_mat'])
         cl = Classifier(self.nn_config,self.dg)
         cl.classifier()
         print('successful')

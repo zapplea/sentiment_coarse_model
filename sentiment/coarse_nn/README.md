@@ -20,6 +20,20 @@ max_review_length: the maximal number of sentences in a review.
 aspect_prob_threshold: determine whether the model contain this topic
 
 ## basic parameters:
-
-## main change in program:
-The aspect should be copied, to fit the size of batch size * max review len.
+'attributes_num': 13,
+'attribute_dim': seed['word_dim'],
+'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
+'words_num': 20,
+'word_dim': seed['word_dim'],
+'is_mat': True,
+'epoch': 10,
+'batch_size': 40,
+'lstm_cell_size': seed['lstm_cell_size'],
+'lookup_table_words_num': 30000000,  # 2074276 for Chinese word embedding
+'padding_word_index': 0,  # the index of #PAD# in word embeddings list
+# flexible parameter
+'reg_rate': 0.03,
+'lr': 0.03,  # learing rate
+'atr_pred_threshold': 0,
+# if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
+'attribute_loss_theta': 1.0,

@@ -105,7 +105,7 @@ class AttributeFunction:
                   shape = (batch size, words number, attributes num, attribute dim)
         :param X: shape = (batch size, words number, lstm cell size)
         :param graph: 
-        :return: (batch size, attributes num)
+        :return: (batch size, attributes number, words num)
         """
         if not self.nn_config['is_mat']:
             X = tf.reshape(X, shape=(-1, self.nn_config['lstm_cell_size']))
@@ -119,8 +119,6 @@ class AttributeFunction:
             # use mask to eliminate the influence of
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
         else:
             # X.shape = (batch size, words num, attributes num, attribute dim)
             X = tf.tile(tf.expand_dims(X, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
@@ -131,8 +129,6 @@ class AttributeFunction:
             # mask.shape = (batch size, attributes number, words num)
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
         return score
 
     def prediction(self, score, graph):
@@ -252,7 +248,7 @@ class Classifier:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='float32'))
         return mask
 
     # should use variable share
@@ -322,7 +318,7 @@ class Classifier:
             words_pad_M = self.is_word_padding_input(X_ids, graph)
             X = self.lookup_table(X_ids, words_pad_M, graph)
             # lstm
-            with tf.variable_scope('sentence_lstm'):
+            with tf.variable_scospe('sentence_lstm'):
                 seq_len = self.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
                 H = self.sentence_lstm(X, seq_len, graph=graph)
@@ -342,7 +338,7 @@ class Classifier:
                 o_lstm = self.af.words_nonattribute_mat2vec(H, o, graph)
                 A_lstm = A_lstm - o_lstm
                 A_e = self.af.words_attribute_mat2vec(X,A,graph)
-                o_e = self.af.words_nonattribute_mat2vec(X,A,graph)
+                o_e = self.af.words_nonattribute_mat2vec(X,o,graph)
                 A_e = A_e-o_e
             if not self.nn_config['is_mat']:
                 mask = self.mask_for_pad_in_score(X_ids,graph)
