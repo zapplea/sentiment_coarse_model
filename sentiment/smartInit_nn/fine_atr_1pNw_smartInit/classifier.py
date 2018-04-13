@@ -180,13 +180,14 @@ class AttributeFunction:
         :param graph: 
         :return: (batch size, attributes number)
         """
-        # create a mask for non-attribute in which Sy is 0 and need to keep max false attribute
+        # create a mask for non-attribute in which Sa is 0 and need to keep max false attribute
+        Y_temp = tf.reduce_sum(Y_att, axis=1)
         condition = tf.equal(tf.reduce_sum(Y_att, axis=1),
-                             tf.zeros(shape=(self.nn_config['batch_size'],), dtype='float32'))
-        item1 = np.zeros(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']), dtype='float32')
-        for i in range(self.nn_config['batch_size']):
-            item1[i][0] = 1
-        nonatr_mask = tf.where(condition, tf.constant(item1, dtype='float32'), Y_att)
+                             tf.zeros_like(Y_temp, dtype='float32'))
+        item1 = tf.tile(tf.expand_dims(
+            tf.multiply(tf.ones_like(Y_temp, dtype='float32'), tf.divide(1, self.nn_config['attributes_num'])), axis=1),
+            multiples=[1, self.nn_config['attributes_num']])
+        nonatr_mask = tf.where(condition, item1, Y_att)
         #
         theta = tf.constant(self.nn_config['attribute_loss_theta'], dtype='float32')
         # loss.shape = (batch size, attributes num)
@@ -197,8 +198,10 @@ class AttributeFunction:
         zero_loss = tf.expand_dims(zero_loss, axis=2)
         # loss.shape = (batch size, attributes num)
         loss = tf.reduce_max(tf.concat([loss, zero_loss], axis=2), axis=2)
-        loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1)) + tf.multiply(1 / self.nn_config['batch_size'],
-                                                                         tf.reduce_sum(graph.get_collection('reg')))
+        # The following is obsolete design of loss function with regularization.
+        # loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1)) + tf.multiply(1 / self.nn_config['batch_size'],
+        #                                                                  tf.reduce_sum(graph.get_collection('reg')))
+        loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1) + tf.reduce_sum(graph.get_collection('reg')))
         graph.add_to_collection('atr_loss', loss)
 
         return loss
@@ -212,13 +215,13 @@ class Classifier:
 
     def sentences_input(self, graph):
         X = tf.placeholder(
-            shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
-            dtype='float32')
+            shape=(None, self.nn_config['words_num']),
+            dtype='int32')
         graph.add_to_collection('X', X)
         return X
 
     def attribute_labels_input(self, graph):
-        Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']), dtype='float32')
+        Y_att = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='float32')
         graph.add_to_collection('Y_att', Y_att)
         return Y_att
 
@@ -322,18 +325,25 @@ class Classifier:
             # Y_att.shape = (batch size, number of attributes+1)
             Y_att = self.attribute_labels_input(graph=graph)
             smartInit = SmartInitiator(self.nn_config)
+
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
             else:
-                A, o = self.af.attribute_mat(smartInit, graph)
+                print('before1')
+                A, o = self.af.attribute_mat(smartInit.smart_initiater(graph), graph)
                 # A.shape = (batch size, words num, attributes number, attribute dim)
                 A_lstm = self.af.words_attribute_mat2vec(H, A, graph)
+                print('before4')
                 o_lstm = self.af.words_nonattribute_mat2vec(H, o, graph)
+                print('before5')
                 A_lstm = A_lstm - o_lstm
+                print('before6')
                 A_e = self.af.words_attribute_mat2vec(X,A,graph)
+                print('before7')
                 o_e = self.af.words_nonattribute_mat2vec(X,A,graph)
                 A_e = A_e-o_e
+            print('before2')
             if not self.nn_config['is_mat']:
                 mask = self.mask_for_pad_in_score(X_ids,graph)
                 score_lstm = self.af.score(A, H,mask, graph)
@@ -352,7 +362,7 @@ class Classifier:
                 score = tf.add(score_lstm, score_e)
                 # score.shape = (batch size, attributes num)
                 score = tf.reduce_max(score, axis=2)
-
+            print('before3')
             max_fscore = self.af.max_false_score(score, Y_att, graph)
             loss = self.af.loss(score, max_fscore, Y_att, graph)
             pred = self.af.prediction(score, graph)

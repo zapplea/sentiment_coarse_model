@@ -200,13 +200,14 @@ class AttributeFunction:
         :param graph: 
         :return: (batch size, attributes number)
         """
-        # create a mask for non-attribute in which Sy is 0 and need to keep max false attribute
+        # create a mask for non-attribute in which Sa is 0 and need to keep max false attribute
+        Y_temp = tf.reduce_sum(Y_att, axis=1)
         condition = tf.equal(tf.reduce_sum(Y_att, axis=1),
-                             tf.zeros(shape=(self.nn_config['batch_size'],), dtype='float32'))
-        item1 = np.zeros(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']), dtype='float32')
-        for i in range(self.nn_config['batch_size']):
-            item1[i][0] = 1
-        nonatr_mask = tf.where(condition, tf.constant(item1, dtype='float32'), Y_att)
+                             tf.zeros_like(Y_temp, dtype='float32'))
+        item1 = tf.tile(tf.expand_dims(
+            tf.multiply(tf.ones_like(Y_temp, dtype='float32'), tf.divide(1, self.nn_config['attributes_num'])), axis=1),
+            multiples=[1, self.nn_config['attributes_num']])
+        nonatr_mask = tf.where(condition, item1, Y_att)
         #
         theta = tf.constant(self.nn_config['attribute_loss_theta'], dtype='float32')
         # loss.shape = (batch size, attributes num)
@@ -217,8 +218,10 @@ class AttributeFunction:
         zero_loss = tf.expand_dims(zero_loss, axis=2)
         # loss.shape = (batch size, attributes num)
         loss = tf.reduce_max(tf.concat([loss, zero_loss], axis=2), axis=2)
-        loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1)) + tf.multiply(1 / self.nn_config['batch_size'],
-                                                                         tf.reduce_sum(graph.get_collection('reg')))
+        # The following is obsolete design of loss function with regularization.
+        # loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1)) + tf.multiply(1 / self.nn_config['batch_size'],
+        #                                                                  tf.reduce_sum(graph.get_collection('reg')))
+        loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1) + tf.reduce_sum(graph.get_collection('reg')))
         graph.add_to_collection('atr_loss', loss)
 
         return loss
@@ -232,13 +235,13 @@ class Classifier:
 
     def sentences_input(self, graph):
         X = tf.placeholder(
-            shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
+            shape=(None, self.nn_config['words_num']),
             dtype='int32')
         graph.add_to_collection('X', X)
         return X
 
     def attribute_labels_input(self, graph):
-        Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']), dtype='float32')
+        Y_att = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='float32')
         graph.add_to_collection('Y_att', Y_att)
         return Y_att
 
@@ -265,7 +268,7 @@ class Classifier:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='int32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32')*(-np.inf), tf.zeros_like(X, dtype='float32'))
         return mask
 
     # should use variable share
@@ -337,7 +340,7 @@ class Classifier:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
             else:
-                A, o = self.af.attribute_mat(smartInit, graph)
+                A, o = self.af.attribute_mat(smartInit.smart_initiater(graph), graph)
                 # A.shape = (batch size, words num, attributes number, attribute dim)
                 A = self.af.words_attribute_mat2vec(H, A, graph)
                 o = self.af.words_nonattribute_mat2vec(H, o, graph)

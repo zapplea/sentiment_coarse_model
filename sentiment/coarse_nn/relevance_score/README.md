@@ -26,7 +26,7 @@ in util/coarse/
        sentence_j = [word_1,...,word_m]
        the data_generator return Reviews. The shape of Reviews is (batch size, max review length, words num(max sentence length), word dim)
 
-3. In atr_data_generator, add function: aspect_prob_generator to provide aspect probability.
+3. In atr_data_generator, use function: data_generator to provide aspect probability.
    also need to provide probability,from topic model, of the aspect in the review.
    eg. aspect_prob = [review_1_aspect_probability,
                       review_2_aspect_probability,
@@ -34,3 +34,5 @@ in util/coarse/
                       review_n_aspect_probabilty]
        review_i_aspect_probability = [aspect_1_prob, aspect_2_prob, ... aspect_k_prob]
        the data generator return aspect_prob.
+
+4. since Y_att is probability, so need to use threshold to determine which should be 1 and which 0:

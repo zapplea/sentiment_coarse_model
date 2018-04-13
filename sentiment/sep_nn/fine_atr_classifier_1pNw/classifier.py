@@ -207,7 +207,7 @@ class Classifier:
     def sentences_input(self, graph):
         X = tf.placeholder(
             shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
-            dtype='float32')
+            dtype='int32')
         graph.add_to_collection('X', X)
         return X
 

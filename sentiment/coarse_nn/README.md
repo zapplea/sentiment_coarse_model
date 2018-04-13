@@ -17,6 +17,7 @@ use parameter is_mat to choose attribute mention matrix(True) and attribute vect
 # Parameter
 ## new parameters:
 max_review_length: the maximal number of sentences in a review.
+aspect_prob_threshold: determine whether the model contain this topic
 
 ## basic parameters:
 

@@ -1,3 +1,13 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
+
 import tensorflow as tf
 import numpy as np
 
@@ -210,7 +220,7 @@ class Classifier:
     def sentences_input(self, graph):
         X = tf.placeholder(
             shape=(None, self.nn_config['words_num']),
-            dtype='float32')
+            dtype='int32')
         graph.add_to_collection('X', X)
         return X
 
@@ -306,7 +316,9 @@ class Classifier:
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
-            X_ids = self.sentences_input(graph=graph)
+            relscore = RelScore(self.nn_config)
+            # X_ids.shape = (batch size * max review length, words num)
+            X_ids = relscore.reviews_input(graph=graph)
             words_pad_M = self.is_word_padding_input(X_ids, graph)
             X = self.lookup_table(X_ids, words_pad_M, graph)
             # lstm
@@ -316,8 +328,10 @@ class Classifier:
                 H = self.sentence_lstm(X, seq_len, graph=graph)
                 graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
-            # Y_att.shape = (batch size, number of attributes+1)
-            Y_att = self.attribute_labels_input(graph=graph)
+            # Y_att.shape = (batch size, number of attributes)
+            aspect_prob = self.attribute_labels_input(graph=graph)
+            # Y_att.shape = (batch size, max review length, attributes num)
+            Y_att = relscore.aspect_prob2true_label(aspect_prob)
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
@@ -348,6 +362,13 @@ class Classifier:
                 score = tf.add(score_lstm, score_e)
                 # score.shape = (batch size, attributes num)
                 score = tf.reduce_max(score, axis=2)
+
+            # aspect_prob.shape = (batch size * max review length ,attributes num)
+            aspect_prob = relscore.expand_aspect_prob(aspect_prob, graph)
+            # atr_rel_prob = (batch size * max review length, attributes num)
+            atr_rel_prob = relscore.relevance_prob_atr(score, graph)
+            # coarse score
+            score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
 
             max_fscore = self.af.max_false_score(score, Y_att, graph)
             loss = self.af.loss(score, max_fscore, Y_att, graph)
