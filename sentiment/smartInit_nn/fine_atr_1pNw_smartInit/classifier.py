@@ -369,7 +369,7 @@ class Classifier:
             # labels
             Y_att = graph.get_collection('Y_att')[0]
             # train_step
-            train_step = graph.get_collection('train_step')[0]
+            train_step = graph.get_collection('opt')[0]
             #
             table = graph.get_collection('table')[0]
             #
@@ -379,18 +379,17 @@ class Classifier:
             smartInit = graph.get_collection('smartInit')[0]
             # attribute function
             init = tf.global_variables_initializer()
-        table_data = self.dg.table_generator()
-        # TODO: get data of smartInit
-        smartInit_data = self.dg.smart_initiator()
+        table_data = self.dg.table
+        smartInit_data = self.dg.smart_init_embedding
         with graph.device('/gpu:1'):
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
                 sess.run(init, feed_dict={smartInit:smartInit_data,table: table_data})
                 for i in range(self.nn_config['epoch']):
-                    sentences, Y_att_data = self.dg.data_generator('train', i)
+                    sentences, Y_att_data = self.dg.train_data_generator(i)
                     sess.run(train_step, feed_dict={X: sentences, Y_att: Y_att_data})
 
-                    if i % 5000 == 0 and i != 0:
-                        sentences, Y_att_data = self.dg.data_generator('test')
+                    if i % 50 == 0 and i != 0:
+                        sentences, Y_att_data = self.dg.test_data_generator()
                         valid_size = Y_att_data.shape[0]
                         p = 0
                         l = 0
@@ -406,3 +405,4 @@ class Classifier:
                                                                   i * batch_size:i * batch_size + batch_size]})
                         p = p / count
                         l = l / count
+                        print(p,l)
