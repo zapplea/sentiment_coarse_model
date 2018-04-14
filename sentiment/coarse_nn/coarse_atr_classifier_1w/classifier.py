@@ -9,7 +9,7 @@ elif os.getlogin() == 'liu121':
 from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
 
 import tensorflow as tf
-
+import numpy as np
 
 class AttributeFunction:
     def __init__(self, nn_config):
@@ -272,8 +272,8 @@ class Classifier:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32') * tf.convert_to_tensor(-np.inf),
-                        tf.zeros_like(X, dtype='int32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32') * tf.convert_to_tensor(-np.inf),
+                        tf.zeros_like(X, dtype='float32'))
         return mask
 
     # should use variable share
@@ -358,14 +358,12 @@ class Classifier:
             mask = self.mask_for_pad_in_score(X_ids, graph)
             # score.shape=(batch size * max review length, attributes num)
             score = self.af.score(A, X, mask, graph)
-
             # aspect_prob.shape = (batch size * max review length ,attributes num)
             aspect_prob = relscore.expand_aspect_prob(aspect_prob,graph)
             # atr_rel_prob = (batch size * max review length, attributes num)
             atr_rel_prob = relscore.relevance_prob_atr(score,graph)
             # coarse score
             score = relscore.coarse_atr_score(aspect_prob=aspect_prob,rel_prob=atr_rel_prob,atr_score=score)
-
             max_fscore = self.af.max_false_score(score, Y_att, graph)
             loss = self.af.loss(score, max_fscore, Y_att, graph)
             pred = self.af.prediction(score, graph)
