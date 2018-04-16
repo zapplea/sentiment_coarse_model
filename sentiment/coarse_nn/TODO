@@ -1,0 +1,2 @@
+
+TODO: eliminate the influence of padded sentence. use unittest to see whether the reuslt of score is the same to expectation.
