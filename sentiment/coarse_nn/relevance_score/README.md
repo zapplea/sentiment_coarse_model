@@ -4,6 +4,9 @@ multiply p(x|a) and p(a|D) to the attribute score.
 ## where to implement atr_data_generator:
 in util/coarse/
 
+## which data set do we use?
+we use restaurant data from Yelp dataset.
+
 ## How to use relevance score
 1. pre-processing of data:
    (1) pad each sentence the maximal length;
