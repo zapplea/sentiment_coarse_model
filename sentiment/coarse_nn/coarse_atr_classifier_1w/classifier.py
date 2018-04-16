@@ -398,6 +398,7 @@ class Classifier:
             precision = graph.get_collection('precision')[0]
             score = graph.get_collection('score')[0]
 
+
             # attribute function
             init = tf.global_variables_initializer()
         table_data, _ = self.dg.table_generator()
