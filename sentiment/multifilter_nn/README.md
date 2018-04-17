@@ -15,6 +15,7 @@ use parameter is_mat to choose attribute mention matrix(True) and attribute vect
 
 # Parameters
 ## new parameters
+filter_size: the size of filter, given by a list, like [1,3,5]. The size of each filter must be a odd number. 
 
 ## basic paramters
 'attributes_num': number of attributes, need to eliminate non-attribute

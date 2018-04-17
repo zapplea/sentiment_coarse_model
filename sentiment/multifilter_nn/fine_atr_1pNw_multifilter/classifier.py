@@ -1,3 +1,13 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+from sentiment.multifilter_nn.multi_filter.multi_filter import MultiFilter
+
 import tensorflow as tf
 import numpy as np
 
@@ -327,18 +337,20 @@ class Classifier:
                 A_e = A_e-o_e
             if not self.nn_config['is_mat']:
                 mask = self.mask_for_pad_in_score(X_ids,graph)
-                score_lstm = self.af.score(A, H,mask, graph)
+                mf = MultiFilter(self.nn_config)
+                score_lstm = mf.score_1pNw(A, H,mask, graph)
                 # score.shape = (batch size, attributes num, words num)
-                score_e = self.af.score(A,X,mask,graph)
+                score_e = mf.score_1pNw(A,X,mask,graph)
                 # score.shape = (batch size, attributes num, words num)
                 score = tf.add(score_lstm,score_e)
                 # score.shape = (batch size, attributes num)
                 score = tf.reduce_max(score, axis=2)
             else:
                 mask = self.mask_for_pad_in_score(X_ids, graph)
-                score_lstm = self.af.score(A_lstm,H,mask,graph)
+                mf = MultiFilter(self.nn_config)
+                score_lstm = mf.score_1pNw(A_lstm,H,mask,graph)
                 # score.shape = (batch size, attributes num, words num)
-                score_e = self.af.score(A_e,X,mask,graph)
+                score_e = mf.score_1pNw(A_e,X,mask,graph)
                 # score.shape = (batch size, attributes num, words num)
                 score = tf.add(score_lstm, score_e)
                 # score.shape = (batch size, attributes num)

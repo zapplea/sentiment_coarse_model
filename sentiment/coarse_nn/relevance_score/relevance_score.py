@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 # TODO: need to use threshold to predict if the Y is 1
 # TODO: need to eliminate the influence of padded sentence

@@ -1,3 +1,13 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+from sentiment.multifilter_nn.multi_filter.multi_filter import MultiFilter
+
 import tensorflow as tf
 import numpy as np
 
@@ -337,7 +347,8 @@ class Classifier:
                 A = A-o
             #
             mask = self.mask_for_pad_in_score(X_ids,graph)
-            score = self.af.score(A,X,mask,graph)
+            mf = MultiFilter(self.nn_config)
+            score = mf.score(A,X,mask,graph)
             max_fscore = self.af.max_false_score(score,Y_att,graph)
             loss = self.af.loss(score,max_fscore, Y_att, graph)
             pred = self.af.prediction(score,graph)
