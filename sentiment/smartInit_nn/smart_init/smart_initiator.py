@@ -20,7 +20,7 @@ class SmartInitiator:
                                              self.nn_config['attribute_mat_size'] - 2,
                                              self.nn_config['attribute_dim']),
                                       dtype='float32')
-        attributes_mat = tf.concat([mentions_mat, random_mat], axis=1)
+        attributes_mat = tf.nn.l2_normalize(tf.concat([mentions_mat, random_mat], axis=1),axis=2)
         graph.add_to_collection('smartInit',attributes_mat)
         return attributes_mat
 
