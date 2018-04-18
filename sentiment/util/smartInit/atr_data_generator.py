@@ -16,13 +16,14 @@ class DataGenerator():
         self.test_data_size = len(self.test_attribute_ground_truth)
 
 
-    def train_data_generator(self,batch_num):
+    def train_data_generator(self,batch_num,epoch_num):
         """
            This function return training/validation/test data for classifier. batch_num*batch_size is start point of the batch. 
            :param batch_size: int. the size of each batch
            :return: [[[float32,],],]. [[[wordembedding]element,]batch,]
            """
         # [( emb_id,fname,row_index m_id,c_id,typeText)]
+
 
         train_size = self.train_data_size
         start = batch_num * self.nn_config['batch_size'] % train_size
@@ -31,8 +32,10 @@ class DataGenerator():
             batches_attribute_ground_truth = self.train_attribute_ground_truth[start:end]
             batches_sentence_ground_truth = self.train_sentence_ground_truth[start:end]
         else:
-            batches_attribute_ground_truth = self.train_attribute_ground_truth[train_size-self.nn_config['batch_size']:train_size]
-            batches_sentence_ground_truth = self.train_sentence_ground_truth[train_size-self.nn_config['batch_size']:train_size]
+            batches_attribute_ground_truth = self.train_attribute_ground_truth[
+                                             train_size - self.nn_config['batch_size']:train_size]
+            batches_sentence_ground_truth = self.train_sentence_ground_truth[
+                                            train_size - self.nn_config['batch_size']:train_size]
         # during validation and test, to avoid errors are counted repeatedly,
         # we need to avoid the same data sended back repeately
         return batches_sentence_ground_truth, batches_attribute_ground_truth

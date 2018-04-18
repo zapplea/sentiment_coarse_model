@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -29,16 +29,16 @@ if __name__ == "__main__":
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 20000,
-            'batch_size': 30,
+            'batch_size': 10,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 3149,  # 2074276 for Chinese word embedding
             'padding_word_index': 3148,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.0008,
-            'lr': 0.003,  # learing rate
+            'reg_rate': 0.009,
+            'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 1.0,
+            'attribute_loss_theta': 3.0,
         },
         {  # fixed parameter
             'attributes_num': 12,
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         'padding_word_index': nn_configs[0]['padding_word_index'],
         'word_dim': seed['word_dim']
     }
-    for nn_config in nn_configs:
-        print(nn_config)
-        main(nn_config,data_config)
-    # main(nn_configs[0], data_config)
+    # for nn_config in nn_configs:
+    #     print(nn_config)
+    #     main(nn_config,data_config)
+    main(nn_configs[0], data_config)

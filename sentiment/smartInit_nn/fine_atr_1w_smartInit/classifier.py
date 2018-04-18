@@ -113,6 +113,7 @@ class AttributeFunction:
             score = tf.reshape(score,(self.nn_config['attributes_num'],-1,self.nn_config['words_num']))
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score,[1,0,2])
+            graph.add_to_collection('score_pre', score)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score,axis=2)
         else:
@@ -122,6 +123,7 @@ class AttributeFunction:
             score = tf.reduce_sum(tf.multiply(A,X),axis=3)
             # score.shape = (batch size, attributes num, words num)
             score = tf.transpose(score,[0,2,1])
+            graph.add_to_collection('score_pre', score)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score,axis=2)
         graph.add_to_collection('score',score)
@@ -147,14 +149,14 @@ class AttributeFunction:
         # accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(cmp,dtype='float32'),tf.zeros_like(cmp,dtype='float32')))
         # accuracy = tf.reduce_mean(tf.where(condition,tf.ones_like(Y_att,dtype='float32'),tf.zeros_like(Y_att,dtype='float32')))
 
-        TP = tf.cast(tf.count_nonzero(pred * Y_att),tf.float32)
+        TP = tf.cast(tf.count_nonzero(pred * Y_att,axis=0),tf.float32)
 
-        TN = tf.cast(tf.count_nonzero((pred - 1) * (Y_att - 1)),tf.float32)
-        FP = tf.cast(tf.count_nonzero(pred * (Y_att - 1)),tf.float32)
+        TN = tf.cast(tf.count_nonzero((pred - 1) * (Y_att - 1),axis=0),tf.float32)
+        FP = tf.cast(tf.count_nonzero(pred * (Y_att - 1),axis=0),tf.float32)
         graph.add_to_collection('TP', TP)
         graph.add_to_collection('FP', FP)
 
-        FN = tf.cast(tf.count_nonzero((pred - 1) * Y_att),tf.float32)
+        FN = tf.cast(tf.count_nonzero((pred - 1) * Y_att,axis=0),tf.float32)
         graph.add_to_collection('FN', FN)
 
         precision = tf.divide(TP, tf.add(TP + FP , 0.001))
@@ -205,7 +207,7 @@ class AttributeFunction:
         #
         theta = tf.constant(self.nn_config['attribute_loss_theta'], dtype='float32')
         # loss.shape = (batch size, attributes num)
-        loss = tf.multiply(tf.add(100 * tf.subtract(theta,tf.multiply(Y_att,score)), 2 * max_fscore),nonatr_mask)
+        loss = tf.multiply(tf.add(tf.subtract(theta,tf.multiply(Y_att,score)),max_fscore),nonatr_mask)
         zero_loss = tf.zeros_like(loss,dtype='float32')
 
         loss = tf.expand_dims(loss,axis=2)
@@ -322,11 +324,42 @@ class Classifier:
         """
         table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']), dtype='float32')
         graph.add_to_collection('table', table)
-        #table = tf.Variable(table, name='table')
+        table = tf.Variable(table, name='table')
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings,mask)
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
+
+    def precision(self,TP,FP,flag):
+        assert flag=='macro' or flag=='micro','Please enter right flag...'
+        if flag == 'macro':
+            tmp = np.nonzero((np.sum(TP,axis=0) + np.sum(FP,axis=0) == 0))
+            res = np.sum(TP,axis=0,dtype='float32') / ( np.sum(TP,axis=0,dtype='float32') + np.sum(FP,axis=0,dtype='float32') )
+            res[tmp] = 1
+            return res
+        else:
+            return np.sum(TP) / ( np.sum(TP) + np.sum(FP) )
+
+    def recall(self,TP,FN,flag):
+        assert flag=='macro' or flag=='micro','Please enter right flag...'
+        if flag == 'macro':
+            tmp = np.nonzero((np.sum(TP, axis=0) + np.sum(FN, axis=0) == 0))
+            res = np.sum(TP, axis=0 ,dtype='float32') / (np.sum(TP, axis=0,dtype='float32') + np.sum(FN, axis=0,dtype='float32'))
+            res[tmp] = 1
+            return res
+        else:
+            return np.sum(TP) / ( np.sum(TP) + np.sum(FN) )
+
+
+    def f1_score(self,precision,recall,flag):
+        assert flag=='macro' or flag=='micro','Please enter right flag...'
+        if flag == 'macro':
+            tmp = np.nonzero((precision + recall) == 0)
+            res = 2 * precision * recall / ( precision + recall )
+            res[tmp] = 0
+            return res
+        else:
+            return 2 * precision * recall / ( precision + recall )
 
     def classifier(self):
         graph = tf.Graph()
@@ -376,63 +409,159 @@ class Classifier:
             #
             table = graph.get_collection('table')[0]
             #
-            f1 = graph.get_collection('f1')[0]
-            #
             loss = graph.get_collection('atr_loss')[0]
 
             pred = graph.get_collection('atr_pred')[0]
 
-            TP = graph.get_collection('TP')[0]
-            FP = graph.get_collection('FP')[0]
-            FN = graph.get_collection('FN')[0]
-            recall = graph.get_collection('recall')[0]
-            precision = graph.get_collection('precision')[0]
-            score = graph.get_collection('score')[0]
             smartInit = graph.get_collection('smartInit')[0]
-
+            score = graph.get_collection('score')[0]
+            score_pre = graph.get_collection('score_pre')[0]
+            max_false_score = graph.get_collection('max_false_score')[0]
+            TP = graph.get_collection('TP')[0]
+            FN = graph.get_collection('FN')[0]
+            FP = graph.get_collection('FP')[0]
             # attribute function
             init = tf.global_variables_initializer()
-        table_data,_ = self.dg.table_generator()
-        # TODO: get data of smartInit
-        smartInit_data = self.dg.smart_initiator()
+        table_data = self.dg.table
+        smartInit_data = self.dg.smart_init_embedding
+
         with graph.device('/gpu:1'):
-            with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                sess.run(init,feed_dict={smartInit:smartInit_data,table: table_data})
+            config = tf.ConfigProto(allow_soft_placement=True)
+            config.gpu_options.allow_growth = True
+            with tf.Session(graph=graph, config=config) as sess:
+                sess.run(init, feed_dict={smartInit: smartInit_data,table: table_data})
+
                 batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
-                print('Train set size: ',self.dg.train_data_size,'Test set size:',self.dg.test_data_size)
+                print('Train set size: ', self.dg.train_data_size, 'Test set size:', self.dg.test_data_size)
                 for i in range(self.nn_config['epoch']):
                     loss_vec = []
-                    accuracy_vec = []
+                    pred_vec = []
+                    score_vec = []
+                    score_pre_vec = []
+                    max_false_score_vec = []
+                    Y_att_vec  = []
+                    TP_vec = []
+                    FP_vec = []
+                    FN_vec = []
                     for j in range(batch_num):
-                        sentences, Y_att_data = self.dg.train_data_generator(j)
-                        _, train_loss, train_f1_score,TP_data,FP_data,FN_data,precision_data,recall_data, pred_data,score_data\
-                            = sess.run([train_step, loss, f1,TP,FP,FN,precision,recall,pred,score],
-                                                                            feed_dict={X: sentences, Y_att: Y_att_data})
-                        loss_vec.append(train_loss)
-                        accuracy_vec.append(train_f1_score)
-                        # print(train_accuracy)
-                        # print(pred_data)
-                        # print(score_data)
-                        # print(sum(pred_data == Y_att_data))
-                        # print('TP',TP_data,'FP',FP_data,'FN',FN_data,'precision',precision_data,'recall',recall_data)
-                    print('Epoch:', i, 'Accuracy:%.10f' % np.mean(accuracy_vec), 'Training loss:%.10f' % np.mean(loss_vec))
+                        sentences, Y_att_data = self.dg.train_data_generator(j ,i)
+                        _, train_loss,TP_data, FP_data, FN_data, pred_data, score_data, max_false_score_data, score_pre_data \
+                            = sess.run(
+                            [train_step, loss, TP,FP,FN,pred, score, max_false_score, score_pre  ],
+                            feed_dict={X: sentences, Y_att: Y_att_data})
 
-                    if i % 5 == 0 and i != 0:
+                        ###Show training message
+                        loss_vec.append(train_loss)
+                        TP_vec.append(TP_data)
+                        FP_vec.append(FP_data)
+                        FN_vec.append(FN_data)
+                        for n in range(self.nn_config['batch_size']):
+                            pred_vec.append(pred_data[n])
+                            score_vec.append(score_data[n])
+                            score_pre_vec.append(score_pre_data[n])
+                            max_false_score_vec.append(max_false_score_data[n])
+                            Y_att_vec.append(Y_att_data[n])
+                    if i % 10 == 0:
+                        check_num = 1
+                        print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
+
+                        _precision = self.precision(TP_vec,FP_vec,'macro')
+                        _recall = self.recall(TP_vec,FN_vec,'macro')
+                        _f1_score = self.f1_score(_precision,_recall,'macro')
+                        print('F1 score for each class:',_f1_score,'\nPrecison for each class:',_precision,'\nRecall for each class:',_recall)
+                        print('Macro F1 sorce:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
+
+                        _precision = self.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 sorce:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
+
+                        # np.random.seed(1)
+                        random_display = np.random.randint(0, 1700, check_num)
+                        pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(pred_vec[r]) if rr] for
+                                      r in random_display]
+                        sentences_check = [
+                            [list(self.dg.dictionary.keys())[word] for word in self.dg.train_sentence_ground_truth[r] if word] for r
+                            in random_display]
+                        Y_att_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in
+                                        enumerate(self.dg.train_attribute_ground_truth[r]) if rr] for r in
+                                       random_display]
+                        score_check = [score_vec[r] for r in random_display]
+                        score_pre_check = [score_pre_vec[r] for r in random_display]
+                        max_false_score_check = [max_false_score_vec[r] for r in random_display]
+                        for n in range(check_num):
+                            print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
+                                  pred_check[n],
+                                  "\nY_att:\n", Y_att_check[n]
+                                  , "\nscore:\n", score_check[n], "\nmax_false_score:\n", max_false_score_check[n])
+                            for nn in range(len(score_pre_check[n])):
+                                if list(self.dg.aspect_dic.keys())[nn] in Y_att_check[n]:
+                                    print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
+
+                    if i % 200 == 0 and i != 0:
                         print('Test.....')
                         sentences, Y_att_data = self.dg.test_data_generator()
                         valid_size = Y_att_data.shape[0]
-                        p = 0
-                        l = 0
-                        count = 0
+                        loss_vec = []
+                        pred_vec = []
+                        score_vec = []
+                        score_pre_vec = []
+                        max_false_score_vec = []
+                        Y_att_vec = []
+                        TP_vec = []
+                        FP_vec = []
+                        FN_vec = []
                         batch_size = self.nn_config['batch_size']
                         for i in range(valid_size // batch_size):
-                            count += 1
-                            p += sess.run(f1, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                                               Y_att: Y_att_data[
-                                                                      i * batch_size:i * batch_size + batch_size]})
-                            l += sess.run(loss, feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                                           Y_att: Y_att_data[
-                                                                  i * batch_size:i * batch_size + batch_size]})
-                        p = p / count
-                        l = l / count
-                        print('F1 score:%.10f' % p, 'Testing loss:', l)
+                            test_loss,  pred_data, score_data, max_false_score_data, score_pre_data,TP_data, FP_data, FN_data  = sess.run([loss, pred, score, max_false_score, score_pre,TP,FP,FN],
+                                                                                                                                feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
+                                                                                                                               Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]
+                                                                                                                               })
+                            ###Show test message
+                            TP_vec.append(TP_data)
+                            FP_vec.append(FP_data)
+                            FN_vec.append(FN_data)
+                            loss_vec.append(test_loss)
+                            for n in range(self.nn_config['batch_size']):
+                                pred_vec.append(pred_data[n])
+                                score_vec.append(score_data[n])
+                                score_pre_vec.append(score_pre_data[n])
+                                max_false_score_vec.append(max_false_score_data[n])
+                        print('\nTest loss:%.10f' % np.mean(loss_vec))
+
+                        _precision = self.precision(TP_vec, FP_vec, 'macro')
+                        _recall = self.recall(TP_vec, FN_vec, 'macro')
+                        _f1_score = self.f1_score(_precision, _recall, 'macro')
+                        print('F1 score for each class:', _f1_score, '\nPrecison for each class:', _precision,
+                              '\nRecall for each class:', _recall)
+                        print('Macro F1 sorce:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
+                              ' Macro recall:', np.mean(_recall))
+
+                        _precision = self.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 sorce:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:',np.mean(_recall))
+                        # # np.random.seed(1)
+                        # random_display = np.random.randint(0, 570, check_num)
+                        # pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(pred_vec[r]) if rr] for
+                        #               r in random_display]
+                        # sentences_check = [
+                        #     [list(self.dg.dictionary.keys())[word] for word in self.dg.test_sentence_ground_truth[r] if
+                        #      word] for r
+                        #     in random_display]
+                        # Y_att_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in
+                        #                 enumerate(self.dg.test_attribute_ground_truth[r]) if rr] for r in
+                        #                random_display]
+                        # score_check = [score_vec[r] for r in random_display]
+                        # score_pre_check = [score_pre_vec[r] for r in random_display]
+                        # max_false_score_check = [max_false_score_vec[r] for r in random_display]
+                        # for n in range(check_num):
+                        #     print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
+                        #           pred_check[n],
+                        #           "\nY_att:\n", Y_att_check[n]
+                        #           , "\nscore:\n", score_check[n], "\nmax_false_score:\n", max_false_score_check[n])
+                        #     for nn in range(len(score_pre_check[n])):
+                        #         if list(self.dg.aspect_dic.keys())[nn] in Y_att_check[n]:
+                        #             print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
+
+
