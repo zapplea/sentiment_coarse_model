@@ -21,8 +21,8 @@ class Test(unittest.TestCase):
             mf = MultiFilter(self.nn_config)
             score = mf.convolution(score)
             sess=tf.Session()
-            sess.run(score)
-            print(score)
+            result = sess.run(score)
+            print(result)
 
 if __name__=="__main__":
     unittest.main()
