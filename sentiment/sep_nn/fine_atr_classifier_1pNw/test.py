@@ -98,6 +98,18 @@ class Test(unittest.TestCase):
         self.assertEqual(result.shape,(batch_size,self.nn_config['words_num'],self.nn_config['word_dim']))
         print(result)
 
+    def test_sequence_length(self):
+        batch_size = 2
+        X_ids = np.ones(shape=(batch_size, self.nn_config['words_num']), dtype='int32')
+        for i in range(2):
+            for j in [-1, -2, -3]:
+                X_ids[i][j] = X_ids[i][j] * self.nn_config['padding_word_index']
+        with self.graph.as_default():
+            seq_len = self.cl.sequence_length(X_ids,self.graph)
+            sess= tf.Session()
+            result = sess.run(seq_len)
+            print(result)
+
     def test_classifier(self):
         self.cl.classifier()
 
