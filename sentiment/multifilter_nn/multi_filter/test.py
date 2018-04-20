@@ -19,10 +19,13 @@ class Test(unittest.TestCase):
 
         with self.graph.as_default():
             mf = MultiFilter(self.nn_config)
-            score = mf.convolution(score)
+            score_ls = mf.convolution(score)
             sess=tf.Session()
-            result = sess.run(score)
-            print(result)
+            for score,filter in score_ls:
+                score_result,filter_result = sess.run([score,filter])
+                print(score_result)
+                print(filter_result)
+                print('==================')
 
 if __name__=="__main__":
     unittest.main()

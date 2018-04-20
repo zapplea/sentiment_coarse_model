@@ -39,7 +39,7 @@ class MultiFilter:
             score = tf.multiply(score,filter)
             # score.shape = (batch size, attributes number, words num)
             score = tf.reduce_sum(score,axis=3)
-            score_ls.append(score)
+            score_ls.append((score,filter))
         # score.shape=(batch size, attributes number, words num)
         score = tf.add_n(score_ls)
         return score_ls
