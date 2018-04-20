@@ -1,10 +1,7 @@
 import os
 import sys
-print(os.getlogin())
-if os.getlogin() == 'yibing':
-    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-else:
-    sys.path.append('/home/liu121/sentiment_coarse_model')
+
+sys.path.append('/home/liu121/sentiment_coarse_model')
 
 from sentiment.sep_nn.fine_atr_classifier_1pNw.classifier import Classifier
 
