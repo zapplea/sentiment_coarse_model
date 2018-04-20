@@ -19,15 +19,10 @@ class Test(unittest.TestCase):
         score = np.ones(shape=(10,6,10),dtype='float32')
 
         with self.graph.as_default():
-            print('before convolution')
             mf = MultiFilter(self.nn_config)
-            score_ls = mf.convolution(score)
+            score = mf.convolution(score)
             sess=tf.Session()
-            for score,filter in score_ls:
-                score_result,filter_result = sess.run([score,filter])
-                print(score_result)
-                print(filter_result)
-                print('==================')
+            print(sess.run(score))
 
 if __name__=="__main__":
     unittest.main()

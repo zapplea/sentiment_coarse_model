@@ -30,7 +30,6 @@ class MultiFilter:
         :param filter_size: ndarray
         :return: 
         """
-        print('in convolution')
         score_ls = []
         for filter_size in self.nn_config['filter_size']:
             filter = self.filter_generator(filter_size=filter_size)
@@ -40,10 +39,10 @@ class MultiFilter:
             new_score = tf.multiply(new_score,filter)
             # score.shape = (batch size, attributes number, words num)
             new_score = tf.reduce_sum(new_score,axis=3)
-            score_ls.append((new_score,filter))
+            score_ls.append(new_score)
         # score.shape=(batch size, attributes number, words num)
-        # score = tf.add_n(score_ls)
-        return score_ls
+        new_score = tf.add_n(score_ls)
+        return new_score
 
     def score(self, A, X, mask, graph):
         """
