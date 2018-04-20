@@ -145,18 +145,38 @@ class AttributeFunction:
         FN = tf.cast(tf.count_nonzero((pred - 1) * Y_att, axis=0), tf.float32)
         graph.add_to_collection('FN', FN)
 
-        tmp = TP + FP
-        cond1 = tf.equal(tmp, tf.zeros_like(tmp))
-        precision = tf.where(cond1, tf.ones_like(tmp), tf.divide(TP, TP + FP))
-        graph.add_to_collection('precision', precision)
+        return TP
 
-        tmp = TP + FN
-        cond2 = tf.equal(tmp, tf.zeros_like(tmp))
-        recall = tf.where(cond2, tf.ones_like(tmp), tf.divide(TP, TP + FN))
-        graph.add_to_collection('recall', recall)
-        f1 = tf.divide(2 * precision * recall, tf.add(precision + recall, 0.001))
-        graph.add_to_collection('f1', f1)
-        return f1
+    def precision(self,TP,FP,flag):
+        assert flag=='macro' or flag=='micro','Please enter right flag...'
+        if flag == 'macro':
+            tmp = np.nonzero((np.sum(TP,axis=0) + np.sum(FP,axis=0) == 0))
+            res = np.sum(TP,axis=0,dtype='float32') / ( np.sum(TP,axis=0,dtype='float32') + np.sum(FP,axis=0,dtype='float32') )
+            res[tmp] = 1
+            return res
+        else:
+            return np.sum(TP) / ( np.sum(TP) + np.sum(FP) )
+
+    def recall(self,TP,FN,flag):
+        assert flag=='macro' or flag=='micro','Please enter right flag...'
+        if flag == 'macro':
+            tmp = np.nonzero((np.sum(TP, axis=0) + np.sum(FN, axis=0) == 0))
+            res = np.sum(TP, axis=0 ,dtype='float32') / (np.sum(TP, axis=0,dtype='float32') + np.sum(FN, axis=0,dtype='float32'))
+            res[tmp] = 1
+            return res
+        else:
+            return np.sum(TP) / ( np.sum(TP) + np.sum(FN) )
+
+
+    def f1_score(self,precision,recall,flag):
+        assert flag=='macro' or flag=='micro','Please enter right flag...'
+        if flag == 'macro':
+            tmp = np.nonzero((precision + recall) == 0)
+            res = 2 * precision * recall / ( precision + recall + 1e-10)
+            res[tmp] = 0
+            return res
+        else:
+            return 2 * precision * recall / ( precision + recall + 1e-10)
 
     def max_false_score(self, score, Y_att, graph):
         """
@@ -312,37 +332,6 @@ class Classifier:
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
-    def precision(self,TP,FP,flag):
-        assert flag=='macro' or flag=='micro','Please enter right flag...'
-        if flag == 'macro':
-            tmp = np.nonzero((np.sum(TP,axis=0) + np.sum(FP,axis=0) == 0))
-            res = np.sum(TP,axis=0,dtype='float32') / ( np.sum(TP,axis=0,dtype='float32') + np.sum(FP,axis=0,dtype='float32') )
-            res[tmp] = 1
-            return res
-        else:
-            return np.sum(TP) / ( np.sum(TP) + np.sum(FP) )
-
-    def recall(self,TP,FN,flag):
-        assert flag=='macro' or flag=='micro','Please enter right flag...'
-        if flag == 'macro':
-            tmp = np.nonzero((np.sum(TP, axis=0) + np.sum(FN, axis=0) == 0))
-            res = np.sum(TP, axis=0 ,dtype='float32') / (np.sum(TP, axis=0,dtype='float32') + np.sum(FN, axis=0,dtype='float32'))
-            res[tmp] = 1
-            return res
-        else:
-            return np.sum(TP) / ( np.sum(TP) + np.sum(FN) )
-
-
-    def f1_score(self,precision,recall,flag):
-        assert flag=='macro' or flag=='micro','Please enter right flag...'
-        if flag == 'macro':
-            tmp = np.nonzero((precision + recall) == 0)
-            res = 2 * precision * recall / ( precision + recall )
-            res[tmp] = 0
-            return res
-        else:
-            return 2 * precision * recall / ( precision + recall )
-
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
@@ -463,20 +452,20 @@ class Classifier:
                             score_pre_vec.append(score_pre_data[n])
                             max_false_score_vec.append(max_false_score_data[n])
                             Y_att_vec.append(Y_att_data[n])
-                    if i % 20 == 0:
+                    if i % 1 == 0:
                         check_num = 1
                         print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
 
-                        _precision = self.precision(TP_vec,FP_vec,'macro')
-                        _recall = self.recall(TP_vec,FN_vec,'macro')
-                        _f1_score = self.f1_score(_precision,_recall,'macro')
-                        print('F1 score for each class:',_f1_score,'\nPrecison for each class:',_precision,'\nRecall for each class:',_recall)
-                        print('Macro F1 sorce:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
+                        _precision = self.af.precision(TP_vec,FP_vec,'macro')
+                        _recall = self.af.recall(TP_vec,FN_vec,'macro')
+                        _f1_score = self.af.f1_score(_precision,_recall,'macro')
+                        print('F1 score for each class:',_f1_score,'\nPrecision for each class:',_precision,'\nRecall for each class:',_recall)
+                        print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
 
-                        _precision = self.precision(TP_vec, FP_vec, 'micro')
-                        _recall = self.recall(TP_vec, FN_vec, 'micro')
-                        _f1_score = self.f1_score(_precision, _recall, 'micro')
-                        print('Micro F1 sorce:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
+                        _precision = self.af.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.af.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.af.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
 
                         # # np.random.seed(1)
                         # random_display = np.random.randint(0, 1700, check_num)
@@ -500,8 +489,7 @@ class Classifier:
                         #         if list(self.dg.aspect_dic.keys())[nn] in Y_att_check[n]:
                         #             print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
 
-                    if i % 20 == 0 and i != 0:
-                        print('Test.....')
+                    if i % 1 == 0 :
                         sentences, Y_att_data = self.dg.test_data_generator()
                         valid_size = Y_att_data.shape[0]
                         loss_vec = []
@@ -531,18 +519,18 @@ class Classifier:
                                 max_false_score_vec.append(max_false_score_data[n])
                         print('\nTest loss:%.10f' % np.mean(loss_vec))
 
-                        _precision = self.precision(TP_vec, FP_vec, 'macro')
-                        _recall = self.recall(TP_vec, FN_vec, 'macro')
-                        _f1_score = self.f1_score(_precision, _recall, 'macro')
-                        print('F1 score for each class:', _f1_score, '\nPrecison for each class:', _precision,
+                        _precision = self.af.precision(TP_vec, FP_vec, 'macro')
+                        _recall = self.af.recall(TP_vec, FN_vec, 'macro')
+                        _f1_score = self.af.f1_score(_precision, _recall, 'macro')
+                        print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
                               '\nRecall for each class:', _recall)
-                        print('Macro F1 sorce:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
+                        print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
                               ' Macro recall:', np.mean(_recall))
 
-                        _precision = self.precision(TP_vec, FP_vec, 'micro')
-                        _recall = self.recall(TP_vec, FN_vec, 'micro')
-                        _f1_score = self.f1_score(_precision, _recall, 'micro')
-                        print('Micro F1 sorce:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:',np.mean(_recall))
+                        _precision = self.af.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.af.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.af.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:',np.mean(_recall))
                         # # np.random.seed(1)
                         # random_display = np.random.randint(0, 570, check_num)
                         # pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(pred_vec[r]) if rr] for

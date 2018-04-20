@@ -76,7 +76,6 @@ class DataGenerator():
         aspect = []
         for i in np.arange(0,data.shape[0]):
             vec = np.zeros(len(aspect_dic))
-            print(data['sentence_id'])
             for j in data[data['sentence_id'] == data.iloc[i]['sentence_id']]['category'].unique():
                     vec[aspect_dic[j]] = 1
             aspect.append(vec)

@@ -10,13 +10,13 @@ class DataGenerator():
     def __init__(self,data_config,nn_config):
         self.data_config = data_config
         self.nn_config = nn_config
-        self.train_attribute_ground_truth, self.train_sentence_ground_truth,self.aspect_dic , self.dictionary,self.table , self.smart_init_embedding = self.load_train_data()
+        self.train_attribute_ground_truth, self.train_sentence_ground_truth,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
         self.test_attribute_ground_truth, self.test_sentence_ground_truth = self.load_test_data(self.aspect_dic,self.dictionary)
         self.train_data_size = len(self.train_attribute_ground_truth)
         self.test_data_size = len(self.test_attribute_ground_truth)
 
 
-    def train_data_generator(self,batch_num,epoch_num):
+    def train_data_generator(self,batch_num):
         """
            This function return training/validation/test data for classifier. batch_num*batch_size is start point of the batch. 
            :param batch_size: int. the size of each batch
@@ -148,38 +148,11 @@ class DataGenerator():
         print('The number of words in dataset:',len(word_list))
         return word_list
 
-    def smart_initiator(self,aspect_dic , dictionary , model):
-        """
-        :param attributes: ndarray, shape=(attribute numbers ,2, attribute dim)
-        :return: 
-        """
-        # random_mat.shape = (attributes number, attribute mat size-2, attribute dim)
-        punctuation = '_'
-        res = []
-        word_list = []
-        for item in list(aspect_dic.keys()):
-            a = item.lower().split('#')
-            aspect = a[0].split(punctuation)
-            attribute = a[1].split(punctuation)
-            word_list += [dictionary[i] for i in aspect if i in dictionary.keys()] + [dictionary[i] for i in attribute if i in dictionary.keys()]
-            asp_embed = []
-            att_embed = []
-            for i in aspect:
-                    asp_embed.append(model.wv[i])
-            for i in attribute:
-                if i == 'general' or i == 'style' or i == 'options':
-                    att_embed.append(np.random.normal(0, 1, 300))
-                else:
-                    att_embed.append(model.wv[i])
-            res.append([np.array(asp_embed).mean(axis=0), np.array(att_embed).mean(axis=0)])
-        return np.array(res) , word_list
-
 
     def load_train_data(self):
         if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
             f = open(self.data_config['train_data_file_path'],'rb')
             aspect_dic = pickle.load(f)
-            smart_init_embedding = pickle.load(f)
             dictionary = pickle.load(f)
             attribute_ground_truth = pickle.load(f)
             sentence_ground_truth  = pickle.load(f)
@@ -203,12 +176,8 @@ class DataGenerator():
                     i += 1
             pickle.dump(aspect_dic,f)
 
-            ##Generate smart embedding
-            smart_init_embedding , a_wordlist = self.smart_initiator(aspect_dic,pre_dictionary,word_embed)
-            pickle.dump(smart_init_embedding,f)
-
             ###Generate dictionary
-            word_list = list(set(self.get_word_list(tmp,pre_dictionary) + a_wordlist))
+            word_list = self.get_word_list(tmp,pre_dictionary)
             vocabulary = list(np.array(vocabulary)[word_list])
             vocabulary.append('#UNK#')
             vocabulary.append('#PAD#')
@@ -233,7 +202,7 @@ class DataGenerator():
 
             f.close()
 
-        return attribute_ground_truth, sentence_ground_truth , aspect_dic , dictionary ,table , smart_init_embedding
+        return attribute_ground_truth, sentence_ground_truth , aspect_dic , dictionary ,table
 
     def load_test_data(self,test_aspect_dic,dictionary):
         if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:

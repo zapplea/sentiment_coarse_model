@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "6" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -28,17 +28,17 @@ if __name__ == "__main__":
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
-            'epoch': 20000,
+            'epoch': 3,
             'batch_size': 20,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 3149,  # 2074276 for Chinese word embedding
             'padding_word_index': 3148,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.003,
+            'reg_rate': 0.0003,
             'lr': 0.003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 3.0,
+            'attribute_loss_theta': 2.0,
         },
         {  # fixed parameter
             'attributes_num': 12,
@@ -72,8 +72,8 @@ if __name__ == "__main__":
             'lookup_table_words_num': 3148,  # 2074276 for Chinese word embedding
             'padding_word_index': 3147,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.001,
-            'lr': 0.03,  # learing rate
+            'reg_rate': 0.0001,
+            'lr': 0.003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
             'attribute_loss_theta': 1.0,
@@ -81,9 +81,9 @@ if __name__ == "__main__":
     ]
     data_config = {
         'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
-        'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/smartInit_nn/fine_atr_nw_smartInit/train_data.pkl',
+        'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/smartInit_nn/train_data.pkl',
         'test_source_file_path': '~/dataset/semeval2016/absa_resturant_test.csv',
-        'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/smartInit_nn/fine_atr_nw_smartInit/test_data.pkl',
+        'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/smartInit_nn/test_data.pkl',
         'wordembedding_file_path': '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
         'attributes_num': nn_configs[0]['attributes_num'],
