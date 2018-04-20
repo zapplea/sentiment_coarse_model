@@ -1,5 +1,6 @@
 import os
 import sys
+print(os.getlogin())
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
 else:
