@@ -5,7 +5,8 @@ import tensorflow as tf
 from multi_filter import MultiFilter
 
 class Test(unittest.TestCase):
-    def __init__(self):
+    def __init__(self,*args,**kwargs):
+        super(Test,self).__init__(*args,**kwargs)
         self.nn_config = {
             'words_num':10,
             'filter_size':[1,3,5]
