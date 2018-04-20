@@ -6,6 +6,7 @@ from multi_filter import MultiFilter
 
 class Test(unittest.TestCase):
     def __init__(self,*args,**kwargs):
+        print('in test')
         super(Test,self).__init__(*args,**kwargs)
         self.nn_config = {
             'words_num':10,
@@ -18,6 +19,7 @@ class Test(unittest.TestCase):
         score = np.ones(shape=(10,6,10),dtype='float32')
 
         with self.graph.as_default():
+            print('before convolution')
             mf = MultiFilter(self.nn_config)
             score_ls = mf.convolution(score)
             sess=tf.Session()

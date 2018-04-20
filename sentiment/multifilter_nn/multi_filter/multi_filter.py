@@ -30,6 +30,7 @@ class MultiFilter:
         :param filter_size: ndarray
         :return: 
         """
+        print('in convolution')
         score_ls = []
         for filter_size in self.nn_config['filter_size']:
             filter = self.filter_generator(filter_size=filter_size)
