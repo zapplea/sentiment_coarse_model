@@ -17,7 +17,9 @@ for file_name in files_name:
     file_path=namelist_filePath+'/'+file_name
     dic[file_name] =[]
     print(file_name)
-    for row in csv.reader(file_path):
-        print(row)
+    with open(file_path,newline='') as csvfile:
+        data = csv.reader(csvfile)
+        for row in data:
+            print(row)
         #print(type(row[0]),' ',type(row[1]))
     break
