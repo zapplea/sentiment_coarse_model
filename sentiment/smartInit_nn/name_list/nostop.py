@@ -1,10 +1,11 @@
 import os
 import sys
-if os.getlogin() == 'yibing':
+import pwd
+if pwd.getpwuid(os.getuid()).pw_name == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-elif os.getlogin() == 'lujunyu':
+elif pwd.getpwuid(os.getuid()).pw_name == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
-elif os.getlogin() == 'liu121':
+elif pwd.getpwuid(os.getuid()).pw_name == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 
