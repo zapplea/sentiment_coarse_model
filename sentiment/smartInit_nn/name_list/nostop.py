@@ -21,4 +21,4 @@ for file_name in files_name:
         data = csv.reader(csvfile)
         for row in data:
             dic[file_name].append(row[0])
-    print(dic[file_name])
+    print(dic[file_name][:10])
