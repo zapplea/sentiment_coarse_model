@@ -13,7 +13,7 @@ import csv
 namelist_filePath='/datastore/liu121/senti_data/name_list/name_list_nostop'
 files_name = os.listdir(namelist_filePath)
 
-for k in [10,15,20]:
+for k in [10,15,20,25,30,25,40,45,50]:
     dic={}
     f=open('top'+str(k),'w')
     for file_name in files_name:
