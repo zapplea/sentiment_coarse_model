@@ -19,6 +19,5 @@ for file_name in files_name:
     print(file_name)
     for row in csv.reader(file_path):
         print(row)
-        print(type(row[0]),' ',type(row[1]))
-        break
+        #print(type(row[0]),' ',type(row[1]))
     break
