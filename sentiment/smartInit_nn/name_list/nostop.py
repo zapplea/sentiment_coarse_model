@@ -24,4 +24,4 @@ for k in [10,15,20]:
             data = csv.reader(csvfile)
             for row in data:
                 dic[file_name].append(row[0])
-        f.write(str(dic[file_name][:k]))
+        f.write(file_name+'\n'+str(dic[file_name][:k])+'\n')
