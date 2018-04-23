@@ -20,6 +20,5 @@ for file_name in files_name:
     with open(file_path,newline='') as csvfile:
         data = csv.reader(csvfile)
         for row in data:
-            print(row)
-        #print(type(row[0]),' ',type(row[1]))
-    break
+            dic[file_name].append(row[0])
+    print(dic[file_name])
