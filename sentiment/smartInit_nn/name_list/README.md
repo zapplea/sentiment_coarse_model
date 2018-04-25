@@ -1,1 +1,1 @@
-TODO: normalize initialization.
+TODO: need to normalize initialization.
