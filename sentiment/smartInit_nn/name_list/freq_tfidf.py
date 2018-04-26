@@ -43,7 +43,7 @@ class NameList:
                 for mention in mentions:
                     if mention in wordEmbedding:
                         mention_vec_list.append(wordEmbedding[mention])
-                mention_vec=np.mean(mention_vec_list).astype('float32')
+                mention_vec=np.mean(mention_vec_list,axis=0).astype('float32')
                 initializer_dic[key].append(mention_vec)
         return initializer_dic
 
