@@ -1,3 +1,15 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+from sentiment.smartInit_nn.smart_init.smart_initiator import SmartInitiator
+from sentiment.smartInit_nn.attribute_function.attribute_function import AttributeFunction
+from sentiment.smartInit_nn.attribute_function.metrics import Metrics
+
 import tensorflow as tf
 import numpy as np
 

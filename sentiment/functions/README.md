@@ -1,0 +1,1 @@
+This folder store attribute function and sentiment function.
