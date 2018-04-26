@@ -7,8 +7,8 @@ elif os.getlogin() == 'lujunyu':
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.smartInit_nn.smart_init.smart_initiator import SmartInitiator
-from sentiment.smartInit_nn.attribute_function.attribute_function import AttributeFunction
-from sentiment.smartInit_nn.attribute_function.metrics import Metrics
+from sentiment.functions.attribute_function.attribute_function import AttributeFunction
+from sentiment.functions.attribute_function.metrics import Metrics
 
 import tensorflow as tf
 import numpy as np
