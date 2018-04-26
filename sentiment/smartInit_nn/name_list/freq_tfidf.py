@@ -48,8 +48,11 @@ class NameList:
         return initializer_dic
 
 if __name__=="__main__":
-    wordEmbedding_filePath=''
-    nl = NameList(wordEmbedding_filePath)
+    config={'json_filePath':'',
+            'wordEmbedding_filePath':''}
+    nl = NameList(config['wordEmbedding_filePath'])
     wordEmbedding = nl.wordEmbedding_loader()
     name_list = nl.name_list_generator()
     initilizer = nl.mapping(name_list,wordEmbedding)
+    with open(config['json_filePath']) as f:
+        json.dump(initilizer,f)
