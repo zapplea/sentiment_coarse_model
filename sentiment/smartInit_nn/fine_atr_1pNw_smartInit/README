@@ -2,3 +2,8 @@ In this version, consider attributes as one word and several words at the same t
 
 Constraints:
 attribute dim = lstm cell size = word dim
+
+
+# TODO
+for each classifier, the score need to be reduce_maxed outside.
+In 1w, forget mask for pad
