@@ -41,7 +41,7 @@ class Classifier:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
             else:
-                A, o = self.af.attribute_mat(smartInit.smart_initiater(graph), graph)
+                A, o = smartInit.attribute_mat(smartInit.smart_initiater(graph), graph)
                 # A.shape = (batch size, words num, attributes number, attribute dim)
                 A_lstm = self.af.words_attribute_mat2vec(H, A, graph)
                 o_lstm = self.af.words_nonattribute_mat2vec(H, o, graph)
@@ -66,6 +66,7 @@ class Classifier:
                 graph.add_to_collection('score_pre', score)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score, axis=2)
+            graph.add_to_collection('score',score)
             loss = self.af.sigmoid_loss(score,Y_att,graph)
             pred = self.af.prediction(score, graph)
             TP,TN,FP,FN = self.mt.accuracy(Y_att,pred,graph)

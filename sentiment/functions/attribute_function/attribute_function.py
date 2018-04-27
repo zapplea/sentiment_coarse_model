@@ -23,13 +23,16 @@ class AttributeFunction:
         graph.add_to_collection('o_vec', o)
         return A, o
 
-    def attribute_mat(self, smartInit, graph):
+    def attribute_mat(self, graph):
         """
 
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        A_mat = tf.get_variable(name='A_mat', initializer=smartInit)
+        A_mat = tf.get_variable(name='A_mat', initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],
+                                                                                   self.nn_config['attribute_mat_size'],
+                                                                                   self.nn_config['attribute_dim']),
+                                                                            dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
         o_mat = tf.get_variable(name='other_vec',
@@ -102,7 +105,6 @@ class AttributeFunction:
             score = tf.reshape(score, (self.nn_config['attributes_num'], -1, self.nn_config['words_num']))
             # score.shape = (batch size, attributes number, words num)
             score = tf.transpose(score, [1, 0, 2])
-            graph.add_to_collection('score_pre', score)
             # mask.shape = (batch size, attributes number, words num)
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
@@ -116,13 +118,11 @@ class AttributeFunction:
             score = tf.reduce_sum(tf.multiply(A, X), axis=3)
             # score.shape = (batch size, attributes num, words num)
             score = tf.transpose(score, [0, 2, 1])
-            graph.add_to_collection('score_pre', score)
             # mask.shape = (batch size, attributes number, words num)
             mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
             score = tf.add(score, mask)
             # score.shape = (batch size, attributes num)
             # score = tf.reduce_max(score, axis=2)
-        graph.add_to_collection('score', score)
         return score
 
     def prediction(self, score, graph):
