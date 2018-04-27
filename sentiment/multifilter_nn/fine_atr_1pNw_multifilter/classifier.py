@@ -35,31 +35,52 @@ class Classifier:
                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes+1)
             Y_att = self.af.attribute_labels_input(graph=graph)
-            if not self.nn_config['is_mat']:
-                A, o = self.af.attribute_vec(graph)
-                A = A - o
-            else:
-                A, o = self.af.attribute_mat(graph)
-                # A.shape = (batch size, words num, attributes number, attribute dim)
-                A_lstm = self.af.words_attribute_mat2vec(H, A, graph)
-                o_lstm = self.af.words_nonattribute_mat2vec(H, o, graph)
-                A_lstm = A_lstm - o_lstm
-                A_e = self.af.words_attribute_mat2vec(X,A,graph)
-                o_e = self.af.words_nonattribute_mat2vec(X,o,graph)
-                A_e = A_e-o_e
+            mask = self.af.mask_for_pad_in_score(X_ids, graph)
             mf = MultiFilter(self.nn_config)
-            if not self.nn_config['is_mat']:
-                mask = self.af.mask_for_pad_in_score(X_ids,graph)
-                score_lstm = mf.score(A, H,mask, graph)
+            multi_score = []
+
+            for filter_size in self.nn_config['filter_size']:
+                filter = mf.filter_generator(X_ids, filter_size)
+                X = mf.look_up(X=X, filter=filter, filter_size=filter_size)
+                H = mf.look_up(X=H, filter=filter, filter_size=filter_size)
+                # conv_X.shape = (batch size, max sentence length, last dim of conv)
+                conv_X = mf.convolution(X=X, filter_size=filter_size, graph=graph)
+                conv_H = mf.convolution(X=H, filter_size=filter_size, graph=graph)
+
+                if not self.nn_config['is_mat']:
+                    A, o = self.af.attribute_vec(graph)
+                    A = A - o
+                else:
+                    A, o = self.af.attribute_mat(graph)
+                    # A.shape = (batch size, words num, attributes number, attribute dim)
+                    A_lstm = self.af.words_attribute_mat2vec(conv_H, A, graph)
+                    o_lstm = self.af.words_nonattribute_mat2vec(conv_H, o, graph)
+                    A_lstm = A_lstm - o_lstm
+                    A_e = self.af.words_attribute_mat2vec(conv_X, A, graph)
+                    o_e = self.af.words_nonattribute_mat2vec(conv_X, o, graph)
+                    A_e = A_e - o_e
+
+                if not self.nn_config['is_mat']:
+                    # score.shape = (batch size, attributes num, words num)
+                    score_lstm = self.af.score(A, conv_H,mask, graph)
+                    # score.shape = (batch size, attributes num, words num)
+                    score_e = self.af.score(A,conv_X,mask,graph)
+                else:
+                    # score.shape = (batch size, attributes num, words num)
+                    score_lstm = self.af.score(A_lstm,H,mask,graph)
+                    # score.shape = (batch size, attributes num, words num)
+                    score_e = self.af.score(A_e,X,mask,graph)
                 # score.shape = (batch size, attributes num, words num)
-                score_e = mf.score(A,X,mask,graph)
-            else:
-                mask = self.af.mask_for_pad_in_score(X_ids, graph)
-                score_lstm = mf.score(A_lstm,H,mask,graph)
-                # score.shape = (batch size, attributes num, words num)
-                score_e = mf.score(A_e,X,mask,graph)
-            # score.shape = (batch size, attributes num, words num)
-            score = tf.add(score_lstm, score_e)
+                score = tf.add(score_lstm, score_e)
+                # score.shape = (batch size, attributes num, words num,1)
+                score = tf.expand_dims(score,axis=3)
+                multi_score.append(score)
+
+            # multi_score.shape = (filter numbers, batch size, attributes number, words num,1)
+            # multi_kernel_score = (batch size, attributes number, words num, filter numbers)
+            multi_kernel_score = tf.concat(multi_score, axis=3)
+            # score.shape = (batch size, attributes number ,words num)
+            score = tf.reduce_max(multi_kernel_score, axis=3)
             graph.add_to_collection('score_pre', score)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score, axis=2)

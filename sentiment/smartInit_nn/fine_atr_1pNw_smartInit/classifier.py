@@ -69,7 +69,9 @@ class Classifier:
             graph.add_to_collection('score',score)
             loss = self.af.sigmoid_loss(score,Y_att,graph)
             pred = self.af.prediction(score, graph)
-            TP,TN,FP,FN = self.mt.accuracy(Y_att,pred,graph)
+            print('accuracy')
+            accuracy = self.mt.accuracy(Y_att,pred,graph)
+            print('after accuracy')
         with graph.as_default():
             opt = self.af.optimizer(loss, graph=graph)
             saver = tf.train.Saver()

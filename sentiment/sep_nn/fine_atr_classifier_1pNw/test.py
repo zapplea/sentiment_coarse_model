@@ -1,7 +1,11 @@
 import os
 import sys
-
-sys.path.append('/home/liu121/sentiment_coarse_model')
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
 
 from sentiment.sep_nn.fine_atr_classifier_1pNw.classifier import Classifier
 
@@ -53,62 +57,62 @@ class Test(unittest.TestCase):
         self.cl = Classifier(self.nn_config, self.dg)
         self.graph=tf.Graph()
 
-    def test_sentence_input(self):
-        X_data = np.ones(shape=(5,self.nn_config['words_num']),dtype='float32')
-        with self.graph.as_default():
-            X = self.cl.sentences_input(self.graph)
-            sess = tf.Session()
-            result = sess.run(X,feed_dict={X:X_data})
-        self.assertTrue(np.all(np.equal(result,X_data)))
-
-    def test_is_word_padding_input(self):
-        batch_size = 2
-        X_ids= np.ones(shape=(batch_size,self.nn_config['words_num']),dtype='int32')
-        for i in range(2):
-            for j in [-1,-2,-3]:
-                X_ids[i][j]=X_ids[i][j]*self.nn_config['padding_word_index']
-        with self.graph.as_default():
-            mask = self.cl.is_word_padding_input(X_ids,self.graph)
-            sess = tf.Session()
-            result = sess.run(mask)
-        self.assertEqual(result.shape,(batch_size,self.nn_config['words_num'],self.nn_config['word_dim']))
-
-        test_data = np.array([[1,1,0,0,0],[1,1,0,0,0]],dtype='float32')
-        test_data = np.tile(np.expand_dims(test_data,axis=2),[1,1,self.nn_config['word_dim']])
-        self.assertTrue(np.all(np.equal(test_data,result)))
-
-    def test_lookup_table(self):
-        batch_size = 2
-        X_ids = np.ones(shape=(batch_size, self.nn_config['words_num']), dtype='int32')
-        for i in range(2):
-            for j in [-1,-2,-3]:
-                X_ids[i][j]=X_ids[i][j]*self.nn_config['padding_word_index']
-        mask = np.array([[1, 1, 0, 0, 0], [1, 1, 0, 0, 0]], dtype='float32')
-        mask = np.tile(np.expand_dims(mask, axis=2), [1, 1, self.nn_config['word_dim']])
-
-        table_data=np.random.uniform(size=(self.nn_config['lookup_table_words_num'],self.nn_config['word_dim'])).astype('float32')
-        table_data[self.nn_config['padding_word_index']] = np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')
-        with self.graph.as_default():
-            X = self.cl.lookup_table(X_ids,mask,self.graph)
-            table = self.graph.get_collection('table')[0]
-            sess = tf.Session()
-            init=tf.global_variables_initializer()
-            sess.run(init,feed_dict={table:table_data})
-            result = sess.run(X)
-        self.assertEqual(result.shape,(batch_size,self.nn_config['words_num'],self.nn_config['word_dim']))
-        print(result)
-
-    def test_sequence_length(self):
-        batch_size = 2
-        X_ids = np.ones(shape=(batch_size, self.nn_config['words_num']), dtype='int32')
-        for i in range(2):
-            for j in [-1, -2, -3]:
-                X_ids[i][j] = X_ids[i][j] * self.nn_config['padding_word_index']
-        with self.graph.as_default():
-            seq_len = self.cl.sequence_length(X_ids,self.graph)
-            sess= tf.Session()
-            result = sess.run(seq_len)
-            print(result)
+    # def test_sentence_input(self):
+    #     X_data = np.ones(shape=(5,self.nn_config['words_num']),dtype='float32')
+    #     with self.graph.as_default():
+    #         X = self.cl.sentences_input(self.graph)
+    #         sess = tf.Session()
+    #         result = sess.run(X,feed_dict={X:X_data})
+    #     self.assertTrue(np.all(np.equal(result,X_data)))
+    #
+    # def test_is_word_padding_input(self):
+    #     batch_size = 2
+    #     X_ids= np.ones(shape=(batch_size,self.nn_config['words_num']),dtype='int32')
+    #     for i in range(2):
+    #         for j in [-1,-2,-3]:
+    #             X_ids[i][j]=X_ids[i][j]*self.nn_config['padding_word_index']
+    #     with self.graph.as_default():
+    #         mask = self.cl.is_word_padding_input(X_ids,self.graph)
+    #         sess = tf.Session()
+    #         result = sess.run(mask)
+    #     self.assertEqual(result.shape,(batch_size,self.nn_config['words_num'],self.nn_config['word_dim']))
+    #
+    #     test_data = np.array([[1,1,0,0,0],[1,1,0,0,0]],dtype='float32')
+    #     test_data = np.tile(np.expand_dims(test_data,axis=2),[1,1,self.nn_config['word_dim']])
+    #     self.assertTrue(np.all(np.equal(test_data,result)))
+    #
+    # def test_lookup_table(self):
+    #     batch_size = 2
+    #     X_ids = np.ones(shape=(batch_size, self.nn_config['words_num']), dtype='int32')
+    #     for i in range(2):
+    #         for j in [-1,-2,-3]:
+    #             X_ids[i][j]=X_ids[i][j]*self.nn_config['padding_word_index']
+    #     mask = np.array([[1, 1, 0, 0, 0], [1, 1, 0, 0, 0]], dtype='float32')
+    #     mask = np.tile(np.expand_dims(mask, axis=2), [1, 1, self.nn_config['word_dim']])
+    #
+    #     table_data=np.random.uniform(size=(self.nn_config['lookup_table_words_num'],self.nn_config['word_dim'])).astype('float32')
+    #     table_data[self.nn_config['padding_word_index']] = np.zeros(shape=(self.nn_config['word_dim'],),dtype='float32')
+    #     with self.graph.as_default():
+    #         X = self.cl.lookup_table(X_ids,mask,self.graph)
+    #         table = self.graph.get_collection('table')[0]
+    #         sess = tf.Session()
+    #         init=tf.global_variables_initializer()
+    #         sess.run(init,feed_dict={table:table_data})
+    #         result = sess.run(X)
+    #     self.assertEqual(result.shape,(batch_size,self.nn_config['words_num'],self.nn_config['word_dim']))
+    #     print(result)
+    #
+    # def test_sequence_length(self):
+    #     batch_size = 2
+    #     X_ids = np.ones(shape=(batch_size, self.nn_config['words_num']), dtype='int32')
+    #     for i in range(2):
+    #         for j in [-1, -2, -3]:
+    #             X_ids[i][j] = X_ids[i][j] * self.nn_config['padding_word_index']
+    #     with self.graph.as_default():
+    #         seq_len = self.cl.sequence_length(X_ids,self.graph)
+    #         sess= tf.Session()
+    #         result = sess.run(seq_len)
+    #         print(result)
 
     def test_classifier(self):
         self.cl.classifier()

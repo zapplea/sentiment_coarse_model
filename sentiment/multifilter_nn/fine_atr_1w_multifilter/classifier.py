@@ -37,24 +37,34 @@ class Classifier:
             #
             mask = self.af.mask_for_pad_in_score(X_ids, graph)
             mf = MultiFilter(self.nn_config)
-
+            multi_score=[]
             for filter_size in self.nn_config['filter_size']:
+                filter = mf.filter_generator(X_ids, filter_size)
+                X = mf.look_up(X=X, filter=filter, filter_size=filter_size)
+                # conv_X.shape = (batch size, max sentence length, last dim of conv)
+                conv_X = mf.convolution(X=X, filter_size=filter_size, graph=graph)
                 if not self.nn_config['is_mat']:
                     A, o = self.af.attribute_vec(graph)
                     A = A - o
                 else:
                     A, o = self.af.attribute_mat(graph)
                     # A.shape = (batch size, words num, attributes number, attribute dim)
-                    A = self.af.words_attribute_mat2vec(X,A,graph)
-                    o = self.af.words_nonattribute_mat2vec(X,o,graph)
+                    A = self.af.words_attribute_mat2vec(conv_X,A,graph)
+                    o = self.af.words_nonattribute_mat2vec(conv_X,o,graph)
                     A = A-o
+                # score.shape = (batch size, attributes number, words num,1)
+                score = tf.expand_dims(self.af.score(A,conv_X,mask,graph),axis=3)
+                multi_score.append(score)
 
-
-                score = mf.score(A,X,mask,graph)
-                graph.add_to_collection('score_pre', score)
-                # score.shape = (batch size, attributes num)
-                score = tf.reduce_max(score, axis=2)
-                graph.add_to_collection('score', score)
+            # multi_score.shape = (filter numbers, batch size, attributes number, words num,1)
+            # multi_kernel_score = (batch size, attributes number, words num, filter numbers)
+            multi_kernel_score = tf.concat(multi_score,axis=3)
+            # score.shape = (batch size, attributes number ,words num)
+            score = tf.reduce_max(multi_kernel_score,axis=3)
+            graph.add_to_collection('score_pre', score)
+            # score.shape = (batch size, attributes num)
+            score = tf.reduce_max(score, axis=2)
+            graph.add_to_collection('score', score)
 
             loss = self.af.sigmoid_loss(score, Y_att, graph)
             pred = self.af.prediction(score,graph)

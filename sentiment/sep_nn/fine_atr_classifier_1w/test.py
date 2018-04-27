@@ -2,12 +2,10 @@ import os
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-elif os.getlogin() == 'lujunyu':
-    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
-elif os.getlogin() == 'liu121':
+else:
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
-from sentiment.multifilter_nn.fine_atr_1w_multifilter.classifier import Classifier
+from sentiment.sep_nn.fine_atr_classifier_1w.classifier import Classifier
 
 import unittest
 
@@ -38,7 +36,6 @@ class Test(unittest.TestCase):
                             'lr': 0.3,  # learing rate
                             'atr_pred_threshold': 0, # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
                             'attribute_loss_theta': 1.0,
-                            'filter_size':[1,3,5]
                         }
         self.data_config = {
                                 'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',

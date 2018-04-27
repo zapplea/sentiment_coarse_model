@@ -46,55 +46,52 @@ class MultiFilter:
         filter = tf.where(condition, filter, tf.ones_like(filter, dtype='int32') * tf.size(filter_org))
         return filter
 
-    def look_up(self,X,filter):
-        pass
-
-
-    def convolution(self,X,filter):
+    def look_up(self,X,filter,filter_size):
         """
         
         :param X: shape=(batch size, max sentence length, word dim)
-        :param filter: shape = (max sentence length, max sentence length)
+        :param filter: shape = (batch size, max sentence length, filter size)
+        :return: (batch size, max sentence length, filter_size*word dim) 
+        """
+        # table.shape=(batch size * max sentence length, word dim)
+        table = tf.reshape(X,shape=(-1,self.nn_config['word_dim']))
+        # X.shape = (batch size, max sentence length, filter size, word dim)
+        X = tf.nn.embedding_lookup(table, filter, partition_strategy='mod', name='lookup_table')
+        # X.shape = (batch size, max sentence length, filter_size*word dim)
+        X = tf.reshape(X,shape=(-1,self.nn_config['words_num'],filter_size*self.nn_config['word_dim']))
+        return X
+
+    def forward_layer(self,H,shape,name,graph):
+        """
+        
+        :param H: (batch size, filter size*word dim)
+        :param shape: 
+        :param name: 
+        :param graph: 
         :return: 
         """
-        pass
+        W = tf.get_variable(name=name+'_w', initializer=tf.random_uniform(shape=shape,dtype='float32'))
+        graph.add_to_collection('reg',W)
+        bias = tf.get_variable(name=name+'_b', initializer=tf.random_uniform(shape=shape[1],dtype='float32'))
+        hidden_layer = tf.tanh(tf.add(tf.matmul(H,W),bias))
+        return hidden_layer
 
-
-    def score(self, A, X, mask, graph):
+    def convolution(self,X, filter_size, graph):
         """
-
-        :param A: shape = (number of attributes, attribute dim) or
-                  shape = (batch size, max words number, attributes num, attribute dim)
-        :param X: shape = (batch size, max words number, word dim)
-        :param mask: shape = (batch size, max words number)
-        :param graph: 
-        :return: (batch size, attributes num)
+        
+        :param X: shape=(batch size, max sentence length, filter_size*word dim)
+        :return: 
         """
-        # finished TODO: should eliminate the influence of #PAD# when calculate reduce max
-        if not self.nn_config['is_mat']:
-            X = tf.reshape(X, shape=(-1, self.nn_config['word_dim']))
-            # score.shape = (attributes num,batch size*words num)
-            score = tf.matmul(A, X, transpose_b=True)
-            # score.shape = (attributes num, batch size, words num)
-            score = tf.reshape(score, (self.nn_config['attributes_num'], -1, self.nn_config['words_num']))
-            # score.shape = (batch size, attributes number, words num)
-            score = tf.transpose(score, [1, 0, 2])
-            score = self.convolution(score)
-            # mask.shape = (batch size, attributes number, words num)
-            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'], 1])
-            score = tf.add(score, mask)
-            # score.shape = (batch size, attributes num)
-            score = tf.reduce_max(score, axis=2)
-        else:
-            # X.shape = (batch size, words num, attributes num, attribute dim)
-            X = tf.tile(tf.expand_dims(X, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
-            # score.shape = (batch size, words num, attributes num)
-            score = tf.reduce_sum(tf.multiply(A, X), axis=3)
-            # score.shape = (batch size, attributes num, words num)
-            score = tf.transpose(score, [0, 2, 1])
-            score = self.convolution(score)
-            # mask.shape = (batch size, attributes number, words num)
-            mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'], 1])
-            score = tf.add(score, mask)
-        return score
-
+        in_dim=filter_size*self.nn_config['word_dim']
+        H = tf.reshape(X,shape=(-1,filter_size*self.nn_config['word_dim']))
+        count = 0
+        for layer_dim in self.nn_config['conv_layer_dim']:
+            name='conv'+str(count)
+            out_dim=layer_dim
+            shape=(in_dim,out_dim)
+            H = self.forward_layer(H,shape,name,graph)
+            in_dim=out_dim
+            count+=1
+        #H.shape = (batch size, words num, out dim)
+        H = tf.reshape(H,(-1,self.nn_config['words_num'],out_dim))
+        return H

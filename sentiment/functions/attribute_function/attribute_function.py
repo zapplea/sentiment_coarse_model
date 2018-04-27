@@ -87,7 +87,7 @@ class AttributeFunction:
         graph.add_to_collection('words_nonattribute', words_o)
         return words_o
 
-    def score(self, A, X,mask, graph):
+    def score(self, A, X, mask, graph):
         """
 
         :param A: shape = (number of attributes, attribute dim) or
