@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "3" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -9,7 +9,7 @@ elif os.getlogin() == 'lujunyu':
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.sep_nn.fine_atr_classifier_nw.classifier import Classifier
-from sentiment.util.smartInit.atr_data_generator import DataGenerator
+from sentiment.util.fine.atr_data_generator import DataGenerator
 
 def main(nn_config,data_config):
     dg = DataGenerator(data_config,nn_config)
@@ -29,17 +29,17 @@ if __name__ == "__main__":
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
-            'epoch': 3,
+            'epoch': 10000,
             'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
-            'lookup_table_words_num': 3149,  # 2074276 for Chinese word embedding
-            'padding_word_index': 3148,  # the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 3148,  # 2074276 for Chinese word embedding
+            'padding_word_index': 3147,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.0003,
-            'lr': 0.003,  # learing rate
+            'reg_rate': 0.00003,
+            'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 2.0,
+            'attribute_loss_theta': 3.0,
         },
         {  # fixed parameter
             'attributes_num': 12,
