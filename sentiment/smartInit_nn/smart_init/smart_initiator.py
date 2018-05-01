@@ -1,9 +1,20 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+
+from sentiment.functions.initializer.initializer import Initializer
+
 import tensorflow as tf
 
 class SmartInitiator:
     def __init__(self, nn_config):
         self.nn_config = nn_config
-
+        self.initializer = Initializer.parameter_initializer
 
     def smart_initiater(self,graph):
         """
@@ -16,7 +27,7 @@ class SmartInitiator:
                                              2,
                                              self.nn_config['attribute_dim']),
                                       dtype='float32')
-        random_mat = tf.random_normal(shape=(self.nn_config['attributes_num'],
+        random_mat = self.initializer(shape=(self.nn_config['attributes_num'],
                                              self.nn_config['attribute_mat_size'] - 2,
                                              self.nn_config['attribute_dim']),
                                       dtype='float32')
@@ -34,7 +45,7 @@ class SmartInitiator:
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
         o_mat = tf.get_variable(name='other_vec',
-                                initializer=tf.random_uniform(shape=(1,
+                                initializer=self.initializer(shape=(1,
                                                                      self.nn_config['attribute_mat_size'],
                                                                      self.nn_config['attribute_dim']),
                                                               dtype='float32'))

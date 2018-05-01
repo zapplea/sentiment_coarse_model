@@ -8,6 +8,7 @@ else:
 from sentiment.multifilter_nn.fine_atr_nw_multifilter.classifier import Classifier
 
 import unittest
+import numpy as np
 
 class DataGenerator:
     def __init__(self):
@@ -58,6 +59,7 @@ class Test(unittest.TestCase):
         cl = Classifier(self.nn_config,self.dg)
         cl.classifier()
         print('successful')
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,21 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+
+from sentiment.functions.initializer.initializer import Initializer
+
 import tensorflow as tf
 import numpy as np
 
 class AttributeFunction:
     def __init__(self, nn_config):
         self.nn_config = nn_config
+        self.initializer=Initializer.parameter_initializer
 
     def attribute_vec(self, graph):
         """
@@ -12,12 +24,12 @@ class AttributeFunction:
         :return: shape = (number of attributes+1, attributes dim)
         """
         # A is matrix of attribute vector
-        A = tf.Variable(initial_value=tf.random_uniform(shape=(self.nn_config['attributes_num'],
+        A = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],
                                                                self.nn_config['attribute_dim']),
                                                         dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A))
         graph.add_to_collection('A_vec', A)
-        o = tf.Variable(initial_value=tf.random_uniform(shape=(1, self.nn_config['attribute_dim']),
+        o = tf.Variable(initial_value=self.initializer(shape=(1, self.nn_config['attribute_dim']),
                                                         dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o))
         graph.add_to_collection('o_vec', o)
@@ -29,13 +41,13 @@ class AttributeFunction:
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        A_mat = tf.Variable(initial_value=tf.random_uniform(shape=(self.nn_config['attributes_num'],
+        A_mat = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],
                                                                     self.nn_config['attribute_mat_size'],
                                                                     self.nn_config['attribute_dim']),
                                                             dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
-        o_mat = tf.Variable(initial_value=tf.random_uniform(shape=(1,
+        o_mat = tf.Variable(initial_value=self.initializer(shape=(1,
                                                                    self.nn_config['attribute_mat_size'],
                                                                    self.nn_config['attribute_dim']),
                                                             dtype='float32'))

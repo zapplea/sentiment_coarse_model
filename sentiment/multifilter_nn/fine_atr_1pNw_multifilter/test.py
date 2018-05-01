@@ -8,6 +8,8 @@ else:
 from sentiment.multifilter_nn.fine_atr_1pNw_multifilter.classifier import Classifier
 
 import unittest
+import numpy as np
+import tensorflow as tf
 
 class DataGenerator:
     def __init__(self):
@@ -20,16 +22,16 @@ class Test(unittest.TestCase):
                 'word_dim': 200
                 }
         self.nn_config = {  # fixed parameter
-                            'attributes_num': 13,
+                            'attributes_num': 12,
                             'attribute_dim': seed['word_dim'],
                             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
-                            'words_num': 20,
+                            'words_num': 10,
                             'word_dim': seed['word_dim'],
                             'is_mat': True,
                             'epoch': 10000,
                             'batch_size': 30,
                             'lstm_cell_size': seed['lstm_cell_size'],
-                            'lookup_table_words_num': 3000000,  # 2074276 for Chinese word embedding
+                            'lookup_table_words_num': 100,  # 2074276 for Chinese word embedding
                             'padding_word_index': 0,  # the index of #PAD# in word embeddings list
                             # flexible parameter
                             'reg_rate': 0.03,
@@ -59,6 +61,40 @@ class Test(unittest.TestCase):
         cl = Classifier(self.nn_config,self.dg)
         cl.classifier()
         print('successful')
+
+    # def test_score(self):
+    #     cl=Classifier(self.nn_config,self.dg)
+    #     multi_kernel_score = graph.get_collection('multi_kernel_score')[0]
+    #     # (batch size, max sentence length, filter_size*word dim)
+    #     multi_X = graph.get_collection('multi_X')[0]
+    #     multi_H = graph.get_collection('multi_H')[0]
+    #     multi_filter = graph.get_collection('multi_filter')[0]
+    #     conv_H = graph.get_collection('conv_H')
+    #
+    #     X_data = np.random.randint(low=1, high=100, size=(5, self.nn_config['words_num'])).astype('int32')
+    #     Y_data = np.random.randint(low=0, high=12, size=(5, 12)).astype('float32')
+    #     table_data = np.random.randn(100, 200).astype('float32')
+    #     # input
+    #     X = graph.get_collection('X')[0]
+    #     Y = graph.get_collection('Y_att')[0]
+    #     table = graph.get_collection('table')[0]
+    #     with tf.Session(graph=graph) as sess:
+    #         init = tf.global_variables_initializer()
+    #         sess.run(init, feed_dict={table: table_data})
+    #         # result_ks.shape = (batch size, attributes number, words num, filter numbers)
+    #         result_conv_H, result_ks = sess.run([conv_H, multi_kernel_score], feed_dict={X: X_data, Y: Y_data})
+    #
+    #     for H in result_conv_H:
+    #         print(H)
+    #     for score in result_ks:
+    #         print(score)
+    #         # print('==================')
+    #         # print(result_ks.shape)
+    #         # print(result_ks[0][0])
+    #     graph,saver=cl.classifier()
+
+
+
 
 if __name__ == "__main__":
     unittest.main()

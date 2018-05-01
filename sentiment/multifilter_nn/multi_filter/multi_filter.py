@@ -1,10 +1,22 @@
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
+
+from sentiment.functions.initializer.initializer import Initializer
+
+
 import tensorflow as tf
-import numpy as np
 import math
 
 class MultiFilter:
     def __init__(self,nn_config):
         self.nn_config = nn_config
+        self.initializer=Initializer.parameter_initializer
 
     def filter_generator(self,X,filter_size):
         """
@@ -73,10 +85,11 @@ class MultiFilter:
         :param graph: 
         :return: 
         """
-        W = tf.Variable(initial_value=tf.random_uniform(shape=shape,dtype='float32'))
+        W = tf.Variable(initial_value=self.initializer(shape=shape,dtype='float32'))
+
         graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
-        bias = tf.Variable(initial_value=tf.random_uniform(shape=(shape[1],),dtype='float32'))
-        hidden_layer = tf.tanh(tf.add(tf.matmul(H,W),bias))
+        bias = tf.Variable(initial_value=self.initializer(shape=(shape[1],),dtype='float32'))
+        hidden_layer = tf.nn.tanh(tf.add(tf.matmul(H,W),bias))
         return hidden_layer
 
     def convolution(self,X, filter_size, graph):
@@ -88,10 +101,12 @@ class MultiFilter:
         in_dim=filter_size*self.nn_config['word_dim']
         H = tf.reshape(X,shape=(-1,filter_size*self.nn_config['word_dim']))
         for layer_dim in self.nn_config['conv_layer_dim']:
+            graph.add_to_collection('conv_H', H)
             out_dim=layer_dim
             shape=(in_dim,out_dim)
             H = self.forward_layer(H,shape,graph)
             in_dim=out_dim
+        graph.add_to_collection('conv_H',H)
         #H.shape = (batch size, words num, out dim)
         H = tf.reshape(H,(-1,self.nn_config['words_num'],out_dim))
         return H

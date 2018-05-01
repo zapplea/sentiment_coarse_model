@@ -40,6 +40,7 @@ class Classifier:
             multi_score = []
             for filter_size in self.nn_config['filter_size']:
                 filter = mf.filter_generator(X_ids, filter_size)
+                # X.shape = (batch size, max sentence length, filter_size*word dim)
                 X = mf.look_up(X=X, filter=filter, filter_size=filter_size)
                 H = mf.look_up(X=H, filter=filter, filter_size=filter_size)
                 # conv_X.shape = (batch size, max sentence length, last dim of conv)
@@ -72,7 +73,7 @@ class Classifier:
                 # score.shape = (batch size, attributes num, words num,1)
                 score = tf.expand_dims(score,axis=3)
                 multi_score.append(score)
-
+            graph.add_to_collection('multi_score',multi_score)
             # multi_score.shape = (filter numbers, batch size, attributes number, words num,1)
             # multi_kernel_score = (batch size, attributes number, words num, filter numbers)
             multi_kernel_score = tf.concat(multi_score, axis=3)
