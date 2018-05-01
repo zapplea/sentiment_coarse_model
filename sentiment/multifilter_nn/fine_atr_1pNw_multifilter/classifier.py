@@ -38,7 +38,6 @@ class Classifier:
             mask = self.af.mask_for_pad_in_score(X_ids, graph)
             mf = MultiFilter(self.nn_config)
             multi_score = []
-            print('1')
             for filter_size in self.nn_config['filter_size']:
                 filter = mf.filter_generator(X_ids, filter_size)
                 X = mf.look_up(X=X, filter=filter, filter_size=filter_size)
@@ -46,7 +45,6 @@ class Classifier:
                 # conv_X.shape = (batch size, max sentence length, last dim of conv)
                 conv_X = mf.convolution(X=X, filter_size=filter_size, graph=graph)
                 conv_H = mf.convolution(X=H, filter_size=filter_size, graph=graph)
-                print('3')
                 if not self.nn_config['is_mat']:
                     A, o = self.af.attribute_vec(graph)
                     A = A - o
@@ -59,7 +57,6 @@ class Classifier:
                     A_e = self.af.words_attribute_mat2vec(conv_X, A, graph)
                     o_e = self.af.words_nonattribute_mat2vec(conv_X, o, graph)
                     A_e = A_e - o_e
-                print('4')
                 if not self.nn_config['is_mat']:
                     # score.shape = (batch size, attributes num, words num)
                     score_lstm = self.af.score(A, conv_H,mask, graph)
@@ -67,19 +64,14 @@ class Classifier:
                     score_e = self.af.score(A,conv_X,mask,graph)
                 else:
                     # score.shape = (batch size, attributes num, words num)
-                    print('6')
                     score_lstm = self.af.score(A_lstm,conv_H,mask,graph)
-                    print('7')
                     # score.shape = (batch size, attributes num, words num)
                     score_e = self.af.score(A_e,conv_X,mask,graph)
-                print('5')
                 # score.shape = (batch size, attributes num, words num)
                 score = tf.add(score_lstm, score_e)
                 # score.shape = (batch size, attributes num, words num,1)
                 score = tf.expand_dims(score,axis=3)
                 multi_score.append(score)
-                print('2')
-                print('=============')
 
             # multi_score.shape = (filter numbers, batch size, attributes number, words num,1)
             # multi_kernel_score = (batch size, attributes number, words num, filter numbers)
