@@ -34,10 +34,12 @@ class Test(unittest.TestCase):
                             # flexible parameter
                             'reg_rate': 0.03,
                             'lr': 0.3,  # learing rate
-                            'atr_pred_threshold': 0, # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
+                            'atr_pred_threshold': 0,
+                        # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
                             'attribute_loss_theta': 1.0,
-                            'filter_size': [1, 3, 5]
-                        }
+                            'filter_size': [1, 3, 5],
+                            'conv_layer_dim': [1000, seed['lstm_cell_size']]
+        }
         self.data_config = {
                                 'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
                                 'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/restaurant attribute data train.pkl',

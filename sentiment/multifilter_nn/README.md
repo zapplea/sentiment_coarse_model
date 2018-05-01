@@ -1,13 +1,9 @@
 In this directory, we implement sentiment model separately, and train them separately.
 
 ## Constraints to Hyper-parameter:
-senti function. rps_num <= words_num
-
-1w: attribute_dim = word_embedding dim
-nw: attribute dim = lstm cell size
-1pNw: attribute dim = lstm cell size = word dim
 1w, nw, 1pNw: attribute dim = lstm cell size = word dim
-batch size should be factor of length of test data, otherwise, some test data will be wasted.
+
+batch can be any size.
 
 ## basic attribute function module:
 use parameter is_mat to choose attribute mention matrix(True) and attribute vector(False).
@@ -18,7 +14,7 @@ use parameter is_mat to choose attribute mention matrix(True) and attribute vect
 # Parameters
 ## new parameters
 filter_size: the size of filter, given by a list, like [1,3,5]. The size of each filter must be a odd number. 
-conv_layer_dim:[1000,self.nn_config['lstm_cell_size']]
+conv_layer_dim:[1000,seed['lstm_cell_size'/'word_dim']]
 
 ## basic paramters
 'attributes_num': number of attributes, need to eliminate non-attribute

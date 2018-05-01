@@ -55,7 +55,6 @@ class Classifier:
                 # score.shape = (batch size, attributes number, words num,1)
                 score = tf.expand_dims(self.af.score(A,conv_X,mask,graph),axis=3)
                 multi_score.append(score)
-
             # multi_score.shape = (filter numbers, batch size, attributes number, words num,1)
             # multi_kernel_score = (batch size, attributes number, words num, filter numbers)
             multi_kernel_score = tf.concat(multi_score,axis=3)
