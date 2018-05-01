@@ -12,13 +12,13 @@ class AttributeFunction:
         :return: shape = (number of attributes+1, attributes dim)
         """
         # A is matrix of attribute vector
-        A = tf.get_variable(name='A_vec', initializer=tf.random_uniform(
-            shape=(self.nn_config['attributes_num'], self.nn_config['attribute_dim']),
-            dtype='float32'))
+        A = tf.Variable(initial_value=tf.random_uniform(shape=(self.nn_config['attributes_num'],
+                                                               self.nn_config['attribute_dim']),
+                                                        dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A))
         graph.add_to_collection('A_vec', A)
-        o = tf.get_variable(name='other_vec', initializer=tf.random_uniform(shape=(1, self.nn_config['attribute_dim']),
-                                                                            dtype='float32'))
+        o = tf.Variable(initial_value=tf.random_uniform(shape=(1, self.nn_config['attribute_dim']),
+                                                        dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o))
         graph.add_to_collection('o_vec', o)
         return A, o
@@ -29,17 +29,16 @@ class AttributeFunction:
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        A_mat = tf.get_variable(name='A_mat', initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],
-                                                                                   self.nn_config['attribute_mat_size'],
-                                                                                   self.nn_config['attribute_dim']),
-                                                                            dtype='float32'))
+        A_mat = tf.Variable(initial_value=tf.random_uniform(shape=(self.nn_config['attributes_num'],
+                                                                    self.nn_config['attribute_mat_size'],
+                                                                    self.nn_config['attribute_dim']),
+                                                            dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
-        o_mat = tf.get_variable(name='other_vec',
-                                initializer=tf.random_uniform(shape=(1,
-                                                                     self.nn_config['attribute_mat_size'],
-                                                                     self.nn_config['attribute_dim']),
-                                                              dtype='float32'))
+        o_mat = tf.Variable(initial_value=tf.random_uniform(shape=(1,
+                                                                   self.nn_config['attribute_mat_size'],
+                                                                   self.nn_config['attribute_dim']),
+                                                            dtype='float32'))
         graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o_mat))
         graph.add_to_collection('o_mat', o_mat)
         return A_mat,o_mat
