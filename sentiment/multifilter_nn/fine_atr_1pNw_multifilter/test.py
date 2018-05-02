@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
                         # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
                             'attribute_loss_theta': 1.0,
                             'filter_size': [1, 3, 5],
-                            'conv_layer_dim': [1000, seed['lstm_cell_size']]
+                            'conv_layer_dim': [seed['lstm_cell_size']]
                         }
         self.data_config = {
                                 'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
