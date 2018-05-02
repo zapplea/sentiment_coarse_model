@@ -22,10 +22,11 @@ class SmartInitiator:
         :param attributes: ndarray, shape=(attribute numbers ,2, attribute dim)
         :return: 
         """
-        name_list_input=tf.placeholder(shape=(None,self.nn_config['attributes_num']),dtype='float32')
-        return name_list_input
+        name_list_vec_input=tf.placeholder(shape=(None,self.nn_config['attributes_num']),dtype='float32')
+        graph.add_to_collection('name_list_vec')
+        return name_list_vec_input
 
-    def name_list_score(self,name_list,graph):
+    def name_list_score(self,name_list_vec,graph):
         """
         
         :param initial: shape = (batch size, attributes num) 
@@ -36,5 +37,5 @@ class SmartInitiator:
                                                        dtype='float32'),
                         dtype='float32')
         graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
-        score = tf.multiply(W,name_list)
+        score = tf.multiply(W,name_list_vec)
         return score
