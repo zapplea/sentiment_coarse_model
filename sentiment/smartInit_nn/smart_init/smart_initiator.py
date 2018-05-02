@@ -9,6 +9,7 @@ elif os.getlogin() == 'liu121':
 
 from sentiment.functions.initializer.initializer import Initializer
 
+
 import tensorflow as tf
 
 class SmartInitiator:
@@ -21,34 +22,19 @@ class SmartInitiator:
         :param attributes: ndarray, shape=(attribute numbers ,2, attribute dim)
         :return: 
         """
-        # TODO: need to be careful to one attribute: STYLE_OPTIONS, should split them to two words and mean.
-        # random_mat.shape = (attributes number, attribute mat size-2, attribute dim)
-        mentions_mat = tf.placeholder(shape=(self.nn_config['attributes_num'],
-                                             2,
-                                             self.nn_config['attribute_dim']),
-                                      dtype='float32')
-        random_mat = self.initializer(shape=(self.nn_config['attributes_num'],
-                                             self.nn_config['attribute_mat_size'] - 2,
-                                             self.nn_config['attribute_dim']),
-                                      dtype='float32')
-        attributes_mat = tf.nn.l2_normalize(tf.concat([mentions_mat, random_mat], axis=1),axis=2)
-        graph.add_to_collection('smartInit',attributes_mat)
-        return attributes_mat
+        name_list_input=tf.placeholder(shape=(None,self.nn_config['attributes_num']),dtype='float32')
+        return name_list_input
 
-    def attribute_mat(self, smartInit, graph):
+    def name_list_score(self,name_list,graph):
         """
-
+        
+        :param initial: shape = (batch size, attributes num) 
         :param graph: 
-        :return: shape = (attributes number+1, attribute mat size, attribute dim)
+        :return: 
         """
-        A_mat = tf.get_variable(name='A_mat', initializer=smartInit)
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
-        graph.add_to_collection('A_mat', A_mat)
-        o_mat = tf.get_variable(name='other_vec',
-                                initializer=self.initializer(shape=(1,
-                                                                     self.nn_config['attribute_mat_size'],
-                                                                     self.nn_config['attribute_dim']),
-                                                              dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o_mat))
-        graph.add_to_collection('o_mat', o_mat)
-        return A_mat,o_mat
+        W = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],),
+                                                       dtype='float32'),
+                        dtype='float32')
+        graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
+        score = tf.multiply(W,name_list)
+        return score

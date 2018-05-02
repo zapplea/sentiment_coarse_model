@@ -41,7 +41,7 @@ class Classifier:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
             else:
-                A, o = smartInit.attribute_mat(smartInit.smart_initiater(graph), graph)
+                A, o = self.af.attribute_mat(graph)
                 # A.shape = (batch size, words num, attributes number, attribute dim)
                 A_lstm = self.af.words_attribute_mat2vec(H, A, graph)
                 o_lstm = self.af.words_nonattribute_mat2vec(H, o, graph)
@@ -66,6 +66,13 @@ class Classifier:
                 graph.add_to_collection('score_pre', score)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score, axis=2)
+
+            # shape = (batch size, attributes number)
+            name_list = smartInit.smart_initiater(graph)
+            # shape = (batch size, attributes number)
+            name_list_score = smartInit.name_list_score(name_list, graph)
+            score = tf.add(name_list_score, score)
+
             graph.add_to_collection('score',score)
             loss = self.af.sigmoid_loss(score,Y_att,graph)
             pred = self.af.prediction(score, graph)
@@ -137,20 +144,20 @@ class Classifier:
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
                             Y_att_vec.append(Y_att_data[n])
-                    # if i % 1 == 0:
-                    #     check_num = 1
-                    #     print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
-                    #
-                    #     _precision = self.mt.precision(TP_vec,FP_vec,'macro')
-                    #     _recall = self.mt.recall(TP_vec,FN_vec,'macro')
-                    #     _f1_score = self.mt.f1_score(_precision,_recall,'macro')
-                    #     print('F1 score for each class:',_f1_score,'\nPrecison for each class:',_precision,'\nRecall for each class:',_recall)
-                    #     print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
-                    #
-                    #     _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                    #     _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                    #     _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                    #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
+                    if i % 1 == 0:
+                        check_num = 1
+                        print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
+
+                        _precision = self.mt.precision(TP_vec,FP_vec,'macro')
+                        _recall = self.mt.recall(TP_vec,FN_vec,'macro')
+                        _f1_score = self.mt.f1_score(_precision,_recall,'macro')
+                        print('F1 score for each class:',_f1_score,'\nPrecison for each class:',_precision,'\nRecall for each class:',_recall)
+                        print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
+
+                        _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
 
                         # # np.random.seed(1)
                         # random_display = np.random.randint(0, 1700, check_num)
@@ -217,7 +224,6 @@ class Classifier:
                         _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:',np.mean(_recall))
                         # # np.random.seed(1)
-                        # check_num = 1
                         # random_display = np.random.randint(0, 570, check_num)
                         # pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(pred_vec[r]) if rr] for
                         #               r in random_display]
@@ -230,11 +236,12 @@ class Classifier:
                         #                random_display]
                         # score_check = [score_vec[r] for r in random_display]
                         # score_pre_check = [score_pre_vec[r] for r in random_display]
+                        # max_false_score_check = [max_false_score_vec[r] for r in random_display]
                         # for n in range(check_num):
                         #     print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
                         #           pred_check[n],
                         #           "\nY_att:\n", Y_att_check[n]
-                        #           , "\nscore:\n", score_check[n])
+                        #           , "\nscore:\n", score_check[n], "\nmax_false_score:\n", max_false_score_check[n])
                         #     for nn in range(len(score_pre_check[n])):
                         #         if list(self.dg.aspect_dic.keys())[nn] in Y_att_check[n]:
                         #             print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
