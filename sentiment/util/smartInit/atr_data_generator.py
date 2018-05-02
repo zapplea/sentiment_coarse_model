@@ -204,11 +204,21 @@ class DataGenerator():
             pickle.dump(aspect_dic,f)
 
             ##Generate smart embedding
-            smart_init_embedding , a_wordlist = self.smart_initiator(aspect_dic,pre_dictionary,word_embed)
+            # smart_init_embedding , a_wordlist = self.smart_initiator(aspect_dic,pre_dictionary,word_embed)
+            # word_list = list(set(self.get_word_list(tmp, pre_dictionary) + a_wordlist))
+            # pickle.dump(smart_init_embedding,f)
+            with open(self.data_config['namelist_path'],'rb') as namelist_file:
+                namelist = pickle.load(namelist_file)
+                a_wordlist  = list(namelist.keys())
+                smart_init_embedding = []
+                for i in a_wordlist:
+                    smart_init_embedding.append(namelist[i])
+                smart_init_embedding = np.array(smart_init_embedding)
             pickle.dump(smart_init_embedding,f)
 
             ###Generate dictionary
-            word_list = list(set(self.get_word_list(tmp,pre_dictionary) + a_wordlist))
+            word_list = list(set(self.get_word_list(tmp, pre_dictionary) + a_wordlist))
+            print(vocabulary)
             vocabulary = list(np.array(vocabulary)[word_list])
             vocabulary.append('#UNK#')
             vocabulary.append('#PAD#')

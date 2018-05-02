@@ -94,7 +94,6 @@ class Classifier:
             smartInit = graph.get_collection('smartInit')[0]
             score = graph.get_collection('score')[0]
             score_pre = graph.get_collection('score_pre')[0]
-            max_false_score = graph.get_collection('max_false_score')[0]
             TP = graph.get_collection('TP')[0]
             FN = graph.get_collection('FN')[0]
             FP = graph.get_collection('FP')[0]
@@ -123,9 +122,9 @@ class Classifier:
                     FN_vec = []
                     for j in range(batch_num):
                         sentences, Y_att_data = self.dg.train_data_generator(j,i)
-                        _, train_loss,TP_data, FP_data, FN_data, pred_data, score_data, max_false_score_data, score_pre_data \
+                        _, train_loss,TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data \
                             = sess.run(
-                            [train_step, loss, TP,FP,FN,pred, score, max_false_score, score_pre  ],
+                            [train_step, loss, TP,FP,FN,pred, score, score_pre  ],
                             feed_dict={X: sentences, Y_att: Y_att_data})
 
                         ###Show training message
@@ -137,7 +136,6 @@ class Classifier:
                             pred_vec.append(pred_data[n])
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
-                            max_false_score_vec.append(max_false_score_data[n])
                             Y_att_vec.append(Y_att_data[n])
                     if i % 1 == 0:
                         check_num = 1
@@ -191,7 +189,7 @@ class Classifier:
                         FN_vec = []
                         batch_size = self.nn_config['batch_size']
                         for i in range(valid_size // batch_size):
-                            test_loss,  pred_data, score_data, max_false_score_data, score_pre_data,TP_data, FP_data, FN_data  = sess.run([loss, pred, score, max_false_score, score_pre,TP,FP,FN],
+                            test_loss,  pred_data, score_data, score_pre_data,TP_data, FP_data, FN_data  = sess.run([loss, pred, score, score_pre,TP,FP,FN],
                                                                                                                                 feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
                                                                                                                                Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size]
                                                                                                                                })
@@ -204,7 +202,6 @@ class Classifier:
                                 pred_vec.append(pred_data[n])
                                 score_vec.append(score_data[n])
                                 score_pre_vec.append(score_pre_data[n])
-                                max_false_score_vec.append(max_false_score_data[n])
                         print('\nTest loss:%.10f' % np.mean(loss_vec))
 
                         _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
