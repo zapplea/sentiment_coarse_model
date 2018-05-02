@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "3" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -26,23 +26,23 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 12,
             'attribute_dim': seed['word_dim'],
-            'conv_layer_dim':[1000,int(seed['lstm_cell_size']/seed['word_dim'])],
+            'conv_layer_dim':[900,seed['lstm_cell_size']],
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
             'filter_size':[1,3,5],
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
-            'epoch': 1000,
+            'epoch': 30,
             'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 3148,  # 2074276 for Chinese word embedding
             'padding_word_index': 3147,  # the index of #PAD# in word embeddings list
             # flexible parameter
             'reg_rate': 0.0003,
-            'lr': 0.003,  # learing rate
-            'atr_pred_threshold': 0,
+            'lr': 0.0003,  # learing rate
+            'atr_pred_threshold': 0.0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 1.0,
+            'attribute_loss_theta': 4.0,
         },
         {  # fixed parameter
             'attributes_num': 12,

@@ -154,6 +154,7 @@ class AttributeFunction:
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score),
                                                    axis=1),
                                      tf.reduce_sum(graph.get_collection('reg'))))
+        tf.add_to_collection('atr_loss',loss)
         return loss
     # ############################ #
     # max margin loss function for multi-label#
@@ -286,7 +287,8 @@ class AttributeFunction:
         :param graph: 
         :return: 
         """
-        cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
+        cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size']))
+        print(cell)
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)

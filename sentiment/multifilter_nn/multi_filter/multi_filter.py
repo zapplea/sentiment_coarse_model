@@ -76,7 +76,7 @@ class MultiFilter:
         X = tf.reshape(X,shape=(-1,self.nn_config['words_num'],filter_size*self.nn_config['word_dim']))
         return X
 
-    def forward_layer(self,H,shape,graph):
+    def forward_layer(self,H,shape,keep_prob,graph):
         """
         
         :param H: (batch size, filter size*word dim)
@@ -89,10 +89,11 @@ class MultiFilter:
 
         graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         bias = tf.Variable(initial_value=self.initializer(shape=(shape[1],),dtype='float32'))
-        hidden_layer = tf.nn.tanh(tf.add(tf.matmul(H,W),bias))
+        hidden_layer = tf.nn.dropout(tf.nn.tanh(tf.add(tf.matmul(H,W),bias)),keep_prob=keep_prob)
+        graph.add_to_collection('score_lstm', hidden_layer)
         return hidden_layer
 
-    def convolution(self,X, filter_size, graph):
+    def convolution(self,X, filter_size, keep_prob,graph):
         """
         
         :param X: shape=(batch size, max sentence length, filter_size*word dim)
@@ -104,7 +105,7 @@ class MultiFilter:
             graph.add_to_collection('conv_H', H)
             out_dim=layer_dim
             shape=(in_dim,out_dim)
-            H = self.forward_layer(H,shape,graph)
+            H = self.forward_layer(H,shape,keep_prob,graph)
             in_dim=out_dim
         graph.add_to_collection('conv_H',H)
         #H.shape = (batch size, words num, out dim)

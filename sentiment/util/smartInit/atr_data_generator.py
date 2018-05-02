@@ -209,16 +209,14 @@ class DataGenerator():
             # pickle.dump(smart_init_embedding,f)
             with open(self.data_config['namelist_path'],'rb') as namelist_file:
                 namelist = pickle.load(namelist_file)
-                a_wordlist  = list(namelist.keys())
                 smart_init_embedding = []
-                for i in a_wordlist:
+                for i in namelist.keys():
                     smart_init_embedding.append(namelist[i])
                 smart_init_embedding = np.array(smart_init_embedding)
             pickle.dump(smart_init_embedding,f)
 
             ###Generate dictionary
-            word_list = list(set(self.get_word_list(tmp, pre_dictionary) + a_wordlist))
-            print(vocabulary)
+            word_list = self.get_word_list(tmp, pre_dictionary)
             vocabulary = list(np.array(vocabulary)[word_list])
             vocabulary.append('#UNK#')
             vocabulary.append('#PAD#')
