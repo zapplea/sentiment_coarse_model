@@ -185,7 +185,9 @@ class DataGenerator():
 
 
             ###Generate dictionary
-            word_list = self.get_word_list(tmp,pre_dictionary)
+            train_word_list = self.get_word_list(tmp,pre_dictionary)
+            test_word_list = self.get_word_list(pd.read_csv(self.data_config['test_source_file_path'], index_col=0),pre_dictionary)
+            word_list = list(set(train_word_list + test_word_list))
             vocabulary = list(np.array(vocabulary)[word_list])
             vocabulary.append('#UNK#')
             vocabulary.append('#PAD#')
