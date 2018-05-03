@@ -15,3 +15,5 @@ TODO:
 and put them in the name list. For different aspect#attribute, the k doesn't need to be the same.
 2. for each sentence, check each word in it to create name list vector.
 3. after create the name list vector for each sentence, input it to name_list_vec in sess.run.
+4. add a new function "name_list_generator" to return name_list_vec of each sentence. or you can use "train_data_generator" to return sentence,attribute labels, and name list at same time if this is more convient.
+In the train function, I choose the first method, yet you can change it.

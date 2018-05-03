@@ -23,7 +23,7 @@ class SmartInitiator:
         :return: 
         """
         name_list_vec_input=tf.placeholder(shape=(None,self.nn_config['attributes_num']),dtype='float32')
-        graph.add_to_collection('name_list_vec')
+        graph.add_to_collection('name_list_vec',name_list_vec_input)
         return name_list_vec_input
 
     def name_list_score(self,name_list_vec,graph):
@@ -33,9 +33,9 @@ class SmartInitiator:
         :param graph: 
         :return: 
         """
-        W = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],),
+        W = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],self.nn_config['attributes_num']),
                                                        dtype='float32'),
                         dtype='float32')
         graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
-        score = tf.multiply(W,name_list_vec)
+        score = tf.matmul(name_list_vec,W)
         return score
