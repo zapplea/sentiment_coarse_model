@@ -33,9 +33,12 @@ class SmartInitiator:
         :param graph: 
         :return: 
         """
-        W = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],self.nn_config['attributes_num']),
-                                                       dtype='float32'),
-                        dtype='float32')
+        # W = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],self.nn_config['attributes_num']),
+        #                                                dtype='float32'),
+        #                 dtype='float32')
+        W=tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],),
+                                                     dtype='float32'),
+                      dtype='float32')
         graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
-        score = tf.matmul(name_list_vec,W)
+        score = tf.multiply(name_list_vec,W)
         return score

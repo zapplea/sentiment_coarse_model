@@ -10,7 +10,6 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.functions.attribute_function.metrics import Metrics
 import tensorflow as tf
-import numpy as np
 
 class SmartInitTrain:
     def __init__(self,nn_config, data_generator):
