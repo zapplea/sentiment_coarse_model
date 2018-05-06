@@ -289,7 +289,7 @@ class AttributeFunction:
         """
         keep_prob = tf.placeholder(tf.float32)
         tf.add_to_collection('keep_prob_lstm',keep_prob)
-        cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size']),input_keep_prob=keep_prob,output_keep_prob=keep_prob,state_keep_prob=keep_prob)
+        cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size']),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)

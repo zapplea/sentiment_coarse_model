@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "5" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -26,42 +26,48 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 12,
             'attribute_dim': seed['word_dim'],
-            'conv_layer_dim':[900,seed['lstm_cell_size']],
+            'conv_layer_dim':[1500,800,seed['lstm_cell_size']],
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
             'filter_size':[1,3,5],
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
-            'epoch': 30,
+            'epoch': 50,
             'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
-            'lookup_table_words_num': 3148,  # 2074276 for Chinese word embedding
-            'padding_word_index': 3147,  # the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 3646,  # 2074276 for Chinese word embedding
+            'padding_word_index': 3645,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.0003,
+            'reg_rate': 0.00003,
             'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0.0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
             'attribute_loss_theta': 4.0,
+            'keep_prob_f':0.5,
+            'keep_prob_lstm':0.5
         },
         {  # fixed parameter
             'attributes_num': 12,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 2,  # number of attribute mention prototypes in a attribute matrix
+            'conv_layer_dim':[1500,800,seed['lstm_cell_size']],
+            'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
+            'filter_size':[1,3,5],
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
-            'epoch': 20000,
+            'epoch': 50,
             'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
-            'lookup_table_words_num': 3149,  # 2074276 for Chinese word embedding
-            'padding_word_index': 3148,  # the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 3646,  # 2074276 for Chinese word embedding
+            'padding_word_index': 3645,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.001,
-            'lr': 0.003,  # learing rate
-            'atr_pred_threshold': 0,
+            'reg_rate': 0.00003,
+            'lr': 0.0003,  # learing rate
+            'atr_pred_threshold': 0.0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 2.0,
+            'attribute_loss_theta': 4.0,
+            'keep_prob_f':0.5,
+            'keep_prob_lstm':0.5
         },
         {  # fixed parameter
             'attributes_num': 12,
@@ -84,10 +90,10 @@ if __name__ == "__main__":
         }
     ]
     data_config = {
-        'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
-        'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/sep_nn/train_data.pkl',
-        'test_source_file_path': '~/dataset/semeval2016/absa_resturant_test.csv',
-        'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/sep_nn/test_data.pkl',
+        'train_source_file_path': '/home/lujunyu/dataset/semeval2016/absa_resturant_train.csv',
+        'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/multifilter_nn/train_data.pkl',
+        'test_source_file_path': '~/dataset/semeval2016/absa_resturant_goldentest.csv',
+        'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/multifilter_nn/test_data.pkl',
         'wordembedding_file_path': '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
         'attributes_num': nn_configs[0]['attributes_num'],

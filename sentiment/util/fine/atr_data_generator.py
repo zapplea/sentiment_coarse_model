@@ -197,7 +197,7 @@ class DataGenerator():
             pickle.dump(dictionary, f)
 
             attribute_ground_truth = self.get_aspect_id(tmp,aspect_dic)
-            train_data_mask = tmp['sentence'].drop_duplicates().index
+            train_data_mask = tmp['sentence_id'].drop_duplicates().index
             attribute_ground_truth = attribute_ground_truth[train_data_mask]
             pickle.dump(attribute_ground_truth, f)
             sentence_ground_truth = self.get_word_id(tmp,dictionary)
@@ -223,7 +223,7 @@ class DataGenerator():
         else:
             f = open(self.data_config['test_data_file_path'], 'wb')
             tmp = pd.read_csv(self.data_config['test_source_file_path'], index_col=0)
-            test_data_mask = tmp['sentence'].drop_duplicates().index
+            test_data_mask = tmp['sentence_id'].drop_duplicates().index
             attribute_ground_truth = self.get_aspect_id(tmp,test_aspect_dic)
             attribute_ground_truth = attribute_ground_truth[test_data_mask]
             pickle.dump(attribute_ground_truth, f)
