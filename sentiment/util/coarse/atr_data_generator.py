@@ -112,7 +112,7 @@ class DataGenerator():
             a = []
             sens = nltk.sent_tokenize(data.iloc[idx]['text'])
             if len(sens) > self.nn_config['max_review_length']:
-                sens = sens[:10]
+                sens = sens[:self.nn_config['max_review_length']]
             sentence = []
             for sent in sens:
                 tmp = []

@@ -27,17 +27,17 @@ if __name__ == "__main__":
             'attributes_num': 7,
             'attribute_dim': seed['word_dim'],
             'attribute_mat_size': 5,  # number of attribute mention prototypes in a attribute matrix
-            'max_review_length':25,
+            'max_review_length':10,
             'words_num': 40,
             'word_dim': seed['word_dim'],
-            'is_mat': False,
-            'epoch': 1,
-            'batch_size': 1,
+            'is_mat': True,
+            'epoch': 1000,
+            'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 27433,  # 2074276 for Chinese word embedding
             'padding_word_index': 27432,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.3,
+            'reg_rate': 0.00003,
             'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
@@ -86,9 +86,9 @@ if __name__ == "__main__":
         }
     ]
     data_config = {
-        'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
+        'train_source_file_path': '/home/lujunyu/dataset/yelp/yelp_lda_trainset.pkl',
         'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/train_data.pkl',
-        'test_source_file_path': '~/dataset/semeval2016/absa_resturant_test.csv',
+        'test_source_file_path': '/home/lujunyu/dataset/yelp/yelp_lda_testset.pkl',
         'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/test_data.pkl',
         'wordembedding_file_path': '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',

@@ -8,7 +8,6 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
 from sentiment.functions.attribute_function.metrics import Metrics
-from sentiment.functions.attribute_function.attribute_function import AttributeFunction as fine_AttributeFunction
 
 import tensorflow as tf
 import numpy as np
@@ -21,7 +20,7 @@ class AttributeFunction:
     def attribute_vec(self, graph):
         """
 
-        :param graph: 
+        :param graph:
         :return: shape = (number of attributes+1, attributes dim)
         """
         # A is matrix of attribute vector
@@ -39,7 +38,7 @@ class AttributeFunction:
     def attribute_mat(self, graph):
         """
 
-        :param graph: 
+        :param graph:
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
         A_mat = tf.get_variable(name='A_mat', initializer=tf.random_uniform(shape=(self.nn_config['attributes_num'],
@@ -62,7 +61,7 @@ class AttributeFunction:
         convert attribtes matrix to attributes vector for each words in a sentence. A_mat include non-attribute mention matrix.
         :param H: shape = (batch size, number of words, word dim)
         :param A_mat: (number of atr, atr mat size, atr dim)
-        :param graph: 
+        :param graph:
         :return: shape = (batch size, number of words, number of attributes, attribute dim(=lstm cell dim))
         """
         # H.shape = (batch size, words number, attribute number, word dim)
@@ -82,7 +81,7 @@ class AttributeFunction:
 
         :param H: shape = (batch size, words number, word dim)
         :param o_mat: shape = (1,attribute mat size, attribute dim)
-        :param graph: 
+        :param graph:
         :return: batch size, number of words, attributes num, attribute dim( =word dim)
         """
         # H.shape = (batch size, words number, 1, word dim)
@@ -106,7 +105,7 @@ class AttributeFunction:
         :param A: shape = (number of attributes, attribute dim) or
                   shape = (batch size, words number, attributes num, attribute dim)
         :param X: shape = (batch size, words number, lstm cell size)
-        :param graph: 
+        :param graph:
         :return: (batch size, attributes number, words num)
         """
         if not self.nn_config['is_mat']:
@@ -144,8 +143,8 @@ class AttributeFunction:
 
         :param Y_att: shape = (batch size, attributes number)
         :param pred: shape = (batch size, attributes number)
-        :param graph: 
-        :return: 
+        :param graph:
+        :return:
         """
         condition = tf.equal(Y_att, pred)
         cmp = tf.reduce_sum(
@@ -162,7 +161,7 @@ class AttributeFunction:
         :param score: shape = (batch size, attributes num)
         :param Y_att: shape = (batch size, attributes num)
         :param graph:
-        :return: 
+        :return:
         """
         condition = tf.equal(Y_att, tf.ones_like(Y_att, dtype='float32'))
         max_fscore = tf.reduce_max(
@@ -179,7 +178,7 @@ class AttributeFunction:
         :param score: shape = (batch size, attributes num)
         :param max_fscore: shape = (batch size, attributes num)
         :param Y_att: (batch size, attributes num)
-        :param graph: 
+        :param graph:
         :return: (batch size, attributes number)
         """
         # create a mask for non-attribute in which Sa is 0 and need to keep max false attribute
@@ -194,16 +193,21 @@ class AttributeFunction:
         theta = tf.constant(self.nn_config['attribute_loss_theta'], dtype='float32')
         # loss.shape = (batch size, attributes num)
         loss = tf.multiply(tf.add(tf.subtract(theta, tf.multiply(Y_att, score)), max_fscore), nonatr_mask)
-        zero_loss = tf.zeros_like(loss, dtype='float32')
+        # zero_loss = tf.zeros_like(loss, dtype='float32')
+        #
+        # loss = tf.expand_dims(loss, axis=2)
+        # zero_loss = tf.expand_dims(zero_loss, axis=2)
+        # # loss.shape = (batch size, attributes num)
+        # loss = tf.reduce_max(tf.concat([loss, zero_loss], axis=2), axis=2)
 
-        loss = tf.expand_dims(loss, axis=2)
-        zero_loss = tf.expand_dims(zero_loss, axis=2)
-        # loss.shape = (batch size, attributes num)
-        loss = tf.reduce_max(tf.concat([loss, zero_loss], axis=2), axis=2)
+        condition2 = tf.equal(loss,loss)
+        loss = tf.where(condition2,loss,tf.zeros_like(loss))
+
         # The following is obsolete design of loss function with regularization.
         # loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1)) + tf.multiply(1 / self.nn_config['batch_size'],
         #                                                                  tf.reduce_sum(graph.get_collection('reg')))
         loss = tf.reduce_mean(tf.reduce_sum(loss, axis=1) + tf.reduce_sum(graph.get_collection('reg')))
+        graph.add_to_collection('check', tf.reduce_sum(graph.get_collection('reg')))
         graph.add_to_collection('atr_loss', loss)
 
         return loss
@@ -214,7 +218,6 @@ class Classifier:
         self.nn_config = nn_config
         self.dg = data_generator
         self.af = AttributeFunction(nn_config)
-        self.fineaf = fine_AttributeFunction(nn_config)
         self.mt = Metrics(self.nn_config)
 
     def sentences_input(self, graph):
@@ -240,6 +243,7 @@ class Classifier:
         condition = tf.equal(paddings, X)
         seq_len = tf.reduce_sum(tf.where(condition, tf.zeros_like(X, dtype='int32'), tf.ones_like(X, dtype='int32')),
                                 axis=1, name='seq_len')
+        tf.add_to_collection('seq_len',seq_len)
         return seq_len
 
     def mask_for_pad_in_score(self,X,graph):
@@ -252,7 +256,7 @@ class Classifier:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='float32')*tf.convert_to_tensor(-np.inf), tf.zeros_like(X, dtype='float32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32')*tf.convert_to_tensor(-100.0), tf.zeros_like(X, dtype='float32'))
         return mask
 
     # should use variable share
@@ -317,6 +321,15 @@ class Classifier:
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
+    def mask_for_true_label(self,X):
+        X = tf.cast(X , dtype='float32')
+        temp = tf.reduce_min(X,axis=1)
+        ones = tf.ones_like(temp, dtype='float32') * self.nn_config['padding_word_index']
+        is_one = tf.equal(temp, ones)
+        mask = tf.where(is_one, tf.zeros_like(temp, dtype='float32'), tf.ones_like(temp, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask,axis=1), multiples=[ 1, self.nn_config['attributes_num']])
+        return mask
+
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
@@ -334,8 +347,11 @@ class Classifier:
                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes)
             aspect_prob = self.attribute_labels_input(graph=graph)
+
+            mask_true_label = self.mask_for_true_label(X_ids)
+
             # Y_att.shape = (batch size, max review length, attributes num)
-            Y_att = relscore.aspect_prob2true_label(aspect_prob)
+            Y_att = relscore.aspect_prob2true_label(aspect_prob ,mask_true_label)
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
@@ -371,17 +387,16 @@ class Classifier:
             tf.add_to_collection('score',score)
             # aspect_prob.shape = (batch size * max review length ,attributes num)
             aspect_prob = relscore.expand_aspect_prob(aspect_prob, graph)
+            tf.add_to_collection('aspect_prob', aspect_prob)
             # atr_rel_prob = (batch size * max review length, attributes num)
             atr_rel_prob = relscore.relevance_prob_atr(score, graph)
+            tf.add_to_collection('atr_rel_prob', atr_rel_prob)
             # coarse score
-            # score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
-            # score = atr_rel_prob
+            score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
 
-            # max_fscore = self.af.max_false_score(score, Y_att, graph)
-            # loss = self.af.loss(score, max_fscore, Y_att, graph)
-            # pred = self.af.prediction(score, graph)
-            loss = self.fineaf.sigmoid_loss(score, Y_att, graph)
-            pred = self.fineaf.prediction(score, graph)
+            max_fscore = self.af.max_false_score(score, Y_att, graph)
+            loss = self.af.loss(score, max_fscore, Y_att, graph)
+            pred = self.af.prediction(score, graph)
             accuracy = self.mt.accuracy(Y_att, pred, graph)
         with graph.as_default():
             opt = self.optimizer(loss, graph=graph)
@@ -410,7 +425,13 @@ class Classifier:
             FN = graph.get_collection('FN')[0]
             FP = graph.get_collection('FP')[0]
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
+            score_check = graph.get_collection('score_check')[0]
             true_labels = graph.get_collection('true_labels')[0]
+            coarse_atr_score = graph.get_collection('coarse_atr_score')[0]
+            atr_rel_prob = graph.get_collection('atr_rel_prob')[0]
+            aspect_prob = graph.get_collection('aspect_prob')[0]
+            max_false_score = graph.get_collection('max_false_score')[0]
+            check = graph.get_collection('max_false_score')[0]
             # attribute function
             init = tf.global_variables_initializer()
         table_data = self.dg.table
@@ -433,18 +454,23 @@ class Classifier:
                     TP_vec = []
                     FP_vec = []
                     FN_vec = []
-                    for j in range(3):
+                    for j in range(batch_num):
                         sentences, Y_att_data = self.dg.train_data_generator(j)
-                        _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,true_labels_data\
+                        _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,aspect_prob_data ,atr_rel_prob_data,score_check_data,coarse_atr_score_data ,max_false_score_data,check_data,true_labels_data\
                             = sess.run(
-                            [train_step, loss, TP, FP, FN, pred, score, score_pre,true_labels],
+                            [train_step, loss, TP, FP, FN, pred, score, score_pre,aspect_prob,atr_rel_prob,score_check,coarse_atr_score,max_false_score,check,true_labels],
                             feed_dict={X: sentences, Y_att: Y_att_data,
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
-                        print('Batch' ,j , 'Training loss: %f'%train_loss)
-                        print(true_labels_data,Y_att_data)
+                        print('Batch' ,j , 'Training loss: ',train_loss)
+                        # print('review:',sentences,'\nprob:',Y_att_data)
+                        # print(max_false_score_data)
                         # print(sentences,Y_att_data)
+                        # print(atr_rel_prob_data)
+                        print(check_data)
+                        # print(pred_data)
+                        # print(coarse_atr_score_data)
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
                         FP_vec.append(FP_data)
@@ -454,7 +480,7 @@ class Classifier:
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
                             Y_att_vec.append(Y_att_data[n])
-                    # if i % 2 == 0:
+                    # if i % 1 == 0:
                     #     check_num = 1
                     #     print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
                     #
@@ -502,7 +528,7 @@ class Classifier:
                         FP_vec = []
                         FN_vec = []
                         batch_size = self.nn_config['batch_size']
-                        for i in range(valid_size // batch_size):
+                        for i in range(valid_size //batch_size):
                             test_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data = sess.run(
                                 [loss, pred, score, score_pre, TP, FP, FN],
                                 feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
