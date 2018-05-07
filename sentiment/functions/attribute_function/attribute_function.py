@@ -105,7 +105,7 @@ class AttributeFunction:
                   shape = (batch size, words number, attributes num, attribute dim)
         :param X: shape = (batch size, words number, lstm cell size)
         :param graph: 
-        :return: (batch size, attributes num)
+        :return: (batch size, attributes num, words num)
         """
         # TODO: should eliminate the influence of #PAD# when calculate reduce max
         if not self.nn_config['is_mat']:

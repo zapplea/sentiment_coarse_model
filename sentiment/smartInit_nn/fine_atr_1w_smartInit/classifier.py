@@ -67,7 +67,7 @@ class Classifier:
         return graph, saver
 
     def train(self):
-        classifier = self.classifier()
+        classifier = self.classifier
         self.tra.train(classifier)
 
 
