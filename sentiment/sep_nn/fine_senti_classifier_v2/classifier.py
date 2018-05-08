@@ -716,7 +716,7 @@ class Classifier:
             with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
                 sess.run(init,feed_dict={table:table_data})
                 for i in range(self.nn_config['epoch']):
-                    sentences, Y_att_data, Y_senti_data = self.dg.data_generator(i) + 3
+                    sentences, Y_att_data, Y_senti_data = self.dg.data_generator(i)
                     sess.run(train_step, feed_dict={X: sentences, Y_att: Y_att_data, Y_senti: Y_senti_data})
 
                     if i%5000 == 0 and i!=0:
