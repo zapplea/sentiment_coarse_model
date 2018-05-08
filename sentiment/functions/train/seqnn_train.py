@@ -73,6 +73,7 @@ class SeqnnTrain:
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
+                        print(score_data)
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
                         FP_vec.append(FP_data)

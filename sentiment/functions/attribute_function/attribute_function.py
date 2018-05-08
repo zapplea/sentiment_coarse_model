@@ -328,3 +328,12 @@ class AttributeFunction:
         embeddings = tf.multiply(embeddings, mask)
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
+
+    def mask_for_true_label(self, X):
+        X = tf.cast(X, dtype='float32')
+        temp = tf.reduce_min(X, axis=1)
+        ones = tf.ones_like(temp, dtype='float32') * self.nn_config['padding_word_index']
+        is_one = tf.equal(temp, ones)
+        mask = tf.where(is_one, tf.zeros_like(temp, dtype='float32'), tf.ones_like(temp, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num']])
+        return mask

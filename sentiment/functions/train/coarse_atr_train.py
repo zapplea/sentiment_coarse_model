@@ -42,13 +42,10 @@ class CoarseTrain:
             FN = graph.get_collection('FN')[0]
             FP = graph.get_collection('FP')[0]
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
-            score_check = graph.get_collection('score_check')[0]
-            true_labels = graph.get_collection('true_labels')[0]
             coarse_atr_score = graph.get_collection('coarse_atr_score')[0]
-            atr_rel_prob = graph.get_collection('atr_rel_prob')[0]
-            aspect_prob = graph.get_collection('aspect_prob')[0]
-            max_false_score = graph.get_collection('max_false_score')[0]
-            check = graph.get_collection('max_false_score')[0]
+            true_labels = graph.get_collection('true_labels')[0]
+            lookup_table = graph.get_collection('lookup_table')[0]
+            check = graph.get_collection('check')[0]
             # attribute function
             init = tf.global_variables_initializer()
         table_data = self.dg.table
@@ -71,67 +68,66 @@ class CoarseTrain:
                     TP_vec = []
                     FP_vec = []
                     FN_vec = []
-                    for j in range(batch_num):
+                    for j in range(100):
                         sentences, Y_att_data = self.dg.train_data_generator(j)
-                        _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,aspect_prob_data ,atr_rel_prob_data,score_check_data,coarse_atr_score_data ,max_false_score_data,check_data,true_labels_data\
+                        _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,coarse_atr_score_data ,score_data,true_labels_data,lookup_table_data,check_data\
                             = sess.run(
-                            [train_step, loss, TP, FP, FN, pred, score, score_pre,aspect_prob,atr_rel_prob,score_check,coarse_atr_score,max_false_score,check,true_labels],
+                            [train_step, loss, TP, FP, FN, pred, score, score_pre,coarse_atr_score,score,true_labels,lookup_table,check],
                             feed_dict={X: sentences, Y_att: Y_att_data,
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
-                        print('Batch' ,j , 'Training loss: ',train_loss)
-                        # print('review:',sentences,'\nprob:',Y_att_data)
-                        # print(max_false_score_data)
-                        # print(sentences,Y_att_data)
-                        # print(atr_rel_prob_data)
-                        print(check_data)
-                        # print(pred_data)
-                        # print(coarse_atr_score_data)
+                        print('Batch :',j,'Training loss:%0.8f'%train_loss)
+                        # print(true_labels_data,pred_data)
+                        # print(check_data,'\n\n*******************')
+                        # print('\ntrue_label:',true_labels_data,'\nprediction:',pred_data,'\ncoarse score:',check_data,'\nscore:',score_data)
+                        # print(len(pred_vec),pred_vec)
+
+                        # # np.random.seed(1)
+                        check_num = 1
+                        random_display = np.random.randint(0, self.nn_config['batch_size'], check_num)
+                        pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']],axis=0)) if rr] for r in random_display]
+                        sentences_check = [[[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in
+                             self.dg.train_sentence_ground_truth[r]] for r
+                            in random_display]
+                        Y_att_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in
+                                        enumerate(np.sum(true_labels_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']],axis=0)) if rr] for r in
+                                       random_display]
+                        score_check = [score_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']] for r in random_display]
+                        coarse_atr_score_check = [coarse_atr_score_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']] for r in random_display]
+                        score_pre_check = [score_pre_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']] for r in random_display]
+                        for n in range(check_num):
+                            print("sentence id: ", random_display[n], "\nsentence:\n",sentences_check[n], "\npred:\n",
+                                  pred_check[n],
+                                  "\nY_att:\n", Y_att_check[n]
+                                  ,'\ncoarse score:',coarse_atr_score_check[n])
+                            # for nn in range(len(score_pre_check[0][n])):
+                            #     if list(self.dg.aspect_dic.keys())[nn] in set(Y_att_check[n]) | set(pred_check[n]):
+                            #         print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
+
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
                         FP_vec.append(FP_data)
                         FN_vec.append(FN_data)
-                        for n in range(self.nn_config['batch_size']):
-                            pred_vec.append(pred_data[n])
-                            score_vec.append(score_data[n])
-                            score_pre_vec.append(score_pre_data[n])
-                            Y_att_vec.append(Y_att_data[n])
-                    # if i % 1 == 0:
-                    #     check_num = 1
-                    #     print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
-                    #
-                    #     _precision = self.mt.precision(TP_vec,FP_vec,'macro')
-                    #     _recall = self.mt.recall(TP_vec,FN_vec,'macro')
-                    #     _f1_score = self.mt.f1_score(_precision,_recall,'macro')
-                    #     print('F1 score for each class:',_f1_score,'\nPrecision for each class:',_precision,'\nRecall for each class:',_recall)
-                    #     print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
-                    #
-                    #     _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                    #     _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                    #     _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                    #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
-                    #
-                    #     # # np.random.seed(1)
-                    #     random_display = np.random.randint(0, 1500, check_num)
-                    #     pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(pred_vec[r]) if rr] for
-                    #                   r in random_display]
-                    #     sentences_check = [
-                    #         [list(self.dg.dictionary.keys())[word] for word in self.dg.train_sentence_ground_truth[r] if word] for r
-                    #         in random_display]
-                    #     Y_att_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in
-                    #                     enumerate(self.dg.train_attribute_ground_truth[r]) if rr] for r in
-                    #                    random_display]
-                    #     score_check = [score_vec[r] for r in random_display]
-                    #     score_pre_check = [score_pre_vec[r] for r in random_display]
-                    #     for n in range(check_num):
-                    #         print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
-                    #               pred_check[n],
-                    #               "\nY_att:\n", Y_att_check[n]
-                    #               , "\nscore:\n", score_check[n])
-                    #         for nn in range(len(score_pre_check[n])):
-                    #             if list(self.dg.aspect_dic.keys())[nn] in set(Y_att_check[n]) | set(pred_check[n]):
-                    #                 print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
+                        # for n in range(self.nn_config['batch_size']*self.nn_config['max_review_length']):
+                        #     pred_vec.append(pred_data[n])
+                        #     score_vec.append(score_data[n])
+                        #     score_pre_vec.append(score_pre_data[n])
+                        #     Y_att_vec.append(true_labels_data[n])
+                    if i % 1 == 0:
+                        print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
+
+                        _precision = self.mt.precision(TP_vec,FP_vec,'macro')
+                        _recall = self.mt.recall(TP_vec,FN_vec,'macro')
+                        _f1_score = self.mt.f1_score(_precision,_recall,'macro')
+                        print('F1 score for each class:',_f1_score,'\nPrecision for each class:',_precision,'\nRecall for each class:',_recall)
+                        print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
+
+                        _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
+
 
                     if i % 1 == 0 and i != 0:
                         sentences, Y_att_data = self.dg.test_data_generator()

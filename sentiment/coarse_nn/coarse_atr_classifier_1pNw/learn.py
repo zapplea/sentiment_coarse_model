@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -26,8 +26,8 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 7,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 5,  # number of attribute mention prototypes in a attribute matrix
-            'max_review_length':10,
+            'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
+            'max_review_length':30,
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
@@ -37,12 +37,12 @@ if __name__ == "__main__":
             'lookup_table_words_num': 27433,  # 2074276 for Chinese word embedding
             'padding_word_index': 27432,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.00003,
-            'lr': 0.0003,  # learing rate
+            'reg_rate': 0.0003,
+            'lr': 0.003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 3.0,
-            'aspect_prob_threshold':0.2,
+            'attribute_loss_theta': 1.0,
+            'aspect_prob_threshold':0.15,
             'keep_prob_lstm':0.5
         },
         {  # fixed parameter
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             'lookup_table_words_num': 3646,  # 2074276 for Chinese word embedding
             'padding_word_index': 3645,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.00003,
+            'reg_rate': 0.003,
             'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
