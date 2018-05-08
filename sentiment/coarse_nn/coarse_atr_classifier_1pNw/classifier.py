@@ -36,10 +36,13 @@ class Classifier:
                 graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes)
+            # p(a|D)
             aspect_prob = self.af.attribute_labels_input(graph=graph)
 
             # Y_att.shape = (batch size, max review length, attributes num)
             Y_att = relscore.aspect_prob2true_label(aspect_prob)
+            # complement aspect probability
+            aspect_prob = relscore.complement_aspect_prob(Y_att, aspect_prob)
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o

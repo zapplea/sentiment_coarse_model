@@ -31,28 +31,10 @@ class RelScore:
         tf.add_to_collection('true_labels',true_labels)
         return true_labels
 
-    # def sentence_lstm(self, X, seq_len, graph):
-    #     """
-    #     return a lstm of a sentence
-    #     :param X: shape = (batch size * max review length, words number, word dim)
-    #     :param seq_len: shape = (batch,) show the number of words in a batch
-    #     :param graph:
-    #     :return: outputs.shape = (batch size * max review length, words number, word dim);
-    #              last_hidden.shape = (batch size * max review length, word dim)
-    #     """
-    #     cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
-    #     # outputs.shape = (batch size, max_time, cell size)
-    #     outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
-    #     graph.add_to_collection('sentence_lstm_outputs', outputs)
-    #     # get the last lifted embedding for each sentence
-    #     index0 = tf.cast(tf.expand_dims(tf.range(start=0,
-    #                                              limit=self.nn_config['max_review_length']*self.nn_config['batch_size']),
-    #                                     axis=1),
-    #                      dtype='int32')
-    #     index1 = tf.cast(tf.expand_dims(tf.expand_dims(seq_len-1,axis=1)),dtype='int32')
-    #     slice_index = tf.concat([index0,index1],axis=1)
-    #     last_hidden = tf.gather(outputs,indices=slice_index)
-    #     return outputs, last_hidden
+    def complement_aspect_prob(self,Y_att, aspect_prob):
+        complementor = tf.subtract(1,Y_att)
+        aspect_prob = tf.abs(tf.subtract(complementor,aspect_prob))
+        return aspect_prob
 
 
 
