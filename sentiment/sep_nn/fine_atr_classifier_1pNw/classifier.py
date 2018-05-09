@@ -11,7 +11,6 @@ from sentiment.functions.train.seqnn_train import SeqnnTrain
 from sentiment.functions.attribute_function.metrics import Metrics
 
 import tensorflow as tf
-import numpy as np
 
 
 class Classifier:

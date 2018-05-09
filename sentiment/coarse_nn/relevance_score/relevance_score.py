@@ -67,19 +67,6 @@ class RelScore:
         aspect_prob = tf.tile(tf.expand_dims(aspect_prob,axis=1),multiples=[1,self.nn_config['max_review_length'],1])
         return tf.reshape(aspect_prob,shape=(-1,self.nn_config['attributes_num']))
 
-    def coarse_atr_score(self,aspect_prob,rel_prob,atr_score):
-        """
-        
-        :param aspect_prob: (batch size*max review length, attributes num)
-        :param rel_prob: (batch size*max review length, attributes num)
-        :param atr_score: (batch size*max review length, attributes num)
-        :return: (batch size*max review length, attributes num)
-        """
-
-        score = tf.multiply(rel_prob,tf.multiply(aspect_prob,atr_score))
-        tf.add_to_collection('coarse_atr_score',score)
-        return score
-
     def relevance_prob_senti(self,H):
         pass
 
