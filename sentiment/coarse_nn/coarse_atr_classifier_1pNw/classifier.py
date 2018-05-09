@@ -42,7 +42,11 @@ class Classifier:
             # Y_att.shape = (batch size, max review length, attributes num)
             Y_att = relscore.aspect_prob2true_label(aspect_prob)
             # complement aspect probability
-            aspect_prob = relscore.complement_aspect_prob(Y_att, aspect_prob)
+            if self.nn_config['complement']=='1':
+                aspect_prob = relscore.complement1_aspect_prob(Y_att, aspect_prob)
+            elif self.nn_config['complement'] =='2':
+                aspect_prob = relscore.complement2_aspect_prob(Y_att, aspect_prob)
+            
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o

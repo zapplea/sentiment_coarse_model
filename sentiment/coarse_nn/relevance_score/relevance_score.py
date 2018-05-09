@@ -31,12 +31,24 @@ class RelScore:
         tf.add_to_collection('true_labels',true_labels)
         return true_labels
 
-    # def complement_aspect_prob(self,Y_att, aspect_prob):
-    #     complementor = tf.subtract(1,Y_att)
-    #     aspect_prob = tf.abs(tf.subtract(complementor,aspect_prob))
-    #     return aspect_prob
+    def complement1_aspect_prob(self,Y_att, aspect_prob):
+        """
+        1-p(a|D)
+        :param Y_att: 
+        :param aspect_prob: 
+        :return: 
+        """
+        complementor = tf.subtract(1,Y_att)
+        aspect_prob = tf.abs(tf.subtract(complementor,aspect_prob))
+        return aspect_prob
 
-    def complement_aspect_prob(self,Y_att, aspect_prob):
+    def complement2_aspect_prob(self,Y_att, aspect_prob):
+        """
+        p(a|D)=1
+        :param Y_att: 
+        :param aspect_prob: 
+        :return: 
+        """
         condition = tf.equal(tf.zeros_like(Y_att),Y_att)
         aspect_prob = tf.where(condition, tf.ones_like(aspect_prob),aspect_prob)
         return aspect_prob

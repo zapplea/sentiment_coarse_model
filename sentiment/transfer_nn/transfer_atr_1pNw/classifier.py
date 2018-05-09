@@ -22,7 +22,7 @@ class Classifier:
         self.trans=Transfer(self.nn_config)
 
     def transfer(self,coarse_model,fine_model):
-
+        pass
 
     def coarse_classifier(self):
         graph = tf.Graph()
@@ -71,9 +71,9 @@ class Classifier:
                 score_e = self.af.score(A_e, X, mask, graph)
             # score.shape = (batch size, attributes num, words num)
             score = tf.add(score_lstm, score_e)
+            tf.add_to_collection('score_pre', score)
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score, axis=2)
-            # need to keep 'score' in collection
             tf.add_to_collection('score', score)
             # eliminate the influce of -inf when calculate relevance probability with softmax
             condition = tf.is_inf(score)
@@ -83,9 +83,11 @@ class Classifier:
             # atr_rel_prob = (batch size * max review length, attributes num)
             atr_rel_prob = relscore.relevance_prob_atr(score, graph)
             # coarse score
-            score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
-
+            # score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
+            # loss.shape=(batch_size*max review length, attributes num)
             loss = self.af.sigmoid_loss(score, Y_att, graph)
+            loss = tf.multiply(atr_rel_prob, tf.multiply(aspect_prob, loss))
+            tf.add_to_collection('coarse_atr_loss', loss)
             pred = self.af.prediction(score, graph)
             accuracy = self.mt.accuracy(Y_att, pred, graph)
         with graph.as_default():
