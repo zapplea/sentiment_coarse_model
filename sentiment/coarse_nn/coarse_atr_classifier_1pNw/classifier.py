@@ -46,7 +46,7 @@ class Classifier:
                 aspect_prob = relscore.complement1_aspect_prob(Y_att, aspect_prob)
             elif self.nn_config['complement'] =='2':
                 aspect_prob = relscore.complement2_aspect_prob(Y_att, aspect_prob)
-            
+
             if not self.nn_config['is_mat']:
                 A, o = self.af.attribute_vec(graph)
                 A = A - o
