@@ -45,7 +45,7 @@ class CoarseTrain:
             coarse_atr_score = graph.get_collection('coarse_atr_score')[0]
             true_labels = graph.get_collection('true_labels')[0]
             lookup_table = graph.get_collection('lookup_table')[0]
-            check = graph.get_collection('check')[0]
+            check = graph.get_collection('check')
             # attribute function
             init = tf.global_variables_initializer()
         table_data = self.dg.table
@@ -61,14 +61,10 @@ class CoarseTrain:
                 print('Train set size: ', self.dg.train_data_size, 'Test set size:', self.dg.test_data_size)
                 for i in range(self.nn_config['epoch']):
                     loss_vec = []
-                    pred_vec = []
-                    score_vec = []
-                    score_pre_vec = []
-                    Y_att_vec = []
                     TP_vec = []
                     FP_vec = []
                     FN_vec = []
-                    for j in range(100):
+                    for j in range(batch_num):
                         sentences, Y_att_data = self.dg.train_data_generator(j)
                         _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,coarse_atr_score_data ,score_data,true_labels_data,lookup_table_data,check_data\
                             = sess.run(
@@ -78,32 +74,15 @@ class CoarseTrain:
 
                         ###Show training message
                         print('Batch :',j,'Training loss:%0.8f'%train_loss)
-                        # print(true_labels_data,pred_data)
-                        # print(check_data,'\n\n*******************')
-                        # print('\ntrue_label:',true_labels_data,'\nprediction:',pred_data,'\ncoarse score:',check_data,'\nscore:',score_data)
-                        # print(len(pred_vec),pred_vec)
 
-                        # # np.random.seed(1)
-                        check_num = 1
-                        random_display = np.random.randint(0, self.nn_config['batch_size'], check_num)
-                        pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']],axis=0)) if rr] for r in random_display]
-                        sentences_check = [[[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in
-                             self.dg.train_sentence_ground_truth[r]] for r
-                            in random_display]
-                        Y_att_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in
-                                        enumerate(np.sum(true_labels_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']],axis=0)) if rr] for r in
-                                       random_display]
-                        score_check = [score_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']] for r in random_display]
-                        coarse_atr_score_check = [coarse_atr_score_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']] for r in random_display]
-                        score_pre_check = [score_pre_data[r *self.nn_config['max_review_length']:(r + 1) *self.nn_config['max_review_length']] for r in random_display]
-                        for n in range(check_num):
-                            print("sentence id: ", random_display[n], "\nsentence:\n",sentences_check[n], "\npred:\n",
-                                  pred_check[n],
-                                  "\nY_att:\n", Y_att_check[n]
-                                  ,'\ncoarse score:',coarse_atr_score_check[n])
-                            # for nn in range(len(score_pre_check[0][n])):
-                            #     if list(self.dg.aspect_dic.keys())[nn] in set(Y_att_check[n]) | set(pred_check[n]):
-                            #         print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
+                        random_display = np.random.randint(0, self.nn_config['batch_size'])
+                        display_start = random_display * self.nn_config['max_review_length']
+                        display_end = (random_display+1) * self.nn_config['max_review_length']
+                        pred_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[display_start:display_end],axis=0)) if rr]
+                        Y_att_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(true_labels_data[display_start:display_end],axis=0)) if rr]
+                        sentences_check = [[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in sentences[random_display] if [list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']]]
+                        coarse_atr_score_check = coarse_atr_score_data[display_start:display_end][range(len(sentences_check))]
+                        print("sentence id: ", random_display, "\nsentence:\n", sentences_check,"\nreview length:\n", len(sentences_check), "\npred:\n",pred_check,"\nY_att:\n", Y_att_check,'\ncoarse score:',coarse_atr_score_check)
 
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
