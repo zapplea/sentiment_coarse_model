@@ -50,7 +50,7 @@ class Metrics:
             res[tmp] = 1
             return res
         else:
-            return np.sum(TP) / (np.sum(TP) + np.sum(FP))
+            return np.sum(TP) / (np.sum(TP) + np.sum(FP) + 1e-10)
 
     def recall(self, TP, FN, flag):
         assert flag == 'macro' or flag == 'micro', 'Please enter right flag...'
@@ -61,7 +61,7 @@ class Metrics:
             res[tmp] = 1
             return res
         else:
-            return np.sum(TP) / (np.sum(TP) + np.sum(FN))
+            return np.sum(TP) / (np.sum(TP) + np.sum(FN) + 1e-10)
 
     def f1_score(self, precision, recall, flag):
         assert flag == 'macro' or flag == 'micro', 'Please enter right flag...'
