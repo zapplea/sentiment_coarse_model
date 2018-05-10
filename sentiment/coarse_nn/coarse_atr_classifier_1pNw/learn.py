@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "6" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -24,7 +24,7 @@ if __name__ == "__main__":
             }
     nn_configs = [
         {  # fixed parameter
-            'attributes_num': 7,
+            'attributes_num': 6,
             'attribute_dim': seed['word_dim'],
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
             'max_review_length':30,
@@ -32,18 +32,20 @@ if __name__ == "__main__":
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 1000,
-            'batch_size': 30,
+            'batch_size': 34,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 27433,  # 2074276 for Chinese word embedding
             'padding_word_index': 27432,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.0003,
-            'lr': 0.003,  # learing rate
+            'reg_rate': 0.003,
+            'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 1.0,
-            'aspect_prob_threshold':0.15,
-            'keep_prob_lstm':0.5
+            'attribute_loss_theta': 3.0,
+            'aspect_prob_threshold':0.2,
+            'keep_prob_lstm':0.5,
+            'complement':0,
+            'model_save_path': 'ckpt/coarse_nn.ckpt'
         },
         {  # fixed parameter
             'attributes_num': 12,
@@ -96,7 +98,7 @@ if __name__ == "__main__":
         'batch_size': nn_configs[0]['batch_size'],
         'words_num': nn_configs[0]['words_num'],
         'padding_word_index': nn_configs[0]['padding_word_index'],
-        'word_dim': seed['word_dim']
+        'word_dim': seed['word_dim'],
     }
     # for nn_config in nn_configs:
     #     print(nn_config)

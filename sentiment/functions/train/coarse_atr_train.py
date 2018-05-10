@@ -1,6 +1,4 @@
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -48,6 +46,7 @@ class CoarseTrain:
             check = graph.get_collection('check')
             # attribute function
             init = tf.global_variables_initializer()
+        max_f1_score = 0
         table_data = self.dg.table
         print(self.dg.aspect_dic)
 
@@ -58,14 +57,14 @@ class CoarseTrain:
                 sess.run(init, feed_dict={table: table_data})
 
                 batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
-                print('Train set size: ', self.dg.train_data_size, 'Test set size:', self.dg.test_data_size)
+                print('Train set size: ', self.dg.train_data_size, 'validation set size:', self.dg.val_data_size)
                 for i in range(self.nn_config['epoch']):
                     loss_vec = []
                     TP_vec = []
                     FP_vec = []
                     FN_vec = []
                     for j in range(batch_num):
-                        sentences, Y_att_data = self.dg.train_data_generator(j)
+                        sentences, Y_att_data = self.dg.data_generator(j,'train')
                         _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,coarse_atr_score_data ,score_data,true_labels_data,lookup_table_data,check_data\
                             = sess.run(
                             [train_step, loss, TP, FP, FN, pred, score, score_pre,coarse_atr_score,score,true_labels,lookup_table,check],
@@ -73,27 +72,22 @@ class CoarseTrain:
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
-                        print('Batch :',j,'Training loss:%0.8f'%train_loss)
+                        # print('Batch :',j,'Training loss:%0.8f'%train_loss)
 
-                        random_display = np.random.randint(0, self.nn_config['batch_size'])
-                        display_start = random_display * self.nn_config['max_review_length']
-                        display_end = (random_display+1) * self.nn_config['max_review_length']
-                        pred_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[display_start:display_end],axis=0)) if rr]
-                        Y_att_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(true_labels_data[display_start:display_end],axis=0)) if rr]
-                        sentences_check = [[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in sentences[random_display] if [list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']]]
-                        coarse_atr_score_check = coarse_atr_score_data[display_start:display_end][range(len(sentences_check))]
-                        print("sentence id: ", random_display, "\nsentence:\n", sentences_check,"\nreview length:\n", len(sentences_check), "\npred:\n",pred_check,"\nY_att:\n", Y_att_check,'\ncoarse score:',coarse_atr_score_check)
+                        # random_display = np.random.randint(0, self.nn_config['batch_size'])
+                        # display_start = random_display * self.nn_config['max_review_length']
+                        # display_end = (random_display+1) * self.nn_config['max_review_length']
+                        # pred_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[display_start:display_end],axis=0)) if rr]
+                        # Y_att_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(true_labels_data[display_start:display_end],axis=0)) if rr]
+                        # sentences_check = [[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in sentences[random_display] if [list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']]]
+                        # coarse_atr_score_check = coarse_atr_score_data[display_start:display_end][range(len(sentences_check))]
+                        # print("sentence id: ", random_display, "\nsentence:\n", sentences_check,"\nreview length:\n", len(sentences_check), "\npred:\n",pred_check,"\nY_att:\n", Y_att_check,'\ncoarse score:',coarse_atr_score_check)
 
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
                         FP_vec.append(FP_data)
                         FN_vec.append(FN_data)
-                        # for n in range(self.nn_config['batch_size']*self.nn_config['max_review_length']):
-                        #     pred_vec.append(pred_data[n])
-                        #     score_vec.append(score_data[n])
-                        #     score_pre_vec.append(score_pre_data[n])
-                        #     Y_att_vec.append(true_labels_data[n])
-                    if i % 1 == 0:
+                    if i % 2 == 0:
                         print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
 
                         _precision = self.mt.precision(TP_vec,FP_vec,'macro')
@@ -108,9 +102,7 @@ class CoarseTrain:
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
 
 
-                    if i % 1 == 0 and i != 0:
-                        sentences, Y_att_data = self.dg.test_data_generator()
-                        valid_size = Y_att_data.shape[0]
+                    if i % 4 == 0 and i != 0:
                         loss_vec = []
                         pred_vec = []
                         score_vec = []
@@ -119,30 +111,40 @@ class CoarseTrain:
                         TP_vec = []
                         FP_vec = []
                         FN_vec = []
-                        batch_size = self.nn_config['batch_size']
-                        for i in range(valid_size //batch_size):
-                            test_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data = sess.run(
-                                [loss, pred, score, score_pre, TP, FP, FN],
-                                feed_dict={X: sentences[i * batch_size:i * batch_size + batch_size],
-                                           Y_att: Y_att_data[i * batch_size:i * batch_size + batch_size],
+                        val_batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
+                        for j in range(val_batch_num):
+                            sentences, Y_att_data = self.dg.data_generator(j,'val')
+                            val_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data,coarse_atr_score_data,true_labels_data = sess.run(
+                                [loss, pred, score, score_pre, TP, FP, FN,coarse_atr_score,true_labels],
+                                feed_dict={X: sentences,
+                                           Y_att: Y_att_data,
                                            keep_prob_lstm: 1.0
                                            })
                             ###Show test message
+                            # random_display = np.random.randint(0, self.nn_config['batch_size'])
+                            # if random_display % 3 == 0:
+                            #     display_start = random_display * self.nn_config['max_review_length']
+                            #     display_end = (random_display+1) * self.nn_config['max_review_length']
+                            #     pred_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[display_start:display_end],axis=0)) if rr]
+                            #     Y_att_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(true_labels_data[display_start:display_end],axis=0)) if rr]
+                            #     sentences_check = [[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in sentences[random_display] if [list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']]]
+                            #     coarse_atr_score_check = coarse_atr_score_data[display_start:display_end][range(len(sentences_check))]
+                            #     print('\nBatch:',j,"\nsentence id: ", random_display, "\nsentence:\n", sentences_check,"\nreview length:\n", len(sentences_check), "\npred:\n",pred_check,"\nY_att:\n", Y_att_check,'\ncoarse score:',coarse_atr_score_check)
                             TP_vec.append(TP_data)
                             FP_vec.append(FP_data)
                             FN_vec.append(FN_data)
-                            loss_vec.append(test_loss)
+                            loss_vec.append(val_loss)
                             for n in range(self.nn_config['batch_size']):
                                 pred_vec.append(pred_data[n])
                                 score_vec.append(score_data[n])
                                 score_pre_vec.append(score_pre_data[n])
-                        print('\nTest loss:%.10f' % np.mean(loss_vec))
+                        print('\nVal_loss:%.10f' % np.mean(loss_vec))
 
                         _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
                         _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
-                        # print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
-                        #       '\nRecall for each class:', _recall)
+                        print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
+                              '\nRecall for each class:', _recall)
                         print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
                               ' Macro recall:', np.mean(_recall))
 
@@ -151,25 +153,8 @@ class CoarseTrain:
                         _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                               ' Micro recall:', np.mean(_recall))
-                        # # np.random.seed(1)
-                        # check_num = 1
-                        # random_display = np.random.randint(0, 570, check_num)
-                        # pred_check = [[c for c, rr in enumerate(pred_vec[r]) if rr] for
-                        #               r in random_display]
-                        # sentences_check = [
-                        #     [list(self.dg.dictionary.keys())[word] for word in self.dg.test_sentence_ground_truth[r] if
-                        #      word] for r
-                        #     in random_display]
-                        # Y_att_check = [[c for c, rr in
-                        #                 enumerate(self.dg.test_attribute_ground_truth[r]) if rr] for r in
-                        #                random_display]
-                        # score_check = [score_vec[r] for r in random_display]
-                        # score_pre_check = [score_pre_vec[r] for r in random_display]
-                        # for n in range(check_num):
-                        #     print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
-                        #           pred_check[n],
-                        #           "\nY_att:\n", Y_att_check[n]
-                        #           , "\nscore:\n", score_check[n])
-                        #     for nn in range(len(score_pre_check[n])):
-                        #         if nn in set(Y_att_check[n]) | set(pred_check[n]):
-                        #             print(list(self.dg.aspect_dic.keys())[nn]+ '*' , nn , " score:", score_pre_check[n][nn])
+
+                        if max_f1_score < _f1_score:
+                            max_f1_score = _f1_score
+                            saver.save(sess,self.nn_config['model_save_path'],global_step=i+1)
+                        print('Max Micro F1 score: ',max_f1_score)
