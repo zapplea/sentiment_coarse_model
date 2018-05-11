@@ -39,8 +39,10 @@ class Classifier:
             # p(a|D)
             aspect_prob = self.af.attribute_labels_input(graph=graph)
 
+            mask_true_label = self.af.mask_for_true_label(X_ids)
+
             # Y_att.shape = (batch size, max review length, attributes num)
-            Y_att = relscore.aspect_prob2true_label(aspect_prob)
+            Y_att = relscore.aspect_prob2true_label(aspect_prob,mask_true_label)
             # complement aspect probability
             if self.nn_config['complement']=='1':
                 aspect_prob = relscore.complement1_aspect_prob(Y_att, aspect_prob)

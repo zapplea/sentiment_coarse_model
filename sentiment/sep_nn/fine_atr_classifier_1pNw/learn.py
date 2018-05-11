@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -33,8 +33,8 @@ if __name__ == "__main__":
             'epoch': 1000,
             'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
-            'lookup_table_words_num': 3646,  # 2074276 for Chinese word embedding
-            'padding_word_index': 3645,  # the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
+            'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
             # flexible parameter
             'reg_rate': 0.00003,
             'lr': 0.0003,  # learing rate
@@ -84,9 +84,9 @@ if __name__ == "__main__":
         }
     ]
     data_config = {
-        'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
+        'train_source_file_path': '/home/lujunyu/dataset/semeval2016/absa_resturant_train.pkl',
         'train_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/sep_nn/train_data.pkl',
-        'test_source_file_path': '~/dataset/semeval2016/absa_resturant_test.csv',
+        'test_source_file_path': '/home/lujunyu/dataset/semeval2016/absa_resturant_test.pkl',
         'test_data_file_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/sep_nn/test_data.pkl',
         'wordembedding_file_path': '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
@@ -94,7 +94,8 @@ if __name__ == "__main__":
         'batch_size': nn_configs[0]['batch_size'],
         'words_num': nn_configs[0]['words_num'],
         'padding_word_index': nn_configs[0]['padding_word_index'],
-        'word_dim': seed['word_dim']
+        'word_dim': seed['word_dim'],
+        'dictionary': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/util/word_dic/data_dictionary.pkl'
     }
     # for nn_config in nn_configs:
     #     print(nn_config)

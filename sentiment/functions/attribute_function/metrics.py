@@ -45,8 +45,7 @@ class Metrics:
         assert flag == 'macro' or flag == 'micro', 'Please enter right flag...'
         if flag == 'macro':
             tmp = np.nonzero((np.sum(TP, axis=0) + np.sum(FP, axis=0) == 0))
-            res = np.sum(TP, axis=0, dtype='float32') / (
-            np.sum(TP, axis=0, dtype='float32') + np.sum(FP, axis=0, dtype='float32'))
+            res = np.sum(TP, axis=0, dtype='float32') / (np.sum(TP, axis=0, dtype='float32') + np.sum(FP, axis=0, dtype='float32'))
             res[tmp] = 1
             return res
         else:

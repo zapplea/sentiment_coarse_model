@@ -71,7 +71,6 @@ class SeqnnTrain:
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
-                        print(score_data)
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
                         FP_vec.append(FP_data)
@@ -160,25 +159,25 @@ class SeqnnTrain:
                         _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                               ' Micro recall:', np.mean(_recall))
-                        # # np.random.seed(1)
-                        # check_num = 1
-                        # random_display = np.random.randint(0, 570, check_num)
-                        # pred_check = [[c for c, rr in enumerate(pred_vec[r]) if rr] for
-                        #               r in random_display]
-                        # sentences_check = [
-                        #     [list(self.dg.dictionary.keys())[word] for word in self.dg.test_sentence_ground_truth[r] if
-                        #      word] for r
-                        #     in random_display]
-                        # Y_att_check = [[c for c, rr in
-                        #                 enumerate(self.dg.test_attribute_ground_truth[r]) if rr] for r in
-                        #                random_display]
-                        # score_check = [score_vec[r] for r in random_display]
-                        # score_pre_check = [score_pre_vec[r] for r in random_display]
-                        # for n in range(check_num):
-                        #     print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
-                        #           pred_check[n],
-                        #           "\nY_att:\n", Y_att_check[n]
-                        #           , "\nscore:\n", score_check[n])
-                        #     for nn in range(len(score_pre_check[n])):
-                        #         if nn in set(Y_att_check[n]) | set(pred_check[n]):
-                        #             print(list(self.dg.aspect_dic.keys())[nn]+ '*' , nn , " score:", score_pre_check[n][nn])
+                        # np.random.seed(1)
+                        check_num = 1
+                        random_display = np.random.randint(0, 570, check_num)
+                        pred_check = [[(c,list(self.dg.aspect_dic.keys())[c]) for c, rr in enumerate(pred_vec[r]) if rr] for
+                                      r in random_display]
+                        sentences_check = [
+                            [list(self.dg.dictionary.keys())[word] for word in self.dg.test_sentence_ground_truth[r] if
+                             word] for r
+                            in random_display]
+                        Y_att_check = [[(c,list(self.dg.aspect_dic.keys())[c]) for c, rr in
+                                        enumerate(self.dg.test_attribute_ground_truth[r]) if rr] for r in
+                                       random_display]
+                        score_check = [score_vec[r] for r in random_display]
+                        score_pre_check = [score_pre_vec[r] for r in random_display]
+                        for n in range(check_num):
+                            print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
+                                  pred_check[n],
+                                  "\nY_att:\n", Y_att_check[n]
+                                  , "\nscore:\n", score_check[n])
+                            for nn in range(len(score_pre_check[n])):
+                                if nn in set(Y_att_check[n]) | set(pred_check[n]):
+                                    print(list(self.dg.aspect_dic.keys())[nn]+ '*' , nn , " score:", score_pre_check[n][nn])

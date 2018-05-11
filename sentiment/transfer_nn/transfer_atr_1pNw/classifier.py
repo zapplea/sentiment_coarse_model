@@ -29,7 +29,7 @@ class Classifier:
         self.tra=TransferTrain(fine_nn_config,self.fine_dg)
 
     def transfer(self):
-        initializer_A_data,initializer_O_data = self.trans.transfer(self.coarse_cl)
+        initializer_A_data,initializer_O_data = self.trans.transfer(self.coarse_cl,self.fine_dg)
         return initializer_A_data,initializer_O_data
 
 
@@ -87,10 +87,11 @@ class Classifier:
             saver = tf.train.Saver()
         return graph, saver
 
-    def train(self,initializer_A_data,initializer_O_data):
+    def train(self):
         """
         train fine grained model with 
         :return: 
         """
         cl = self.fine_classifier
+        initializer_A_data , initializer_O_data = self.transfer()
         self.tra.train(cl,initializer_A_data=initializer_A_data,initializer_O_data=initializer_O_data)

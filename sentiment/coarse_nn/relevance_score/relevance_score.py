@@ -15,7 +15,7 @@ class RelScore:
         X = tf.reshape(X,shape=(-1,self.nn_config['words_num']))
         return X
 
-    def aspect_prob2true_label(self,aspect_prob):
+    def aspect_prob2true_label(self,aspect_prob,mask):
         """
 
         :param aspect_prob: shape=(batch size, attributes num)
@@ -27,7 +27,7 @@ class RelScore:
         true_labels = tf.tile(tf.expand_dims(true_labels, axis=1),
                               multiples=[1, self.nn_config['max_review_length'], 1])
         true_labels = tf.reshape(true_labels,shape=(-1,self.nn_config['attributes_num']))
-        true_labels = true_labels
+        true_labels = true_labels * mask
         tf.add_to_collection('true_labels',true_labels)
         return true_labels
 

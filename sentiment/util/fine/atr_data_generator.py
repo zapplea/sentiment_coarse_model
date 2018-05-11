@@ -128,7 +128,7 @@ class DataGenerator():
         for i in np.arange(0,data.shape[0]):
             a = []
             num = 0
-            for word in data.iloc[i]['sentence'].lower().translate(trantab).split():
+            for word in data.iloc[i]['text'].lower().translate(trantab).split():
                 if num >= self.nn_config['words_num']:
                     break
                 if word in dictionary.keys():
@@ -148,7 +148,7 @@ class DataGenerator():
         trantab = str.maketrans(intab, outtab)
         word_list = []
         for i in np.arange(0, data.shape[0]):
-            for word in data.iloc[i]['sentence'].lower().translate(trantab).split():
+            for word in data.iloc[i]['text'].lower().translate(trantab).split():
                 if word in dictionary.keys():
                     word_list.append(dictionary[word])
         word_list = list(set(word_list))
@@ -167,12 +167,8 @@ class DataGenerator():
             f.close()
         else:
             f = open(self.data_config['train_data_file_path'], 'wb')
-            tmp = pd.read_csv(self.data_config['train_source_file_path'], index_col=0)
+            tmp = pd.read_pickle(self.data_config['train_source_file_path'])
             word_embed = gensim.models.KeyedVectors.load_word2vec_format(self.data_config['wordembedding_file_path'],binary=True, unicode_errors='ignore')
-            vocabulary = word_embed.index2word
-            pre_dictionary = {}
-            for i in range(len(vocabulary)):
-                pre_dictionary[vocabulary[i]] = i
 
             ##Generate attribute_dic
             aspect_dic = {}
@@ -185,15 +181,10 @@ class DataGenerator():
 
 
             ###Generate dictionary
-            train_word_list = self.get_word_list(tmp,pre_dictionary)
-            test_word_list = self.get_word_list(pd.read_csv(self.data_config['test_source_file_path'], index_col=0),pre_dictionary)
-            word_list = list(set(train_word_list + test_word_list))
-            vocabulary = list(np.array(vocabulary)[word_list])
-            vocabulary.append('#UNK#')
-            vocabulary.append('#PAD#')
-            dictionary = {}
-            for i in range(len(vocabulary)):
-                dictionary[vocabulary[i]] = i
+            with open(self.data_config['dictionary'],'rb') as wd:
+                word_list = pickle.load(wd)
+                dictionary = pickle.load(wd)
+                print('The number of words in dataset:',len(dictionary))
             pickle.dump(dictionary, f)
 
             attribute_ground_truth = self.get_aspect_id(tmp,aspect_dic)
@@ -222,7 +213,7 @@ class DataGenerator():
             f.close()
         else:
             f = open(self.data_config['test_data_file_path'], 'wb')
-            tmp = pd.read_csv(self.data_config['test_source_file_path'], index_col=0)
+            tmp = pd.read_pickle(self.data_config['test_source_file_path'])
             test_data_mask = tmp['sentence_id'].drop_duplicates().index
             attribute_ground_truth = self.get_aspect_id(tmp,test_aspect_dic)
             attribute_ground_truth = attribute_ground_truth[test_data_mask]

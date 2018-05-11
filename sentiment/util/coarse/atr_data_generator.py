@@ -37,7 +37,6 @@ class DataGenerator():
                                                  train_size - self.nn_config['batch_size']:train_size]
                 batches_sentence_ground_truth = self.train_sentence_ground_truth[
                                                 train_size - self.nn_config['batch_size']:train_size]
-                print('Training epoch finished...')
         else:
             val_size = self.val_data_size
             start = batch_num * self.nn_config['batch_size'] % val_size
@@ -50,7 +49,6 @@ class DataGenerator():
                                                  val_size - self.nn_config['batch_size']:val_size]
                 batches_sentence_ground_truth = self.train_sentence_ground_truth[
                                                 val_size - self.nn_config['batch_size']:val_size]
-                print('Validation finished...')
         # during validation and test, to avoid errors are counted repeatedly,
         # we need to avoid the same data sended back repeately
         return batches_sentence_ground_truth, batches_attribute_ground_truth
@@ -179,10 +177,6 @@ class DataGenerator():
             with open(self.data_config['train_source_file_path'],'rb') as ff:
                 tmp = pickle.load(ff)
             word_embed = gensim.models.KeyedVectors.load_word2vec_format(self.data_config['wordembedding_file_path'],binary=True, unicode_errors='ignore')
-            vocabulary = word_embed.index2word
-            pre_dictionary = {}
-            for i in range(len(vocabulary)):
-                pre_dictionary[vocabulary[i]] = i
 
             ##Generate attribute_dic
             aspect_dic ={'RESTAURANT': 0, 'SERVICE': 1, 'FOOD': 2
@@ -190,14 +184,10 @@ class DataGenerator():
             pickle.dump(aspect_dic,f)
 
             ###Generate dictionary
-            word_list = self.get_word_list(tmp,pre_dictionary)
-            vocabulary = list(np.array(vocabulary)[word_list])
-            vocabulary.append('#UNK#')
-            vocabulary.append('#PAD#')
-            dictionary = {}
-            for i in range(len(vocabulary)):
-                dictionary[vocabulary[i]] = i
-            pickle.dump(dictionary, f)
+            with open(self.data_config['dictionary'],'rb') as wd:
+                word_list = pickle.load(wd)
+                dictionary = pickle.load(wd)
+            pickle.dump(dictionary,f)
 
             attribute_ground_truth = self.get_aspect_probility(tmp)
             train_data_mask = tmp['text'].drop_duplicates().reset_index().index
@@ -247,7 +237,7 @@ class DataGenerator():
             # print(r[~np.all(r == 0, axis=1)].astype(int).shape)
             fine_sent = []
             for atr_vec in attribute.transpose():
-                r = np.repeat(np.reshape(atr_vec, [1995, 1]), axis=1, repeats=40) * sentence
+                r = np.repeat(np.reshape(atr_vec, [2000, 1]), axis=1, repeats=40) * sentence
                 r = np.reshape(r[~np.all(r == 0, axis=1)].astype(int),[-1,1,40])
                 fine_sent.append(r)
             fine_sent = np.array(fine_sent)
