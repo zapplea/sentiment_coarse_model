@@ -311,13 +311,13 @@ class AttributeFunction:
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
-        graph.add_to_collection('sentence_lstm_outputs', outputs)
+        graph.add_to_collection('sentence_bilstm_outputs', outputs)
         graph.add_to_collection('reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name('bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
         graph.add_to_collection('reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name('bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
         return outputs
 
     def optimizer(self, loss, graph):
