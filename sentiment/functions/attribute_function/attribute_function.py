@@ -295,6 +295,31 @@ class AttributeFunction:
         graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
 
+    def sentence_bilstm(self, X, seq_len, graph):
+        """
+        return a lstm of a sentence
+        :param X: shape = (batch size, words number, word dim)
+        :param seq_len: shape = (batch size,) show the number of words in a batch
+        :param graph: 
+        :return: 
+        """
+        keep_prob = tf.placeholder(tf.float32)
+        tf.add_to_collection('keep_prob_lstm',keep_prob)
+        fw_cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size']/2)),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
+        bw_cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size']/2)),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
+        # outputs.shape = [(batch size, max time step, lstm cell size/2),(batch size, max time step, lstm cell size/2)]
+        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
+        # outputs.shape = (batch size, max time step, lstm cell size)
+        outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
+        graph.add_to_collection('sentence_lstm_outputs', outputs)
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name('bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name('bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+        return outputs
+
     def optimizer(self, loss, graph):
         opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
         graph.add_to_collection('opt', opt)
