@@ -34,8 +34,11 @@ class TransferTrain:
             # labels
             Y_att = graph.get_collection('Y_att')[0]
             # lstm
-            lstm_kernel = graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')
-            lstm_bias = graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/bias:0')
+            for v in tf.all_variables():
+                if v.name.startwith('sentence_lstm/rnn/basic_lstm_cell/kernel:0'):
+                    lstm_kernel = v
+                elif v.name.startwith('sentence_lstm/rnn/basic_lstm_cell/bias:0'):
+                    lstm_bias = v
             # attribute mention vector or matrix
             if not self.nn_config['is_mat']:
                 A=graph.get_collection('A_vec')[0]

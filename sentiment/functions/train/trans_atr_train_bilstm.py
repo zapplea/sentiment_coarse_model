@@ -34,10 +34,15 @@ class TransferTrain:
             # labels
             Y_att = graph.get_collection('Y_att')[0]
             # lstm
-            bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
-            bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
-            bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
-            bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
+            for v in tf.all_variables():
+                if v.name.startwith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0'):
+                    bilstm_fw_kernel =v
+                elif v.name.startwith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0'):
+                    bilstm_fw_bias = v
+                elif v.name.startwith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0'):
+                    bilstm_bw_kernel = v
+                elif v.name.startwith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0'):
+                    bilstm_bw_bias = v
             # attribute mention vector or matrix
             if not self.nn_config['is_mat']:
                 A=graph.get_collection('A_vec')[0]
