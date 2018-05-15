@@ -9,7 +9,7 @@ elif os.getlogin() == 'lujunyu':
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
-from sentiment.sep_nn.fine_atr_classifier_1pNw.classifier import Classifier
+from sentiment.sep_nn.fine_atr_classifier_1pNw_bilstm.classifier import Classifier
 from sentiment.util.fine.atr_data_generator import DataGenerator
 
 def main(nn_config,data_config):

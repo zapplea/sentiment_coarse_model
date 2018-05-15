@@ -9,7 +9,7 @@ elif os.getlogin() == 'lujunyu':
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
-from sentiment.coarse_nn.coarse_atr_classifier_1pNw.classifier import Classifier
+from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Classifier
 from sentiment.util.coarse.atr_data_generator import DataGenerator
 
 def main(nn_config,data_config):
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             'aspect_prob_threshold':0.2,
             'keep_prob_lstm':0.5,
             'complement':0,
-            'model_save_path': 'ckpt2/coarse_nn.ckpt',
+            'model_save_path': 'ckpt_bi/coarse_nn.ckpt',
             'sr_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw/ckpt/'
         },
         {  # fixed parameter
