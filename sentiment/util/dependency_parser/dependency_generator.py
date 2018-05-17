@@ -301,6 +301,9 @@ class DependencyGenerator:
                 encoded_table.append(encoded_path)
             while len(encoded_table)<max_table_length:
                 encoded_table.append([self.nn_config['padding_word_index']]*max_path_length)
+            with open('encoded_table.json','w') as f:
+                json.dump(encoded_table,f,indent=4)
+
             encoded_tables.append(np.array(encoded_table,dtype='int32'))
         while len(encoded_tables)<max_sentence_length:
             encoded_tables.append(np.ones(shape=(max_table_length,max_path_length),dtype='int32')*self.nn_config['padding_word_index'])
@@ -329,8 +332,8 @@ class DependencyGenerator:
 
 
     def write(self,encoded_tables,encoded_sentences):
-        with open(self.data_config['relative_distance_table'],'wb') as f:
-            pickle.dump({'encoded_tables':encoded_tables,'encoded_sentences':encoded_sentences},f)
+        with open(self.data_config['relative_distance_table'],'w') as f:
+            json.dump({'encoded_tables':encoded_tables,'encoded_sentences':encoded_sentences},f,indent=4)
 
     def expand_dictionary(self):
         count = len(self.dictionary)
@@ -341,6 +344,8 @@ class DependencyGenerator:
     def main(self):
         # sentences contain ROOT
         forest, sentences = self.construct_forest()
+        for sentence in sentences:
+            print(sentence)
         # max_sentence_length decide how many tables should a sentence contain
         encoded_sentences,max_sentence_length = self.sentences_encoder(sentences)
         tables = []
@@ -357,6 +362,8 @@ class DependencyGenerator:
 
         with open('read_table.json','w') as f:
             json.dump(tables, f, indent=4)
+        with open('dictionary.json','w') as f:
+            json.dump(self.dictionary,f,indent=4)
 
         encoded_tables = []
         print('relation words number:',len(self.relation_vocabulary))
@@ -368,11 +375,11 @@ class DependencyGenerator:
 if __name__ == '__main__':
     data_configs = [{
                         'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train_non-collapsed.json',
-                        'relative_distance_table':'/datastore/liu121/senti_data/pd_table/train_pd.table',
+                        'relative_distance_table':'/datastore/liu121/senti_data/pd_table/train.json',
                         'dictionary_filePath':'/datastore/liu121/senti_data/en_word2id_dictionary.json'},
                    {
                        'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test_non-collapsed.json',
-                       'relative_distance_table':'/datastore/liu121/senti_data/pd_table/test_pd.table',
+                       'relative_distance_table':'/datastore/liu121/senti_data/pd_table/test.json',
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
 

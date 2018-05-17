@@ -39,10 +39,20 @@ word a embedding. Then this vocabulary will be attached at the end of the origin
 dependency path.
 In the program, just need to know the number of relation words.
 
-#6 paramters:
+#6. paramters:
 ###6.1 new paramters:
 'rel_words_num': the number of relation words.
 'rel_word_dim': dimension of relation words' embedding. should be the same to original word embeddings' dimension.
+
+#7. generate dependency path
+Use util/dependency_parser/dependency_generator.py to generate sentences (without punctuation) and dependency path.
+It will generate two json file: train.json and test.json. 
+In each file, it contains two elements: 'encoded_tables' and 'encoded_sentences'. 
+The e'ncoded_sentences' contain all sentences in test/train dataset. Words are converted to the number in the  wordembedding.
+In the 'encoded_tables', it contains each sentence's dependency path.
+
+
+
 
 #Note:
 The attribute is given even in the test. So, if the attributes cannot be recognized correctly, the performance of the sentiment will be influenced.
