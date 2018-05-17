@@ -183,17 +183,18 @@ class SentiFunction:
         :param item1: shape = (batch size,number of words, 3+3*attributes number)
         :param item2: shape=(batch size, number of attributes+1, number of words)
         :param graph: 
-        :return: (batch size, 3*number of attributes+3) this is all combinations of yi and ai
+        :return: (batch size, 3+3*attributes number, number of words) this is all combinations of yi and ai
         """
-        # TODO: should eliminate the influence of #PAD# when calculate reduce max
         # item1.shape = (batch size, 3+3*attributes number, number of words)
         item1 = tf.transpose(item1, [0, 2, 1])
         # item2.shape = (batch size, 3+3*attributes number, number of words)
         item2 = tf.reshape(tf.tile(tf.expand_dims(item2, axis=2), [1, 1, 3, 1]),
                            shape=(-1, 3 * self.nn_config['attributes_num'] + 3, self.nn_config['words_num']))
+        # score.shape = (batch size, 3+3*attributes number, number of words)
         score = tf.add(item1, item2)
         # mask.shape = (batch size, attributes number, words num)
         mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, 3 + 3 * self.nn_config['attributes_num'], 1])
+        # eliminate influence of #PAD#
         score = tf.add(score, mask)
 
         return score
@@ -253,20 +254,32 @@ class SentiFunction:
 
     def prediction(self, score, Y_atr, graph):
         """
-        :param score: shape = (batch size, 3*attributes numbers+3)
+        :param score: shape = (batch size, attributes numbers+1,3)
         :param Y_atr: shape = (batch size, attributes numbers+1)
         :param graph: 
         :return: 
         """
-        # score.shape = (batch size, attribute number +1, 3)
-        score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3))
-        # Y_atr.shape = (batch size, attributes numbers+1,3)
-        Y_atr = tf.tile(tf.expand_dims(Y_atr, axis=2), multiples=[1, 1, 3])
-        score = tf.multiply(Y_atr, score)
-        condition = tf.greater(score, self.nn_config['senti_pred_threshold'])
-        pred = tf.where(condition, tf.ones_like(score, dtype='float32'), tf.zeros_like(score, dtype='float32'))
+        # score.shape = (batch size, attributes numbers+1,3)
+        score = tf.nn.softmax(logits=score,axis=-1)
+        # pred.shape =(batch size, attributes number +1)
+        pred = tf.cast(tf.argmax(score,axis=2),dtype='float32')
+        # use Y_atr to mask non-activated attributes' sentiment
+        pred = tf.multiply(Y_atr, pred)
+
         graph.add_to_collection('prediction', pred)
         return pred
+
+    def softmax_loss(self,labels, logits,graph):
+        """
+        
+        :param labels: (batch size, number of attributes+1,3)
+        :param logits: (batch_size, number of attributes + 1, 3)
+        :return: 
+        """
+
+        loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels,logits=logits,dim=-1),axis=1),
+                                     tf.reduce_sum(graph.get_collection('reg'))))
+        return loss
 
     def accuracy(self, Y_senti, pred, graph):
         """
@@ -362,10 +375,17 @@ class SentiFunction:
         """
 
         :param graph: 
-        :return: shape = (batch size, attributes number)
+        :return: shape = (batch size, attributes number+1)
         """
-        Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num'] + 1),
+        Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']),
                                dtype='float32')
+        # TODO: add non-attribute
+        batch_size = tf.shape(Y_att)[0]
+        non_attr = tf.zeros((batch_size,1),dtype='float32')
+        condition = tf.equal(tf.reduce_sum(Y_att,axis=1,keep_dims=True),non_attr)
+        non_attr = tf.where(condition,non_attr,tf.ones_like(non_attr))
+        Y_att = tf.concat([Y_att,non_attr],axis=1)
+
         graph.add_to_collection('Y_att', Y_att)
         return Y_att
 
@@ -374,8 +394,9 @@ class SentiFunction:
         :param graph: 
         :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-        Y_senti = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num'] + 1, 3),
+        Y_senti = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1, 3),
                                  dtype='float32')
+        # TODO: add non-attribute
         graph.add_to_collection('Y_senti', Y_senti)
         return Y_senti
 
@@ -402,8 +423,8 @@ class SentiFunction:
         """
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
-        mask = tf.where(condition, tf.ones_like(X, dtype='int32') * tf.convert_to_tensor(-np.inf),
-                        tf.zeros_like(X, dtype='int32'))
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32') * tf.convert_to_tensor(-np.inf),
+                        tf.zeros_like(X, dtype='float32'))
         return mask
 
     def sentence_lstm(self, X, seq_len, graph):
@@ -418,9 +439,36 @@ class SentiFunction:
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
         return outputs
 
-    # TODO: Path Dependency
+    def sentence_bilstm(self, X, seq_len, graph):
+        """
+        return a lstm of a sentence
+        :param X: shape = (batch size, words number, word dim)
+        :param seq_len: shape = (batch size,) show the number of words in a batch
+        :param graph: 
+        :return: 
+        """
+        keep_prob = tf.placeholder(tf.float32)
+        tf.add_to_collection('keep_prob_lstm',keep_prob)
+        fw_cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size']/2)),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
+        bw_cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size']/2)),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
+        # outputs.shape = [(batch size, max time step, lstm cell size/2),(batch size, max time step, lstm cell size/2)]
+        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
+        # outputs.shape = (batch size, max time step, lstm cell size)
+        outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
+        graph.add_to_collection('sentence_bilstm_outputs', outputs)
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+        return outputs
+
     def path_dependency_table_input(self, graph):
         """
         :param graph: 

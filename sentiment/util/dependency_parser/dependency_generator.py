@@ -191,6 +191,8 @@ class DependencyGenerator:
         for i in range(length):
             node1 = path1[i]
             node2 = path2[i]
+            print(node1.text)
+            print(node2.text)
             if node1.index == node2.index:
                 # index of last common nodes
                 index = i

@@ -6,14 +6,16 @@ else:
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 
-from sentiment.sep_nn.fine_senti_classifier.classifier import SentiFunction
-from sentiment.sep_nn.fine_senti_classifier.classifier import Classifier
-from sentiment.util.fine.senti_data_generator import DataGenerator
+from sentiment.senti_nn.fine_senti_classifier_rd.classifier import Classifier
 
 import unittest
 import tensorflow as tf
 import numpy as np
 import math
+
+class DataGenerator:
+    def __init__(self,dg):
+        self.dg=dg
 
 class SFTest(unittest.TestCase):
     def __init__(self,*args,**kwargs):
@@ -46,8 +48,6 @@ class SFTest(unittest.TestCase):
                           }
         self.graph=tf.Graph()
         self.dg = DataGenerator(self.nn_config)
-        # self.af = AttributeFunction(self.nn_config)
-        self.sf=SentiFunction(self.nn_config)
         self.sess=tf.Session(graph=self.graph)
         self.cf = Classifier(self.nn_config,self.dg)
 
@@ -569,21 +569,21 @@ class SFTest(unittest.TestCase):
     #     test_data = np.mean(np.sum(np.sum(test_data,axis=2),axis=1))
     #     self.assertTrue(np.all(test_data == result))
 
-    def test_prediction(self):
-        # attribute labels
-        Y_atr = np.zeros(shape=(self.nn_config['batch_size'],self.nn_config['attributes_num'] + 1), dtype='float32')
-        for i in range(0, int(math.ceil(Y_atr.shape[0] / 2))):
-            Y_atr[i] = 1
-        # score
-        score = np.ones(shape=(self.nn_config['batch_size'],3 * self.nn_config['attributes_num'] + 3,),
-                        dtype='float32')
-
-        with self.graph.as_default():
-            pred = self.sf.prediction(score,Y_atr,self.graph)
-        with self.sess as sess:
-            result = sess.run(pred)
-
-        self.assertEqual(result.shape,(self.nn_config['batch_size'],self.nn_config['attributes_num']+1,3))
+    # def test_prediction(self):
+    #     # attribute labels
+    #     Y_atr = np.zeros(shape=(self.nn_config['batch_size'],self.nn_config['attributes_num'] + 1), dtype='float32')
+    #     for i in range(0, int(math.ceil(Y_atr.shape[0] / 2))):
+    #         Y_atr[i] = 1
+    #     # score
+    #     score = np.ones(shape=(self.nn_config['batch_size'],3 * self.nn_config['attributes_num'] + 3,),
+    #                     dtype='float32')
+    #
+    #     with self.graph.as_default():
+    #         pred = self.sf.prediction(score,Y_atr,self.graph)
+    #     with self.sess as sess:
+    #         result = sess.run(pred)
+    #
+    #     self.assertEqual(result.shape,(self.nn_config['batch_size'],self.nn_config['attributes_num']+1,3))
 
     # def test_accuracy(self):
     #     Y_senti = np.array([[[0,1,0],[0,0,1],[0,0,0]],[[0,0,1],[0,1,0],[1,0,1]]],dtype='float32')
@@ -593,8 +593,8 @@ class SFTest(unittest.TestCase):
     #     result = self.sess.run(accuracy)
     #     self.assertEqual(result,np.array(0.5,dtype='float32'))
 
-    # def test_classifier(self):
-    #     graph,saver = self.cf.classifier()
+    def test_classifier(self):
+        graph,saver = self.cf.classifier()
 
 
 if __name__ == "__main__":

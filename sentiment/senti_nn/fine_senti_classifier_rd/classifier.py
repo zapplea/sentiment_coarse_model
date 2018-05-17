@@ -28,15 +28,15 @@ class Classifier:
             words_pad_M = self.sf.is_word_padding_input(X_ids, graph)
             X = self.sf.lookup_table(X_ids,words_pad_M,graph)
             # lstm
-            with tf.variable_scope('sentence_lstm'):
+            with tf.variable_scope('sentence_bilstm'):
                 seq_len = self.sf.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
-                H = self.sf.sentence_lstm(X,seq_len, graph=graph)
+                H = self.sf.sentence_bilstm(X,seq_len, graph=graph)
                 #
-                graph.add_to_collection('reg',
-                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
+
 
             Y_att = self.sf.attribute_labels_input(graph=graph)
+            # Y_senti.shape = [batch_size, number of attributes + 1, 3]
             Y_senti = self.sf.sentiment_labels_input(graph=graph)
             if not self.nn_config['is_mat']:
                 A = self.sf.attribute_vec(graph)
@@ -46,6 +46,7 @@ class Classifier:
                 A = self.sf.words_attribute_mat2vec(H=H, A_mat=A, graph=graph)
             # sentiment expression prototypes matrix
             # shape = (3*numbers of normal sentiment prototype + attributes_numbers*attribute specific sentiment prototypes)
+            print('============ 1 ========')
             W = self.sf.sentiment_matrix(graph)
             # sentiment extractors for all (yi,ai)
             # extors_mat.shape = (3*attributes number+3, sentiment prototypes number, sentiment dim)
@@ -68,6 +69,7 @@ class Classifier:
             attended_W = self.sf.attended_sentiment(W, attention, graph)
             # shape = (batch size,number of words, 3+3*attributes number)
             item1 = self.sf.item1(attended_W,H,graph)
+            print('2')
             # A_dist.shape = (batch size, number of attributes+1, wrods number)
             A_dist = self.sf.attribute_distribution(A=A, H=H, graph=graph)
             # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
@@ -76,20 +78,33 @@ class Classifier:
             item2 = tf.reduce_sum(tf.multiply(A_Vi, beta), axis=3)
             # mask for score to eliminate the influence of padding word
             mask = self.sf.mask_for_pad_in_score(X_ids, graph)
-            # senti_socre.shape = (batch size, 3*number of attributes+3)
+            # senti_socre.shape = (batch size, 3*number of attributes+3, words num)
             score = self.sf.score(item1, item2,mask, graph)
+            # score.shape = (batch size, 3*number of attributes+3)
             score = tf.reduce_max(score, axis=2)
             # in coarse model, when the whole sentence is padded, there will be -inf, so need to convert them to 0
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
             graph.add_to_collection('senti_score', score)
-            # max_false_score.shape = (batch size, attributes number, 3)
-            max_false_score = self.sf.max_false_senti_score(Y_senti, score, graph)
-            #
-            senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
+            print('3')
+            # max margin loss
+            # # max_false_score.shape = (batch size, attributes number, 3)
+            # max_false_score = self.sf.max_false_senti_score(Y_senti, score, graph)
+            # #
+            # senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
+
+            # score.shape = (batch size, number of attributes+1,3)
+            score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num']+1, 3))
+            print('4')
+            # softmax loss
+            # TODO: check reg
+            senti_loss = self.sf.softmax_loss(labels=Y_senti,logits=score,graph=graph)
+            print('5')
             opt = self.sf.optimizer(senti_loss,graph)
+            # TODO: in coarse, should mask the prediction of padded sentences.
+            print('6')
             senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
-            accuracy = self.sf.accuracy(Y_senti=Y_senti,pred=senti_pred,graph=graph)
+            print('7')
             saver = tf.train.Saver()
         return graph, saver
 

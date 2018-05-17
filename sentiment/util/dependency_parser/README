@@ -12,6 +12,3 @@ dependency parser will remove punctuations, but the result of tokenizer will not
 
 The dependency parser will generate training data for sentiment function, both relative distance and dependency path.
 
-Wordembedding:
-the relationship words in sentiment path should be involved.
-check how many words is unk in the generated sentence.
