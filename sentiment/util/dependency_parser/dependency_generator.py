@@ -188,7 +188,6 @@ class DependencyGenerator:
             length = len(path1)
         else:
             length = len(path2)
-        path = []
         for i in range(length):
             node1 = path1[i]
             node2 = path2[i]
@@ -262,6 +261,7 @@ class DependencyGenerator:
                 attribute_word_index = j - 1
                 attribute_node_path = self.path_to_root(tree, attribute_node)
                 path = self.path_between_nodes(sentiment_node_path, attribute_node_path)
+                print('path:\n',path)
                 if max_path_length < len(path):
                     max_path_length = len(path)
                 table.append(path)
