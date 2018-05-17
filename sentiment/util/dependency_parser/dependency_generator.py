@@ -72,6 +72,7 @@ class DependencyGenerator:
         print('words: ',words)
         # ls = ['word1-index1,','word2-index2']
         ls = words.split(',')
+        ls[1]=ls[1][1:]
         # # delete ',' in the first item
         # ls[0] = ls[0][:-1]
         print('ls: ',ls)
