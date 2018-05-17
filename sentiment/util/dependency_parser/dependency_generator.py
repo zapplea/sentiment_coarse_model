@@ -367,7 +367,7 @@ if __name__ == '__main__':
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
 
-    nn_config = {'padding_word_index': 0,
+    nn_config = {'padding_word_index': 894728,
                  '#UNK#':'</s>'}
     for data_config in data_configs:
         pd_gen = DependencyGenerator(nn_config,data_config)
