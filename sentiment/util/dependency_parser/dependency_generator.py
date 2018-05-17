@@ -183,9 +183,6 @@ class DependencyGenerator:
             parent = tree[parent_index]
             path.insert(0, parent)
             node = parent
-        print('path to root: ')
-        for node in path:
-            print(node.text)
         return path
 
     def path_between_nodes(self, path1, path2):
@@ -217,9 +214,6 @@ class DependencyGenerator:
         path.extend(path1)
         path2.reverse()
         path.extend(path2[1:])
-
-        print(path)
-        exit()
         return path
 
     def path_decoder(self, path):
@@ -259,7 +253,7 @@ class DependencyGenerator:
             # node = tree[i]
             # sentiment_node = node[i]
             sentiment_node = tree[i]
-            print('senti_node:\n', sentiment_node.text)
+            print('senti_node:', sentiment_node.text)
             sentiment_node_index = i
             sentiment_word_index = i - 1
             sentiment_node_path = self.path_to_root(tree, sentiment_node)
@@ -273,16 +267,20 @@ class DependencyGenerator:
                 attribute_node_index = j
                 attribute_word_index = j - 1
                 attribute_node_path = self.path_to_root(tree, attribute_node)
-                print('attr_node:\n', attribute_node.text)
-
+                print('attr_node:', attribute_node.text)
                 path = self.path_between_nodes(sentiment_node_path, attribute_node_path)
-
+                print('path: ', path)
                 if max_path_length < len(path):
                     max_path_length = len(path)
                 table.append(path)
+            print(table)
+            with open('table.json','r') as f:
+                json.dump(table,f,indent=4)
+            exit()
             if len(table)>max_table_length:
                 max_table_length=len(table)
             tables[sentiment_word_index] = table
+
         return tables, max_path_length, max_table_length
 
     def tables_encoder(self, tables, max_path_length,max_table_length,max_sentence_length):
@@ -349,9 +347,6 @@ class DependencyGenerator:
         max_path_length = 0
         max_table_length =0
         for tree in forest:
-            print('tree: ')
-            for node in tree:
-                print(node.text)
             table, path_length,table_length = self.relative_distance_table_generator(tree)
             tables.append(table)
             if path_length > max_path_length:
