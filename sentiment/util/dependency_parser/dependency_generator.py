@@ -291,7 +291,7 @@ class DependencyGenerator:
                     if word in self.dictionary:
                         encoded_path.append(self.dictionary[word])
                     else:
-                        encoded_path.append(self.dictionary['#UNK#'])
+                        encoded_path.append(self.dictionary[self.nn_config['#UNK#']])
                 while len(encoded_path) < max_path_length:
                     encoded_path.append(self.nn_config['padding_word_index'])
                 encoded_table.append(encoded_path)
