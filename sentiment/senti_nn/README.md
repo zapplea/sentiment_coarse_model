@@ -22,6 +22,9 @@ This prograss is finished by the program so don't worry.
 ###sentences:
 The same to the attribute function in current state, but in the future, we would use the version without punctuation because of dependency parsing.
 
+### wordembedding table
+The same to attribute function
+
 #Wordembedding:
 In the dependency parsing version, the relationship words in sentiment path should be involved. Need to check how many words is unk in the generated sentence.
 
