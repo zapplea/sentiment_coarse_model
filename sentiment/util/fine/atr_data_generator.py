@@ -12,6 +12,8 @@ class DataGenerator():
         self.nn_config = nn_config
         self.train_attribute_ground_truth, self.train_sentence_ground_truth,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
         self.test_attribute_ground_truth, self.test_sentence_ground_truth = self.load_test_data(self.aspect_dic,self.dictionary)
+        self.train_sentence_ground_truth, self.train_attribute_ground_truth = self.unison_shuffled_copies(self.train_sentence_ground_truth, self.train_attribute_ground_truth)
+        self.train_attribute_ground_truth,self.train_sentence_ground_truth = self.train_attribute_ground_truth[:self.data_config['top_k_data']] , self.train_sentence_ground_truth[:self.data_config['top_k_data']]
         self.train_data_size = len(self.train_attribute_ground_truth)
         self.test_data_size = len(self.test_attribute_ground_truth)
 
@@ -24,8 +26,8 @@ class DataGenerator():
            """
         # [( emb_id,fname,row_index m_id,c_id,typeText)]
         #
-        if batch_num == 0:
-            self.train_sentence_ground_truth, self.train_attribute_ground_truth = self.unison_shuffled_copies(self.train_sentence_ground_truth,self.train_attribute_ground_truth)
+        # if batch_num == 0:
+        #     self.train_sentence_ground_truth, self.train_attribute_ground_truth = self.unison_shuffled_copies(self.train_sentence_ground_truth,self.train_attribute_ground_truth)
         train_size = self.train_data_size
         start = batch_num * self.nn_config['batch_size'] % train_size
         end = (batch_num * self.nn_config['batch_size'] + self.nn_config['batch_size']) % train_size
@@ -98,6 +100,7 @@ class DataGenerator():
         :param end: 
         :return:  shape =(batch size, attributes number +1, 3) 
         """
+
         sentiment = []
         for i in np.arange(0,data.shape[0]):
             vec = []

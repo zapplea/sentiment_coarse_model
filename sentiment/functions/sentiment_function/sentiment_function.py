@@ -279,6 +279,7 @@ class SentiFunction:
 
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels,logits=logits,dim=-1),axis=1),
                                      tf.reduce_sum(graph.get_collection('reg'))))
+        graph.add_to_collection('senti_loss', loss)
         return loss
 
     def accuracy(self, Y_senti, pred, graph):
