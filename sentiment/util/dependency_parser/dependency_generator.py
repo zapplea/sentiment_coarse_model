@@ -23,6 +23,8 @@ class DependencyGenerator:
         self.data_config = data_config
         self.dp_result = self.load()
         self.dictionary = self.load_dictionary()
+        # TODO: patch rv to dictionary to form a new dictionary.
+        self.relation_vocabulary =[]
 
     def load_dictionary(self):
         with open(self.data_config['dictionary_filePath'],'r') as f:
@@ -65,7 +67,9 @@ class DependencyGenerator:
         :return: 
         """
         index = dp_result.find('(')
-        relation = dp_result[:index]
+        relation = '#'+dp_result[:index]+'#'
+        if relation not in self.relation_vocabulary:
+            self.relation_vocabulary.append(relation)
         # words = 'word1-index1, word2-index2'
         words = dp_result[index + 1:-1]
         # ls = ['word1-index1,','word2-index2']
@@ -328,6 +332,11 @@ class DependencyGenerator:
         with open(self.data_config['relative_distance_table'],'wb') as f:
             pickle.dump({'encoded_tables':encoded_tables,'encoded_sentences':encoded_sentences},f)
 
+    def expand_dictionary(self):
+        count = len(self.dictionary)
+        for word in self.relation_vocabulary:
+            self.dictionary[word]=count
+            count+=1
 
     def main(self):
         # sentences contain ROOT
@@ -344,8 +353,13 @@ class DependencyGenerator:
                 max_path_length = path_length
             if table_length > max_table_length:
                 max_table_length = table_length
-        encoded_tables = []
+        self.expand_dictionary()
 
+        with open('read_table.json','w') as f:
+            json.dump(tables, f, indent=4)
+
+        encoded_tables = []
+        print('relation words number:',len(self.relation_vocabulary))
         print('max_path_length: ',max_path_length)
         for table in tables:
             encoded_tables.append(self.tables_encoder(table, max_path_length,max_table_length,max_sentence_length))

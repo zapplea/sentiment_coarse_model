@@ -31,3 +31,28 @@ In the dependency parsing version, the relationship words in sentiment path shou
 #Note:
 The attribute is given even in the test. So, if the attributes cannot be recognized correctly, the performance of the sentiment will be influenced.
 TODO:for coarse model, there should be something to eliminate the influence of padded sentences' labels.
+
+# path dependency version
+dependency relathion words: since these words are special and cannot be find in the original word embedding, we extract all of them and form a vocabulary of 
+relation words. The relation words are something like "#case#", or "#amod#". They will be randomly initialized, which means we use np.random.normal to give each 
+word a embedding. Then this vocabulary will be attached at the end of the original word embeddings, so we can use one lookup table to process sentences and 
+dependency path.
+In the program, just need to know the number of relation words.
+
+# paramters:
+### new paramters:
+'rel_words_num': the number of relation words.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
