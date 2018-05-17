@@ -72,7 +72,7 @@ if __name__ == "__main__":
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 1000,
-            'batch_size': 30,
+            'batch_size': 10,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
             'padding_word_index': coarse_nn_configs['padding_word_index'],  # the index of #PAD# in word embeddings list
@@ -97,6 +97,7 @@ if __name__ == "__main__":
         'words_num': fine_nn_configs['words_num'],
         'padding_word_index': fine_nn_configs['padding_word_index'],
         'word_dim': seed['word_dim'],
+        'top_k_data': 30,
         'dictionary': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/util/word_dic/data_dictionary.pkl'
     }
     # for nn_config in nn_configs:

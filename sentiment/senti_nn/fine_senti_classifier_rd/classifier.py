@@ -109,4 +109,4 @@ class Classifier:
         return graph, saver
 
     def train(self):
-        self.tra.train(self.classifier)
+        self.tra.train(self.classifier())

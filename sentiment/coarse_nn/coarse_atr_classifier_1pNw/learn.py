@@ -26,7 +26,7 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 6,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
+            'attribute_mat_size': 10,  # number of attribute mention prototypes in a attribute matrix
             'max_review_length':30,
             'words_num': 40,
             'word_dim': seed['word_dim'],
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             'aspect_prob_threshold':0.2,
             'keep_prob_lstm':0.5,
             'complement':0,
-            'model_save_path': 'ckpt2/coarse_nn.ckpt',
+            'model_save_path': 'ckpt_bi_10mention/coarse_nn.ckpt',
             'sr_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw/ckpt/'
         },
         {  # fixed parameter

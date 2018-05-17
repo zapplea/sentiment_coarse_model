@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -26,13 +26,13 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 6,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
+            'attribute_mat_size': 15,  # number of attribute mention prototypes in a attribute matrix
             'max_review_length':30,
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 1000,
-            'batch_size': 34,
+            'batch_size': 8,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
             'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             'aspect_prob_threshold':0.2,
             'keep_prob_lstm':0.5,
             'complement':0,
-            'model_save_path': 'ckpt_bi/coarse_nn.ckpt',
+            'model_save_path': 'ckpt_bi_15mention/coarse_nn.ckpt',
             'sr_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw/ckpt/'
         },
         {  # fixed parameter

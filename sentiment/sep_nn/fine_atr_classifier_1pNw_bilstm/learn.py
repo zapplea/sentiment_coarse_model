@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "6" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -26,12 +26,12 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 12,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 5,  # number of attribute mention prototypes in a attribute matrix
+            'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 1000,
-            'batch_size': 30,
+            'batch_size': 10,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
             'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
@@ -70,8 +70,8 @@ if __name__ == "__main__":
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
-            'epoch': 10,
-            'batch_size': 30,
+            'epoch': 100,
+            'batch_size': 10,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 3148,  # 2074276 for Chinese word embedding
             'padding_word_index': 3147,  # the index of #PAD# in word embeddings list
@@ -95,6 +95,7 @@ if __name__ == "__main__":
         'words_num': nn_configs[0]['words_num'],
         'padding_word_index': nn_configs[0]['padding_word_index'],
         'word_dim': seed['word_dim'],
+        'top_k_data':30,
         'dictionary': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/util/word_dic/data_dictionary.pkl'
     }
     # for nn_config in nn_configs:

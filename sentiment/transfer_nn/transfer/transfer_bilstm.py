@@ -19,7 +19,7 @@ class Transfer:
 
     def transfer(self, coarse_model,fine_dg):
         graph, saver = coarse_model.classifier()
-        score = graph.get_collection('socre')[0]
+        score = graph.get_collection('score')[0]
         X = graph.get_collection('X')[0]
         keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
         bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')

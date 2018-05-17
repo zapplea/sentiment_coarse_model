@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "6" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -35,13 +35,13 @@ class TransferTrain:
             Y_att = graph.get_collection('Y_att')[0]
             # lstm
             for v in tf.all_variables():
-                if v.name.startwith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0'):
+                if v.name.startswith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0'):
                     bilstm_fw_kernel =v
-                elif v.name.startwith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0'):
+                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0'):
                     bilstm_fw_bias = v
-                elif v.name.startwith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0'):
+                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0'):
                     bilstm_bw_kernel = v
-                elif v.name.startwith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0'):
+                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0'):
                     bilstm_bw_bias = v
             # attribute mention vector or matrix
             if not self.nn_config['is_mat']:
@@ -103,7 +103,7 @@ class TransferTrain:
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
-                        print(score_data)
+                        # print(score_data)
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
                         FP_vec.append(FP_data)
@@ -113,20 +113,20 @@ class TransferTrain:
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
                             Y_att_vec.append(Y_att_data[n])
-                    # if i % 2 == 0:
-                    #     check_num = 1
-                    #     print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
-                    #
-                    #     _precision = self.mt.precision(TP_vec,FP_vec,'macro')
-                    #     _recall = self.mt.recall(TP_vec,FN_vec,'macro')
-                    #     _f1_score = self.mt.f1_score(_precision,_recall,'macro')
-                    #     print('F1 score for each class:',_f1_score,'\nPrecision for each class:',_precision,'\nRecall for each class:',_recall)
-                    #     print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
-                    #
-                    #     _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                    #     _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                    #     _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                    #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
+                    if i % 1 == 0:
+                        check_num = 1
+                        print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
+
+                        _precision = self.mt.precision(TP_vec,FP_vec,'macro')
+                        _recall = self.mt.recall(TP_vec,FN_vec,'macro')
+                        _f1_score = self.mt.f1_score(_precision,_recall,'macro')
+                        print('F1 score for each class:',_f1_score,'\nPrecision for each class:',_precision,'\nRecall for each class:',_recall)
+                        print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
+
+                        _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
+                        _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
+                        _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
+                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
                     #
                     #     # # np.random.seed(1)
                     #     random_display = np.random.randint(0, 1500, check_num)
