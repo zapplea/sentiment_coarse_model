@@ -279,10 +279,6 @@ class DependencyGenerator:
                 print('attr_node:', attribute_node.text)
                 path = self.path_between_nodes(sentiment_node_path, attribute_node_path)
                 print('path: ', path)
-                if count ==1:
-                    exit()
-                else:
-                    count+=1
                 if max_path_length < len(path):
                     max_path_length = len(path)
                 table.append(path)

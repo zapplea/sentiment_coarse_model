@@ -15,3 +15,6 @@ The dependency parser will generate training data for sentiment function, both r
 special situation:
 1. sentiment word and attribute word are the same word.
 2. sentiment word is in the path to attribute word
+
+check:
+if the direction of the path is correct after conjunction.
