@@ -72,6 +72,7 @@ class DependencyGenerator:
         ls = words.split(',')
         # # delete ',' in the first item
         # ls[0] = ls[0][:-1]
+        print('ls: ',ls)
         words = []
         for s in ls:
             index = s.rfind('-')
