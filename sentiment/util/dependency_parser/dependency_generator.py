@@ -311,7 +311,7 @@ class DependencyGenerator:
                 if word in self.dictionary:
                     encoded_sentence.append(self.dictionary[word])
                 else:
-                    encoded_sentence.append(self.dictionary['</s>'])
+                    encoded_sentence.append(self.dictionary[self.nn_config['#UNK#']])
             while len(encoded_sentence) < max_sentence_length:
                 encoded_sentence.append(self.nn_config['padding_word_index'])
             encoded_sentences.append(encoded_sentence)
@@ -355,7 +355,8 @@ if __name__ == '__main__':
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
 
-    nn_config = {'padding_word_index': 0}
+    nn_config = {'padding_word_index': 0,
+                 '#UNK#':'</s>'}
     for data_config in data_configs:
         pd_gen = DependencyGenerator(nn_config,data_config)
         pd_gen.main()

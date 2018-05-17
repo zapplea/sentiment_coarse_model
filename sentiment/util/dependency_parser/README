@@ -9,3 +9,5 @@ The table of relative distance is arranged based on index of words in the origin
 
 Observation1:
 dependency parser will remove punctuations, but the result of tokenizer will not do that. so use dependency parser as tokenizer to process data.
+
+The dependency parser will generate training data for sentiment function, both relative distance and dependency path.
