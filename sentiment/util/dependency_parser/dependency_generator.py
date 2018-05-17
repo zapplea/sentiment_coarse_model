@@ -311,7 +311,7 @@ class DependencyGenerator:
                 if word in self.dictionary:
                     encoded_sentence.append(self.dictionary[word])
                 else:
-                    encoded_sentence.append(self.dictionary['#UNK#'])
+                    encoded_sentence.append(self.dictionary['</s>'])
             while len(encoded_sentence) < max_sentence_length:
                 encoded_sentence.append(self.nn_config['padding_word_index'])
             encoded_sentences.append(encoded_sentence)
