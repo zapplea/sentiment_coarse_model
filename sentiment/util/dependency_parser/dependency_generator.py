@@ -191,18 +191,18 @@ class DependencyGenerator:
         for i in range(length):
             node1 = path1[i]
             node2 = path2[i]
-            print(node1.text)
-            print(node2.text)
             if node1.index == node2.index:
                 # index of last common nodes
                 index = i
             else:
                 break
         path1 = path1[index:]
+        print('path1: ',path1)
         # child <-- relation -->parent<-- ...-->grand_parent
         path1 = self.path_decoder(path1)
 
         path2 = path2[index:]
+        print('path2: ',path2)
         # child <-- relation -->parent<-- ...-->grand_parent
         path2 = self.path_decoder(path2)
 
@@ -249,6 +249,7 @@ class DependencyGenerator:
             # node = tree[i]
             # sentiment_node = node[i]
             sentiment_node = tree[i]
+            print('senti_node:\n', sentiment_node.text)
             sentiment_node_index = i
             sentiment_word_index = i - 1
             sentiment_node_path = self.path_to_root(tree, sentiment_node)
@@ -262,10 +263,10 @@ class DependencyGenerator:
                 attribute_node_index = j
                 attribute_word_index = j - 1
                 attribute_node_path = self.path_to_root(tree, attribute_node)
-                print('senti_path:\n',sentiment_node_path)
-                print('attr_path:\n', attribute_node_path)
+                print('attr_node:\n', attribute_node.text)
 
                 path = self.path_between_nodes(sentiment_node_path, attribute_node_path)
+
                 if max_path_length < len(path):
                     max_path_length = len(path)
                 table.append(path)
