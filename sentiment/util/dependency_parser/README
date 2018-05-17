@@ -18,3 +18,8 @@ special situation:
 
 check:
 if the direction of the path is correct after conjunction.
+
+be careful, there are repetition in the sentences, so don't use
+
+#Data
+1. generate a vocabulary including all words used in the word embeddings.
