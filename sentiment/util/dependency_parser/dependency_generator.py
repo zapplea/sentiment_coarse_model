@@ -181,6 +181,9 @@ class DependencyGenerator:
             parent = tree[parent_index]
             path.insert(0, parent)
             node = parent
+        print('path to root: ')
+        for node in path:
+            print(node.text)
         return path
 
     def path_between_nodes(self, path1, path2):
