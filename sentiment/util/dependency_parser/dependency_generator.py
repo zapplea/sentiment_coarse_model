@@ -175,7 +175,7 @@ class DependencyGenerator:
         return forest, sentences
 
     def path_to_root(self, tree, node):
-        path = []
+        path = [node]
         while node.text != 'ROOT':
             parent_index = node.parent
             parent = tree[parent_index]
@@ -197,15 +197,16 @@ class DependencyGenerator:
             else:
                 break
         path1 = path1[index:]
-        print('path1: ',path1)
+
         # child <-- relation -->parent<-- ...-->grand_parent
         path1 = self.path_decoder(path1)
-
+        print('path1: ', path1)
         path2 = path2[index:]
         # TODO: need to check if the top node is included.
-        print('path2: ',path2)
+
         # child <-- relation -->parent<-- ...-->grand_parent
         path2 = self.path_decoder(path2)
+        print('path2: ', path2)
 
         path = []
         path.extend(path1)
