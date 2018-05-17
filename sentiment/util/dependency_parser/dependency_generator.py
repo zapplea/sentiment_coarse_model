@@ -245,8 +245,9 @@ class DependencyGenerator:
         for i in range(len(tree)):
             if i == 0:
                 continue
-            node = tree[i]
-            sentiment_node = node[i]
+            # node = tree[i]
+            # sentiment_node = node[i]
+            sentiment_node = tree[i]
             sentiment_node_index = i
             sentiment_word_index = i - 1
             sentiment_node_path = self.path_to_root(tree, sentiment_node)
@@ -255,7 +256,8 @@ class DependencyGenerator:
             for j in range(len(tree)):
                 if j == 0:
                     continue
-                attribute_node = node[j]
+                # attribute_node = node[j]
+                attribute_node = tree[j]
                 attribute_node_index = j
                 attribute_word_index = j - 1
                 attribute_node_path = self.path_to_root(tree, attribute_node)
