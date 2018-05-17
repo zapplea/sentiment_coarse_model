@@ -12,3 +12,6 @@ dependency parser will remove punctuations, but the result of tokenizer will not
 
 The dependency parser will generate training data for sentiment function, both relative distance and dependency path.
 
+special situation:
+1. sentiment word and attribute word are the same word.
+2. sentiment word is in the path to attribute word
