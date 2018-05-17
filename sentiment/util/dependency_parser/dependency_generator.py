@@ -283,7 +283,7 @@ class DependencyGenerator:
                     max_path_length = len(path)
                 table.append(path)
             print(table)
-            with open('table.json','r') as f:
+            with open('table.json','w') as f:
                 json.dump(table,f,indent=4)
             exit()
             if len(table)>max_table_length:
