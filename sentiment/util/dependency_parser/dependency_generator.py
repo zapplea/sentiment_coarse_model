@@ -64,10 +64,12 @@ class DependencyGenerator:
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
+        print('dp_result: ',dp_result)
         index = dp_result.find('(')
         relation = dp_result[:index]
         # words = 'word1-index1, word2-index2'
         words = dp_result[index + 1:-1]
+        print('words: ',words)
         # ls = ['word1-index1,','word2-index2']
         ls = words.split(',')
         # # delete ',' in the first item
