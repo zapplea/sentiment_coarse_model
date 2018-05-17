@@ -260,8 +260,10 @@ class DependencyGenerator:
                 attribute_node_index = j
                 attribute_word_index = j - 1
                 attribute_node_path = self.path_to_root(tree, attribute_node)
+                print('senti_path:\n',sentiment_node_path)
+                print('attr_path:\n', attribute_node_path)
+
                 path = self.path_between_nodes(sentiment_node_path, attribute_node_path)
-                print('path:\n',path)
                 if max_path_length < len(path):
                     max_path_length = len(path)
                 table.append(path)
