@@ -297,11 +297,6 @@ class DependencyGenerator:
                 encoded_table.append(encoded_path)
             while len(encoded_table)<max_table_length:
                 encoded_table.append([self.nn_config['padding_word_index']]*max_path_length)
-
-            with open('table.json', 'w') as f:
-                json.dump(encoded_table, f, indent=4)
-            exit()
-
             encoded_tables.append(np.array(encoded_table,dtype='int32'))
         while len(encoded_tables)<max_sentence_length:
             encoded_tables.append(np.ones(shape=(max_table_length,max_path_length),dtype='int32')*self.nn_config['padding_word_index'])
