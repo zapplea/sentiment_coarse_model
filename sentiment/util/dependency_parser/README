@@ -20,4 +20,6 @@ be careful, there are repetition in the sentences, so don't use
 
 #Data
 1. generate a vocabulary including all words used in the word embeddings.
-2. to each relation, since they cannot be find in the sentence, so we need to set new word embedding to them.
+
+# be careful
+each
