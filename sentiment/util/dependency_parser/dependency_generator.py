@@ -77,7 +77,10 @@ class DependencyGenerator:
             index = s.rfind('-')
             words.append({'word': s[:index], 'index': int(s[index + 1:])})
 
-        return {'rel': relation, 'parent': words[0], 'child': words[1]}
+        dic={'rel': relation, 'parent': words[0], 'child': words[1]}
+        print(dic)
+        exit()
+        return dic
 
     def construct_tree(self, relations, sentence):
         """
@@ -156,7 +159,7 @@ class DependencyGenerator:
                     break
             child['index'] = child['index'] - difference
         return relations
-
+    # TODO: rim space before words.
     def construct_forest(self):
         forest = []
         sentences = []
