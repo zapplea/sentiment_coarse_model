@@ -347,11 +347,11 @@ class DependencyGenerator:
 if __name__ == '__main__':
     data_configs = [{
                         'dependency_parsing_filePath':'/datastore/liu121/senti_data/pd/path_dependency_resturant_train_non-collapsed.json',
-                        'relative_distance_table':'/datastore/liu121/senti_data/pd/train_pd.table',
+                        'relative_distance_table':'/datastore/liu121/senti_data/pd_table/train_pd.table',
                         'dictionary_filePath':'/datastore/liu121/senti_data/en_word2id_dictionary.json'},
                    {
                        'dependency_parsing_filePath': '/datastore/liu121/senti_data/pd/path_dependency_resturant_test_non-collapsed.json',
-                       'relative_distance_table':'/datastore/liu121/senti_data/pd/test_pd.table',
+                       'relative_distance_table':'/datastore/liu121/senti_data/pd_table/test_pd.table',
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
 
