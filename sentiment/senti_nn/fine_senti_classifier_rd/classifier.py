@@ -33,8 +33,6 @@ class Classifier:
                 # H.shape = (batch size, max_time, cell size)
                 H = self.sf.sentence_bilstm(X,seq_len, graph=graph)
                 #
-
-
             Y_att = self.sf.attribute_labels_input(graph=graph)
             # Y_senti.shape = [batch_size, number of attributes + 1, 3]
             Y_senti = self.sf.sentiment_labels_input(graph=graph)
@@ -69,7 +67,6 @@ class Classifier:
             attended_W = self.sf.attended_sentiment(W, attention, graph)
             # shape = (batch size,number of words, 3+3*attributes number)
             item1 = self.sf.item1(attended_W,H,graph)
-            print('2')
             # A_dist.shape = (batch size, number of attributes+1, wrods number)
             A_dist = self.sf.attribute_distribution(A=A, H=H, graph=graph)
             # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
@@ -86,7 +83,6 @@ class Classifier:
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
             graph.add_to_collection('senti_score', score)
-            print('3')
             # max margin loss
             # # max_false_score.shape = (batch size, attributes number, 3)
             # max_false_score = self.sf.max_false_senti_score(Y_senti, score, graph)
@@ -95,16 +91,12 @@ class Classifier:
 
             # score.shape = (batch size, number of attributes+1,3)
             score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num']+1, 3))
-            print('4')
             # softmax loss
             # TODO: check reg
             senti_loss = self.sf.softmax_loss(labels=Y_senti,logits=score,graph=graph)
-            print('5')
             opt = self.sf.optimizer(senti_loss,graph)
             # TODO: in coarse, should mask the prediction of padded sentences.
-            print('6')
             senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
-            print('7')
             saver = tf.train.Saver()
         return graph, saver
 

@@ -26,12 +26,11 @@ class Classifier:
             words_pad_M = self.sf.is_word_padding_input(X_ids, graph)
             X = self.sf.lookup_table(X_ids,words_pad_M,graph)
             # lstm
-            with tf.variable_scope('sentence_lstm'):
+            with tf.variable_scope('sentence_bilstm'):
                 seq_len = self.sf.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
-                H = self.sf.sentence_lstm(X,seq_len, graph=graph)
+                H = self.sf.sentence_bilstm(X,seq_len, graph=graph)
                 #
-                graph.add_to_collection('reg',tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # path dependency
             # PD_ids.shape = ()
             PD_ids = self.sf.path_dependency_table_input(graph)
