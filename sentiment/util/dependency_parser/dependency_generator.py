@@ -202,6 +202,7 @@ class DependencyGenerator:
         path1 = self.path_decoder(path1)
 
         path2 = path2[index:]
+        # TODO: need to check if the top node is included.
         print('path2: ',path2)
         # child <-- relation -->parent<-- ...-->grand_parent
         path2 = self.path_decoder(path2)
@@ -210,6 +211,9 @@ class DependencyGenerator:
         path.extend(path1)
         path2.reverse()
         path.extend(path2[1:])
+
+        print(path)
+        exit()
         return path
 
     def path_decoder(self, path):
@@ -219,7 +223,7 @@ class DependencyGenerator:
         :return: 
         """
         # from child node to parent node
-        path = path.reverse()
+        path.reverse()
         ls = []
         # False: word to stack then relation to stack
         # True: relation to stack then word to stack
