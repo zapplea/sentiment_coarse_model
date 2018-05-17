@@ -202,13 +202,11 @@ class DependencyGenerator:
 
         # child <-- relation -->parent<-- ...-->grand_parent
         path1 = self.path_decoder(path1)
-        print('path1: ', path1)
         path2 = path2[index:]
         # TODO: need to check if the top node is included.
 
         # child <-- relation -->parent<-- ...-->grand_parent
         path2 = self.path_decoder(path2)
-        print('path2: ', path2)
 
         path = []
         path.extend(path1)
@@ -253,13 +251,11 @@ class DependencyGenerator:
             # node = tree[i]
             # sentiment_node = node[i]
             sentiment_node = tree[i]
-            print('senti_node:', sentiment_node.text)
             sentiment_node_index = i
             sentiment_word_index = i - 1
             sentiment_node_path = self.path_to_root(tree, sentiment_node)
             # key is relative distance
             table = []
-            count=0
             for j in range(len(tree)):
                 if j == 0:
                     continue
@@ -268,24 +264,10 @@ class DependencyGenerator:
                 attribute_node_index = j
                 attribute_word_index = j - 1
                 attribute_node_path = self.path_to_root(tree, attribute_node)
-                print('===============')
-                print('senti path to root: ')
-                for node in sentiment_node_path:
-                    print(node.text)
-                print('attr path to root: ')
-                for node in attribute_node_path:
-                    print(node.text)
-
-                print('attr_node:', attribute_node.text)
                 path = self.path_between_nodes(sentiment_node_path, attribute_node_path)
-                print('path: ', path)
                 if max_path_length < len(path):
                     max_path_length = len(path)
                 table.append(path)
-            print(table)
-            with open('table.json','w') as f:
-                json.dump(table,f,indent=4)
-            exit()
             if len(table)>max_table_length:
                 max_table_length=len(table)
             tables[sentiment_word_index] = table
@@ -363,6 +345,9 @@ class DependencyGenerator:
             if table_length > max_table_length:
                 max_table_length = table_length
         encoded_tables = []
+        with open('table.json','w') as f:
+            json.dump(tables,f,indent=4)
+        exit()
         print('max_path_length: ',max_path_length)
         for table in tables:
             encoded_tables.append(self.tables_encoder(table, max_path_length,max_table_length,max_sentence_length))
