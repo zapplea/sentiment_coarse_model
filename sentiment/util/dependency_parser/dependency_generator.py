@@ -347,6 +347,9 @@ class DependencyGenerator:
         max_path_length = 0
         max_table_length =0
         for tree in forest:
+            print('tree: ')
+            for node in tree:
+                print(node.text)
             table, path_length,table_length = self.relative_distance_table_generator(tree)
             tables.append(table)
             if path_length > max_path_length:
