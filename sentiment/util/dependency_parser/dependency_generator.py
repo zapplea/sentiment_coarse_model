@@ -64,26 +64,21 @@ class DependencyGenerator:
         :param dp_result: dependency relationship between two words, but type is str
         :return: 
         """
-        print('dp_result: ',dp_result)
         index = dp_result.find('(')
         relation = dp_result[:index]
         # words = 'word1-index1, word2-index2'
         words = dp_result[index + 1:-1]
-        print('words: ',words)
         # ls = ['word1-index1,','word2-index2']
         ls = words.split(',')
         ls[1]=ls[1][1:]
         # # delete ',' in the first item
         # ls[0] = ls[0][:-1]
-        print('ls: ',ls)
         words = []
         for s in ls:
             index = s.rfind('-')
             words.append({'word': s[:index], 'index': int(s[index + 1:])})
 
         dic={'rel': relation, 'parent': words[0], 'child': words[1]}
-        print(dic)
-        exit()
         return dic
 
     def construct_tree(self, relations, sentence):
