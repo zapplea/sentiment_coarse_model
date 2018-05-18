@@ -246,7 +246,7 @@ class SentiFunction:
         zeros_loss = tf.expand_dims(zeros_loss, axis=3)
         masked_loss = tf.expand_dims(masked_loss, axis=3)
         loss = tf.reduce_max(tf.concat([zeros_loss, masked_loss], axis=3), axis=3)
-
+        # TODO: eliminate the influence of batch size.
         batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(loss, axis=2), axis=1)) + tf.multiply(
             1 / self.nn_config['batch_size'], tf.reduce_sum(graph.get_collection('reg')))
         graph.add_to_collection('senti_loss', batch_loss)
@@ -367,7 +367,7 @@ class SentiFunction:
 
     def sentences_input(self, graph):
         X = tf.placeholder(
-            shape=(self.nn_config['batch_size'], self.nn_config['words_num']),
+            shape=(None, self.nn_config['words_num']),
             dtype='int32')
         graph.add_to_collection('X', X)
         return X
@@ -378,7 +378,7 @@ class SentiFunction:
         :param graph: 
         :return: shape = (batch size, attributes number+1)
         """
-        Y_att = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']),
+        Y_att = tf.placeholder(shape=(None, self.nn_config['attributes_num']),
                                dtype='float32')
         # TODO: add non-attribute
         batch_size = tf.shape(Y_att)[0]
@@ -395,7 +395,7 @@ class SentiFunction:
         :param graph: 
         :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-        Y_senti = tf.placeholder(shape=(self.nn_config['batch_size'], self.nn_config['attributes_num']+1, 3),
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
                                  dtype='float32')
         # TODO: add non-attribute
         graph.add_to_collection('Y_senti', Y_senti)
@@ -475,7 +475,7 @@ class SentiFunction:
         :param graph: 
         :return: 
         """
-        PD = tf.placeholder(shape=(self.nn_config['batch_size'],
+        PD = tf.placeholder(shape=(None,
                                    self.nn_config['words_num'],
                                    self.nn_config['words_num'],
                                    self.nn_config['max_path_length']),
@@ -511,27 +511,38 @@ class SentiFunction:
         :param graph: 
         :return: 
         """
+        current_batch_size = tf.shape(PD)[0]
         PD = tf.reshape(PD, shape=(-1, self.nn_config['max_path_length'], self.nn_config['word_dim']))
-        fw_cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
-        bw_cell = tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size'])
-        # outputs.shape = (-1,max words num, lstm cell size)
+        fw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size']/2))
+        bw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size']/2))
+        # outputs.shape = [(-1,max words num, lstm cell size/2),(-1,max words num, lstm cell size/2)]
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,
                                                      cell_bw=bw_cell,
                                                      inputs=PD,
                                                      sequence_length=seq_len,
                                                      time_major=False)
+        outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
         # instance_index stands for the index of dependency path
-        instance_index = tf.cast(tf.expand_dims(tf.range(start=0, limit=self.nn_config['batch_size'] * self.nn_config[
+        instance_index = tf.cast(tf.expand_dims(tf.range(start=0, limit=current_batch_size * self.nn_config[
             'words_num'] * self.nn_config['words_num']),
                                                 axis=1), dtype='int32')
         # instance_length_index stands for the length of the instance
+        # for padded sentence, the seq length is 0; then the index will be -1 and still the [0,...,0] will be chosen.
         instance_length_index = tf.cast(tf.expand_dims(seq_len - 1, axis=1), dtype='int32')
         slice_index = tf.concat([instance_index, instance_length_index], axis=1)
         outputs = tf.gather_nd(outputs, slice_index)
-        outputs = tf.reshape(outputs, shape=(self.nn_config['batch_size'],
+        outputs = tf.reshape(outputs, shape=(None,
                                              self.nn_config['words_num'],
                                              self.nn_config['words_num'],
                                              self.nn_config['lstm_cell_size']))
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name(
+                                        'dependency_path_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+        graph.add_to_collection('reg',
+                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+                                    graph.get_tensor_by_name(
+                                        'dependency_path_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
         return outputs
 
     def lstm_mask(self, X):
@@ -632,6 +643,8 @@ class SentiFunction:
         table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
                                dtype='float32')
         graph.add_to_collection('table', table)
+        rel_word_embeddings = tf.random_uniform(shape=(self.nn_config['rel_words_num'],self.nn_config['rel_word_dim']),dtype='float32')
+        table = tf.concat([table,rel_word_embeddings],axis=0)
         table = tf.Variable(table, name='table')
 
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')

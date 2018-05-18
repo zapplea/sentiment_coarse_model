@@ -1,5 +1,8 @@
-#1. input batch size:
+#1. 
+###1.1 input batch size:
 there is no limitation to the size of batch. You can change code in sentinn_train.
+###1.2 prediction and loss
+we use softmax cross entropy to construct the loss and predict the last result.
 
 #2. Metrics
 You can write a new metrics program. 
@@ -43,6 +46,7 @@ In the program, just need to know the number of relation words.
 ###6.1 new paramters:
 'rel_words_num': the number of relation words.
 'rel_word_dim': dimension of relation words' embedding. should be the same to original word embeddings' dimension.
+'max_path_length': the length of path dependency. The generator will produce it.
 
 #7. generate dependency path
 Use util/dependency_parser/dependency_generator.py to generate sentences (without punctuation) and dependency path.

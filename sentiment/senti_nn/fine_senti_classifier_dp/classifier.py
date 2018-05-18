@@ -47,14 +47,7 @@ class Classifier:
                 seq_len = self.sf.path_sequence_length(PD_ids)
                 # pd_H.shape=(batch size, words num, words num, lstm cell size)
                 pd_H = self.sf.path_dependency_bilstm(PD,seq_len,graph)
-                graph.add_to_collection('reg',
-                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                            graph.get_tensor_by_name(
-                                                'dependency_path_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
-                graph.add_to_collection('reg',
-                                        tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                            graph.get_tensor_by_name(
-                                                'dependency_path_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+            # TODO:eliminate the influence of padded dependency path; actually, the 0 will not influence.
 
             Y_att = self.sf.attribute_labels_input(graph=graph)
             Y_senti = self.sf.sentiment_labels_input(graph=graph)
@@ -100,13 +93,23 @@ class Classifier:
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
             graph.add_to_collection('senti_score', score)
-            # max_false_score.shape = (batch size, attributes number, 3)
-            max_false_score = self.sf.max_false_senti_score(Y_senti, score, graph)
-            #
-            senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
-            opt = self.sf.optimizer(senti_loss,graph)
+
+            # # max_false_score.shape = (batch size, attributes number, 3)
+            # max_false_score = self.sf.max_false_senti_score(Y_senti, score, graph)
+            # #
+            # senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
+            # opt = self.sf.optimizer(senti_loss,graph)
+            # senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
+
+            # score.shape = (batch size, number of attributes+1,3)
+            score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3))
+            # softmax loss
+            # TODO: check reg
+            senti_loss = self.sf.softmax_loss(labels=Y_senti, logits=score, graph=graph)
+            opt = self.sf.optimizer(senti_loss, graph)
+            # TODO: in coarse, should mask the prediction of padded sentences.
             senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
-            accuracy = self.sf.accuracy(Y_senti=Y_senti,pred=senti_pred,graph=graph)
+
             saver = tf.train.Saver()
         return graph, saver
 

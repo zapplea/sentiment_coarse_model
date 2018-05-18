@@ -44,7 +44,6 @@ class Classifier:
                 A = self.sf.words_attribute_mat2vec(H=H, A_mat=A, graph=graph)
             # sentiment expression prototypes matrix
             # shape = (3*numbers of normal sentiment prototype + attributes_numbers*attribute specific sentiment prototypes)
-            print('============ 1 ========')
             W = self.sf.sentiment_matrix(graph)
             # sentiment extractors for all (yi,ai)
             # extors_mat.shape = (3*attributes number+3, sentiment prototypes number, sentiment dim)
