@@ -24,8 +24,8 @@ class SFTest(unittest.TestCase):
                 'word_dim': 300
                 }
         self.nn_config = {'attributes_num': 20,
-                          'attribute_senti_prototype_num': 4,
-                          'normal_senti_prototype_num': 4,  # number of specific sentiment of each attribute
+                          'attribute_senti_prototype_num': 4, # number of specific sentiment of each attribute
+                          'normal_senti_prototype_num': 4,
                           'sentiment_dim': seed['lstm_cell_size'],  # dim of a sentiment expression prototype.
                           'attribute_dim': seed['lstm_cell_size'],
                           'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix

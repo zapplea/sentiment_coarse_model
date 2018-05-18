@@ -1,8 +1,14 @@
-#1. 
+#1. instruction of program
 ###1.1 input batch size:
 there is no limitation to the size of batch. You can change code in sentinn_train.
 ###1.2 prediction and loss
-we use softmax cross entropy to construct the loss and predict the last result.
+we use softmax cross entropy to construct the loss and use result of softmax to predict the labels.
+###1.3 relative distance and dependency path
+When we recognize a sentiment word in sentence, we don't know to which attribute it belongs, so, by calculating the distance between sentiment word and 
+attribute word, we want to associate the sentiment word to attribute words.
+###1.4 how to start
+1. use util/dependency_parser/dependency_generator.py to generate a dependency path table and sentences (look at section 5)
+2. run classifier.py in each folder. You can see the necessary input at section 3.
 
 #2. Metrics
 You can write a new metrics program. 
@@ -42,11 +48,70 @@ word a embedding. Then this vocabulary will be attached at the end of the origin
 dependency path.
 In the program, just need to know the number of relation words.
 
-#6. paramters:
-###6.1 new paramters:
+#6. paramters
+###6.1 new paramters in dependency path
+These parameter should also be included in relative distance version
+
 'rel_words_num': the number of relation words.
 'rel_word_dim': dimension of relation words' embedding. should be the same to original word embeddings' dimension.
 'max_path_length': the length of path dependency. The generator will produce it.
+
+###6.2 constraints
+lstm cell size = word dim
+rel_words_dim = lstm cell size
+rp_dim = lstm cell size
+
+###6.3 explanation of each paramter
+'attributes_num': number of attributes
+
+'attribute_senti_prototype_num': 10, number of sentiment prototypes for a specific attribute
+
+'normal_senti_prototype_num': 10,  # number of sentiment prototypes for each normal sentiment polarity like "Negative"
+
+'sentiment_dim': seed['lstm_cell_size'],  # dim of a sentiment expression prototype.
+
+'attribute_dim': seed['lstm_cell_size'], # dim of an attribute
+
+'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
+
+'words_num': 10, # number of words
+
+'word_dim': seed['word_dim'], # word dimension
+
+'rel_words_num':20, # number of dependency-parser relation words
+
+'rel_word_dim':seed['word_dim'], # a relation word's dimension
+
+'attribute_loss_theta': 1.0, # deprecated
+
+'sentiment_loss_theta': 1.0, # deprecated 
+
+'is_mat': False, # if the attribute mention is a matrix
+
+'epoch': None,
+
+'rps_num': 5,  # number of relative distance. if it is 5, then it means , for word_i, the distance between the other words and word_i is at most 5.
+if the distance is greater than 5, then we still consider the distance as 5.
+
+'rp_dim': seed['lstm_cell_size'],  # dimension of relative distance embedding
+
+'lr': 0.003,  # learing rate 
+
+'batch_size': 30,
+
+'lstm_cell_size': seed['lstm_cell_size'],
+
+'atr_threshold': 0,  # attribute score threshold, not used in here
+
+'reg_rate': 0.03, # regularization rate
+
+'senti_pred_threshold':0, # deprecated, used to predict sentiment
+
+'lookup_table_words_num':2981402, # number of words in the original word embeddings. Don't need to include relation word
+
+'padding_word_index':1, # index of padding word in the vocabulary
+
+'max_path_length':20 # the maximal length of dependency path, the util/dependency_parser/dependency_generator.py will print it out.
 
 #7. generate dependency path
 Use util/dependency_parser/dependency_generator.py to generate sentences (without punctuation) and dependency path.

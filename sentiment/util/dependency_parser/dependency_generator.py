@@ -357,12 +357,10 @@ class DependencyGenerator:
                 max_table_length = table_length
         self.expand_dictionary()
 
-        with open('read_table.json','w') as f:
-            json.dump(tables, f, indent=4)
+        print('relation words number:', len(self.relation_vocabulary))
+        print('max_path_length: ', max_path_length)
 
         encoded_tables = []
-        print('relation words number:',len(self.relation_vocabulary))
-        print('max_path_length: ',max_path_length)
         for table in tables:
             encoded_tables.append(self.tables_encoder(table, max_path_length,max_table_length,max_sentence_length))
         self.write(encoded_tables,encoded_sentences)
@@ -378,8 +376,9 @@ if __name__ == '__main__':
                        'dictionary_filePath': '/datastore/liu121/senti_data/en_word2id_dictionary.json'}
                    ]
 
-    nn_config = {'padding_word_index': 894728,
-                 '#UNK#':'</s>'}
+    nn_config = {'padding_word_index': 0, #The index of #PAD# in word embeddings
+                 '#UNK#':'#UNK#' # the symbol of the unknown word
+                }
     for data_config in data_configs:
         pd_gen = DependencyGenerator(nn_config,data_config)
         pd_gen.main()

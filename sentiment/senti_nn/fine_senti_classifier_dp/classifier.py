@@ -47,7 +47,6 @@ class Classifier:
                 # pd_H.shape=(batch size, words num, words num, lstm cell size)
                 pd_H = self.sf.path_dependency_bilstm(PD,seq_len,graph)
             # TODO:eliminate the influence of padded dependency path; actually, the 0 will not influence.
-            print('0')
             Y_att = self.sf.attribute_labels_input(graph=graph)
             Y_senti = self.sf.sentiment_labels_input(graph=graph)
             if not self.nn_config['is_mat']:
@@ -56,7 +55,6 @@ class Classifier:
                 A = self.sf.attribute_mat(graph)
                 # A.shape = shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
                 A = self.sf.words_attribute_mat2vec(H=H, A_mat=A, graph=graph)
-            print('1')
             # sentiment expression prototypes matrix
             # shape = (3*numbers of normal sentiment prototype + attributes_numbers*attribute specific sentiment prototypes)
             W = self.sf.sentiment_matrix(graph)
@@ -65,7 +63,6 @@ class Classifier:
             extors_mat = self.sf.senti_extors_mat(graph)
             # extors_mask_mat.shape = (3*attributes number+3, sentiment prototypes number)
             extors_mask_mat = self.sf.extors_mask(extors=extors_mat,graph=graph)
-            print('2')
             beta = self.sf.beta(graph)
             # extract sentiment expression corresponding to sentiment and attribute from W for all attributes
             # W.shape=(number of attributes*3+3, size of original W); shape of original W =(3*normal sentiment prototypes + attribute number * attribute sentiment prototypes, sentiment dim)
