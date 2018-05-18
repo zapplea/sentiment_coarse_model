@@ -24,7 +24,8 @@ class Classifier:
         with graph.as_default():
             X_ids = self.sf.sentences_input(graph=graph)
             words_pad_M = self.sf.is_word_padding_input(X_ids, graph)
-            X = self.sf.lookup_table(X_ids,words_pad_M,graph)
+            table = self.sf.wordEbmedding_table_input(graph)
+            X = self.sf.lookup_table(X_ids,words_pad_M,table,graph)
             # lstm
             with tf.variable_scope('sentence_bilstm'):
                 seq_len = self.sf.sequence_length(X_ids, graph)
@@ -41,6 +42,7 @@ class Classifier:
             # PD.shape =
             PD = self.sf.lookup_table(PD_ids,
                                       path_dependence_pad_M,
+                                      table,
                                       graph)
             with tf.variable_scope('dependency_path_bilstm'):
                 seq_len = self.sf.path_sequence_length(PD_ids)

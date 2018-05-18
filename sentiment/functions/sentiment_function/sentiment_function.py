@@ -636,19 +636,22 @@ class SentiFunction:
         graph.add_to_collection('opt', opt)
         return opt
 
-    def lookup_table(self, X, mask, graph):
+    def wordEbmedding_table_input(self,graph):
+        table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
+                               dtype='float32')
+        graph.add_to_collection('table', table)
+        rel_word_embeddings = tf.random_uniform(shape=(self.nn_config['rel_words_num'], self.nn_config['rel_word_dim']),
+                                                dtype='float32')
+        table = tf.concat([table, rel_word_embeddings], axis=0)
+        table = tf.Variable(table, name='table')
+        return table
+
+    def lookup_table(self, X, mask, table, graph):
         """
         :param X: shape = (batch_size, words numbers)
         :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
-                               dtype='float32')
-        graph.add_to_collection('table', table)
-        rel_word_embeddings = tf.random_uniform(shape=(self.nn_config['rel_words_num'],self.nn_config['rel_word_dim']),dtype='float32')
-        table = tf.concat([table,rel_word_embeddings],axis=0)
-        table = tf.Variable(table, name='table')
-
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings, mask)
         graph.add_to_collection('lookup_table', embeddings)
