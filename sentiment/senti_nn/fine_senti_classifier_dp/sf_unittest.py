@@ -20,7 +20,7 @@ class DataGenerator:
 class SFTest(unittest.TestCase):
     def __init__(self,*args,**kwargs):
         super(SFTest, self).__init__(*args, **kwargs)
-        seed = {'lstm_cell_size': 30,
+        seed = {'lstm_cell_size': 300,
                 'word_dim': 300
                 }
         self.nn_config = {'attributes_num': 20,
@@ -38,7 +38,7 @@ class SFTest(unittest.TestCase):
                           'is_mat': False,
                           'epoch': None,
                           'rps_num': 5,  # number of relative positions
-                          'rp_dim': 15,  # dimension of relative position
+                          'rp_dim': seed['lstm_cell_size'],  # dimension of relative position
                           'lr': 0.003,  # learing rate
                           'batch_size': 30,
                           'lstm_cell_size': seed['lstm_cell_size'],

@@ -37,7 +37,7 @@ class SentiFunction:
         temp = tf.multiply(m, tf.exp(tf.reduce_sum(tf.multiply(H, W), axis=4)))
 
         # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
-        denominator = tf.reduce_sum(temp, axis=3, keep_dims=True)
+        denominator = tf.reduce_sum(temp, axis=3, keepdims=True)
 
         denominator = tf.tile(denominator, multiples=[1, 1, 1,
                                                       self.nn_config['normal_senti_prototype_num'] * 3 +
@@ -216,7 +216,7 @@ class SentiFunction:
                         tf.ones_like(score, dtype='float32') * tf.constant(-np.inf, dtype='float32'),
                         tf.zeros_like(score, dtype='float32'))
         # shape = (batch size, number of attributes+1,1)
-        max_fscore = tf.reduce_max(tf.add(score, mask), axis=2, keep_dims=True)
+        max_fscore = tf.reduce_max(tf.add(score, mask), axis=2, keepdims=True)
 
         # consider when attribute contains all sentiment in a sentence.
         max_fscore = tf.where(tf.is_inf(max_fscore), tf.zeros_like(max_fscore, dtype='float32'), max_fscore)
@@ -383,7 +383,7 @@ class SentiFunction:
         # TODO: add non-attribute
         batch_size = tf.shape(Y_att)[0]
         non_attr = tf.zeros((batch_size,1),dtype='float32')
-        condition = tf.equal(tf.reduce_sum(Y_att,axis=1,keep_dims=True),non_attr)
+        condition = tf.equal(tf.reduce_sum(Y_att,axis=1,keepdims=True),non_attr)
         non_attr = tf.where(condition,non_attr,tf.ones_like(non_attr))
         Y_att = tf.concat([Y_att,non_attr],axis=1)
 
@@ -520,7 +520,8 @@ class SentiFunction:
                                                      cell_bw=bw_cell,
                                                      inputs=PD,
                                                      sequence_length=seq_len,
-                                                     time_major=False)
+                                                     time_major=False,dtype='float32')
+        # outputs.shape = (batch size*words num*words num, max path length, word dim)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
         # instance_index stands for the index of dependency path
         instance_index = tf.cast(tf.expand_dims(tf.range(start=0, limit=current_batch_size * self.nn_config[
@@ -531,7 +532,8 @@ class SentiFunction:
         instance_length_index = tf.cast(tf.expand_dims(seq_len - 1, axis=1), dtype='int32')
         slice_index = tf.concat([instance_index, instance_length_index], axis=1)
         outputs = tf.gather_nd(outputs, slice_index)
-        outputs = tf.reshape(outputs, shape=(None,
+        print(outputs)
+        outputs = tf.reshape(outputs, shape=(-1,
                                              self.nn_config['words_num'],
                                              self.nn_config['words_num'],
                                              self.nn_config['lstm_cell_size']))
@@ -657,11 +659,25 @@ class SentiFunction:
         To make the sentence have the same length, we need to pad each sentence with '#PAD#'. To avoid updating of the vector,
         we need a mask to multiply the result of lookup table.
         :param graph: 
-        :return: shape = (review number, sentence number, words number)
+        :return: 
         """
         ids = tf.cast(ids, dtype='float32')
         ones = tf.ones_like(ids, dtype='float32') * self.nn_config['padding_word_index']
-        is_one = tf.equal(ids, ones)
-        mask = tf.where(is_one, tf.zeros_like(ids, dtype='float32'), tf.ones_like(ids, dtype='float32'))
+        is_pad = tf.equal(ids, ones)
+        mask = tf.where(is_pad, tf.zeros_like(ids, dtype='float32'), tf.ones_like(ids, dtype='float32'))
         mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1, 1, self.nn_config['word_dim']])
+        return mask
+
+    def is_dpword_padding_input(self,ids,graph):
+        """
+        
+        :param ids: (batch size, words number, words number, max dp length)
+        :param graph: 
+        :return: 
+        """
+        ids = tf.cast(ids, dtype='float32')
+        ones = tf.ones_like(ids, dtype='float32') * self.nn_config['padding_word_index']
+        is_pad = tf.equal(ids, ones)
+        mask = tf.where(is_pad, tf.zeros_like(ids, dtype='float32'), tf.ones_like(ids, dtype='float32'))
+        mask = tf.tile(tf.expand_dims(mask,axis=4),multiples=[1,1,1,1,self.nn_config['rel_word_dim']])
         return mask
