@@ -8,7 +8,7 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "2" ## 0
 
 from sentiment.senti_nn.fine_senti_classifier_rd.classifier import Classifier
 from sentiment.util.fine.senti_data_generator import DataGenerator
@@ -30,11 +30,11 @@ if __name__ == "__main__":
                    'attributes_num': 12,
                    'sentiment_dim': seed['lstm_cell_size'],  # dim of a sentiment expression prototype.
                    'attribute_dim': seed['lstm_cell_size'],
-                   'words_num': 20,
+                   'words_num': 40,
                    'word_dim': seed['word_dim'],
                    'is_mat': True,
                    'epoch': 10000,#10000
-                   'batch_size':30,
+                   'batch_size':17,
                    'lstm_cell_size': seed['lstm_cell_size'],
                    'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
                    'padding_word_index': 30341,
@@ -42,11 +42,11 @@ if __name__ == "__main__":
                    'attribute_senti_prototype_num': 4,
                    'normal_senti_prototype_num': 4,  # number of specific sentiment of each attribute
                    'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
-                   'sentiment_loss_theta': 1.0,
+                   'sentiment_loss_theta': 3.0,
                    'rps_num': 5,  # number of relative positions
                    'rp_dim': 100,  # dimension of relative position
-                   'lr': 0.0003,  # learing rate
-                   'reg_rate': 0.0003,
+                   'lr': 0.00003,  # learing rate
+                   'reg_rate': 0.003,
                    'senti_pred_threshold': 0.5,
                    'keep_prob_lstm': 0.5,
                    'report_filePath': '/datastore/liu121/nosqldb2/sentiA/report1.txt'

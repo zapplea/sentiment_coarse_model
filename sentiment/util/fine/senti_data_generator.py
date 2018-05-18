@@ -12,8 +12,8 @@ class DataGenerator():
         self.nn_config = nn_config
         self.train_attribute_ground_truth, self.train_sentiment_ground_truth,self.train_sentence_ground_truth,self.aspect_dic ,self.senti_dic , self.dictionary,self.table = self.load_train_data()
         self.val_attribute_ground_truth, self.val_sentiment_ground_truth , self.val_sentence_ground_truth = self.load_test_data(self.aspect_dic, self.senti_dic ,self.dictionary)
-        self.train_sentence_ground_truth, self.train_attribute_ground_truth = self.unison_shuffled_copies(self.train_sentence_ground_truth, self.train_attribute_ground_truth)
-        self.train_attribute_ground_truth,self.train_sentence_ground_truth = self.train_attribute_ground_truth[:self.data_config['top_k_data']] , self.train_sentence_ground_truth[:self.data_config['top_k_data']]
+        # self.train_sentence_ground_truth, self.train_attribute_ground_truth = self.unison_shuffled_copies(self.train_sentence_ground_truth, self.train_attribute_ground_truth)
+        # self.train_attribute_ground_truth,self.train_sentence_ground_truth = self.train_attribute_ground_truth[:self.data_config['top_k_data']] , self.train_sentence_ground_truth[:self.data_config['top_k_data']]
         self.train_data_size = len(self.train_attribute_ground_truth)
         self.val_data_size = len(self.val_attribute_ground_truth)
 
@@ -99,12 +99,10 @@ class DataGenerator():
         """
         aspect = []
         for i in np.arange(0,data.shape[0]):
-            vec = np.zeros(len(aspect_dic))
+            vec = np.zeros(len(aspect_dic)-1)
             for j in data[data['sentence_id'] == data.iloc[i]['sentence_id']]['category'].unique():
                 if j == j:
                     vec[aspect_dic[j]] = 1
-                else:
-                    vec[aspect_dic['NONE']] = 1
             aspect.append(vec)
         aspect = np.array(aspect)
         if np.nan in aspect_dic.keys():
@@ -129,7 +127,7 @@ class DataGenerator():
                     tmp[sent_dic[data.iloc[i]['polarity']]] = 1
                     vec.append(tmp)
                 else:
-                    vec.append(np.zeros(3))
+                    vec.append(np.array([1,0,0]))
             sentiment.append(np.array(vec))
         return np.array(sentiment)
 
@@ -205,12 +203,7 @@ class DataGenerator():
             pickle.dump(aspect_dic,f)
 
             ##Generate sentiment_dic
-            senti_dic = {}
-            i = 0
-            for senti in tmp['polarity'].unique():
-                if senti == senti:
-                    senti_dic[senti] = i
-                    i += 1
+            senti_dic = {'neutral': 0, 'negative': 1, 'positive': 2}
             pickle.dump(senti_dic, f)
 
 
