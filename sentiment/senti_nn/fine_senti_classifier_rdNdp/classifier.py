@@ -75,14 +75,31 @@ class Classifier:
             item1 = self.sf.item1(attended_W,H,graph)
             # A_dist.shape = (batch size, number of attributes+1, wrods number)
             A_dist = self.sf.attribute_distribution(A=A, H=H, graph=graph)
-            # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
-            A_Vi = self.sf.dp_Vi(A_dist=A_dist,PD=pd_H,graph=graph)
-            # item2.shape=(batch size, number of attributes+1, number of words)
-            item2 = tf.reduce_sum(tf.multiply(A_Vi, beta), axis=3)
             # mask for score to eliminate the influence of padding word
-            mask = self.sf.mask_for_pad_in_score(X_ids,graph)
-            # senti_socre.shape = (batch size, 3*number of attributes+3, words num)
-            score = self.sf.score(item1, item2,mask, graph)
+            mask = self.sf.mask_for_pad_in_score(X_ids, graph)
+
+            # TODO: dependency path
+            # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+            dp_A_Vi = self.sf.dp_Vi(A_dist=A_dist,PD=pd_H,graph=graph)
+            # item2.shape=(batch size, number of attributes+1, number of words)
+            item2 = tf.reduce_sum(tf.multiply(dp_A_Vi, beta), axis=3)
+            # dp_socre.shape = (batch size, 3*number of attributes+3, words num)
+            dp_score = self.sf.score(item1, item2,mask, graph)
+            # TODO: relative distance
+            V = self.sf.relative_pos_matrix(graph)
+            # relative position ids
+            # shape = (number of words, number of words)
+            rp_ids = self.sf.relative_pos_ids(graph)
+            # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+            rd_A_Vi = self.sf.rd_Vi(A_dist=A_dist, V=V, rp_ids=rp_ids, graph=graph)
+            # item2.shape=(batch size, number of attributes+1, number of words)
+            item2 = tf.reduce_sum(tf.multiply(rd_A_Vi, beta), axis=3)
+            # rd_socre.shape = (batch size, 3*number of attributes+3, words num)
+            rd_score = self.sf.score(item1, item2, mask, graph)
+            # TODO: combine scores of relative distance and dependency path
+            # score.shape = (batch size, 3*number of attributes+3, words num)
+            score = tf.add(rd_score,dp_score)
+
             # score.shape = (batch size, 3*number of attributes+3)
             score = tf.reduce_max(score, axis=2)
             # in coarse model, when the whole sentence is padded, there will be -inf, so need to convert them to 0
