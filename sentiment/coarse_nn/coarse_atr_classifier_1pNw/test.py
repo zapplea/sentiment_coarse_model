@@ -37,7 +37,8 @@ class Test(unittest.TestCase):
                             'atr_pred_threshold': 0, # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
                             'attribute_loss_theta': 1.0,
                             'max_review_length':5,
-                            'aspect_prob_threshold':0.3
+                            'aspect_prob_threshold':0.3,
+                            'complement':1
                         }
         self.data_config = {
                                 'train_source_file_path': '~/dataset/semeval2016/absa_resturant_train.csv',
