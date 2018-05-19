@@ -262,9 +262,10 @@ class SentiFunction:
         # score.shape = (batch size, attributes numbers+1,3)
         score = tf.nn.softmax(logits=score,axis=-1)
         # pred.shape =(batch size, attributes number +1)
-        pred = tf.cast(tf.argmax(score,axis=2),dtype='float32')
+        # pred = tf.cast(tf.argmax(score,axis=2),dtype='float32')
+        pred = tf.where(tf.equal(tf.reduce_max(score,axis=2,keep_dims=True),score),tf.ones_like(score),tf.zeros_like(score))
         # use Y_atr to mask non-activated attributes' sentiment
-        pred = tf.multiply(Y_atr, pred)
+        # pred = tf.multiply(Y_atr, pred)
 
         graph.add_to_collection('prediction', pred)
         return pred
@@ -380,14 +381,14 @@ class SentiFunction:
         """
         Y_att = tf.placeholder(shape=(None, self.nn_config['attributes_num']),
                                dtype='float32')
+        graph.add_to_collection('Y_att', Y_att)
         # TODO: add non-attribute
         batch_size = tf.shape(Y_att)[0]
         non_attr = tf.zeros((batch_size,1),dtype='float32')
         condition = tf.equal(tf.reduce_sum(Y_att,axis=1,keepdims=True),non_attr)
         non_attr = tf.where(condition,tf.ones_like(non_attr),non_attr)
         Y_att = tf.concat([Y_att,non_attr],axis=1)
-
-        graph.add_to_collection('Y_att', Y_att)
+        graph.add_to_collection('check', Y_att)
         return Y_att
 
     def sentiment_labels_input(self, graph):

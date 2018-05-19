@@ -127,7 +127,7 @@ class DataGenerator():
                     tmp[sent_dic[data.iloc[i]['polarity']]] = 1
                     vec.append(tmp)
                 else:
-                    vec.append(np.array([1,0,0]))
+                    vec.append(np.array([0,0,0]))
             sentiment.append(np.array(vec))
         return np.array(sentiment)
 

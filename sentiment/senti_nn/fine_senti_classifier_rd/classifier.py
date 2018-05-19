@@ -9,6 +9,7 @@ elif os.getlogin() == 'liu121':
 
 from sentiment.functions.sentiment_function.sentiment_function import SentiFunction
 from sentiment.functions.train.sentinn_train import SentiTrain
+from sentiment.functions.sentiment_function.metrics import Metrics
 
 import tensorflow as tf
 import numpy as np
@@ -20,6 +21,7 @@ class Classifier:
         self.sf = SentiFunction(nn_config)
         self.dg = data_generator
         self.tra = SentiTrain(self.nn_config, self.dg)
+        self.mt = Metrics(self.nn_config)
 
     def classifier(self):
         graph = tf.Graph()
@@ -98,6 +100,9 @@ class Classifier:
             opt = self.sf.optimizer(senti_loss,graph)
             # TODO: in coarse, should mask the prediction of padded sentences.
             senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
+
+            f1 = self.mt.sentiment_f1(label=Y_senti,pred=senti_pred,graph=graph)
+
             saver = tf.train.Saver()
         return graph, saver
 

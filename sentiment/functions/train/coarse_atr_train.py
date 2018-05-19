@@ -88,7 +88,7 @@ class CoarseTrain:
                         # FP_vec.append(FP_data)
                         # FN_vec.append(FN_data)
                     # if i % 2 == 0:
-                    print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
+                    # print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
                     #
                     #     _precision = self.mt.precision(TP_vec,FP_vec,'macro')
                     #     _recall = self.mt.recall(TP_vec,FN_vec,'macro')
@@ -102,7 +102,7 @@ class CoarseTrain:
                     #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
 
 
-                    if i % 4 == 0 and i != 0:
+                    if i % 1 == 0 :
                         loss_vec = []
                         pred_vec = []
                         score_vec = []

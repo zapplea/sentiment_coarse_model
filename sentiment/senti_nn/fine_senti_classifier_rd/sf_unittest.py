@@ -20,25 +20,23 @@ class DataGenerator:
 class SFTest(unittest.TestCase):
     def __init__(self,*args,**kwargs):
         super(SFTest, self).__init__(*args, **kwargs)
-        seed = {'lstm_cell_size': 300,
+        seed = {'lstm_cell_size': 30,
                 'word_dim': 300
                 }
         self.nn_config = {'attributes_num': 20,
-                          'attribute_senti_prototype_num': 4, # number of specific sentiment of each attribute
-                          'normal_senti_prototype_num': 4,
+                          'attribute_senti_prototype_num': 4,
+                          'normal_senti_prototype_num': 4,  # number of specific sentiment of each attribute
                           'sentiment_dim': seed['lstm_cell_size'],  # dim of a sentiment expression prototype.
                           'attribute_dim': seed['lstm_cell_size'],
                           'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
                           'words_num': 10,
                           'word_dim': seed['word_dim'],
-                          'rel_words_num': 20,
-                          'rel_word_dim': seed['word_dim'],
                           'attribute_loss_theta': 1.0,
                           'sentiment_loss_theta': 1.0,
                           'is_mat': False,
                           'epoch': None,
                           'rps_num': 5,  # number of relative positions
-                          'rp_dim': seed['lstm_cell_size'],  # dimension of relative position
+                          'rp_dim': 15,  # dimension of relative position
                           'lr': 0.003,  # learing rate
                           'batch_size': 30,
                           'lstm_cell_size': seed['lstm_cell_size'],

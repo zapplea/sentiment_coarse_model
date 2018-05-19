@@ -26,13 +26,13 @@ if __name__ == "__main__":
         {  # fixed parameter
             'attributes_num': 6,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 15,  # number of attribute mention prototypes in a attribute matrix
+            'attribute_mat_size': 5,  # number of attribute mention prototypes in a attribute matrix
             'max_review_length':30,
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,
             'epoch': 1000,
-            'batch_size': 8,
+            'batch_size': 20,
             'lstm_cell_size': seed['lstm_cell_size'],
             'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
             'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             'aspect_prob_threshold':0.2,
             'keep_prob_lstm':0.5,
             'complement':0,
-            'model_save_path': 'ckpt_bi_15mention/coarse_nn.ckpt',
+            'model_save_path': 'ckpt_bi_15mention_2/coarse_nn.ckpt',
             'sr_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw/ckpt/'
         },
         {  # fixed parameter
@@ -61,7 +61,7 @@ if __name__ == "__main__":
             'lookup_table_words_num': 3646,  # 2074276 for Chinese word embedding
             'padding_word_index': 3645,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.003,
+            'reg_rate': 0.0003,
             'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
@@ -81,11 +81,11 @@ if __name__ == "__main__":
             'lookup_table_words_num': 3148,  # 2074276 for Chinese word embedding
             'padding_word_index': 3147,  # the index of #PAD# in word embeddings list
             # flexible parameter
-            'reg_rate': 0.001,
-            'lr': 0.03,  # learing rate
+            'reg_rate': 0.0003,
+            'lr': 0.0003,  # learing rate
             'atr_pred_threshold': 0,
             # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
-            'attribute_loss_theta': 1.0,
+            'attribute_loss_theta': 4.0,
         }
     ]
     data_config = {

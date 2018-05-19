@@ -13,24 +13,24 @@ class Metrics:
         :param graph: 
         :return: 
         """
-        label = tf.reshape(label,[self.nn_config['batch_size'],-1])
-        pred  = tf.reshape(pred, [self.nn_config['batch_size'], -1])
+        label = tf.reshape(label,shape=[-1, self.nn_config['attributes_num'] * 3 + 3])
+        pred  = tf.reshape(pred, shape=[-1, self.nn_config['attributes_num'] * 3 + 3])
 
-        # TP.shape = (batch size, attributes number+1 * 3)
-        TP = tf.cast(tf.count_nonzero(pred * label, axis=0,keep_dims=True), tf.float32)
-        # TP.shape = (batch size, attributes number+1)
-        TP = tf.reduce_sum(tf.reshape(TP,shape=[self.nn_config['batch_size'],self.nn_config['attributes_num']+1,3]),axis=2)
+        # TP.shape = (1,attributes number+1 * 3)
+        TP = tf.cast(tf.count_nonzero(pred * label, axis=0), tf.float32)
+        # TP.shape = (1,attributes number+1)
+        TP = tf.reduce_sum(tf.reshape(TP, shape=[self.nn_config['attributes_num'] + 1, 3]), axis=1)
 
 
         # FP.shape = (batch size, attributes number+1 * 3)
         FP = tf.cast(tf.count_nonzero(pred * (label - 1), axis=0), tf.float32)
         # FP.shape = (batch size, attributes number+1)
-        FP = tf.reduce_sum(tf.reshape(FP, shape=[self.nn_config['batch_size'], self.nn_config['attributes_num'] + 1, 3]), axis=2)
+        FP = tf.reduce_sum(tf.reshape(FP, shape=[self.nn_config['attributes_num'] + 1, 3]), axis=1)
 
         # FN.shape = (batch size, attributes number+1 * 3)
         FN = tf.cast(tf.count_nonzero((pred - 1) * label, axis=0), tf.float32)
         # FN.shape = (batch size, attributes number+1)
-        FN = tf.reduce_sum(tf.reshape(FN, shape=[self.nn_config['batch_size'], self.nn_config['attributes_num'] + 1, 3]), axis=2)
+        FN = tf.reduce_sum(tf.reshape(FN, shape=[self.nn_config['attributes_num'] + 1, 3]), axis=1)
         graph.add_to_collection('TP', TP)
         graph.add_to_collection('FP', FP)
         graph.add_to_collection('FN', FN)
