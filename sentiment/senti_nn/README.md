@@ -24,7 +24,8 @@ batch= [sentiment for sentence1, ...]
 sentiment for sentence1 = [sentiment for attribute1, ..., sentiment for non-attribute]
 sentiment for attribute1 = [0,0,1]
 The first represent neutral, the second represents negative, the third is positive. When a sentiment is true, then the corresponding position will be 1.
-If an attribute(including non-attribute) doesn't appear in a sentence, then its sentiment is neutral. 
+If an attribute(including non-attribute) doesn't appear in a sentence, then its sentiment is non-sentiment, which means that the sentiment for attribute_i
+ will be [0,0,0]. 
 
 ###3.2 attributes labels:
 The same to the attribute function, and the shape is (batch size, attributes number). 

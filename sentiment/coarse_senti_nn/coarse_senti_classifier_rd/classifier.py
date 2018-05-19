@@ -8,7 +8,8 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 from sentiment.functions.sentiment_function.sentiment_function import SentiFunction
-from sentiment.functions.train.sentinn_train import SentiTrain
+from sentiment.functions.train.coarse_sentinn_train import CoarseSentiTrain
+from sentiment.coarse_senti_nn.relevance_score.relevance_score import RelScore
 
 import tensorflow as tf
 import numpy as np
@@ -19,12 +20,14 @@ class Classifier:
         self.nn_config = nn_config
         self.sf = SentiFunction(nn_config)
         self.dg = data_generator
-        self.tra = SentiTrain(self.nn_config, self.dg)
+        self.tra = CoarseSentiTrain(self.nn_config, self.dg)
 
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
-            X_ids = self.sf.sentences_input(graph=graph)
+            relscore = RelScore(self.nn_config)
+            # X_ids.shape = (batch size * max review length, words num)
+            X_ids = relscore.reviews_input(graph=graph)
             words_pad_M = self.sf.is_word_padding_input(X_ids, graph)
             table=self.sf.wordEbmedding_table_input(graph)
             X = self.sf.lookup_table(X_ids,words_pad_M,table,graph)
@@ -89,8 +92,9 @@ class Classifier:
             # #
             # senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
 
+            mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
             # score.shape = (batch size, number of attributes+1,3)
-            score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num']+1, 3))
+            score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
             # softmax loss
             # TODO: check reg
             senti_loss = self.sf.softmax_loss(labels=Y_senti,logits=score,graph=graph)

@@ -384,7 +384,7 @@ class SentiFunction:
         batch_size = tf.shape(Y_att)[0]
         non_attr = tf.zeros((batch_size,1),dtype='float32')
         condition = tf.equal(tf.reduce_sum(Y_att,axis=1,keepdims=True),non_attr)
-        non_attr = tf.where(condition,non_attr,tf.ones_like(non_attr))
+        non_attr = tf.where(condition,tf.ones_like(non_attr),non_attr)
         Y_att = tf.concat([Y_att,non_attr],axis=1)
 
         graph.add_to_collection('Y_att', Y_att)

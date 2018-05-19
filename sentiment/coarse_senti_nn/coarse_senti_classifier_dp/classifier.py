@@ -8,7 +8,8 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 from sentiment.functions.sentiment_function.sentiment_function import SentiFunction
-from sentiment.functions.train.sentinn_train import SentiTrain
+from sentiment.functions.train.coarse_sentinn_train import CoarseSentiTrain
+from sentiment.coarse_senti_nn.relevance_score.relevance_score import RelScore
 
 import tensorflow as tf
 
@@ -17,12 +18,13 @@ class Classifier:
         self.nn_config = nn_config
         self.dg = data_generator
         self.sf= SentiFunction(self.nn_config)
-        self.tra = SentiTrain(self.nn_config, self.dg)
+        self.tra = CoarseSentiTrain(self.nn_config, self.dg)
 
     def classifier(self):
         graph = tf.Graph()
         with graph.as_default():
-            X_ids = self.sf.sentences_input(graph=graph)
+            relscore = RelScore(self.nn_config)
+            X_ids = relscore.reviews_input(graph=graph)
             words_pad_M = self.sf.is_word_padding_input(X_ids, graph)
             table = self.sf.wordEbmedding_table_input(graph)
             X = self.sf.lookup_table(X_ids,words_pad_M,table,graph)
@@ -49,7 +51,10 @@ class Classifier:
                 # pd_H.shape=(batch size, words num, words num, lstm cell size)
                 pd_H = self.sf.path_dependency_bilstm(PD,seq_len,graph)
             # TODO:eliminate the influence of padded dependency path; actually, the 0 will not influence.
-            Y_att = self.sf.attribute_labels_input(graph=graph)
+            aspect_prob = self.sf.attribute_labels_input(graph=graph)
+            mask_true_label = self.sf.mask_for_true_label(X_ids)
+
+            Y_att = relscore.aspect_prob2true_label(aspect_prob,mask_true_label)
             Y_senti = self.sf.sentiment_labels_input(graph=graph)
             if not self.nn_config['is_mat']:
                 A = self.sf.attribute_vec(graph)
@@ -97,8 +102,9 @@ class Classifier:
             # senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
             # opt = self.sf.optimizer(senti_loss,graph)
             # senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
+            mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
             # score.shape = (batch size, number of attributes+1,3)
-            score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3))
+            score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
             # softmax loss
             # TODO: check reg
             senti_loss = self.sf.softmax_loss(labels=Y_senti, logits=score, graph=graph)

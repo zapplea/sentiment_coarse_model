@@ -114,8 +114,10 @@ class Classifier:
             # senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
             # opt = self.sf.optimizer(senti_loss,graph)
             # senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
+            # mask the situation when attribute doesn't appear
+            mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
             # score.shape = (batch size, number of attributes+1,3)
-            score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3))
+            score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
             # softmax loss
             # TODO: check reg
             senti_loss = self.sf.softmax_loss(labels=Y_senti, logits=score, graph=graph)
