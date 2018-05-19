@@ -37,7 +37,19 @@ class Classifier:
                 # H.shape = (batch size, max_time, cell size)
                 H = self.sf.sentence_bilstm(X,seq_len, graph=graph)
                 #
-            Y_att = self.sf.attribute_labels_input(graph=graph)
+            aspect_prob = relscore.attribute_labels_input(graph=graph)
+            # mask padded sentences
+            # mask.shape = (batch size*max review length, attributes num+1)
+            mask_true_label = relscore.mask_for_true_label(X_ids)
+            # Y_att.shape = (batch size, max review length, attributes num+1)
+            Y_att = relscore.aspect_prob2true_label(aspect_prob, mask_true_label)
+
+            # complement aspect probability
+            if self.nn_config['complement'] == '1':
+                aspect_prob = relscore.complement1_aspect_prob(Y_att, aspect_prob)
+            elif self.nn_config['complement'] == '2':
+                aspect_prob = relscore.complement2_aspect_prob(Y_att, aspect_prob)
+
             # Y_senti.shape = [batch_size, number of attributes + 1, 3]
             Y_senti = self.sf.sentiment_labels_input(graph=graph)
             if not self.nn_config['is_mat']:
@@ -93,11 +105,24 @@ class Classifier:
             # senti_loss = self.sf.loss(Y_senti, score, max_false_score, graph)
 
             mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
-            # score.shape = (batch size, number of attributes+1,3)
+            # score.shape = (batch size*max_review_length, number of attributes+1,3)
             score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
+
+            # aspect_prob.shape = (batch size * max review length ,attributes num+1)
+            aspect_prob = relscore.expand_aspect_prob(aspect_prob, graph)
+
+            # Y_senti.shape=(batch size*max review length, attributes num+1,3)
+            Y_senti = relscore.expand_senti_label(Y_senti,graph)
+            # mask padded sentences
+            # Y_senti.shape=(batch size*max review length, attributes num+1,3)
+            Y_senti = relscore.senti_label2true_label(Y_senti,mask_true_label)
+
+            # senti_rel_prob = (batch size * max review length, attributes num+1)
+            senti_rel_prob = relscore.relevance_prob_senti(score,Y_senti, graph)
+
             # softmax loss
             # TODO: check reg
-            senti_loss = self.sf.softmax_loss(labels=Y_senti,logits=score,graph=graph)
+            senti_loss = relscore.softmax_loss(labels=Y_senti,logits=score,senti_rel_prob=senti_rel_prob,aspect_prob=aspect_prob,graph=graph)
             opt = self.sf.optimizer(senti_loss,graph)
             # TODO: in coarse, should mask the prediction of padded sentences.
             senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)

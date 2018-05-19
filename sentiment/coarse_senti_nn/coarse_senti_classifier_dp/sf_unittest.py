@@ -6,7 +6,7 @@ else:
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 
-from sentiment.senti_nn.fine_senti_classifier_dp.classifier import Classifier
+from sentiment.coarse_senti_nn.coarse_senti_classifier_dp.classifier import Classifier
 
 import unittest
 import tensorflow as tf

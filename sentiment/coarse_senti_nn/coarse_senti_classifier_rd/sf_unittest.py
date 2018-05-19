@@ -6,7 +6,7 @@ else:
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 
-from sentiment.senti_nn.fine_senti_classifier_rd.classifier import Classifier
+from sentiment.coarse_senti_nn.coarse_senti_classifier_rd.classifier import Classifier
 
 import unittest
 import tensorflow as tf
@@ -46,7 +46,11 @@ class SFTest(unittest.TestCase):
                           'reg_rate': 0.03,
                           'senti_pred_threshold':0,
                           'lookup_table_words_num':2981402, # 2074276 for Chinese word embedding
-                          'padding_word_index':1
+                          'padding_word_index':0,
+                          'complement':0,
+                          'max_review_length':20,
+                          'non_attr_prob': 0.5,
+                          'aspect_prob_threshold':0.2
                           }
         self.graph=tf.Graph()
         self.dg = DataGenerator(self.nn_config)
