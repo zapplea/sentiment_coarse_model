@@ -13,7 +13,7 @@ class SentiFunction:
             self.nn_config['normal_senti_prototype_num'] * 3 + self.nn_config['attribute_senti_prototype_num'] *
             self.nn_config['attributes_num'],
             self.nn_config['sentiment_dim']), dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         graph.add_to_collection('W', W)
         return W
 
@@ -93,6 +93,7 @@ class SentiFunction:
         else:
             # A.shape = (batch size, number of words, number of attributes+1, attribute dim(=lstm cell dim))
             # H.shape = (batch size, number of words, number of attributes+1, word dim)
+
             H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'] + 1, 1])
             # A_dist.shape = (batch size, attributes number, words number)
             A_dist = tf.nn.softmax(tf.transpose(tf.reduce_sum(tf.multiply(A, H), axis=3), [0, 2, 1]))
@@ -104,7 +105,7 @@ class SentiFunction:
         V = tf.get_variable(name='relative_pos',
                             initializer=tf.random_uniform(shape=(self.nn_config['rps_num'], self.nn_config['rp_dim']),
                                                           dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
         graph.add_to_collection('V', V)
         return V
 
@@ -173,7 +174,7 @@ class SentiFunction:
         """
         b = tf.get_variable(name='beta',
                             initializer=tf.random_uniform(shape=(self.nn_config['rp_dim'],), dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
         graph.add_to_collection('beta', b)
         return b
 
@@ -248,7 +249,7 @@ class SentiFunction:
         loss = tf.reduce_max(tf.concat([zeros_loss, masked_loss], axis=3), axis=3)
         # TODO: eliminate the influence of batch size.
         batch_loss = tf.reduce_mean(tf.reduce_sum(tf.reduce_sum(loss, axis=2), axis=1)) + tf.multiply(
-            1 / self.nn_config['batch_size'], tf.reduce_sum(graph.get_collection('reg')))
+            1 / self.nn_config['batch_size'], tf.reduce_sum(graph.get_collection('senti_reg')))
         graph.add_to_collection('senti_loss', batch_loss)
         return batch_loss
 
@@ -279,7 +280,7 @@ class SentiFunction:
         """
 
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels,logits=logits,dim=-1),axis=1),
-                                     tf.reduce_sum(graph.get_collection('reg'))))
+                                     tf.reduce_sum(graph.get_collection('senti_reg'))))
         graph.add_to_collection('senti_loss', loss)
         return loss
 
@@ -314,11 +315,11 @@ class SentiFunction:
         A = tf.get_variable(name='A_vec', initializer=tf.random_uniform(
             shape=(self.nn_config['attributes_num'], self.nn_config['attribute_dim']),
             dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A))
         graph.add_to_collection('A_vec', A)
         o = tf.get_variable(name='other_vec', initializer=tf.random_uniform(shape=(self.nn_config['attribute_dim'],),
                                                                             dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o))
         graph.add_to_collection('o_vec', o)
         A = tf.concat([A, tf.expand_dims(o, axis=0)], axis=0)
         return A
@@ -333,13 +334,13 @@ class SentiFunction:
                                                                                    self.nn_config['attribute_mat_size'],
                                                                                    self.nn_config['attribute_dim']),
                                                                             dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         graph.add_to_collection('A_mat', A_mat)
         o_mat = tf.get_variable(name='other_vec',
                                 initializer=tf.random_uniform(shape=(self.nn_config['attribute_mat_size'],
                                                                      self.nn_config['attribute_dim']),
                                                               dtype='float32'))
-        graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o_mat))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o_mat))
         graph.add_to_collection('o_mat', o_mat)
 
         A_mat = tf.concat([A_mat, tf.expand_dims(o_mat, axis=0)], axis=0)
@@ -441,7 +442,7 @@ class SentiFunction:
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
         graph.add_to_collection('sentence_lstm_outputs', outputs)
-        graph.add_to_collection('reg',
+        graph.add_to_collection('senti_reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
         return outputs
@@ -462,13 +463,13 @@ class SentiFunction:
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
-        graph.add_to_collection('sentence_bilstm_outputs', outputs)
-        graph.add_to_collection('reg',
+        graph.add_to_collection('senti_sentence_bilstm_outputs', outputs)
+        graph.add_to_collection('senti_reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
-        graph.add_to_collection('reg',
+                                    graph.get_tensor_by_name('senti_sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+        graph.add_to_collection('senti_reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name('senti_sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
         return outputs
 
     def path_dependency_table_input(self, graph):
@@ -538,11 +539,11 @@ class SentiFunction:
                                              self.nn_config['words_num'],
                                              self.nn_config['words_num'],
                                              self.nn_config['lstm_cell_size']))
-        graph.add_to_collection('reg',
+        graph.add_to_collection('senti_reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name(
                                         'dependency_path_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
-        graph.add_to_collection('reg',
+        graph.add_to_collection('senti_reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name(
                                         'dependency_path_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
@@ -633,8 +634,8 @@ class SentiFunction:
         return mask
 
     def optimizer(self, loss, graph):
-        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
-        graph.add_to_collection('opt', opt)
+        opt = tf.train.AdamOptimizer(self.nn_config['senti_lr']).minimize(loss)
+        graph.add_to_collection('senti_opt', opt)
         return opt
 
     def wordEbmedding_table_input(self,graph):

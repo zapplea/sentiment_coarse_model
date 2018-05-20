@@ -33,18 +33,20 @@ class SFTest(unittest.TestCase):
                           'word_dim': seed['word_dim'],
                           'attribute_loss_theta': 1.0,
                           'sentiment_loss_theta': 1.0,
-                          'is_mat': False,
+                          'is_mat': True,
                           'epoch': None,
                           'rps_num': 5,  # number of relative positions
                           'rp_dim': 15,  # dimension of relative position
-                          'lr': 0.003,  # learing rate
+                          'senti_lr': 0.003,  # learing rate
                           'batch_size': 30,
                           'lstm_cell_size': seed['lstm_cell_size'],
                           'atr_threshold': 0,  # attribute score threshold
                           'reg_rate': 0.03,
                           'senti_pred_threshold':0,
                           'lookup_table_words_num':2981402, # 2074276 for Chinese word embedding
-                          'padding_word_index':1
+                          'padding_word_index':1,
+                          'rel_word_dim': 300,
+                          'rel_words_num': 10
                           }
         self.graph=tf.Graph()
         self.dg = DataGenerator(self.nn_config)

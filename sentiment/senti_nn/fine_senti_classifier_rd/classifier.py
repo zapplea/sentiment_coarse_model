@@ -31,7 +31,7 @@ class Classifier:
             table=self.sf.wordEbmedding_table_input(graph)
             X = self.sf.lookup_table(X_ids,words_pad_M,table,graph)
             # lstm
-            with tf.variable_scope('sentence_bilstm'):
+            with tf.variable_scope('senti_sentence_bilstm'):
                 seq_len = self.sf.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
                 H = self.sf.sentence_bilstm(X,seq_len, graph=graph)

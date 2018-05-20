@@ -27,7 +27,14 @@ class Transfer:
         index = tf.argmax(tf.nn.softmax(avg_score, axis=0))
         return index
 
-    def
+    def gather_score(self,score,Y_senti):
+        """
+        
+        :param score: 
+        :param Y_senti: 
+        :return: 
+        """
+        tf.argmax(Y_senti,axis=)
 
     def transfer(self, coarse_model,fine_dg):
         graph, saver = coarse_model.classifier()
