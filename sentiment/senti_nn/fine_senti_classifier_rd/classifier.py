@@ -94,13 +94,14 @@ class Classifier:
             mask=tf.tile(tf.expand_dims(Y_att,axis=2),multiples=[1,1,3])
             # score.shape = (batch size, number of attributes+1,3)
             score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num']+1, 3)),mask)
+            graph.add_to_collection('word_score', score)
+            graph.add_to_collection('check', score)
             # softmax loss
             # TODO: check reg
             senti_loss = self.sf.softmax_loss(labels=Y_senti,logits=score,graph=graph)
             opt = self.sf.optimizer(senti_loss,graph)
             # TODO: in coarse, should mask the prediction of padded sentences.
             senti_pred = self.sf.prediction(score=score, Y_atr=Y_att, graph=graph)
-
             f1 = self.mt.sentiment_f1(label=Y_senti,pred=senti_pred,graph=graph)
 
             saver = tf.train.Saver()
