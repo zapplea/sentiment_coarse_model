@@ -102,6 +102,7 @@ class SentiTrain:
             FN = graph.get_collection('FN')[0]
             FP = graph.get_collection('FP')[0]
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
+            word_score = graph.get_collection('word_score')[0]
             check = graph.get_collection('check')[0]
             # attribute function
             init = tf.global_variables_initializer()
@@ -114,7 +115,7 @@ class SentiTrain:
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
                 sess.run(init, feed_dict={table: table_data})
-
+                # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 
                 batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
                 print('Train set size: ', self.dg.train_data_size, 'validation set size:', self.dg.val_data_size)
@@ -125,9 +126,9 @@ class SentiTrain:
                     FN_vec = []
                     for j in range(batch_num):
                         sentences, Y_att_data ,Y_senti_data= self.dg.data_generator(j,'train')
-                        _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data ,check_data\
+                        _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data ,check_data,word_score_data\
                             = sess.run(
-                            [train_step, loss, TP, FP, FN, pred, score ,check],
+                            [train_step, loss, TP, FP, FN, pred, score ,check,word_score],
                             feed_dict={X: sentences, Y_att: Y_att_data,Y_senti:Y_senti_data,
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
@@ -136,14 +137,12 @@ class SentiTrain:
                         # print(check_data)
                         # print('Batch :',j,'Training loss:%0.8f'%train_loss)
                         # #
-                        # random_display = np.random.randint(0, self.nn_config['batch_size'])
-                        # display_start = random_display * self.nn_config['max_review_length']
-                        # display_end = (random_display+1) * self.nn_config['max_review_length']
-                        # pred_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(pred_data[display_start:display_end],axis=0)) if rr]
-                        # Y_att_check = [list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(np.sum(true_labels_data[display_start:display_end],axis=0)) if rr]
-                        # sentences_check = [[list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']] for s in sentences[random_display] if [list(self.dg.dictionary.keys())[word] for word in s if word != self.nn_config['padding_word_index']]]
-                        # coarse_atr_score_check = score_data[display_start:display_end][range(len(sentences_check))]
-                        # print("sentence id: ", random_display, "\nsentence:\n", sentences_check,"\nreview length:\n", len(sentences_check), "\npred:\n",pred_check,"\nY_att:\n", Y_att_check,'\ncoarse score:',coarse_atr_score_check)
+                        random_display = np.random.randint(0, self.nn_config['batch_size'])
+                        pred_check = [(list(self.dg.aspect_dic.keys())[rrr],list(self.dg.senti_dic.keys())[c]) for rrr in range(self.nn_config['attributes_num']) for c, rr in enumerate(pred_data[random_display][rrr]) if rr]
+                        Y_att_check = [(list(self.dg.aspect_dic.keys())[rrr],list(self.dg.senti_dic.keys())[c]) for rrr in range(self.nn_config['attributes_num']) for c, rr in enumerate(Y_senti_data[random_display][rrr]) if rr]
+                        sentences_check = [list(self.dg.dictionary.keys())[word] for word in sentences[random_display] if word]
+                        senti_score_check = word_score_data[random_display]
+                        print("sentence id: ", random_display, "\nsentence:\n", sentences_check,"\nreview length:\n", len(sentences_check), "\npred:\n",pred_check,"\nY_att:\n", Y_att_check,'\nsentiment score:',word_score_data)
                         #
                         loss_vec.append(train_loss)
                         TP_vec.append(TP_data)
@@ -184,7 +183,7 @@ class SentiTrain:
                                            keep_prob_lstm: 1.0
                                            })
                             ##Show test message
-                            # random_display = np.random.randint(0, self.nn_config['batch_size'])
+                            random_display = np.random.randint(0, self.nn_config['batch_size'])
                             # if random_display % 6 == 0:
                             #     display_start = random_display * self.nn_config['max_review_length']
                             #     display_end = (random_display+1) * self.nn_config['max_review_length']

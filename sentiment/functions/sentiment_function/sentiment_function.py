@@ -262,11 +262,11 @@ class SentiFunction:
         """
         # score.shape = (batch size, attributes numbers+1,3)
         score = tf.nn.softmax(logits=score,axis=-1)
-        # pred.shape =(batch size, attributes number +1)
-        # pred = tf.cast(tf.argmax(score,axis=2),dtype='float32')
+        # pred.shape =(batch size, attributes number +1 , 3)
         pred = tf.where(tf.equal(tf.reduce_max(score,axis=2,keep_dims=True),score),tf.ones_like(score),tf.zeros_like(score))
         # use Y_atr to mask non-activated attributes' sentiment
-        # pred = tf.multiply(Y_atr, pred)
+        Y_atr = tf.tile(tf.expand_dims(Y_atr,axis=2),multiples=[1,1,3])
+        pred = tf.multiply(Y_atr, pred)
 
         graph.add_to_collection('prediction', pred)
         return pred
@@ -389,7 +389,6 @@ class SentiFunction:
         condition = tf.equal(tf.reduce_sum(Y_att,axis=1,keepdims=True),non_attr)
         non_attr = tf.where(condition,tf.ones_like(non_attr),non_attr)
         Y_att = tf.concat([Y_att,non_attr],axis=1)
-        graph.add_to_collection('check', Y_att)
         return Y_att
 
     def sentiment_labels_input(self, graph):
@@ -634,7 +633,11 @@ class SentiFunction:
         return mask
 
     def optimizer(self, loss, graph):
-        opt = tf.train.AdamOptimizer(self.nn_config['senti_lr']).minimize(loss)
+        # opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
+        opt = tf.train.AdamOptimizer(self.nn_config['senti_lr'])
+        gradients, variables = zip(*opt.compute_gradients(loss))
+        gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+        opt = opt.apply_gradients(zip(gradients, variables))
         graph.add_to_collection('senti_opt', opt)
         return opt
 

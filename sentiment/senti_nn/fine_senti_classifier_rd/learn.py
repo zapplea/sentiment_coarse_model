@@ -8,7 +8,7 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "2" ## 0
 
 from sentiment.senti_nn.fine_senti_classifier_rd.classifier import Classifier
 from sentiment.util.fine.senti_data_generator import DataGenerator
@@ -34,13 +34,13 @@ if __name__ == "__main__":
         'word_dim': seed['word_dim'],
         'is_mat': True,
         'epoch': 1000,
-        'batch_size': 5,
+        'batch_size': 10,
         'lstm_cell_size': seed['lstm_cell_size'],
         'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
         'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
         # flexible parameter
-        'reg_rate': 0.0003,
-        'lr': 0.0003,  # learing rate
+        'reg_rate': 0.003,
+        'lr': 0.00001,  # learing rate
         'atr_pred_threshold': 0,
         # if score of attribute is larger than atr_pred_threshold, the attribute exists in the sentence
         'attribute_loss_theta': 3.0,
