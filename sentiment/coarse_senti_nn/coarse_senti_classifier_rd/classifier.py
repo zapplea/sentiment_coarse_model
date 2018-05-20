@@ -97,7 +97,7 @@ class Classifier:
             # in coarse model, when the whole sentence is padded, there will be -inf, so need to convert them to 0
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
-
+            graph.add_to_collection('senti_score', score)
             # max margin loss
             # # max_false_score.shape = (batch size, attributes number, 3)
             # max_false_score = self.sf.max_false_senti_score(Y_senti, score, graph)
@@ -107,7 +107,6 @@ class Classifier:
             mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
             # score.shape = (batch size*max_review_length, number of attributes+1,3)
             score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
-            graph.add_to_collection('senti_score', score)
 
             # aspect_prob.shape = (batch size * max review length ,attributes num+1)
             aspect_prob = relscore.expand_aspect_prob(aspect_prob, graph)
