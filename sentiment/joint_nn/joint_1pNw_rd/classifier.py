@@ -83,6 +83,7 @@ class Classifier:
             attr_loss = self.af.sigmoid_loss(score, Y_att, graph)
             attr_pred = self.af.prediction(score, graph)
             accuracy = self.mt.accuracy(Y_att, attr_pred, graph)
+            opt = self.af.optimizer(attr_loss, graph=graph)
             # sentiment lstm
             with tf.variable_scope('senti_sentence_bilstm'):
                 # H.shape = (batch size, max_time, cell size)
