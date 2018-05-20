@@ -13,5 +13,15 @@ graph.get_collection('joint_opt') can get optimizer fo joint loss
 combination of paramters in attribute function and sentiment function
 
 #3. Training
-1. train attribute loss
-2. train joint loss
+###3.1 Traing method 1：
+for i in epoch:
+   train attribute loss
+for i in epoch:
+   train sentiment loss
+for i in eppch:
+   train joint loss
+###3.2 Traing method 2：
+for i in epoch:
+   train attribute loss
+for i in eppch:
+   train joint loss
