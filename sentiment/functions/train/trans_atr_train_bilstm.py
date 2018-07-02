@@ -34,15 +34,10 @@ class TransferTrain:
             # labels
             Y_att = graph.get_collection('Y_att')[0]
             # lstm
-            for v in tf.all_variables():
-                if v.name.startswith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0'):
-                    bilstm_fw_kernel =v
-                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0'):
-                    bilstm_fw_bias = v
-                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0'):
-                    bilstm_bw_kernel = v
-                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0'):
-                    bilstm_bw_bias = v
+            bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
+            bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
+            bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
+            bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
             # attribute mention vector or matrix
             if not self.nn_config['is_mat']:
                 A=graph.get_collection('A_vec')[0]
@@ -65,17 +60,13 @@ class TransferTrain:
             FN = graph.get_collection('FN')[0]
             FP = graph.get_collection('FP')[0]
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
-            # attribute function
-            init = tf.global_variables_initializer()
-        table_data = self.dg.table
         print(self.dg.aspect_dic)
 
         with graph.device('/gpu:1'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
-                sess.run(init, feed_dict={table: table_data})
-
+                table.load(init_data['init_table'],sess)
                 A.load(init_data['init_A'],sess)
                 O.load(init_data['init_O'],sess)
                 bilstm_fw_kernel.load(init_data['init_bilstm_fw_kernel'],sess)

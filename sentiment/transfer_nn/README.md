@@ -8,9 +8,11 @@
 运行程序时，先调用transfer,输出initializer_A与initializer_O, 然后调用train函数，并把这两个矩阵输入。
 
 代码结构：
-transfer_nn/transfer/transfer.py 包含transfer函数以及需要输入初始化的attribute_mat, attribute_vec(之前的版本都是随机初始化).
-transfer_nn/1pNw/classifier.py, 对1pNw 的transfer learning. coarse model调用coarse_nn中原代码. fine model重新写了一下,是fine_classifier函数，由于attribute_mat与attriubte_vec要用需要输入初始化的版本。
-functions/train/trans_atr_train.py里是训练fine_nn的函数。
+transfer_nn/transfer/transfer.py: 包含transfer函数以及需要输入初始化的attribute_mat, attribute_vec(之前的版本都是随机初始化).
+transfer_nn/1pNw/classifier.py: 对1pNw 的transfer learning. coarse model调用coarse_nn中原代码. fine model重新写了一下,是fine_classifier函数，由于attribute_mat与attriubte_vec要用需要输入初始化的版本。
+transfer_nn/ilp_1pNw/classifier.py: bilstm as bottom of the transfer learning. use ilp to align aspect and attribute.
+functions/train/trans_atr_train.py: 是训练fine_nn的函数。
+
 
 
 输入：

@@ -1,108 +1,83 @@
 import numpy as np
+import pulp
 import operator
-# import pulp
 # import gurobipy
 
-class ILP:
-    def __init__(self,depth,layer_dim,used_pos):
-        self.depth=depth
-        self.lamda = 0.3
-        self.delta = 0.3
-        self.layer_dim=layer_dim
-        self.greatest_k= int(self.layer_dim[-2]/4)
-        self.used_pos = used_pos
+class AttributeIlp:
+    def __init__(self,ilp_data):
+        self.ilp_data = ilp_data
+        self.target_labels_num = len(ilp_data)
+        self.source_vectors_num = ilp_data[0]['attention'].shape[2]*ilp_data[0]['attention'].shape[3]
 
-
-
-    def ilp(self, phi_x, W, pos_neg, mt_1):
+    def extract_attention(self):
         """
-
-        :param phi_x: np.narray, shape = (batch size, last hidden layer size)
-        :param W: np.array, shape = (last hidden layer size, output layer size)
-        :param pos_neg: When at the position where in ground truth label is 1, the pos_neg =1, otherwise, pos_neg =-1
-        :param mt_1:
-        :return:
+        extract attention of each sentence
+        :return: shape = (target labels num, source vectors num)
         """
+        # shape = (target labels num, sentence number, source vectors num)
+        W_attention = [[]]*self.target_labels_num
 
-        temp=[]
-        for i in range(phi_x.shape[0]):
-            x = phi_x[i]
-            pn = pos_neg[i]
-            # print(pn.shape)
-            pn = np.tile(np.expand_dims(pn,axis=1),[1,self.layer_dim[-2]])
-            t1 = np.multiply(x,np.transpose(W))
-            t2 = np.multiply(pn,t1)
-            t3 = -np.exp(t2)
-            t4 = np.sum(t3,axis=0)
-            temp.append(t4)
-        z = np.sum(temp,axis=0)
+        # j,i means source attribute vector j to target label i
+        for i in range(self.target_labels_num):
+            # score_pre.shape = (batch size, attributes num, words num)
+            score_pre = self.ilp_data[i]['score_pre']
+            # attention.shape = (batch size, words number, 1,attribute number*attribute mat size)
+            attention = self.ilp_data[i]['attention']
+            for l in range(len(score_pre)):
+                # shape = (attributes num, words num)
+                instance_score_pre = score_pre[l]
+                # shape = (words number, 1, attribute number*attribute mat size)
+                instance_attention = attention[l]
+                for j in range(self.source_vectors_num):
+                    # shape = (words num,)
+                    source_score = instance_score_pre[j]
+                    index = np.argmax(source_score)
+                    # shape = (attribute number*attribute mat size,)
+                    source_attention = instance_attention[index][0]
+                    W_attention[i].append(source_attention)
+        # W_attention.shape = (target labels num, source vectors num)
+        for i in range(self.target_labels_num):
+            W_attention[i] = np.mean(W_attention[i],axis=0)
+        # W_attention.shape = (source vectors num, target labels num)
+        W_attention = np.transpose(W_attention)
+        return W_attention
 
-        # abs
-        # when mt_1_i = 1, the condition_i = True
-        condition = np.equal(np.ones_like(mt_1,dtype='float32'),mt_1)
-        abs = np.where(condition, np.ones_like(mt_1,dtype='float32'),-np.ones_like(mt_1,dtype='float32'))
-        result = np.add(z,np.multiply(abs,np.multiply(self.lamda,1-mt_1)))
-        # rank the result and extract top k
-        disordered_result = []
-        for i in range(result.shape[0]):
-            if i not in self.used_pos:
-                disordered_result.append((i,result[i]))
-        # order result
-        orderd_result = sorted(disordered_result,key=operator.itemgetter(1),reverse=True)
-        orderd_result = np.array(orderd_result)
-        greatest_k_index = orderd_result[:self.greatest_k,0]
-        mt = np.zeros_like(mt_1,dtype='float32')
-        for index in greatest_k_index:
-            mt[int(index)] = 1
-        return mt
 
-    # def matmul(self,vars_mat,constant_mat):
-    #     result=[]
-    #     for var in vars_mat:
-    #         result.append(np.sum(np.multiply(var,constant_mat),axis=1))
-    #
-    #     return result
-    #
-    def ilp(self,phi_x, W, pos_neg,mt_1):
-        """
 
-        :param phi_x: np.narray
-        :param W: np.array
-        :param pos_neg:
-        :param mt_1:
-        :return:
-        """
-        if self.depth<4:
-            upslice=int(self.depth*self.layer_dim[-2]/4)
-            lowslice=int((self.depth-1)*self.layer_dim[-2]/4)
-            length=np.abs(upslice-lowslice)
-        else:
-            lowslice=int((self.depth-1)*self.layer_dim[-2]/4)
-            length=np.abs(self.layer_dim[-2]-lowslice)
-        mask_vars = []
-        for i in range(self.layer_dim[-2]):
-            name='m'+str(i)
-            mask_vars.append(pulp.LpVariable(name,0,1,pulp.LpInteger))
-        prob=pulp.LpProblem('',pulp.LpMinimize)
-        temp1 = np.multiply(phi_x, mask_vars)
-        temp2=[]
-        for row in temp1:
-            temp2.append(np.sum(np.multiply(row,np.transpose(W)),axis=1))
-        temp3 = np.multiply(temp2, pos_neg)
+    def attributes_vec_index(self):
+        # W_attention.shape = (source vectors num, target labels num, )
+        W_attention = self.extract_attention()
+        vars=[[]]*self.source_vectors_num
+        for j in range(self.source_vectors_num):
+            for i in range(self.target_labels_num):
+                vars[j].append(pulp.LpVariable('x_'+str(j)+'_'+str(i),0,1,pulp.LpInteger))
+        # space.shape = (source vectors num, target labels num)
+        space = np.multiply(W_attention,vars)
+        prob = pulp.LpProblem('attr_map',pulp.LpMaximize)
 
-        # manhattan distance
-        abs = np.ones_like(mt_1,dtype='float32')
-        for i in range(mt_1.shape[0]):
-            if mt_1[i]== 1:
-                abs[i]=-1
-        norm = np.multiply(self.lamda,np.sum(np.add(np.multiply(abs,mask_vars),mt_1)))
+        prob += np.sum(space)
+        for j in range(self.source_vectors_num):
+            prob+= np.sum(space[j])<=3
+        # space.shape = (target labels num, source vectors num)
+        space=np.transpose(space)
+        for i in range(self.target_labels_num):
+            prob+= np.sum(space[i])==3
+        prob.solve()
 
-        prob += -np.sum(temp3) + norm + self.delta
-        # prob+= -np.sum(np.multiply(np.matmul(np.multiply(phi_x,mask_vars),W),pos_neg))+np.linalg.norm(np.subtract(mask_vars,mt_1))
-        prob+= np.sum(mask_vars) == length
-        prob.solve(pulp.GUROBI_CMD(msg=0))
-        mt=[]
-        for m in prob.variables():
-            num=int(m.name.replace('m',''))
-            mt[num]=m.varValue
-        return mt
+        vars_value=np.zeros(shape=(self.source_vectors_num,self.target_labels_num),dtype='int32')
+        for v in prob.variables():
+            ls = v.name.split('_')
+            j = int(ls[1])
+            i = int(ls[2])
+            vars_value[j][i]=v.varValue
+        index_collection = sorted(np.argwhere(vars_value),key=operator.itemgetter(0,1))
+        return index_collection
+
+    def attributes_matrix(self,index_collection,matrix):
+        # shape=(target attributes num, mat size, attribute dim)
+        A=[[]]*self.target_labels_num
+        for index in index_collection:
+            j = index[0]
+            i = index[1]
+            A[i].append(matrix[j])
+        return A
