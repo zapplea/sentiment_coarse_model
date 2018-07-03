@@ -113,11 +113,11 @@ class Transfer:
         # ##################### #
         graph = self.media_model()
         with graph.as_default():
-            # score_pre.shape = (batch size, attributes num, words num)
+            # score_pre.shape = (batch size, 1, words num)
             score_pre = graph.get_collection('score_pre')[0]
             # X.shape = (batch size, word numbers)
             X = graph.get_collection('X')[0]
-            # attention.shape = (batch size, words number, attribute number, attribute mat size)
+            # attention.shape = (batch size, words number, 1, aspects num*aspect mat size)
             attention = graph.get_collection('attention')[0]
 
             bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
@@ -146,13 +146,14 @@ class Transfer:
                 label_id = 0
                 ilp_data={}
                 for X_data in X_data_list:
-                    # score_pre.shape = (batch size, aspects num, words num)
-                    # attention.shape = (batch size, words number, aspects num, aspect mat size)
+                    # in source model, things will be different
+                    # score_pre.shape = (batch size, 1, words num)
+                    # attention.shape = (batch size, words number, 1, aspects num*aspect mat size)
                     score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data})
                     ilp_data[label_id]={'score_pre':score_pre_data,'attention':attention_data}
                     label_id+=1
 
-        ilp = AttributeIlp(ilp_data)
+        ilp = AttributeIlp(ilp_data,self.coarse_nn_config['attributes_num'],self.coarse_nn_config['attribute_mat_size'])
         index_collection = ilp.attributes_vec_index()
         A_data = ilp.attributes_matrix(index_collection,A_data[0])
 

@@ -105,11 +105,8 @@ class Test(unittest.TestCase):
         self.cl = Classifier(coarse_nn_configs, fine_nn_configs, coarse_dg, fine_dg)
         self.trans=Transfer(coarse_data_configs,coarse_dg)
 
-    def test_coarse_classifier(self):
-        self.cl.coarse_classifier()
-
-    def test_fine_classifier(self):
-        self.cl.fine_classifier()
+    def test_media_model(self):
+        self.trans.media_model()
 
 
 
