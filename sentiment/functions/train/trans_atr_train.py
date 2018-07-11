@@ -1,6 +1,4 @@
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -35,9 +33,9 @@ class TransferTrain:
             Y_att = graph.get_collection('Y_att')[0]
             # lstm
             for v in tf.all_variables():
-                if v.name.startwith('sentence_lstm/rnn/basic_lstm_cell/kernel:0'):
+                if v.name.startswith('sentence_lstm/rnn/basic_lstm_cell/kernel:0'):
                     lstm_kernel = v
-                elif v.name.startwith('sentence_lstm/rnn/basic_lstm_cell/bias:0'):
+                elif v.name.startswith('sentence_lstm/rnn/basic_lstm_cell/bias:0'):
                     lstm_bias = v
             # attribute mention vector or matrix
             if not self.nn_config['is_mat']:

@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "6" ## 0
+os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
 if os.getlogin() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
@@ -9,7 +9,7 @@ elif os.getlogin() == 'lujunyu':
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
-from sentiment.transfer_nn.transfer_atr_1pNw_bilstm.classifier import Classifier
+from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 from sentiment.util.coarse.atr_data_generator import DataGenerator as coarse_DataGenerator
 from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGenerator
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     coarse_nn_configs ={  # fixed parameter
             'attributes_num': 6,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 15,  # number of attribute mention prototypes in a attribute matrix
+            'attribute_mat_size': 5,  # number of attribute mention prototypes in a attribute matrix
             'max_review_length':1,
             'words_num': 40,
             'word_dim': seed['word_dim'],
@@ -47,7 +47,7 @@ if __name__ == "__main__":
             'aspect_prob_threshold':0.2,
             'keep_prob_lstm':0.5,
             'complement':0,
-            'sr_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw_bilstm/ckpt_bi_15mention_2/'
+            'sr_path': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw_bilstm/ckpt_bi_5mention_6.19/'
         }
     coarse_data_configs = {
         'train_source_file_path': '/home/lujunyu/dataset/yelp/yelp_lda_trainset.pkl',
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     fine_nn_configs = {  # fixed parameter
             'attributes_num': 12,
             'attribute_dim': seed['word_dim'],
-            'attribute_mat_size': 15,  # number of attribute mention prototypes in a attribute matrix
+            'attribute_mat_size': 5,  # number of attribute mention prototypes in a attribute matrix
             'words_num': 40,
             'word_dim': seed['word_dim'],
             'is_mat': True,

@@ -97,6 +97,7 @@ if __name__ == "__main__":
         'words_num': fine_nn_configs['words_num'],
         'padding_word_index': fine_nn_configs['padding_word_index'],
         'word_dim': seed['word_dim'],
+        'top_k_data': -1,
         'dictionary': '/home/lujunyu/repository/sentiment_coarse_model/sentiment/util/word_dic/data_dictionary.pkl'
     }
     # for nn_config in nn_configs:

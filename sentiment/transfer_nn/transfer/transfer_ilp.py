@@ -84,7 +84,7 @@ class Transfer:
         #      coarse model     #
         # ##################### #
         graph, saver = coarse_model.classifier()
-        with graph.as_default:
+        with graph.as_default():
             bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
             bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
             bilstm_bw_kernel =graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
@@ -99,12 +99,12 @@ class Transfer:
         with graph.device('/gpu:1'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
+            table_data = fine_dg.table
             with tf.Session(graph=graph,config=config) as sess:
                 model_file = tf.train.latest_checkpoint(self.coarse_nn_config['sr_path'])
                 saver.restore(sess, model_file)
                 A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data =\
-                    sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias])
-                table_data=sess.run(table)
+                    sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias],feed_dict={table:table_data})
             # A_data.shape=(attributes num, mat size, attribute dim)
             A_data= np.reshape(A_data,newshape=(1,self.coarse_nn_config['attributes_num']*self.coarse_nn_config['attribute_mat_size'],self.coarse_nn_config['attribute_dim']))
 
@@ -117,13 +117,21 @@ class Transfer:
             score_pre = graph.get_collection('score_pre')[0]
             # X.shape = (batch size, word numbers)
             X = graph.get_collection('X')[0]
+            # dropout
+            keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
             # attention.shape = (batch size, words number, 1, aspects num*aspect mat size)
             attention = graph.get_collection('attention')[0]
 
-            bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
-            bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
-            bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
-            bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
+            # lstm
+            for v in tf.all_variables():
+                if v.name.startswith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0'):
+                    bilstm_fw_kernel = v
+                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0'):
+                    bilstm_fw_bias = v
+                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0'):
+                    bilstm_bw_kernel = v
+                elif v.name.startswith('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0'):
+                    bilstm_bw_bias = v
             table = graph.get_collection('table')[0]
             if self.coarse_nn_config['is_mat']:
                 A = graph.get_collection('A_mat')[0]
@@ -131,11 +139,13 @@ class Transfer:
             else:
                 A = graph.get_collection('A_vec')[0]
                 O = graph.get_collection('o_vec')[0]
+            init = tf.global_variables_initializer()
         with graph.device('/gpu:1'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph,config=config) as sess:
-                table.load(table_data,sess)
+                # table.load(table_data,sess)
+                sess.run(init,feed_dict={table:table_data})
                 A.load(A_data,sess)
                 O.load(O_data,sess)
                 bilstm_fw_kernel.load(bilstm_fw_kernel_data,sess)
@@ -149,7 +159,7 @@ class Transfer:
                     # in source model, things will be different
                     # score_pre.shape = (batch size, 1, words num)
                     # attention.shape = (batch size, words number, 1, aspects num*aspect mat size)
-                    score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data})
+                    score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data,keep_prob_lstm:1.0})
                     ilp_data[label_id]={'score_pre':score_pre_data,'attention':attention_data}
                     label_id+=1
 
@@ -238,7 +248,7 @@ class AttributeFunction:
         # H.shape = (batch size, words number, 1, word dim)
         H = tf.expand_dims(H, axis=2)
         # H.shape = (batch size, words number, 1, attributes number*attribute mat size, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attributes_number']*self.nn_config['attribute_mat_size'], 1])
+        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attributes_num']*self.nn_config['attribute_mat_size'], 1])
         # attention.shape = (batch size, words number,1, attribute number*attribute mat size)
         attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
         graph.add_to_collection('attention',attention)

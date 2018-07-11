@@ -8,7 +8,7 @@ elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Classifier as coarse_Classifier
 from sentiment.sep_nn.fine_atr_classifier_1pNw_bilstm.classifier import Classifier as fine_Classifier
-from sentiment.transfer_nn.transfer.transfer_bilstm import Transfer
+from sentiment.transfer_nn.transfer.transfer_ilp import Transfer
 from sentiment.functions.train.trans_atr_train_bilstm import TransferTrain
 
 class Classifier:

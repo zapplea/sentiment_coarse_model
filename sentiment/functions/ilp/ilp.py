@@ -68,11 +68,11 @@ class AttributeIlp:
 
         prob += np.sum(space)
         for j in range(self.source_vectors_num):
-            prob+= np.sum(space[j])<=3
+            prob+= np.sum(vars[j])<=3
         # space.shape = (target labels num, source vectors num)
-        space=np.transpose(space)
+        vars_T=np.transpose(vars)
         for i in range(self.target_labels_num):
-            prob+= np.sum(space[i])==3
+            prob+= np.sum(vars_T[i])==15
         prob.solve()
 
         index_collection=[]
