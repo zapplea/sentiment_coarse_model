@@ -10,6 +10,7 @@ from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Cla
 from sentiment.sep_nn.fine_atr_classifier_1pNw_bilstm.classifier import Classifier as fine_Classifier
 from sentiment.transfer_nn.transfer.transfer_ilp import Transfer
 from sentiment.functions.train.trans_atr_train_bilstm import TransferTrain
+import tensorflow as tf
 
 class Classifier:
     def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator):
@@ -29,7 +30,6 @@ class Classifier:
     def transfer(self,coarse_cl):
         init_data = self.trans.transfer(coarse_cl,self.fine_dg)
         return init_data
-
 
     def fine_classifier(self):
         fine_cl = fine_Classifier(self.fine_nn_config, self.fine_dg)

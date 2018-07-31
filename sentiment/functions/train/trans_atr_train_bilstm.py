@@ -24,6 +24,25 @@ class TransferTrain:
         # self.cl is a class
         self.mt = Metrics(self.nn_config)
 
+    def tfb(self):
+        micro_f1 = tf.get_variable(name='micro_f1',initializer=tf.zeros(shape=(),dtype='float32'))
+        tf.summary.scalar('micro_f1',micro_f1)
+        micro_pre = tf.get_variable(name='micro_pre',initializer=tf.zeros(shape=(),dtype='float32'))
+        tf.summary.scalar('micro_pre',micro_pre)
+        micro_rec = tf.get_variable(name='micro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
+        tf.summary.scalar('micro_rec', micro_rec)
+
+        macro_f1 = tf.get_variable(name='macro_f1', initializer=tf.zeros(shape=(), dtype='float32'))
+        tf.summary.scalar('macro_f1', macro_f1)
+        macro_pre = tf.get_variable(name='macro_pre', initializer=tf.zeros(shape=(), dtype='float32'))
+        tf.summary.scalar('macro_pre', macro_pre)
+        macro_rec = tf.get_variable(name='macro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
+        tf.summary.scalar('macro_rec', macro_rec)
+
+        tfb_loss = tf.get_variable(name='tfb_loss',initializer=tf.zeros(shape=(),dtype='float32'))
+
+        return micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss
+
     def train(self,fine_cl, init_data):
         graph,saver = fine_cl.classifier()
         with graph.as_default():
@@ -64,10 +83,17 @@ class TransferTrain:
             FP = graph.get_collection('FP')[0]
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
             table_data = self.dg.table
+
+            # tfb
+            micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss=self.tfb()
+            summ = tf.summary.merge_all()
+            writer = tf.summary.FileWriter(self.nn_config['tfb_filePath'])
+            writer.add_graph(graph)
+
             init = tf.global_variables_initializer()
         print(self.dg.aspect_dic)
 
-        with graph.device('/gpu:1'):
+        with graph.device('/gpu:0'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
@@ -175,6 +201,10 @@ class TransferTrain:
                                 score_pre_vec.append(score_pre_data[n])
                         print('\nVal loss:%.10f' % np.mean(loss_vec))
 
+                        tfb_loss.load(np.mean(loss_vec))
+                        s = sess.run(summ)
+                        writer.add_summary(s,i)
+
                         _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
                         _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
@@ -183,11 +213,18 @@ class TransferTrain:
                         print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
                               ' Macro recall:', np.mean(_recall))
 
+                        micro_f1.load(np.mean(_f1_score))
+                        micro_pre.load(np.mean(_precision))
+                        micro_rec.load(np.mean(_recall))
+
                         _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
                         _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                               ' Micro recall:', np.mean(_recall))
+                        macro_f1.load(np.mean(_f1_score))
+                        macro_pre.load(np.mean(_precision))
+                        macro_rec.load(np.mean(_recall))
                         # # np.random.seed(1)
                         # check_num = 1
                         # random_display = np.random.randint(0, 570, check_num)

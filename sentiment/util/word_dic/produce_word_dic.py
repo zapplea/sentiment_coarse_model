@@ -38,10 +38,15 @@ class Word_dictionary():
         dictionary = {}
         for i in range(len(vocabulary)):
             dictionary[vocabulary[i]] = i
-        with open('./data_dictionary.pkl','wb') as f:
-            pickle.dump(wordlist,f)
-            pickle.dump(dictionary,f)
 
+        if os.getlogin() == "lujunyu":
+            with open('./data_dictionary.pkl','wb') as f:
+                pickle.dump(wordlist,f)
+                pickle.dump(dictionary,f)
+        elif os.getlogin() == "liu121":
+            with open('/datastore/liu121/sentidata2/expdata/data_dictionary.pkl','wb') as f:
+                pickle.dump(wordlist,f)
+                pickle.dump(dictionary,f)
 
     def get_word_list(self, data):
         outtab = ' ' * len(string.punctuation)
@@ -60,10 +65,17 @@ def main(coarse_data_path,fine_data_path,wordembed_path):
 
 
 if __name__ == "__main__":
-    coarse_data_path = {'train':'/home/lujunyu/dataset/yelp/yelp_lda_trainset.pkl',
-                      'test':'/home/lujunyu/dataset/yelp/yelp_lda_testset.pkl'}
-    fine_data_path = {'train':'/home/lujunyu/dataset/semeval2016/absa_resturant_train.pkl',
-                      'test':'/home/lujunyu/dataset/semeval2016/absa_resturant_test.pkl'}
-    wordembed_path = '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin'
+    if os.getlogin() == 'lujunyu':
+        coarse_data_path = {'train':'/home/lujunyu/dataset/yelp/yelp_lda_trainset.pkl',
+                          'test':'/home/lujunyu/dataset/yelp/yelp_lda_testset.pkl'}
+        fine_data_path = {'train':'/home/lujunyu/dataset/semeval2016/absa_resturant_train.pkl',
+                          'test':'/home/lujunyu/dataset/semeval2016/absa_resturant_test.pkl'}
+        wordembed_path = '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin'
+    elif os.getlogin() == "liu121":
+        coarse_data_path = {'train': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
+                            'test': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl'}
+        fine_data_path = {'train': '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl',
+                          'test': '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_test.pkl'}
+        wordembed_path = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
 
     main(coarse_data_path,fine_data_path,wordembed_path)
