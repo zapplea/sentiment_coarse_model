@@ -6,6 +6,7 @@ import operator
 class AttributeIlp:
     def __init__(self,ilp_data,source_labels_num, mat_size):
         self.ilp_data = ilp_data
+        self.attr_mat_size=mat_size
         self.target_labels_num = len(ilp_data)
         self.source_labels_num = source_labels_num
         self.source_vectors_num = source_labels_num*mat_size
@@ -72,7 +73,7 @@ class AttributeIlp:
         # space.shape = (target labels num, source vectors num)
         vars_T=np.transpose(vars)
         for i in range(self.target_labels_num):
-            prob+= np.sum(vars_T[i])==15
+            prob+= np.sum(vars_T[i])==self.attr_mat_size
         prob.solve()
 
         index_collection=[]
