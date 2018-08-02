@@ -7,7 +7,6 @@ elif os.getlogin() == 'lujunyu':
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.functions.attribute_function.metrics import Metrics
-from sentiment.functions.tfb.tfb_utils import Tfb
 import tensorflow as tf
 import numpy as np
 
@@ -24,7 +23,6 @@ class TransferTrain:
         self.dg = data_generator
         # self.cl is a class
         self.mt = Metrics(self.nn_config)
-        self.tfb = Tfb(self.nn_config)
 
     def train(self,fine_cl, init_data):
         graph,saver = fine_cl.classifier()
@@ -67,14 +65,6 @@ class TransferTrain:
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
             table_data = self.dg.table
 
-            # tfb
-            micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss=self.tfb.scalar()
-            emb_config,fine_assignment,coarse_assignment = self.tfb.mat_emb(A,init_data['coarse_A'])
-            summ = tf.summary.merge_all()
-            writer = tf.summary.FileWriter(self.nn_config['tfb_filePath'])
-            writer.add_graph(graph)
-            tf.contrib.tensorboard.plugins.projector.visualize_embeddings(writer, emb_config)
-
             init = tf.global_variables_initializer()
         print(self.dg.aspect_dic)
 
@@ -89,10 +79,6 @@ class TransferTrain:
                 bilstm_fw_bias.load(init_data['init_bilstm_fw_bias'],sess)
                 bilstm_bw_kernel.load(init_data['init_bilstm_bw_kernel'],sess)
                 bilstm_bw_bias.load(init_data['init_bilstm_bw_bias'],sess)
-
-                sess.run(fine_assignment)
-                sess.run(coarse_assignment)
-                saver.save(sess,self.nn_config['sr_path'])
 
                 batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
                 print('Train set size: ', self.dg.train_data_size, 'Test set size:', self.dg.test_data_size)
@@ -190,12 +176,6 @@ class TransferTrain:
                                 score_pre_vec.append(score_pre_data[n])
                         print('\nVal loss:%.10f' % np.mean(loss_vec))
 
-                        tfb_loss.load(np.mean(loss_vec))
-                        s = sess.run(summ)
-                        writer.add_summary(s,i)
-                        sess.run(fine_assignment)
-                        sess.run(coarse_assignment)
-                        saver.save(sess, self.nn_config['sr_path'])
 
                         _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
@@ -205,19 +185,11 @@ class TransferTrain:
                         print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
                               ' Macro recall:', np.mean(_recall))
 
-                        micro_f1.load(np.mean(_f1_score))
-                        micro_pre.load(np.mean(_precision))
-                        micro_rec.load(np.mean(_recall))
-
                         _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
                         _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                               ' Micro recall:', np.mean(_recall))
-                        macro_f1.load(np.mean(_f1_score))
-                        macro_pre.load(np.mean(_precision))
-                        macro_rec.load(np.mean(_recall))
-
 
                         # # np.random.seed(1)
                         # check_num = 1

@@ -190,7 +190,8 @@ class Transfer:
         #     bilstm_bw_kernel_data, bilstm_bw_bias_data = sess.run([bilstm_bw_kernel, bilstm_bw_bias])
         init_data = {'init_A': A_data, 'init_O': O_data,
                      'init_bilstm_fw_kernel': bilstm_fw_kernel_data, 'init_bilstm_fw_bias': bilstm_fw_bias_data,
-                     'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_data}
+                     'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_data,
+                     'coarse_A': A}
         return init_data
 
 
