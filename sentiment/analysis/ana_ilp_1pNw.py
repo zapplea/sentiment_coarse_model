@@ -8,7 +8,10 @@ import argparse
 
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 
-
+# TODO: analyze init_data
+# TODO: 1. mapping between labels
+# TODO: 2. nearest neighbour of attribute mention vector
+# TODO: check whether coarse and fine use the same table
 class Analysis:
     def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator):
         cl = Classifier(coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator)

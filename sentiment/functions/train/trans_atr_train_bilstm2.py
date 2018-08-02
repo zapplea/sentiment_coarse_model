@@ -1,10 +1,10 @@
-import os
+import getpass
 import sys
-if os.getlogin() == 'yibing':
+if  getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-elif os.getlogin() == 'lujunyu':
+elif  getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
-elif os.getlogin() == 'liu121':
+elif  getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.functions.attribute_function.metrics import Metrics
 from sentiment.functions.tfb.tfb_utils import Tfb

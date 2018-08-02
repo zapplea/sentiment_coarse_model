@@ -1,10 +1,10 @@
-import os
+import getpass
 import sys
-if os.getlogin() == 'yibing':
+if  getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-elif os.getlogin() == 'lujunyu':
+elif  getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
-elif os.getlogin() == 'liu121':
+elif  getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Classifier as coarse_Classifier
 from sentiment.sep_nn.fine_atr_classifier_1pNw_bilstm.classifier import Classifier as fine_Classifier
@@ -37,10 +37,6 @@ class Classifier:
     def classifier(self):
         coarse_cl = self.coarse_classifier()
         init_data = self.transfer(coarse_cl)
-        # TODO: analyze init_data
-        # TODO: 1. mapping between labels
-        # TODO: 2. nearest neighbour of attribute mention vector
-        # TODO: check whether coarse and fine use the same table
         fine_cl = self.fine_classifier()
         return fine_cl,init_data
 
