@@ -1,6 +1,6 @@
-import os
+import getpass
 import sys
-if os.getlogin() == 'liu121':
+if getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 import pickle
