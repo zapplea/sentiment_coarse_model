@@ -120,7 +120,7 @@ if __name__ =="__main__":
     reg_rate = [3E-5, ]
     lr = [3E-4, ]
 
-    if os.getlogin() == "lujunyu":
+    if getpass.getuser() == "lujunyu":
 
         coarse_nn_config[
             'sr_path'] = '/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw_bilstm/ckpt_bi_5mention_6.19/'
@@ -160,7 +160,7 @@ if __name__ =="__main__":
         # path of meta data for fine coarse label
         fine_nn_config['tfb_coarse_atr_metaPath'] = ''
 
-    elif os.getlogin() == "liu121":
+    elif getpass.getuser() == "liu121":
         coarse_nn_config[
             'sr_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/model/ckpt_bi_5mention_6.19/'
         coarse_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
