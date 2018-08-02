@@ -35,6 +35,8 @@ class Analysis:
             self.fine_table = pickle.load(f)
 
     def check_table(self):
+        print(len(self.coarse_word_dic))
+        print(len(self.fine_word_dic))
         for word in self.coarse_word_dic:
             coarse_id = self.coarse_word_dic[word]
             fine_id = self.fine_word_dic[word]
