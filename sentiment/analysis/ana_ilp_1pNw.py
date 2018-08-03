@@ -235,10 +235,6 @@ if __name__ =="__main__":
         fine_nn_config['lr'] = lr[args.num]
         # path of tensorboard files
         fine_nn_config['tfb_filePath'] = ''
-        # path of meta data for fine attribute label
-        fine_nn_config['tfb_fine_atr_metaPath'] = ''
-        # path of meta data for fine coarse label
-        fine_nn_config['tfb_coarse_atr_metaPath'] = ''
 
     elif getpass.getuser() == "liu121":
         coarse_nn_config[
@@ -275,9 +271,47 @@ if __name__ =="__main__":
         fine_nn_config['tfb_filePath'] = '/datastore/liu121/sentidata2/resultdata/transfer/tfb/mat%s_reg%s_lr%s' \
                                          % (str(fine_nn_config['attribute_mat_size']), str(reg_rate[args.num]),
                                             str(lr[args.num]))
+        fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
+
+    elif getpass.getuser() == "lizhou":
+        print('lizhou')
+        coarse_nn_config[
+            'sr_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/transfer/coarse_grain/model/ckpt_bi_5mention_6.19/'
+        coarse_data_config['train_source_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
+        coarse_data_config['test_source_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/yelp/yelp_lda_testset.pkl'
+        coarse_data_config[
+            'train_data_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/transfer/coarse_grain/data/coarse_train_data.pkl'
+        coarse_data_config[
+            'test_data_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/transfer/coarse_grain/data/coarse_test_data.pkl'
+        coarse_data_config[
+            'wordembedding_file_path'] = '/media/data2tb4/yibing2/datastore/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
+        coarse_data_config['stopwords_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/stopwords.txt'
+        coarse_data_config[
+            'fine_sentences_file'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/transfer/fine_grain/data/fine_sentences_data.pkl'
+        coarse_data_config['dictionary'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/data_dictionary.pkl'
+
+        fine_nn_config['sr_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/resultdata/transfer/model'
+        fine_data_config[
+            'train_source_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/semeval2016/absa_resturant_train.pkl'
+        fine_data_config[
+            'test_source_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/semeval2016/absa_resturant_test.pkl'
+        fine_data_config[
+            'train_data_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/transfer/fine_grain/data/fine_train_data.pkl'
+        fine_data_config[
+            'test_data_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/transfer/fine_grain/data/fine_test_data.pkl'
+        fine_data_config[
+            'wordembedding_file_path'] = '/media/data2tb4/yibing2/datastore/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
+        fine_data_config['stopwords_file_path'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/stopwords.txt'
+        fine_data_config['dictionary'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/data_dictionary.pkl'
+
+        fine_nn_config['reg_rage'] = reg_rate[args.num]
+        fine_nn_config['lr'] = lr[args.num]
+        fine_nn_config['tfb_filePath'] = '/media/data2tb4/yibing2/datastore/sentidata2/resultdata/transfer/tfb/mat%s_reg%s_lr%s' \
+                                         % (str(fine_nn_config['attribute_mat_size']), str(reg_rate[args.num]),
+                                            str(lr[args.num]))
         fine_nn_config[
-            'tfb_fine_atr_metaPath'] = '/datastore/liu121/sentidata2/expdata/meta/semeval2016_absa_resturant_label.tsv'
-        fine_nn_config['tfb_coarse_atr_metaPath'] = '/datastore/liu121/sentidata2/expdata/meta/yelp_label.tsv'
+            'tfb_fine_atr_metaPath'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/meta/semeval2016_absa_resturant_label.tsv'
+        fine_nn_config['tfb_coarse_atr_metaPath'] = '/media/data2tb4/yibing2/datastore/sentidata2/expdata/meta/yelp_label.tsv'
         fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
 
     main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
