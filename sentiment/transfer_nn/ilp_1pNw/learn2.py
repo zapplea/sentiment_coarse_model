@@ -121,10 +121,7 @@ if __name__ == "__main__":
         fine_nn_config['lr'] = lr[args.num]
         # path of tensorboard files
         fine_nn_config['tfb_filePath'] = ''
-        # path of meta data for fine attribute label
-        fine_nn_config['tfb_fine_atr_metaPath'] = ''
-        # path of meta data for fine coarse label
-        fine_nn_config['tfb_coarse_atr_metaPath']=''
+        fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
 
     elif os.getlogin() == "liu121":
         coarse_nn_config['sr_path']='/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/model/ckpt_bi_5mention_6.19/'
@@ -150,8 +147,6 @@ if __name__ == "__main__":
         fine_nn_config['lr'] = lr[args.num]
         fine_nn_config['tfb_filePath'] = '/datastore/liu121/sentidata2/resultdata/transfer/tfb/mat%s_reg%s_lr%s'\
                                          %(str(fine_nn_config['attribute_mat_size']),str(reg_rate[args.num]),str(lr[args.num]))
-        fine_nn_config['tfb_fine_atr_metaPath'] = '/datastore/liu121/sentidata2/expdata/meta/semeval2016_absa_resturant_label.tsv'
-        fine_nn_config['tfb_coarse_atr_metaPath']='/datastore/liu121/sentidata2/expdata/meta/yelp_label.tsv'
         fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
 
 
