@@ -17,6 +17,7 @@ from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGen
 def main(coarse_nn_configs, fine_nn_configs, coarse_data_configs, fine_data_configs):
     coarse_dg = coarse_DataGenerator(coarse_data_configs,coarse_nn_configs)
     fine_dg = fine_DataGenerator(fine_data_configs, fine_nn_configs)
+    print(type(fine_dg))
     cl = Classifier(coarse_nn_configs, fine_nn_configs, coarse_dg, fine_dg)
     cl.train()
 

@@ -80,6 +80,7 @@ class Transfer:
 
 
     def transfer(self, coarse_model, fine_dg):
+        print(type(fine_dg))
         # ##################### #
         #      coarse model     #
         # ##################### #
