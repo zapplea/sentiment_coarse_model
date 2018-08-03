@@ -20,23 +20,26 @@ from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGen
 # TODO: 2. nearest neighbour of attribute mention vector
 # TODO: check whether coarse and fine use the same table
 class Analysis:
-    def __init__(self, coarse_nn_configs, fine_nn_configs, coarse_data_configs, fine_data_configs, config_ana):
-        coarse_dg = coarse_DataGenerator(coarse_data_configs, coarse_nn_configs)
-        fine_dg = fine_DataGenerator(fine_data_configs, fine_nn_configs)
+    def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana):
+        coarse_dg = coarse_DataGenerator(coarse_data_config, coarse_nn_config)
+        fine_dg = fine_DataGenerator(fine_data_config, fine_nn_config)
         self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_dg, fine_dg)
         self.coarse_nn_config = coarse_nn_config
         self.fine_nn_config = fine_nn_config
 
+        self.coarse_data_config=coarse_data_config
+        self.fine_data_config = fine_data_config
+
         self.config_ana = config_ana
 
-        with open(self.coarse_data_generator['train_data_file_path'],'rb') as f:
+        with open(self.coarse_data_config['train_data_file_path'],'rb') as f:
             self.aspect_dic = pickle.load(f)
             self.coarse_word_dic=pickle.load(f)
             self.aspect_labels = pickle.load(f)
             self.coarse_sentences = pickle.load(f)
             self.coarse_table = pickle.load(f)
 
-        with open(self.fine_data_generator['train_data_file_path'],'rb') as f:
+        with open(self.fine_data_config['train_data_file_path'],'rb') as f:
             self.attribute_dic = pickle.load(f)
             self.fine_word_dic = pickle.load(f)
             self.attribute_labels=pickle.load(f)
