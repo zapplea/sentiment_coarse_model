@@ -115,8 +115,12 @@ class Analysis:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
 
 def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config):
-    config_ana={'top_k':5,
-                'report':'/datastore/liu121/sentidata2/resultdata/analysis/'}
+    if getpass.getuser()=="liu121":
+        config_ana={'top_k':5,
+                    'report':'/datastore/liu121/sentidata2/resultdata/analysis/'}
+    elif getpass.getuser() == "lizhou":
+        config_ana = {'top_k': 5,
+                      'report': '/media/data2tb4/yibing2/datastore/sentidata2/resultdata/analysis/'}
     path = Path(config_ana['report'])
     if not path.exists():
         path.mkdir(parents=True,exist_ok=True)
