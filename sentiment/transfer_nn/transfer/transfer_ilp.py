@@ -6,6 +6,8 @@ elif getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
 elif getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
+elif getpass.getuser() == "lizhou":
+    sys.path.append('/media/data2tb4/yibing2/sentiment_coarse_model/')
 from sentiment.functions.initializer.initializer import Initializer
 from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
 from sentiment.functions.ilp.ilp import AttributeIlp

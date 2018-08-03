@@ -2,6 +2,8 @@ import getpass
 import sys
 if getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
+elif getpass.getuser() == "lizhou":
+    sys.path.append('/media/data2tb4/yibing2/sentiment_coarse_model/')
 
 import os
 import pickle
