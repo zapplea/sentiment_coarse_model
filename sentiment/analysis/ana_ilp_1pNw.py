@@ -3,8 +3,13 @@ import sys
 if getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
+import os
 import pickle
 import argparse
+import sklearn
+import operator
+from pathlib import Path
+import json
 
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 
@@ -13,12 +18,14 @@ from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 # TODO: 2. nearest neighbour of attribute mention vector
 # TODO: check whether coarse and fine use the same table
 class Analysis:
-    def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator):
-        cl = Classifier(coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator)
+    def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator, config_ana):
+        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator)
         self.coarse_nn_config = coarse_nn_config
         self.fine_nn_config = fine_nn_config
         self.coarse_data_generator = coarse_data_generator
         self.fine_data_generator = fine_data_generator
+
+        self.config_ana = config_ana
 
         with open(self.coarse_data_generator['train_data_file_path'],'rb') as f:
             self.aspect_dic = pickle.load(f)
@@ -43,9 +50,73 @@ class Analysis:
             if fine_id != coarse_id:
                 print(word)
 
+    def transfer_data_generator(self):
+        coarse_cl = self.cl.coarse_classifier()
+        init_data = self.cl.transfer(coarse_cl)
+        return init_data
+
+    def aspect_mention_vector_nearest_word(self,init_data):
+        aspect_A = init_data['coarse_A']
+        map = []
+        for i in range(len(self.aspect_dic)):
+            aspect_matrix = aspect_A[i]
+            distance = sklearn.metrics.pairwise.pairwise_distance(aspect_matrix,self.coarse_table)
+            map.append([])
+            for j in range(distance.shape()[0]):
+                map[i].append([])
+                for l in range(distance.shape()[1]):
+                    value = distance[j][l]
+                    map[i][j].append((l,value))
+                map[i][j] = sorted(map[i][j],key=operator.itemgetter(1))
+        k_nearest={}
+        for i in range(len(self.aspect_dic)):
+            label = self.aspect_dic[i]
+            k_nearest[label]={}
+            for j in range(len(map[i])):
+                k_nearest[label]['mention_%s' % str(j)]=[]
+                for word in map[i][j][:self.config_ana['top_k']]:
+                    k_nearest[label]['mention_%s'%str(j)].append(self.coarse_table[word[0]])
+        report_filePath = os.path.join(self.config_ana['report'],'aspect_nearest_top%s.pkl'%str(self.config_ana['top_k']))
+        with open(report_filePath,'w+') as f:
+            json.dump(k_nearest, f, indent=4, sort_keys=False)
+
+
+    def attribute_mention_vector_nearest_word(self,init_data):
+        attribute_A = init_data['init_A']
+        map = []
+        for i in range(len(self.attribute_dic)):
+            attribute_matrix = attribute_A[i]
+            distance = sklearn.metrics.pairwise.pairwise_distance(attribute_matrix, self.fine_table)
+            map.append([])
+            for j in range(distance.shape()[0]):
+                map[i].append([])
+                for l in range(distance.shape()[1]):
+                    value = distance[j][l]
+                    map[i][j].append((l, value))
+                map[i][j] = sorted(map[i][j], key=operator.itemgetter(1))
+        k_nearest = {}
+        for i in range(len(self.attribute_dic)):
+            label = self.attribute_dic[i]
+            k_nearest[label] = {}
+            for j in range(len(map[i])):
+                k_nearest[label]['mention_%s' % str(j)] = []
+                for word in map[i][j][:self.config_ana['top_k']]:
+                    k_nearest[label]['mention_%s' % str(j)].append(self.fine_table[word[0]])
+        report_filePath = os.path.join(self.config_ana['report'],
+                                       'attribute_nearest_top%s.pkl' % str(self.config_ana['top_k']))
+        with open(report_filePath, 'w+') as f:
+            json.dump(k_nearest, f, indent=4, sort_keys=False)
+
 def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config):
-    ana = Analysis(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
-    ana.check_table()
+    config_ana={'top_k':5,
+                'report':'/datastore/liu121/sentidata2/expresult/analysis/'}
+    path = Path(config_ana['report'])
+    if not path.exists():
+        path.mkdir(parents=True,exist_ok=True)
+    ana = Analysis(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana)
+    init_data = ana.transfer_data_generator()
+    ana.aspect_mention_vector_nearest_word(init_data)
+    ana.attribute_mention_vector_nearest_word(init_data)
 
 if __name__ =="__main__":
     parser = argparse.ArgumentParser()
