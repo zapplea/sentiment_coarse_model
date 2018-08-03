@@ -12,18 +12,20 @@ from pathlib import Path
 import json
 
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
+from sentiment.util.coarse.atr_data_generator import DataGenerator as coarse_DataGenerator
+from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGenerator
 
 # TODO: analyze init_data
 # TODO: 1. mapping between labels
 # TODO: 2. nearest neighbour of attribute mention vector
 # TODO: check whether coarse and fine use the same table
 class Analysis:
-    def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator, config_ana):
-        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator)
+    def __init__(self, coarse_nn_configs, fine_nn_configs, coarse_data_configs, fine_data_configs, config_ana):
+        coarse_dg = coarse_DataGenerator(coarse_data_configs, coarse_nn_configs)
+        fine_dg = fine_DataGenerator(fine_data_configs, fine_nn_configs)
+        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_dg, fine_dg)
         self.coarse_nn_config = coarse_nn_config
         self.fine_nn_config = fine_nn_config
-        self.coarse_data_generator = coarse_data_generator
-        self.fine_data_generator = fine_data_generator
 
         self.config_ana = config_ana
 
