@@ -56,9 +56,7 @@ class Analysis:
                 print(word)
 
     def transfer_data_generator(self):
-        print('================')
         coarse_cl = self.cl.coarse_classifier()
-        print('++++++++++++++++')
         init_data = self.cl.transfer(coarse_cl)
         return init_data
 

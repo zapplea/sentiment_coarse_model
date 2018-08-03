@@ -27,7 +27,6 @@ class Classifier:
         return coarse_cl
 
     def transfer(self,coarse_cl):
-        print(type(self.fine_dg))
         init_data = self.trans.transfer(coarse_cl,self.fine_dg)
         return init_data
 
