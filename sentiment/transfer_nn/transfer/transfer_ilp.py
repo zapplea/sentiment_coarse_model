@@ -104,7 +104,9 @@ class Transfer:
             table_data = fine_dg.table
             with tf.Session(graph=graph,config=config) as sess:
                 model_file = tf.train.latest_checkpoint(self.coarse_nn_config['sr_path'])
+                print('restore begin')
                 saver.restore(sess, model_file)
+                print('restore finish')
                 A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data =\
                     sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias],feed_dict={table:table_data})
             # A_data.shape=(attributes num, mat size, attribute dim)
@@ -161,7 +163,7 @@ class Transfer:
                     # in source model, things will be different
                     # score_pre.shape = (batch size, 1, words num)
                     # attention.shape = (batch size, words number, 1, aspects num*aspect mat size)
-                    score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data,keep_prob_lstm:1.0})
+                    score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data,keep_prob_lstm:self.coarse_nn_config['keep_prob_lstm']})
                     ilp_data[label_id]={'score_pre':score_pre_data,'attention':attention_data}
                     label_id+=1
 
