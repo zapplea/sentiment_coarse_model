@@ -148,8 +148,8 @@ if __name__ =="__main__":
         'batch_size': 34,
         'lstm_cell_size': seed['lstm_cell_size'],
         'lookup_table_words_num': 41486,  # 2074276 for Chinese word embedding
-        'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
-        'unk_word_index': 30340,
+        'padding_word_index': 41485,  # the index of #PAD# in word embeddings list
+        'unk_word_index': 41484,
         # flexible parameter
         'reg_rate': 0.003,
         'lr': 0.0003,  # learing rate
