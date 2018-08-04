@@ -122,10 +122,9 @@ def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
     if not path.exists():
         path.mkdir(parents=True,exist_ok=True)
     ana = Analysis(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana)
-    ana.check_table()
-    # init_data = ana.transfer_data_generator()
-    # ana.aspect_mention_vector_nearest_word(init_data)
-    # ana.attribute_mention_vector_nearest_word(init_data)
+    init_data = ana.transfer_data_generator()
+    ana.aspect_mention_vector_nearest_word(init_data)
+    ana.attribute_mention_vector_nearest_word(init_data)
 
 if __name__ =="__main__":
     parser = argparse.ArgumentParser()
