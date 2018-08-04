@@ -51,11 +51,8 @@ class Analysis:
     def check_table(self):
         print(len(self.coarse_word_dic))
         print(len(self.fine_word_dic))
-        for word in self.coarse_word_dic:
-            coarse_id = self.coarse_word_dic[word]
-            fine_id = self.fine_word_dic[word]
-            if fine_id != coarse_id:
-                print(word)
+        print('UNK id: ',self.coarse_word_dic['#UNK#'])
+        print('PAD id: ',self.coarse_word_dic['#PAD#'])
 
     def transfer_data_generator(self):
         coarse_cl = self.cl.coarse_classifier()
@@ -125,9 +122,10 @@ def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
     if not path.exists():
         path.mkdir(parents=True,exist_ok=True)
     ana = Analysis(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana)
-    init_data = ana.transfer_data_generator()
-    ana.aspect_mention_vector_nearest_word(init_data)
-    ana.attribute_mention_vector_nearest_word(init_data)
+    ana.check_table()
+    # init_data = ana.transfer_data_generator()
+    # ana.aspect_mention_vector_nearest_word(init_data)
+    # ana.attribute_mention_vector_nearest_word(init_data)
 
 if __name__ =="__main__":
     parser = argparse.ArgumentParser()
@@ -149,7 +147,7 @@ if __name__ =="__main__":
         'epoch': 1000,
         'batch_size': 34,
         'lstm_cell_size': seed['lstm_cell_size'],
-        'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
+        'lookup_table_words_num': 41486,  # 2074276 for Chinese word embedding
         'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
         'unk_word_index': 30340,
         # flexible parameter
@@ -174,7 +172,7 @@ if __name__ =="__main__":
         'epoch': 1000,
         'batch_size': 10,
         'lstm_cell_size': seed['lstm_cell_size'],
-        'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
+        'lookup_table_words_num': 41486,
         'padding_word_index': coarse_nn_config['padding_word_index'],  # the index of #PAD# in word embeddings list
         'unk_word_index': coarse_nn_config['unk_word_index'],
         # flexible parameter
