@@ -12,7 +12,6 @@ class DataGenerator():
         self.configs = configs
         self.train_label, self.train_sentence,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
         print(self.aspect_dic)
-        exit()
         self.test_label, self.test_sentence = self.load_test_data(self.aspect_dic,self.dictionary)
         self.train_data_size = len(self.train_label)
         self.val_data_size = len(self.test_label)
