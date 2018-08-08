@@ -187,7 +187,11 @@ class DataGenerator():
     def load_train_data(self):
         if os.path.exists(self.configs['coarse_train_data_file']) and os.path.getsize(self.configs['coarse_train_data_file']) > 0:
             with open(self.configs['coarse_train_data_file'],'rb') as f:
-                aspect_dic, word_dic, label, sentence, word_embed = pickle.load(f)
+                aspect_dic= pickle.load(f)
+                word_dic= pickle.load(f)
+                label= pickle.load(f)
+                sentence= pickle.load(f)
+                word_embed = pickle.load(f)
         else:
             with open(self.configs['coarse_train_source_file'],'rb') as f:
                 tmp = pickle.load(f)
