@@ -185,8 +185,6 @@ class DataGenerator():
 
 
     def load_train_data(self):
-        print('coarse_test_data_file: ', self.configs['coarse_test_data_file'])
-        print('coarse_test_data_file: ', self.configs['coarse_test_data_file'])
         if os.path.exists(self.configs['coarse_train_data_file']) and os.path.getsize(self.configs['coarse_train_data_file']) > 0:
             with open(self.configs['coarse_train_data_file'],'rb') as f:
                 aspect_dic, word_dic, label, sentence, word_embed = pickle.load(f)
