@@ -14,12 +14,12 @@ elif getpass.getuser() == 'lizhou':
 import argparse
 
 from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Classifier
-from sentiment.util.coarse.atr_data_generator import DataGenerator
+from sentiment.util.coarse.atr_data_generator2 import DataGenerator
 from pathlib import Path
 
 def main(nn_config,data_config):
-    nn_config.update(data_config)
-    dg = DataGenerator(nn_config)
+    # nn_config.update(data_config)
+    dg = DataGenerator(nn_config,data_config)
     cl = Classifier(nn_config, dg)
     cl.train()
 
