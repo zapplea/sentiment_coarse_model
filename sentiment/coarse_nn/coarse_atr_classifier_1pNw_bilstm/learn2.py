@@ -18,7 +18,7 @@ from sentiment.util.coarse.atr_data_generator import DataGenerator
 from pathlib import Path
 
 def main(nn_config,data_config):
-    dg = DataGenerator(data_config,nn_config)
+    dg = DataGenerator(nn_config.update(data_config))
     cl = Classifier(nn_config, dg)
     cl.train()
 
