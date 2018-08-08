@@ -9,7 +9,7 @@ class RelScore:
 
     def reviews_input(self,graph):
         X = tf.placeholder(
-            shape=(20, self.nn_config['max_review_length'], self.nn_config['words_num']),
+            shape=(None, self.nn_config['max_review_length'], self.nn_config['words_num']),
             dtype='int32')
         graph.add_to_collection('X', X)
         X = tf.reshape(X,shape=(-1,self.nn_config['words_num']))
@@ -98,3 +98,21 @@ class RelScore:
 
     def coarse_senti_score(self,senti_prob,rel_prob,senti_score):
         pass
+
+    def kl_loss(self, score, atr_rel_prob, aspect_prob, graph):
+        """
+        This is KL divergence, used to measure the difference between 
+        :param score: (batch size * max reviews length, attributes num)
+        :param aspect_prob: (batch size * max reviews length, attributes num)
+        :param graph: 
+        :return: 
+        """
+        p_distribution = aspect_prob
+        q_distribution = tf.nn.sigmoid(score)
+
+        kld=tf.reduce_sum(tf.multiply(tf.multiply(q_distribution,tf.log(tf.truediv(q_distribution,p_distribution))),atr_rel_prob),axis=1)
+        # TODO: need to refine the size of atr_rel_prob.
+        loss = tf.reduce_mean(tf.add(kld
+                                     ,tf.reduce_sum(graph.get_collection('reg'))))
+        tf.add_to_collection('atr_loss',loss)
+        return loss
