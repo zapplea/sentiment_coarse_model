@@ -33,13 +33,13 @@ class Classifier:
                 seq_len = self.af.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
                 H = self.af.sentence_bilstm(X, seq_len, graph=graph)
-            # Y_att.shape = (batch size, number of attributes)
+            # Y_att.shape = (batch size * max review length, number of attributes)
             # p(a|D)
             aspect_prob = self.af.attribute_labels_input(graph=graph)
 
             mask_true_label = self.af.mask_for_true_label(X_ids)
 
-            # Y_att.shape = (batch size, max review length, attributes num)
+            # Y_att.shape = (batch size * max review length, max review length, attributes num)
             Y_att = relscore.aspect_prob2true_label(aspect_prob,mask_true_label)
             # complement aspect probability
             if self.nn_config['complement']=='1':
@@ -62,14 +62,14 @@ class Classifier:
             if not self.nn_config['is_mat']:
                 mask = self.af.mask_for_pad_in_score(X_ids,graph)
                 score_lstm = self.af.score(A, H,mask, graph)
-                # score.shape = (batch size, attributes num, words num)
+                # score.shape = (batch size * max review length, attributes num, words num)
                 score_e = self.af.score(A,X,mask,graph)
             else:
                 mask = self.af.mask_for_pad_in_score(X_ids, graph)
                 score_lstm = self.af.score(A_lstm,H,mask,graph)
-                # score.shape = (batch size, attributes num, words num)
+                # score.shape = (batch size * max review length, attributes num, words num)
                 score_e = self.af.score(A_e,X,mask,graph)
-            # score.shape = (batch size, attributes num, words num)
+            # score.shape = (batch size * max review length, attributes num, words num)
             score = tf.add(score_lstm, score_e)
             tf.add_to_collection('score_pre',score)
             # score.shape = (batch size, attributes num)

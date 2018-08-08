@@ -72,7 +72,7 @@ class AttributeIlp:
         # space.shape = (target labels num, source vectors num)
         vars_T=np.transpose(vars)
         for i in range(self.target_labels_num):
-            prob+= np.sum(vars_T[i])==15
+            prob+= np.sum(vars_T[i])==5
         prob.solve()
 
         index_collection=[]

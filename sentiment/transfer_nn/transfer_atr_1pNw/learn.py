@@ -35,9 +35,9 @@ if __name__ == "__main__":
             'epoch': 1000,
             'batch_size': 34,
             'lstm_cell_size': seed['lstm_cell_size'],
-            'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
-            'padding_word_index': 30341,  # the index of #PAD# in word embeddings list
-            'unk_word_index': 30340,
+            'lookup_table_words_num': 41486,  # 2074276 for Chinese word embedding
+            'padding_word_index': 41485,  # the index of #PAD# in word embeddings list
+            'unk_word_index': 41484,
             # flexible parameter
             'reg_rate': 0.003,
             'lr': 0.0003,  # learing rate
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             'epoch': 1000,
             'batch_size': 30,
             'lstm_cell_size': seed['lstm_cell_size'],
-            'lookup_table_words_num': 30342,  # 2074276 for Chinese word embedding
+            'lookup_table_words_num': 41486,  # 2074276 for Chinese word embedding
             'padding_word_index': coarse_nn_configs['padding_word_index'],  # the index of #PAD# in word embeddings list
             'unk_word_index': coarse_nn_configs['unk_word_index'],
             # flexible parameter

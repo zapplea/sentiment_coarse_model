@@ -90,6 +90,7 @@ class Transfer:
             bilstm_bw_kernel =graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
             bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
             table = graph.get_collection('table')[0]
+            table_val = graph.get_collection('table_val')[0]
             if self.coarse_nn_config['is_mat']:
                 A = graph.get_collection('A_mat')[0]
                 O = graph.get_collection('o_mat')[0]
@@ -103,8 +104,8 @@ class Transfer:
             with tf.Session(graph=graph,config=config) as sess:
                 model_file = tf.train.latest_checkpoint(self.coarse_nn_config['sr_path'])
                 saver.restore(sess, model_file)
-                A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data =\
-                    sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias],feed_dict={table:table_data})
+                A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data, table_val_data =\
+                    sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,table_val],feed_dict={table:table_data})
             # A_data.shape=(attributes num, mat size, attribute dim)
             A_data= np.reshape(A_data,newshape=(1,self.coarse_nn_config['attributes_num']*self.coarse_nn_config['attribute_mat_size'],self.coarse_nn_config['attribute_dim']))
 
@@ -190,7 +191,7 @@ class Transfer:
         #     bilstm_bw_kernel_data, bilstm_bw_bias_data = sess.run([bilstm_bw_kernel, bilstm_bw_bias])
         init_data = {'init_A': A_data, 'init_O': O_data,
                      'init_bilstm_fw_kernel': bilstm_fw_kernel_data, 'init_bilstm_fw_bias': bilstm_fw_bias_data,
-                     'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_data}
+                     'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_val_data}
         return init_data
 
 

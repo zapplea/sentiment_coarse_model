@@ -9,7 +9,7 @@ class RelScore:
 
     def reviews_input(self,graph):
         X = tf.placeholder(
-            shape=(None, self.nn_config['max_review_length'], self.nn_config['words_num']),
+            shape=(20, self.nn_config['max_review_length'], self.nn_config['words_num']),
             dtype='int32')
         graph.add_to_collection('X', X)
         X = tf.reshape(X,shape=(-1,self.nn_config['words_num']))

@@ -9,6 +9,7 @@ elif os.getlogin() == 'liu121':
 from sentiment.functions.attribute_function.metrics import Metrics
 import tensorflow as tf
 import numpy as np
+import sentiment.functions.train.fine_print_op as print_op
 
 class SeqnnTrain:
     def __init__(self,nn_config, data_generator):
@@ -43,7 +44,9 @@ class SeqnnTrain:
             # attribute function
             init = tf.global_variables_initializer()
         table_data = self.dg.table
-        print(self.dg.aspect_dic)
+        aspect_list = list(self.dg.aspect_dic.keys())
+        vocab = list(self.dg.dictionary.keys())
+        print(aspect_list)
 
         with graph.device('/gpu:1'):
             config = tf.ConfigProto(allow_soft_placement=True)
@@ -80,41 +83,11 @@ class SeqnnTrain:
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
                             Y_att_vec.append(Y_att_data[n])
-                    if i % 1 == 0:
-                        check_num = 1
-                        print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
 
-                        _precision = self.mt.precision(TP_vec,FP_vec,'macro')
-                        _recall = self.mt.recall(TP_vec,FN_vec,'macro')
-                        _f1_score = self.mt.f1_score(_precision,_recall,'macro')
-                        print('F1 score for each class:',_f1_score,'\nPrecision for each class:',_precision,'\nRecall for each class:',_recall)
-                        print('Macro F1 score:',np.mean(_f1_score) ,' Macro precision:', np.mean(_precision),' Macro recall:', np.mean(_recall) )
+                    # print_op.visualization_train(self.dg,vocab,aspect_list,pred_vec,score_vec,score_pre_vec,i,self.mt,
+                    #                              loss_vec, TP_vec, FP_vec, FN_vec)
 
-                        _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                        _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                        _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision), ' Micro recall:', np.mean(_recall))
 
-                    #     # # np.random.seed(1)
-                    #     random_display = np.random.randint(0, 1500, check_num)
-                    #     pred_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in enumerate(pred_vec[r]) if rr] for
-                    #                   r in random_display]
-                    #     sentences_check = [
-                    #         [list(self.dg.dictionary.keys())[word] for word in self.dg.train_sentence_ground_truth[r] if word] for r
-                    #         in random_display]
-                    #     Y_att_check = [[list(self.dg.aspect_dic.keys())[c] for c, rr in
-                    #                     enumerate(self.dg.train_attribute_ground_truth[r]) if rr] for r in
-                    #                    random_display]
-                    #     score_check = [score_vec[r] for r in random_display]
-                    #     score_pre_check = [score_pre_vec[r] for r in random_display]
-                    #     for n in range(check_num):
-                    #         print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
-                    #               pred_check[n],
-                    #               "\nY_att:\n", Y_att_check[n]
-                    #               , "\nscore:\n", score_check[n])
-                    #         for nn in range(len(score_pre_check[n])):
-                    #             if list(self.dg.aspect_dic.keys())[nn] in set(Y_att_check[n]) | set(pred_check[n]):
-                    #                 print(list(self.dg.aspect_dic.keys())[nn] + " score:", score_pre_check[n][nn])
 
                     if i % 1 == 0 and i != 0:
                         sentences, Y_att_data = self.dg.test_data_generator()
@@ -123,7 +96,6 @@ class SeqnnTrain:
                         pred_vec = []
                         score_vec = []
                         score_pre_vec = []
-                        Y_att_vec = []
                         TP_vec = []
                         FP_vec = []
                         FN_vec = []
@@ -144,40 +116,5 @@ class SeqnnTrain:
                                 pred_vec.append(pred_data[n])
                                 score_vec.append(score_data[n])
                                 score_pre_vec.append(score_pre_data[n])
-                        print('\nTest loss:%.10f' % np.mean(loss_vec))
-
-                        _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
-                        _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
-                        _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
-                        # print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
-                        #       '\nRecall for each class:', _recall)
-                        print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
-                              ' Macro recall:', np.mean(_recall))
-
-                        _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                        _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                        _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
-                              ' Micro recall:', np.mean(_recall))
-                        # np.random.seed(1)
-                        # check_num = 1
-                        # random_display = np.random.randint(0, 570, check_num)
-                        # pred_check = [[(c,list(self.dg.aspect_dic.keys())[c]) for c, rr in enumerate(pred_vec[r]) if rr] for
-                        #               r in random_display]
-                        # sentences_check = [
-                        #     [list(self.dg.dictionary.keys())[word] for word in self.dg.test_sentence_ground_truth[r] if
-                        #      word] for r
-                        #     in random_display]
-                        # Y_att_check = [[(c,list(self.dg.aspect_dic.keys())[c]) for c, rr in
-                        #                 enumerate(self.dg.test_attribute_ground_truth[r]) if rr] for r in
-                        #                random_display]
-                        # score_check = [score_vec[r] for r in random_display]
-                        # score_pre_check = [score_pre_vec[r] for r in random_display]
-                        # for n in range(check_num):
-                        #     print("sentence id: ", random_display[n], "\nsentence:\n", sentences_check[n], "\npred:\n",
-                        #           pred_check[n],
-                        #           "\nY_att:\n", Y_att_check[n]
-                        #           , "\nscore:\n", score_check[n])
-                        #     for nn in range(len(score_pre_check[n])):
-                        #         if nn in set(Y_att_check[n]) | set(pred_check[n]):
-                        #             print(list(self.dg.aspect_dic.keys())[nn]+ '*' , nn , " score:", score_pre_check[n][nn])
+                        print_op.visualization_test(self.dg,vocab,aspect_list,pred_vec,score_vec,score_pre_vec,i,self.mt,
+                                                    loss_vec,TP_vec,FP_vec,FN_vec)

@@ -8,13 +8,12 @@ import pickle
 import nltk
 
 class DataGenerator():
-    def __init__(self,data_config,nn_config):
-        self.data_config = data_config
-        self.nn_config = nn_config
-        self.train_attribute_ground_truth, self.train_sentence_ground_truth,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
-        self.test_attribute_ground_truth, self.test_sentence_ground_truth = self.load_test_data(self.aspect_dic,self.dictionary)
-        self.train_data_size = len(self.train_attribute_ground_truth)
-        self.val_data_size = len(self.test_attribute_ground_truth)
+    def __init__(self,configs):
+        self.configs = configs
+        self.train_label, self.train_sentence,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
+        self.test_label, self.test_sentence = self.load_test_data(self.aspect_dic,self.dictionary)
+        self.train_data_size = len(self.train_label)
+        self.val_data_size = len(self.test_label)
 
 
     def data_generator(self,batch_num,flag):
@@ -27,31 +26,31 @@ class DataGenerator():
 
         if flag == 'train':
             train_size = self.train_data_size
-            start = batch_num * self.nn_config['batch_size'] % train_size
-            end = (batch_num * self.nn_config['batch_size'] + self.nn_config['batch_size']) % train_size
+            start = batch_num * self.configs['batch_size'] % train_size
+            end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % train_size
             if start < end:
-                batches_attribute_ground_truth = self.train_attribute_ground_truth[start:end]
-                batches_sentence_ground_truth = self.train_sentence_ground_truth[start:end]
+                batches_label = self.train_label[start:end]
+                batches_sentence = self.train_sentence[start:end]
             else:
-                batches_attribute_ground_truth = self.train_attribute_ground_truth[
-                                                 train_size - self.nn_config['batch_size']:train_size]
-                batches_sentence_ground_truth = self.train_sentence_ground_truth[
-                                                train_size - self.nn_config['batch_size']:train_size]
+                batches_label = self.train_label[
+                                                 train_size - self.configs['batch_size']:train_size]
+                batches_sentence = self.train_sentence[
+                                                train_size - self.configs['batch_size']:train_size]
         else:
             val_size = self.val_data_size
-            start = batch_num * self.nn_config['batch_size'] % val_size
-            end = (batch_num * self.nn_config['batch_size'] + self.nn_config['batch_size']) % val_size
+            start = batch_num * self.configs['batch_size'] % val_size
+            end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % val_size
             if start < end:
-                batches_attribute_ground_truth = self.train_attribute_ground_truth[start:end]
-                batches_sentence_ground_truth = self.train_sentence_ground_truth[start:end]
+                batches_label = self.train_label[start:end]
+                batches_sentence = self.train_sentence[start:end]
             else:
-                batches_attribute_ground_truth = self.train_attribute_ground_truth[
-                                                 val_size - self.nn_config['batch_size']:val_size]
-                batches_sentence_ground_truth = self.train_sentence_ground_truth[
-                                                val_size - self.nn_config['batch_size']:val_size]
+                batches_label = self.train_label[
+                                                 val_size - self.configs['batch_size']:val_size]
+                batches_sentence = self.train_sentence[
+                                                val_size - self.configs['batch_size']:val_size]
         # during validation and test, to avoid errors are counted repeatedly,
         # we need to avoid the same data sended back repeately
-        return batches_sentence_ground_truth, batches_attribute_ground_truth
+        return batches_sentence, batches_label
 
     def test_data_generator(self):
         """
@@ -59,22 +58,7 @@ class DataGenerator():
            :param batch_size: int. the size of each batch
            :return: [[[float32,],],]. [[[wordembedding]element,]batch,]
            """
-        return self.test_sentence_ground_truth,self.test_attribute_ground_truth
-
-    def table_generator(self,word_embed,word_list):
-        """
-        Generate word embedding matirx
-        :return: word embeddings table: shape = (number of words, word dimension) word1 [0.223, -4.222, ....] word2 [0.883, 0.333, ....] ... ...
-        """
-        tmp = word_embed.syn0
-        table = tmp[word_list]
-        unk_vec = np.mean(tmp,axis=0).reshape(1,self.nn_config['word_dim'])
-        pad_vec = np.zeros((1,self.nn_config['word_dim']))
-        vec = np.append(unk_vec,pad_vec,axis=0)
-        table = np.append(table,vec,axis=0)
-        print("Generate table finished...")
-
-        return table
+        return self.test_sentence,self.test_label
 
 
     def get_aspect_probility(self,data):
@@ -112,127 +96,149 @@ class DataGenerator():
     def get_word_id(self,data,dictionary):
         """
         Generate sentences id matrix
-        :param data: 
-        :param start: 
-        :param end: 
+        :param data:
+        :param start:
+        :param end:
         :return: shape = (batch size, words number) eg. [[1,4,6,8,...],[7,1,5,10,...],]
         """
 
         review = []
-        vocabulary = dictionary.keys()
-        for idx in np.arange(0, data.shape[0]):
-            a = []
+        punctuation = '!"#&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+        outtab = ' ' * len(punctuation)
+        intab = punctuation
+        trantab = str.maketrans(intab, outtab)
+        for idx in range(data.shape[0]):
             sens = nltk.sent_tokenize(data.iloc[idx]['text'])
-            if len(sens) > self.nn_config['max_review_length']:
-                sens = sens[:self.nn_config['max_review_length']]
+            if len(sens) > self.configs['max_review_length']:
+                sens = sens[:self.configs['max_review_length']]
             sentence = []
             for sent in sens:
-                tmp = []
-                for i in nltk.word_tokenize(sent):
-                    if i not in string.punctuation:
-                        if i.lower() in vocabulary:
-                            tmp.append(dictionary[i.lower()])
-                        else:
-                            tmp.append(dictionary['#UNK#'])
-                if len(tmp) < self.nn_config['words_num']:
-                    for j in range(self.nn_config['words_num'] - len(tmp)):
-                        tmp.append(self.nn_config['padding_word_index'])
+                a = []
+                num = 0
+                for word in sent.lower().translate(trantab).split():
+                    if num >= self.configs['words_num']:
+                        break
+                    a.append(dictionary[word])
+                    num += 1
+                if num < self.configs['words_num']:
+                    for j in range(self.configs['words_num'] - num):
+                        a.append(self.configs['padding_word_index'])
                 else:
-                    tmp = tmp[:self.nn_config['words_num']]
+                    a = a[:self.configs['words_num']]
 
-                sentence.append(np.array(tmp))
-            if len(sentence) < self.nn_config['max_review_length']:
-                for j in range(self.nn_config['max_review_length'] - len(sentence)):
-                    sentence.append(np.array([dictionary['#PAD#']] * self.nn_config['words_num']))
+                sentence.append(np.array(a))
+            if len(sentence) < self.configs['max_review_length']:
+                for j in range(self.configs['max_review_length'] - len(sentence)):
+                    sentence.append(np.array([dictionary['#PAD#']] * self.configs['words_num']))
             else:
-                sentence = sentence[:self.nn_config['max_review_length']]
+                sentence = sentence[:self.configs['max_review_length']]
             review.append(np.array(sentence))
         return np.array(review)
 
-    def get_word_list(self, data ,dictionary):
+    # def get_word_id(self, data, w2id):
+    #     """
+    #     Generate sentences id matrix
+    #     :param data:
+    #     :param start:
+    #     :param end:
+    #     :return: shape = (batch size, words number) eg. [[1,4,6,8,...],[7,1,5,10,...],]
+    #     """
+    #
+    #     review = []
+    #     for sens in data['review_normalization']:
+    #         if len(sens) > self.configs['max_review_length']:
+    #             sens = sens[:self.configs['max_review_length']]
+    #         sentence = []
+    #         for sent in sens:
+    #             tmp = []
+    #             for word in sent:
+    #                 tmp.append(w2id[word])
+    #             if len(tmp) < self.configs['words_num']:
+    #                 for j in range(self.configs['words_num'] - len(tmp)):
+    #                     tmp.append(w2id['#PAD#'])
+    #             else:
+    #                 tmp = tmp[:self.configs['words_num']]
+    #
+    #             sentence.append(np.array(tmp))
+    #         if len(sentence) < self.configs['max_review_length']:
+    #             for j in range(self.configs['max_review_length'] - len(sentence)):
+    #                 sentence.append(np.array([w2id['#PAD#']] * self.configs['words_num']))
+    #         else:
+    #             sentence = sentence[:self.configs['max_review_length']]
+    #         review.append(np.array(sentence))
+    #     return np.array(review)
+
+    def get_word_list(self, data ,word_dic):
         outtab = ' ' * len(string.punctuation)
         intab = string.punctuation
         trantab = str.maketrans(intab, outtab)
         word_list = []
         for i in np.arange(0, data.shape[0]):
             for word in data.iloc[i]['text'].lower().translate(trantab).split():
-                if word in dictionary.keys():
-                    word_list.append(dictionary[word])
+                if word in word_dic.keys():
+                    word_list.append(word_dic[word])
         word_list = list(set(word_list))
         print('The number of words in dataset:',len(word_list))
         return word_list
 
 
     def load_train_data(self):
-        if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
-            f = open(self.data_config['train_data_file_path'],'rb')
-            aspect_dic = pickle.load(f)
-            dictionary = pickle.load(f)
-            attribute_ground_truth = pickle.load(f)
-            sentence_ground_truth  = pickle.load(f)
-            table = pickle.load(f)
-            f.close()
+        if os.path.exists(self.configs['coarse_train_data_file']) and os.path.getsize(self.configs['coarse_train_data_file']) > 0:
+            with open(self.configs['coarse_train_data_file'],'rb') as f:
+                aspect_dic, word_dic, label, sentence, word_embed = pickle.load(f)
         else:
-            f = open(self.data_config['train_data_file_path'], 'wb')
-            with open(self.data_config['train_source_file_path'],'rb') as ff:
-                tmp = pickle.load(ff)
-            word_embed = gensim.models.KeyedVectors.load_word2vec_format(self.data_config['wordembedding_file_path'],binary=True, unicode_errors='ignore')
+            with open(self.configs['coarse_train_source_file'],'rb') as f:
+                tmp = pickle.load(f)
 
             ##Generate attribute_dic
             aspect_dic ={'RESTAURANT': 0, 'SERVICE': 1, 'FOOD': 2
             , 'DRINKS': 3, 'AMBIENCE': 4, 'LOCATION': 5,'OTHER':6}
-            pickle.dump(aspect_dic,f)
 
-            ###Generate dictionary
-            with open(self.data_config['dictionary'],'rb') as wd:
-                word_list = pickle.load(wd)
-                dictionary = pickle.load(wd)
-            pickle.dump(dictionary,f)
+            ###Generate word_dic
+            with open(self.configs['dictionary'],'rb') as wd:
+                word_list, word_dic, word_embed = pickle.load(wd)
+                print('The number of words in dataset:',len(word_dic))
 
-            attribute_ground_truth = self.get_aspect_probility(tmp)
+            label = self.get_aspect_probility(tmp)
             train_data_mask = tmp['text'].drop_duplicates().reset_index().index
-            attribute_ground_truth = attribute_ground_truth[train_data_mask]
-            pickle.dump(attribute_ground_truth, f)
-            sentence_ground_truth = self.get_word_id(tmp,dictionary)
-            sentence_ground_truth = sentence_ground_truth[train_data_mask]
-            pickle.dump(sentence_ground_truth, f)
+            label = label[train_data_mask]
+            sentence = self.get_word_id(tmp,word_dic)
+            sentence = sentence[train_data_mask]
 
 
-            ###Generate table
-            table = self.table_generator(word_embed,word_list)
-            print(table.shape)
-            pickle.dump(table, f , protocol = 4)
+            ###Generate word_embed
 
-            f.close()
+            with open(self.configs['coarse_train_data_file'], 'wb') as f:
+                pickle.dump((aspect_dic, word_dic, label, sentence, word_embed), f)
 
-        return attribute_ground_truth, sentence_ground_truth , aspect_dic , dictionary ,table
+        return label, sentence , aspect_dic , word_dic ,word_embed
 
-    def load_test_data(self,test_aspect_dic,dictionary):
-        if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
-            f = open(self.data_config['test_data_file_path'],'rb')
-            attribute_ground_truth = pickle.load(f)
-            sentence_ground_truth  = pickle.load(f)
+    def load_test_data(self,test_aspect_dic,word_dic):
+        if os.path.exists(self.configs['coarse_test_data_file']) and os.path.getsize(self.configs['coarse_test_data_file']) > 0:
+            f = open(self.configs['coarse_test_data_file'],'rb')
+            label = pickle.load(f)
+            sentence  = pickle.load(f)
             f.close()
         else:
-            f = open(self.data_config['test_data_file_path'], 'wb')
-            with open(self.data_config['test_source_file_path'],'rb') as ff:
+            f = open(self.configs['coarse_test_data_file'], 'wb')
+            with open(self.configs['coarse_test_source_file'],'rb') as ff:
                 tmp = pickle.load(ff)
             test_data_mask = tmp['text'].drop_duplicates().reset_index().index
-            attribute_ground_truth = self.get_aspect_probility(tmp)
-            attribute_ground_truth = attribute_ground_truth[test_data_mask]
-            pickle.dump(attribute_ground_truth, f)
-            sentence_ground_truth = self.get_word_id(tmp,dictionary)
-            sentence_ground_truth = sentence_ground_truth[test_data_mask]
-            pickle.dump(sentence_ground_truth, f)
+            label = self.get_aspect_probility(tmp)
+            label = label[test_data_mask]
+            pickle.dump(label, f)
+            sentence = self.get_word_id(tmp,word_dic)
+            sentence = sentence[test_data_mask]
+            pickle.dump(sentence, f)
             f.close()
-        return attribute_ground_truth, sentence_ground_truth
+        return label, sentence
 
     def fine_sentences(self,attribute,sentence):
-        if os.path.exists(self.data_config['fine_sentences_file']):
-            with open(self.data_config['fine_sentences_file'],'rb') as f:
+        if os.path.exists(self.configs['fine_sentences_file']):
+            with open(self.configs['fine_sentences_file'],'rb') as f:
                 fine_sent = pickle.load(f)
         else:
-            # with open(self.data_config['fine_sentences_file'],'wb') as f:
+            # with open(self.configs['fine_sentences_file'],'wb') as f:
             # r = np.repeat(np.reshape(attribute.transpose()[0],[1995,1]),axis=1,repeats=40) * sentence
             # print(r[~np.all(r == 0, axis=1)].astype(int).shape)
             fine_sent = []
@@ -241,7 +247,7 @@ class DataGenerator():
                 r = np.reshape(r[~np.all(r == 0, axis=1)].astype(int),[-1,1,40])
                 fine_sent.append(r)
             fine_sent = np.array(fine_sent)
-            with open(self.data_config['fine_sentences_file'], 'wb') as f:
+            with open(self.configs['fine_sentences_file'], 'wb') as f:
                 pickle.dump(fine_sent,f)
         return fine_sent
 

@@ -109,22 +109,6 @@ class TransferTrain:
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
                             Y_att_vec.append(Y_att_data[n])
-
-                        # if j == 0:
-                        #     print('Start:', '\nTraining loss:%.10f' % np.mean(loss_vec))
-                        #     _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
-                        #     _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
-                        #     _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
-                        #     print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
-                        #           '\nRecall for each class:', _recall)
-                        #     print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
-                        #           ' Macro recall:', np.mean(_recall))
-                        #
-                        #     _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                        #     _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                        #     _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                        #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
-                        #           ' Macro recall:', np.mean(_recall))
                     # if i % 1 == 0:
                     #     check_num = 1
                     #     print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))

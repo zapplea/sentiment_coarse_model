@@ -34,7 +34,7 @@ class Transfer:
         :param Y_senti: 
         :return: 
         """
-        tf.argmax(Y_senti,axis=)
+        tf.argmax(Y_senti,axis=1)
 
     def transfer(self, coarse_model,fine_dg):
         graph, saver = coarse_model.classifier()

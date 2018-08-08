@@ -349,6 +349,7 @@ class AttributeFunction:
                                dtype='float32')
         graph.add_to_collection('table', table)
         table = tf.Variable(table, name='table')
+        graph.add_to_collection('table_val',table)
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings, mask)
         graph.add_to_collection('lookup_table', embeddings)

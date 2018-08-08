@@ -1,69 +1,99 @@
 import numpy as np
 import pandas as pd
+import os
+import sys
+if os.getlogin() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+elif os.getlogin() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
+elif os.getlogin() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model')
 import gensim
 from nltk.corpus import stopwords
 import string
 import os
 import pickle
+from sentiment.util.configure import config
 
 class Word_dictionary():
-    def __init__(self,coarse_data_path,fine_data_path,wordembed_path):
-        self.coarse_data_path = coarse_data_path
-        self.fine_data_path = fine_data_path
-        self.word_embed = gensim.models.KeyedVectors.load_word2vec_format(wordembed_path, binary=True,
-                                                                     unicode_errors='ignore')
-        self.vocabulary = self.word_embed.index2word
-        self.pre_dictionary = {}
-        for i in range(len(self.vocabulary)):
-            self.pre_dictionary[self.vocabulary[i]] = i
+    def __init__(self):
+        self.coarse_train_data = pd.read_pickle(config['coarse_train_source_file'])
+        print(self.coarse_train_data.shape)
+        self.coarse_test_data = pd.read_pickle(config['coarse_test_source_file'])
+        print(self.coarse_test_data.shape)
+        self.fine_train_data = pd.read_pickle(config['fine_train_source_file'])
+        print(self.fine_train_data.shape)
+        self.fine_test_data = pd.read_pickle(config['fine_test_source_file'])
+        print(self.fine_test_data.shape)
 
     def get_dictionary(self):
 
-        coarse_train_data = pd.read_pickle(self.coarse_data_path['train'])
-        print(coarse_train_data.shape)
-        coarse_test_data = pd.read_pickle(self.coarse_data_path['test'])
-        print(coarse_test_data.shape)
-        fine_train_data = pd.read_pickle(self.fine_data_path['train'])
-        print(fine_train_data.shape)
-        fine_test_data = pd.read_pickle(self.fine_data_path['test'])
-        print(fine_test_data.shape)
+        ## generate word dictionary from yelp and semeval dataset
+        # tmp = pd.concat([self.coarse_train_data['normalization'],self.coarse_test_data['normalization'],self.fine_train_data['normalization'],self.fine_test_data['normalization']],axis=0)
+        tmp = set(self.split_word(self.coarse_train_data)+self.split_word(self.coarse_test_data)+self.split_word(self.fine_train_data)+self.split_word(self.fine_test_data))
+        word_list, word_dic = self.get_word_dic(tmp)
 
-        wordlist = self.get_word_list(coarse_train_data) + self.get_word_list(coarse_test_data) + self.get_word_list(fine_train_data) + self.get_word_list(fine_test_data)
-        wordlist = list(set(wordlist))
+        ## generate embedding
+        with open(config['wordembedding_file_path'], 'rb') as f:
+            id2w, w2id, g_embed = pickle.load(f)
+        print(g_embed.shape)
+        unk_vec = np.mean(g_embed,axis=0)
+        print(unk_vec.shape)
+        embed4data = []
+        for word in word_list:
+            if word in id2w:
+                embed4data.append(g_embed[w2id[word]])
+            else:
+                embed4data.append(unk_vec)
 
-        vocabulary = list(np.array(self.vocabulary)[wordlist])
-        vocabulary.append('#UNK#')
-        vocabulary.append('#PAD#')
-        print('The number of words in dataset:',len(vocabulary))
-        dictionary = {}
-        for i in range(len(vocabulary)):
-            dictionary[vocabulary[i]] = i
-        with open('./data_dictionary.pkl','wb') as f:
-            pickle.dump(wordlist,f)
-            pickle.dump(dictionary,f)
+        ## add #PAD#
+        word_list.append('#PAD#')
+        word_dic['#PAD#'] = len(word_dic)
+        embed4data.append(np.array([0.0] * 300))
+
+        embed4data = np.array(embed4data)
+        print(embed4data.shape)
+
+        with open(config['dictionary'],'wb') as f:
+            pickle.dump((word_list, word_dic, embed4data),f)
 
 
-    def get_word_list(self, data):
-        outtab = ' ' * len(string.punctuation)
-        intab = string.punctuation
+    def split_word(self,data):
+        """
+        Generate sentences id matrix
+        :param data:
+        :param start:
+        :param end:
+        :return: shape = (batch size, words number) eg. [[1,4,6,8,...],[7,1,5,10,...],]
+        """
+
+        punctuation = '!"#&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+        outtab = ' ' * len(punctuation)
+        intab = punctuation
         trantab = str.maketrans(intab, outtab)
-        word_list = []
-        for i in np.arange(0, data.shape[0]):
+        a = []
+        for i in range(data.shape[0]):
             for word in data.iloc[i]['text'].lower().translate(trantab).split():
-                if word in self.pre_dictionary.keys():
-                    word_list.append(self.pre_dictionary[word])
-        return word_list
+                a.append(word)
+        return list(set(a))
 
-def main(coarse_data_path,fine_data_path,wordembed_path):
-    wd = Word_dictionary(coarse_data_path,fine_data_path,wordembed_path)
+
+    def get_word_dic(self, data):
+        word_list= []
+        word_dic = {}
+        idx = 0
+        for word in data:
+            if word not in word_list:
+                word_list.append(word)
+        for word in word_list:
+            word_dic[word] = idx
+            idx += 1
+        return word_list, word_dic
+
+def main():
+    wd = Word_dictionary()
     wd.get_dictionary()
 
 
 if __name__ == "__main__":
-    coarse_data_path = {'train':'/home/lujunyu/dataset/yelp/yelp_lda_trainset.pkl',
-                      'test':'/home/lujunyu/dataset/yelp/yelp_lda_testset.pkl'}
-    fine_data_path = {'train':'/home/lujunyu/dataset/semeval2016/absa_resturant_train.pkl',
-                      'test':'/home/lujunyu/dataset/semeval2016/absa_resturant_test.pkl'}
-    wordembed_path = '~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin'
-
-    main(coarse_data_path,fine_data_path,wordembed_path)
+    main()
