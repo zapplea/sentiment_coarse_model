@@ -4,7 +4,7 @@ class Tfb:
     def __init__(self,fine_nn_config):
         self.fine_nn_config = fine_nn_config
 
-    def scalar(self):
+    def metrics_scalar(self):
         micro_f1 = tf.get_variable(name='micro_f1',initializer=tf.zeros(shape=(),dtype='float32'))
         tf.summary.scalar('micro_f1',micro_f1)
         micro_pre = tf.get_variable(name='micro_pre',initializer=tf.zeros(shape=(),dtype='float32'))
