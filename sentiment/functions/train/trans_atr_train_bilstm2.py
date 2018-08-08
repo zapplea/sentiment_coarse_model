@@ -1,12 +1,13 @@
-import os
+import getpass
 import sys
-if os.getlogin() == 'yibing':
+if  getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-elif os.getlogin() == 'lujunyu':
+elif  getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
-elif os.getlogin() == 'liu121':
+elif  getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.functions.attribute_function.metrics import Metrics
+from sentiment.functions.tfb.tfb_utils import Tfb
 import tensorflow as tf
 import numpy as np
 
@@ -23,25 +24,7 @@ class TransferTrain:
         self.dg = data_generator
         # self.cl is a class
         self.mt = Metrics(self.nn_config)
-
-    def tfb(self):
-        micro_f1 = tf.get_variable(name='micro_f1',initializer=tf.zeros(shape=(),dtype='float32'))
-        tf.summary.scalar('micro_f1',micro_f1)
-        micro_pre = tf.get_variable(name='micro_pre',initializer=tf.zeros(shape=(),dtype='float32'))
-        tf.summary.scalar('micro_pre',micro_pre)
-        micro_rec = tf.get_variable(name='micro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
-        tf.summary.scalar('micro_rec', micro_rec)
-
-        macro_f1 = tf.get_variable(name='macro_f1', initializer=tf.zeros(shape=(), dtype='float32'))
-        tf.summary.scalar('macro_f1', macro_f1)
-        macro_pre = tf.get_variable(name='macro_pre', initializer=tf.zeros(shape=(), dtype='float32'))
-        tf.summary.scalar('macro_pre', macro_pre)
-        macro_rec = tf.get_variable(name='macro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
-        tf.summary.scalar('macro_rec', macro_rec)
-
-        tfb_loss = tf.get_variable(name='tfb_loss',initializer=tf.zeros(shape=(),dtype='float32'))
-
-        return micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss
+        self.tfb = Tfb(self.nn_config)
 
     def train(self,fine_cl, init_data):
         graph,saver = fine_cl.classifier()
@@ -85,7 +68,7 @@ class TransferTrain:
             table_data = self.dg.table
 
             # tfb
-            micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss=self.tfb()
+            micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss=self.tfb.scalar()
             summ = tf.summary.merge_all()
             writer = tf.summary.FileWriter(self.nn_config['tfb_filePath'])
             writer.add_graph(graph)
@@ -135,22 +118,6 @@ class TransferTrain:
                             score_vec.append(score_data[n])
                             score_pre_vec.append(score_pre_data[n])
                             Y_att_vec.append(Y_att_data[n])
-
-                        # if j == 0:
-                        #     print('Start:', '\nTraining loss:%.10f' % np.mean(loss_vec))
-                        #     _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
-                        #     _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
-                        #     _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
-                        #     print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
-                        #           '\nRecall for each class:', _recall)
-                        #     print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
-                        #           ' Macro recall:', np.mean(_recall))
-                        #
-                        #     _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                        #     _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                        #     _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                        #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
-                        #           ' Macro recall:', np.mean(_recall))
                     # if i % 1 == 0:
                     #     check_num = 1
                     #     print('Epoch:', i, '\nTraining loss:%.10f' % np.mean(loss_vec))
@@ -220,6 +187,7 @@ class TransferTrain:
                         tfb_loss.load(np.mean(loss_vec))
                         s = sess.run(summ)
                         writer.add_summary(s,i)
+                        # saver.save(sess, self.nn_config['sr_path'])
 
                         _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
@@ -241,6 +209,8 @@ class TransferTrain:
                         macro_f1.load(np.mean(_f1_score))
                         macro_pre.load(np.mean(_precision))
                         macro_rec.load(np.mean(_recall))
+
+
                         # # np.random.seed(1)
                         # check_num = 1
                         # random_display = np.random.randint(0, 570, check_num)

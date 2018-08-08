@@ -1,11 +1,13 @@
-import os
+import getpass
 import sys
-if os.getlogin() == 'yibing':
+if getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
-elif os.getlogin() == 'lujunyu':
+elif getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
-elif os.getlogin() == 'liu121':
+elif getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
+elif getpass.getuser() == "lizhou":
+    sys.path.append('/media/data2tb4/yibing2/sentiment_coarse_model/')
 from sentiment.functions.initializer.initializer import Initializer
 from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
 from sentiment.functions.ilp.ilp import AttributeIlp
@@ -90,7 +92,6 @@ class Transfer:
             bilstm_bw_kernel =graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
             bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
             table = graph.get_collection('table')[0]
-            table_val = graph.get_collection('table_val')[0]
             if self.coarse_nn_config['is_mat']:
                 A = graph.get_collection('A_mat')[0]
                 O = graph.get_collection('o_mat')[0]
@@ -103,9 +104,11 @@ class Transfer:
             table_data = fine_dg.table
             with tf.Session(graph=graph,config=config) as sess:
                 model_file = tf.train.latest_checkpoint(self.coarse_nn_config['sr_path'])
+                print('restore begin')
                 saver.restore(sess, model_file)
-                A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data, table_val_data =\
-                    sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,table_val],feed_dict={table:table_data})
+                print('restore finish')
+                A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data =\
+                    sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias],feed_dict={table:table_data})
             # A_data.shape=(attributes num, mat size, attribute dim)
             A_data= np.reshape(A_data,newshape=(1,self.coarse_nn_config['attributes_num']*self.coarse_nn_config['attribute_mat_size'],self.coarse_nn_config['attribute_dim']))
 
@@ -160,7 +163,7 @@ class Transfer:
                     # in source model, things will be different
                     # score_pre.shape = (batch size, 1, words num)
                     # attention.shape = (batch size, words number, 1, aspects num*aspect mat size)
-                    score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data,keep_prob_lstm:1.0})
+                    score_pre_data,attention_data = sess.run([score_pre,attention],feed_dict={X:X_data,keep_prob_lstm:self.coarse_nn_config['keep_prob_lstm']})
                     ilp_data[label_id]={'score_pre':score_pre_data,'attention':attention_data}
                     label_id+=1
 
@@ -191,7 +194,8 @@ class Transfer:
         #     bilstm_bw_kernel_data, bilstm_bw_bias_data = sess.run([bilstm_bw_kernel, bilstm_bw_bias])
         init_data = {'init_A': A_data, 'init_O': O_data,
                      'init_bilstm_fw_kernel': bilstm_fw_kernel_data, 'init_bilstm_fw_bias': bilstm_fw_bias_data,
-                     'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_val_data}
+                     'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_data,
+                     'coarse_A': A}
         return init_data
 
 
