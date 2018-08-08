@@ -72,10 +72,10 @@ if __name__ == "__main__":
     nn_config['model_save_path']=nn_config['model_save_path']+'model.ckpt'
 
     data_config = {
-        'coarse_train_source_file_path': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
-        'coarse_train_data_file_path': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data.pkl',
-        'coarse_test_source_file_path': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl',
-        'coarse_test_data_file_path': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data.pkl',
+        'coarse_train_source_file': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
+        'coarse_train_data_file': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data.pkl',
+        'coarse_test_source_file': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl',
+        'coarse_test_data_file': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data.pkl',
         'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '/datastore/liu121/sentidata2/expdata/stopwords.txt',
         'attributes_num': nn_config['attributes_num'],
