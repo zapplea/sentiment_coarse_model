@@ -13,13 +13,13 @@ elif getpass.getuser() == 'lizhou':
     sys.path.append('/media/data2tb4/yibing2/sentiment_coarse_model/')
 import argparse
 
-from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier2 import Classifier
-from sentiment.util.coarse.atr_data_generator2 import DataGenerator
+from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Classifier
+from sentiment.util.coarse.atr_data_generator import DataGenerator
 from pathlib import Path
 
 def main(nn_config,data_config):
-    # nn_config.update(data_config)
-    dg = DataGenerator(data_config,nn_config)
+    nn_config.update(data_config)
+    dg = DataGenerator(nn_config)
     cl = Classifier(nn_config, dg)
     cl.train()
 
