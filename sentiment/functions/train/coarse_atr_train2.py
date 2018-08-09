@@ -73,6 +73,7 @@ class CoarseTrain:
                 sess.run(init, feed_dict={table: table_data})
                 early_stop_count=0
                 for i in range(self.nn_config['epoch']):
+                    print('\n===========================')
                     print('epoch:%s'%str(i))
                     loss_vec = []
                     TP_vec = []
