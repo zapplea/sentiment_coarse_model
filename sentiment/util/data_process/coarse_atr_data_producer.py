@@ -19,7 +19,7 @@ class CoarseAtrDataProd:
 
     def get_review_sentiment(self,data):
         star = data['stars'].tolist()
-        return star
+        return np.array(star)
 
     def get_word_id(self,data,dictionary):
         """
@@ -128,6 +128,7 @@ class CoarseAtrDataProd:
         sentence, sentence_len = self.get_word_id(tmp, word_dic)
         sentence = sentence[test_data_mask]
         sentence_len = sentence_len[test_data_mask]
+        label = self.add_other(sentence_len, label, stars)
         with open(self.config['test_data_filePath'], 'wb') as f:
             pickle.dump(label, f)
             pickle.dump(sentence, f)
