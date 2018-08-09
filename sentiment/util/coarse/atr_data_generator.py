@@ -12,7 +12,13 @@ class DataGenerator():
         self.configs = configs
         self.train_label, self.train_sentence,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
         print(self.aspect_dic)
+        print('train_labels shape: ', self.train_label.shape)
+        print('train_sentences shape: ', self.train_sentence.shape)
         self.test_label, self.test_sentence = self.load_test_data(self.aspect_dic,self.dictionary)
+        print('test_labels shape: ', self.test_label.shape)
+        print('test_sentences shape: ', self.test_sentence.shape)
+        print('test sentences:\n',self.test_sentence[1])
+        exit()
         self.train_data_size = len(self.train_label)
         self.val_data_size = len(self.test_label)
 

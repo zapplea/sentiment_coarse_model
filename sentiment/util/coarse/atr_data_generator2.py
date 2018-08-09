@@ -45,6 +45,8 @@ class DataGenerator():
         self.test_labels, self.test_sentences = self.load_test_data(self.aspect_dic,self.dictionary)
         print('test_labels shape: ',self.test_labels.shape)
         print('test_sentences shape: ',self.test_sentences.shape)
+        print('test sentences:\n', self.test_sentences[1])
+        exit()
         self.train_data_size = len(self.train_labels)
         self.val_data_size = len(self.test_labels)
 
