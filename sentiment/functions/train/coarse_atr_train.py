@@ -71,7 +71,7 @@ class CoarseTrain:
                     FN_vec = []
                     true_label = []
                     for j in range(batch_num):
-                        sentences, Y_att_data = self.dg.data_generator(j,'train')
+                        sentences, Y_att_data = self.dg.train_data_generator(j)
                         _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,true_labels_data,lookup_table_data,check_data\
                             = sess.run(
                             [train_step, loss, TP, FP, FN, pred, score, score_pre,true_labels,lookup_table,check],
@@ -103,7 +103,7 @@ class CoarseTrain:
                         FN_vec = []
                         val_batch_num = int(self.dg.val_data_size / self.nn_config['batch_size'])
                         for j in range(val_batch_num):
-                            sentences, Y_att_data = self.dg.data_generator(j,'val')
+                            sentences, Y_att_data = self.dg.test_data_generator()
                             val_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data,true_labels_data = sess.run(
                                 [loss, pred, score, score_pre, TP, FP, FN,true_labels],
                                 feed_dict={X: sentences,
@@ -119,21 +119,9 @@ class CoarseTrain:
                                 pred_vec.append(pred_data[n])
                                 score_vec.append(score_data[n])
                                 score_pre_vec.append(score_pre_data[n])
-                        print('\nVal_loss:%.10f' % np.mean(loss_vec))
 
-                        _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
-                        _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
-                        _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
-                        print('F1 score for each class:', _f1_score, '\nPrecision for each class:', _precision,
-                              '\nRecall for each class:', _recall)
-                        print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
-                              ' Macro recall:', np.mean(_recall))
-
-                        _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                        _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                        _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                        print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
-                              ' Micro recall:', np.mean(_recall))
+                        _f1_score = print_op.visualization_test(self.dg,vocab ,aspect_list,true_label,pred_vec,score_vec,score_pre_vec ,i,self.mt,
+                                                 loss_vec, TP_vec, FP_vec, FN_vec)
 
                         if max_f1_score < _f1_score:
                             max_f1_score = _f1_score

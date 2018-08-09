@@ -19,8 +19,8 @@ config = {
         'lstm_cell_size': 300,
         'word_dim': 300,
         'attribute_dim': 300,
-        'lookup_table_words_num': 39555,  # 34934,2074276 for Chinese word embedding
-        'padding_word_index': 39554,  # 34933,the index of #PAD# in word embeddings list
+        'lookup_table_words_num': 34934,  # 34934,2074276 for Chinese word embedding
+        'padding_word_index': 34933,  # 34933,the index of #PAD# in word embeddings list
         'epoch': 1000,
         'words_num': 40,
         'atr_pred_threshold': 0,

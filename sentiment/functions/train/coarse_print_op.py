@@ -75,7 +75,8 @@ def visualization_train(dg,vocab ,aspect_list,true_label,pred_vec,score_vec,scor
     # print_aspect_score(score_vec, aspect_list,random_display)
     # print_word_score(dg, score_pre_vec, aspect_list, vocab, random_display,'train')
 
-def visualization_test(dg, vocab, true_label, aspect_list, epoch, mt, loss_vec, TP_vec, FP_vec, FN_vec):
+def visualization_test(dg,vocab ,aspect_list,true_label,pred_vec,score_vec,score_pre_vec ,epoch,mt,
+                        loss_vec, TP_vec, FP_vec, FN_vec):
 
     # np.random.seed(1)
     check_num = 1
@@ -102,3 +103,5 @@ def visualization_test(dg, vocab, true_label, aspect_list, epoch, mt, loss_vec, 
     print_label(dg, true_label, random_display)
     # print_aspect_score(score_vec, aspect_list,random_display)
     # print_word_score(dg, score_pre_vec, aspect_list, vocab, random_display,'test')
+
+    return _f1_score

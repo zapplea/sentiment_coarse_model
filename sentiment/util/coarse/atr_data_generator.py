@@ -16,40 +16,23 @@ class DataGenerator():
         self.val_data_size = len(self.test_label)
 
 
-    def data_generator(self,batch_num,flag):
+    def train_data_generator(self,batch_num):
         """
            This function return training/validation/test data for classifier. batch_num*batch_size is start point of the batch. 
            :param batch_size: int. the size of each batch
            :return: [[[float32,],],]. [[[wordembedding]element,]batch,]
            """
-        # [( emb_id,fname,row_index m_id,c_id,typeText)]
-
-        if flag == 'train':
-            train_size = self.train_data_size
-            start = batch_num * self.configs['batch_size'] % train_size
-            end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % train_size
-            if start < end:
-                batches_label = self.train_label[start:end]
-                batches_sentence = self.train_sentence[start:end]
-            else:
-                batches_label = self.train_label[
-                                                 train_size - self.configs['batch_size']:train_size]
-                batches_sentence = self.train_sentence[
-                                                train_size - self.configs['batch_size']:train_size]
+        train_size = self.train_data_size
+        start = batch_num * self.configs['batch_size'] % train_size
+        end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % train_size
+        if start < end:
+            batches_label = self.train_label[start:end]
+            batches_sentence = self.train_sentence[start:end]
         else:
-            val_size = self.val_data_size
-            start = batch_num * self.configs['batch_size'] % val_size
-            end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % val_size
-            if start < end:
-                batches_label = self.test_label[start:end]
-                batches_sentence = self.test_sentence[start:end]
-            else:
-                batches_label = self.test_label[
-                                                 val_size - self.configs['batch_size']:val_size]
-                batches_sentence = self.test_sentence[
-                                                val_size - self.configs['batch_size']:val_size]
-        # during validation and test, to avoid errors are counted repeatedly,
-        # we need to avoid the same data sended back repeately
+            batches_label = self.train_label[
+                            train_size - self.configs['batch_size']:train_size]
+            batches_sentence = self.train_sentence[
+                               train_size - self.configs['batch_size']:train_size]
         return batches_sentence, batches_label
 
     def test_data_generator(self):

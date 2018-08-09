@@ -19,14 +19,10 @@ class DataGenerator():
 
     def train_data_generator(self,batch_num):
         """
-           This function return training/validation/test data for classifier. batch_num*batch_size is start point of the batch. 
+           This function return training/validation/train data for classifier. batch_num*batch_size is start point of the batch.
            :param batch_size: int. the size of each batch
            :return: [[[float32,],],]. [[[wordembedding]element,]batch,]
            """
-        # [( emb_id,fname,row_index m_id,c_id,typeText)]
-        #
-        # if batch_num == 0:
-        #     self.train_sentence, self.train_label = self.unison_shuffled_copies(self.train_sentence,self.train_label)
         train_size = self.train_data_size
         start = batch_num * self.configs['batch_size'] % train_size
         end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % train_size
@@ -38,8 +34,6 @@ class DataGenerator():
                                              train_size - self.configs['batch_size']:train_size]
             batches_sentence = self.train_sentence[
                                             train_size - self.configs['batch_size']:train_size]
-        # during validation and test, to avoid errors are counted repeatedly,
-        # we need to avoid the same data sended back repeately
         return batches_sentence, batches_label
 
     def test_data_generator(self):
