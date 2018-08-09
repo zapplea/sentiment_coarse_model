@@ -108,16 +108,12 @@ class CoarseTrain:
                         FN_vec = []
                         dataset = self.dg.data_generator('val')
                         for att_labels_data, sentences_data in dataset:
-                            print('sentences data shape: ',sentences_data.shape)
-                            print('sentences data: \n',sentences_data)
                             val_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data,true_labels_data = sess.run(
                                 [loss, pred, score, score_pre, TP, FP, FN,true_labels],
                                 feed_dict={X: sentences_data,
                                            Y_att: att_labels_data,
                                            keep_prob_lstm: 1.0
                                            })
-                            print('FP:\n',FP_data)
-                            exit()
                             FP_vec.append(FP_data)
                             FN_vec.append(FN_data)
                             loss_vec.append(val_loss)
