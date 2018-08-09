@@ -103,11 +103,10 @@ class CoarseAtrDataProd:
         sentence = sentence[train_data_mask]
         sentence_len = sentence_len[train_data_mask]
         label = self.add_other(sentence_len,label,stars)
-        print('train data mask: \n',train_data_mask)
-        print('sentence shape: ',sentence.shape)
-        print('label shape: ',label.shape)
-        print('stars shape: ',stars.shape)
-        exit()
+        # print('train data mask: \n',train_data_mask)
+        # print('sentence shape: ',sentence.shape)
+        # print('label shape: ',label.shape)
+        # print('stars shape: ',stars.shape)
 
         ###Generate word_embed
         with open(self.config['train_data_filePath'], 'wb') as f:
