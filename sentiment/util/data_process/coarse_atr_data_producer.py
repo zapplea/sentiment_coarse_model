@@ -143,6 +143,7 @@ if __name__=='__main__':
         'dictionary': '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl',
         'max_review_length': 30,
         'words_num': 40,
+        'padding_word_index': 34933
     }
     prod = CoarseAtrDataProd(data_config)
     word_dic = prod.train_data_producer()
