@@ -52,7 +52,7 @@ class CoarseTrain:
         aspect_list = list(self.dg.aspect_dic.keys())
         print(self.dg.aspect_dic)
 
-        with graph.device('/gpu:1'):
+        with graph.device('/gpu:0'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
@@ -104,12 +104,15 @@ class CoarseTrain:
                         val_batch_num = int(self.dg.val_data_size / self.nn_config['batch_size'])
                         for j in range(val_batch_num):
                             sentences, Y_att_data = self.dg.data_generator(j,'val')
+                            print('test sentences shape: ',sentences.shape)
+                            print('sentences value: \n',sentences)
                             val_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data,true_labels_data = sess.run(
                                 [loss, pred, score, score_pre, TP, FP, FN,true_labels],
                                 feed_dict={X: sentences,
                                            Y_att: Y_att_data,
                                            keep_prob_lstm: 1.0
                                            })
+                            print('FP_data:\n',FP_data)
                             ##Show test message
                             TP_vec.append(TP_data)
                             FP_vec.append(FP_data)
