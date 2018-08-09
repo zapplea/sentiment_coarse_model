@@ -19,7 +19,7 @@ class CoarseTrain:
         # self.cl is a class
         self.mt = Metrics(self.nn_config)
         # tensorboard
-        self.tfb = Tfb(self.nn_config)
+        # self.tfb = Tfb(self.nn_config)
 
     def report(self,info):
         with open('report.info','a+') as f:
@@ -55,10 +55,10 @@ class CoarseTrain:
             check = graph.get_collection('check')
 
             # tfb
-            micro_f1, micro_pre, micro_rec, macro_f1, macro_pre, macro_rec, tfb_loss = self.tfb.metrics_scalar()
-            summ = tf.summary.merge_all()
-            writer = tf.summary.FileWriter(self.nn_config['tfb_filePath'])
-            writer.add_graph(graph)
+            # micro_f1, micro_pre, micro_rec, macro_f1, macro_pre, macro_rec, tfb_loss = self.tfb.metrics_scalar()
+            # summ = tf.summary.merge_all()
+            # writer = tf.summary.FileWriter(self.nn_config['tfb_filePath'])
+            # writer.add_graph(graph)
 
             # attribute function
             init = tf.global_variables_initializer()
@@ -124,9 +124,9 @@ class CoarseTrain:
                         print('\nVal_loss:%.10f' % np.mean(loss_vec))
 
                         # tfb
-                        tfb_loss.load(np.mean(loss_vec))
-                        s = sess.run(summ)
-                        writer.add_summary(s, i)
+                        # tfb_loss.load(np.mean(loss_vec))
+                        # s = sess.run(summ)
+                        # writer.add_summary(s, i)
 
                         _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
@@ -137,9 +137,9 @@ class CoarseTrain:
                               ' Macro recall:', np.mean(_recall))
 
                         # tfb
-                        micro_f1.load(np.mean(_f1_score))
-                        micro_pre.load(np.mean(_precision))
-                        micro_rec.load(np.mean(_recall))
+                        # micro_f1.load(np.mean(_f1_score))
+                        # micro_pre.load(np.mean(_precision))
+                        # micro_rec.load(np.mean(_recall))
 
                         _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
@@ -148,9 +148,9 @@ class CoarseTrain:
                               ' Micro recall:', np.mean(_recall))
 
                         # tfb
-                        macro_f1.load(np.mean(_f1_score))
-                        macro_pre.load(np.mean(_precision))
-                        macro_rec.load(np.mean(_recall))
+                        # macro_f1.load(np.mean(_f1_score))
+                        # macro_pre.load(np.mean(_precision))
+                        # macro_rec.load(np.mean(_recall))
 
                         # A_mat_value=sess.run(A_mat)
                         # for i in range(3):
