@@ -114,6 +114,7 @@ class CoarseTrain:
                             print('============')
                             print(sentences)
                             print('============')
+                            exit()
                             ##Show test message
                             TP_vec.append(TP_data)
                             FP_vec.append(FP_data)
