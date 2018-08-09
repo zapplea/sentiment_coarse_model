@@ -114,6 +114,7 @@ class CoarseTrain:
                                            Y_att: att_labels_data,
                                            keep_prob_lstm: 1.0
                                            })
+                            TP_vec.append(TP_data)
                             FP_vec.append(FP_data)
                             FN_vec.append(FN_data)
                             loss_vec.append(val_loss)
