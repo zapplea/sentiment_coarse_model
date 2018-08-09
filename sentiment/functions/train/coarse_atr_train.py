@@ -62,6 +62,7 @@ class CoarseTrain:
                 batch_num = int(self.dg.train_data_size / self.nn_config['batch_size'])
                 print('Train set size: ', self.dg.train_data_size, 'validation set size:', self.dg.val_data_size)
                 for i in range(self.nn_config['epoch']):
+                    print('epoch: ',i)
                     loss_vec = []
                     pred_vec = []
                     score_vec = []
@@ -113,6 +114,7 @@ class CoarseTrain:
                                            keep_prob_lstm: 1.0
                                            })
                             print('FP_data:\n',FP_data)
+                            exit()
                             ##Show test message
                             TP_vec.append(TP_data)
                             FP_vec.append(FP_data)

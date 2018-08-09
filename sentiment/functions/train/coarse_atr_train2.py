@@ -117,6 +117,7 @@ class CoarseTrain:
                                            keep_prob_lstm: 1.0
                                            })
                             print('FP:\n',FP_data)
+                            exit()
                             FP_vec.append(FP_data)
                             FN_vec.append(FN_data)
                             loss_vec.append(val_loss)
