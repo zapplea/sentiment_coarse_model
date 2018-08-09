@@ -111,6 +111,9 @@ class CoarseTrain:
                                            Y_att: Y_att_data,
                                            keep_prob_lstm: 1.0
                                            })
+                            print('============')
+                            print(sentences)
+                            print('============')
                             ##Show test message
                             TP_vec.append(TP_data)
                             FP_vec.append(FP_data)
