@@ -67,7 +67,7 @@ class CoarseAtrDataProd:
 
     def add_other(self,sentence_len,labels,stars):
         O = np.zeros(shape=(len(labels),))
-        np.expand_dims(O,axis=1)
+        O = np.expand_dims(O,axis=1)
         print('labes shape: ',labels.shape)
         print('O shapes: ',O.shape)
         labels = np.concatenate([labels,O],axis=1)
