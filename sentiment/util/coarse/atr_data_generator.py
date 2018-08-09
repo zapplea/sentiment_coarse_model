@@ -41,12 +41,12 @@ class DataGenerator():
             start = batch_num * self.configs['batch_size'] % val_size
             end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % val_size
             if start < end:
-                batches_label = self.train_label[start:end]
-                batches_sentence = self.train_sentence[start:end]
+                batches_label = self.test_label[start:end]
+                batches_sentence = self.test_sentence[start:end]
             else:
-                batches_label = self.train_label[
+                batches_label = self.test_label[
                                                  val_size - self.configs['batch_size']:val_size]
-                batches_sentence = self.train_sentence[
+                batches_sentence = self.test_sentence[
                                                 val_size - self.configs['batch_size']:val_size]
         # during validation and test, to avoid errors are counted repeatedly,
         # we need to avoid the same data sended back repeately
@@ -215,22 +215,21 @@ class DataGenerator():
 
     def load_test_data(self,test_aspect_dic,word_dic):
         if os.path.exists(self.configs['coarse_test_data_file']) and os.path.getsize(self.configs['coarse_test_data_file']) > 0:
-            f = open(self.configs['coarse_test_data_file'],'rb')
-            label = pickle.load(f)
-            sentence  = pickle.load(f)
-            f.close()
+            with open(self.configs['coarse_test_data_file'],'rb') as f:
+                label, sentence = pickle.load(f)
         else:
-            f = open(self.configs['coarse_test_data_file'], 'wb')
-            with open(self.configs['coarse_test_source_file'],'rb') as ff:
-                tmp = pickle.load(ff)
+
+            with open(self.configs['coarse_test_source_file'],'rb') as f:
+                tmp = pickle.load(f)
             test_data_mask = tmp['text'].drop_duplicates().reset_index().index
             label = self.get_aspect_probility(tmp)
             label = label[test_data_mask]
-            pickle.dump(label, f)
+
             sentence = self.get_word_id(tmp,word_dic)
             sentence = sentence[test_data_mask]
-            pickle.dump(sentence, f)
-            f.close()
+
+            with open(self.configs['coarse_test_data_file'], 'wb') as f:
+                pickle.dump((label, sentence), f)
         return label, sentence
 
     def fine_sentences(self,attribute,sentence):
