@@ -5,21 +5,22 @@ class Tfb:
         self.fine_nn_config = fine_nn_config
 
     def metrics_scalar(self):
-        micro_f1 = tf.get_variable(name='micro_f1',initializer=tf.zeros(shape=(),dtype='float32'))
+        micro_f1 = tf.get_variable(name='tfb_micro_f1',initializer=tf.zeros(shape=(),dtype='float32'))
         tf.summary.scalar('micro_f1',micro_f1)
-        micro_pre = tf.get_variable(name='micro_pre',initializer=tf.zeros(shape=(),dtype='float32'))
+        micro_pre = tf.get_variable(name='tfb_micro_pre',initializer=tf.zeros(shape=(),dtype='float32'))
         tf.summary.scalar('micro_pre',micro_pre)
-        micro_rec = tf.get_variable(name='micro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
+        micro_rec = tf.get_variable(name='tfb_micro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
         tf.summary.scalar('micro_rec', micro_rec)
 
-        macro_f1 = tf.get_variable(name='macro_f1', initializer=tf.zeros(shape=(), dtype='float32'))
+        macro_f1 = tf.get_variable(name='tfb_macro_f1', initializer=tf.zeros(shape=(), dtype='float32'))
         tf.summary.scalar('macro_f1', macro_f1)
-        macro_pre = tf.get_variable(name='macro_pre', initializer=tf.zeros(shape=(), dtype='float32'))
+        macro_pre = tf.get_variable(name='tfb_macro_pre', initializer=tf.zeros(shape=(), dtype='float32'))
         tf.summary.scalar('macro_pre', macro_pre)
-        macro_rec = tf.get_variable(name='macro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
+        macro_rec = tf.get_variable(name='tfb_macro_rec', initializer=tf.zeros(shape=(), dtype='float32'))
         tf.summary.scalar('macro_rec', macro_rec)
 
         tfb_loss = tf.get_variable(name='tfb_loss',initializer=tf.zeros(shape=(),dtype='float32'))
+        tf.summary.scalar('loss',tfb_loss)
 
         return micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss
 
