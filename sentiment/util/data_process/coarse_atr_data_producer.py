@@ -77,6 +77,7 @@ class CoarseAtrDataProd:
             star = stars[i]
             if star==3:
                 label[-1]=1/(3+length)
+            print(label)
         return labels
 
 
