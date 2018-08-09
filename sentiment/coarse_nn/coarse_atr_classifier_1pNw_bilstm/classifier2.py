@@ -8,7 +8,7 @@ elif getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 from sentiment.functions.attribute_function.attribute_function import AttributeFunction
 from sentiment.functions.attribute_function.metrics import Metrics
-from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
+from sentiment.functions.relevance_function.atr_relevance_score import RelScore
 from sentiment.functions.train.coarse_atr_train2 import CoarseTrain
 
 import tensorflow as tf
@@ -85,7 +85,7 @@ class Classifier:
             # coarse score
             # score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
             # loss.shape=(batch_size*max review length, attributes num)
-            loss = relscore.sigmoid_loss(score, Y_att, atr_rel_prob, aspect_prob, graph)
+            loss = relscore.sigmoid_loss_v2(score, Y_att, atr_rel_prob, aspect_prob, graph)
             #loss = tf.multiply(atr_rel_prob,tf.multiply(aspect_prob,loss))
             tf.add_to_collection('coarse_atr_loss',loss)
             pred = self.af.prediction(score, graph)

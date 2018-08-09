@@ -23,7 +23,7 @@ def main(nn_config,data_config):
     cl = Classifier(nn_config, dg)
     cl.train()
 
-
+# TODO: check whether the program is correct, eg. how to process padded words.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
