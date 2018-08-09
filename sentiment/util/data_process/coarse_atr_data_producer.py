@@ -140,7 +140,9 @@ if __name__=='__main__':
         'train_data_filePath': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v2.pkl',
         'test_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl',
         'test_data_filePath': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data_v2.pkl',
-        'dictionary': '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
+        'dictionary': '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl',
+        'max_review_length': 30,
+        'words_num': 40,
     }
     prod = CoarseAtrDataProd(data_config)
     word_dic = prod.train_data_producer()
