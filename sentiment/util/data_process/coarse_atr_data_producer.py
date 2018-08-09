@@ -66,8 +66,10 @@ class CoarseAtrDataProd:
         return np.array(review),np.array(review_length)
 
     def add_other(self,sentence_len,labels,stars):
-        O = np.zeros(shape=(len(labels)))
+        O = np.zeros(shape=(len(labels),))
         np.expand_dims(O,axis=1)
+        print('labes shape: ',labels.shape)
+        print('O shapes: ',O.shape)
         labels = np.concatenate([labels,O],axis=1)
         for i in range(len(sentence_len)):
             length = sentence_len[i]
