@@ -17,8 +17,7 @@ class DataGenerator():
         self.test_label, self.test_sentence = self.load_test_data(self.aspect_dic,self.dictionary)
         print('test_labels shape: ', self.test_label.shape)
         print('test_sentences shape: ', self.test_sentence.shape)
-        print('test sentences:\n',self.test_sentence[1])
-        exit()
+        print('test sentences 1:\n',self.test_sentence[1])
         self.train_data_size = len(self.train_label)
         self.val_data_size = len(self.test_label)
 
@@ -48,12 +47,12 @@ class DataGenerator():
             start = batch_num * self.configs['batch_size'] % val_size
             end = (batch_num * self.configs['batch_size'] + self.configs['batch_size']) % val_size
             if start < end:
-                batches_label = self.train_label[start:end]
-                batches_sentence = self.train_sentence[start:end]
+                batches_label = self.test_label[start:end]
+                batches_sentence = self.test_sentence[start:end]
             else:
-                batches_label = self.train_label[
+                batches_label = self.test_label[
                                                  val_size - self.configs['batch_size']:val_size]
-                batches_sentence = self.train_sentence[
+                batches_sentence = self.test_sentence[
                                                 val_size - self.configs['batch_size']:val_size]
         # during validation and test, to avoid errors are counted repeatedly,
         # we need to avoid the same data sended back repeately
