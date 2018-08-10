@@ -138,7 +138,7 @@ if __name__=='__main__':
     # parser = argparse.ArgumentParser()
     # parser.add_argument('--num',type=str,default=0)
     # args=parser.parse_args()
-    param=[0.1,0.25,0.5,1]
+    param=[1,1.2,1.3,1.4]
     for key in param:
         data_config={
             'train_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
