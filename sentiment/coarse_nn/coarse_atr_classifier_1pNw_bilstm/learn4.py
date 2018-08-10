@@ -27,6 +27,7 @@ def main(nn_config,data_config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
+    parser.add_argument('--dataset',type=str, default='1.5')
     args = parser.parse_args()
     seed = {'lstm_cell_size': 300,
             'word_dim': 300,
@@ -73,9 +74,9 @@ if __name__ == "__main__":
 
     data_config = {
         'train_source_file_path': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
-        'train_data_file_path': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v2.pkl',
+        'train_data_file_path': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v%s.pkl'%args.dataset,
         'test_source_file_path': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl',
-        'test_data_file_path': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data_v2.pkl',
+        'test_data_file_path': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data_v%s.pkl'%args.dataset,
         'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
         'stopwords_file_path': '/datastore/liu121/sentidata2/expdata/stopwords.txt',
         'attributes_num': nn_config['attributes_num'],
