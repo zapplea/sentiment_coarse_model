@@ -287,7 +287,8 @@ class AttributeFunction:
         :param graph: 
         :return: 
         """
-        keep_prob = self.nn_config['keep_prob_lstm']
+        keep_prob = tf.placeholder(dtype='float32')
+        graph.add_to_collection('keep_prob_lstm', keep_prob)
         # graph.add_to_collection('keep_prob_lstm',keep_prob)
         cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size']),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
         # outputs.shape = (batch size, max_time, cell size)
