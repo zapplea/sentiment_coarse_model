@@ -85,8 +85,7 @@ class Classifier:
             # coarse score
             # score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
             # loss.shape=(batch_size*max review length, attributes num)
-            # loss = relscore.sigmoid_loss_v2(score, Y_att, atr_rel_prob, aspect_prob, graph)
-            loss = relscore.kl_loss(score, atr_rel_prob, aspect_prob, graph)
+            loss = relscore.sigmoid_loss_v2(score, Y_att, atr_rel_prob, aspect_prob, graph)
             #loss = tf.multiply(atr_rel_prob,tf.multiply(aspect_prob,loss))
             tf.add_to_collection('coarse_atr_loss',loss)
             pred = self.af.prediction(score, graph)
