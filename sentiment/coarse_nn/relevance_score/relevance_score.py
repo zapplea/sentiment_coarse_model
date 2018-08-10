@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
-
+print('coarse_nn/relevance_score/relevance_score.py is expired and will not be maintained forever. '
+      'To make sure the integrity of the program, please use functions/relevance_function/atr_relevance_score.py to replace it.')
 # TODO: need to use threshold to predict if the Y is 1
 # TODO: need to eliminate the influence of padded sentence
 class RelScore:
@@ -54,16 +55,17 @@ class RelScore:
         aspect_prob = tf.where(condition, tf.ones_like(aspect_prob),aspect_prob)
         return aspect_prob
 
-
-
-    def relevance_prob_atr(self, atr_score, graph):
+    def relevance_prob_atr(self, atr_score, mask, graph):
         """
         P(x|a)
         :param atr_score: (batch size*max review length, attributes num)
+        :param mask: (batch size, )
         :return: shape = (batch size*max review length, attributes num) , in dimension 2 values are the same
         """
+
         atr_score = tf.reshape(atr_score,shape=(-1, self.nn_config['max_review_length'], self.nn_config['attributes_num']))
         # prob.shape = (batch size, attributes num, max review length); p(x;a)
+        # TODO: problem: the padded sentences is not masked.
         rel_prob = tf.nn.softmax(tf.transpose(atr_score,perm=[0,2,1]),axis=2)
         # prob.shape = (batch size,max review length, attributes num)
         rel_prob = tf.transpose(rel_prob,perm=[0,2,1])

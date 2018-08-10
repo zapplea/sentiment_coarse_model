@@ -54,18 +54,36 @@ class RelScore:
         aspect_prob = tf.where(condition, tf.ones_like(aspect_prob),aspect_prob)
         return aspect_prob
 
+    def softmax(self, score, mask):
+        """
 
+        :param score: (batch size, attributes num, max review length)
+        :return: 
+        """
+        # shape = (batch size, attributes num, max review length)
+        exp_score = tf.multiply(tf.exp(score),mask)
+        # (batch size, attributes num)
+        sum_score = tf.reduce_sum(exp_score,axis=2)
+        # (batch size, attributes num, max review length)
+        sum_score = tf.tile(tf.expand_dims(sum_score,axis=2),multiples=[1,1,self.nn_config['max_review_length']])
+        rel_prob = tf.truediv(exp_score,sum_score)
+        return rel_prob
 
-    def relevance_prob_atr(self, atr_score, graph):
+    def relevance_prob_atr(self, atr_score, mask, graph):
         """
         P(x|a)
         :param atr_score: (batch size*max review length, attributes num)
+        :param mask: (batch size*max review length, attributes num)
         :return: shape = (batch size*max review length, attributes num) , in dimension 2 values are the same
         """
-        atr_score = tf.reshape(atr_score,
-                               shape=(-1, self.nn_config['max_review_length'], self.nn_config['attributes_num']))
+
+        atr_score = tf.reshape(atr_score,shape=(-1, self.nn_config['max_review_length'], self.nn_config['attributes_num']))
+
+        mask = tf.reshape(mask,shape=(-1, self.nn_config['max_review_length'], self.nn_config['attributes_num']))
+
         # prob.shape = (batch size, attributes num, max review length); p(x;a)
-        rel_prob = tf.nn.softmax(tf.transpose(atr_score, perm=[0, 2, 1]), axis=2)
+        # TODO: problem: the padded sentences is not masked.
+        rel_prob = self.softmax(tf.transpose(atr_score, perm=[0, 2, 1]),tf.transpose(mask,perm=[0,2,1]))
         # prob.shape = (batch size,max review length, attributes num)
         rel_prob = tf.transpose(rel_prob, perm=[0, 2, 1])
         return tf.reshape(rel_prob, shape=(-1, self.nn_config['attributes_num']))

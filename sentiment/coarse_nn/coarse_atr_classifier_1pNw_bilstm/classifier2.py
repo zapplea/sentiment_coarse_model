@@ -76,13 +76,16 @@ class Classifier:
             # score.shape = (batch size, attributes num)
             score = tf.reduce_max(score, axis=2)
             tf.add_to_collection('score',score)
-            # eliminate the influce of -inf when calculate relevance probability with softmax
+            # eliminate the influce of -inf when calculate relevance probability with softmax.
+            # the existence of -inf is because of padded sentence in which all words are #PAD#
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
+            # the mask is used to eliminate the influence of padded sentences when calculate p(x|a)
+            mask = tf.where(condition, tf.zeros_like(score),tf.ones_like(score))
             # aspect_prob.shape = (batch size * max review length ,attributes num)
             aspect_prob = relscore.expand_aspect_prob(aspect_prob, graph)
             # atr_rel_prob = (batch size * max review length, attributes num)
-            atr_rel_prob = relscore.relevance_prob_atr(score, graph)
+            atr_rel_prob = relscore.relevance_prob_atr(score,mask, graph)
             # coarse score
             # score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
             # loss.shape=(batch_size*max review length, attributes num)
