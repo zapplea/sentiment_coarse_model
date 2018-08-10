@@ -137,21 +137,22 @@ class CoarseAtrDataProd:
             pickle.dump(stars,f)
 
 if __name__=='__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--num',type=str,default=0)
-    args=parser.parse_args()
-    param=[1.5,2,3,4]
-    data_config={
-        'train_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
-        'train_data_filePath': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v%s.pkl'%str(param[args.num]),
-        'test_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl',
-        'test_data_filePath': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data_v%s.pkl'%str(param[args.num]),
-        'dictionary': '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl',
-        'max_review_length': 30,
-        'words_num': 40,
-        'padding_word_index': 34933,
-        'param':param[args.num]
-    }
-    prod = CoarseAtrDataProd(data_config)
-    word_dic = prod.train_data_producer()
-    prod.test_data_producer(word_dic)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--num',type=str,default=0)
+    # args=parser.parse_args()
+    param=[1.5,2,3,4,5,6]
+    for key in param:
+        data_config={
+            'train_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
+            'train_data_filePath': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v%s.pkl'%str(key),
+            'test_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl',
+            'test_data_filePath': '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data_v%s.pkl'%str(key),
+            'dictionary': '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl',
+            'max_review_length': 30,
+            'words_num': 40,
+            'padding_word_index': 34933,
+            'param':key
+        }
+        prod = CoarseAtrDataProd(data_config)
+        word_dic = prod.train_data_producer()
+        prod.test_data_producer(word_dic)
