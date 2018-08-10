@@ -33,7 +33,7 @@ class Classifier:
             with tf.variable_scope('sentence_lstm'):
                 seq_len = self.af.sequence_length(X_ids, graph)
                 # H.shape = (batch size, max_time, cell size)
-                H = self.af.sentence_bilstm(X, seq_len, graph=graph)
+                H = self.af.sentence_lstm(X, seq_len, graph=graph)
                 graph.add_to_collection('reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                     graph.get_tensor_by_name('sentence_lstm/rnn/basic_lstm_cell/kernel:0')))
             # Y_att.shape = (batch size, number of attributes)
