@@ -55,6 +55,7 @@ class RelScore:
         return aspect_prob
 
     def softmax(self, score, mask):
+        print('relevance score softmax')
         """
 
         :param score: (batch size, attributes num, max review length)
