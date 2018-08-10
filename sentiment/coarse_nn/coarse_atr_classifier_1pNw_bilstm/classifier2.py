@@ -37,6 +37,7 @@ class Classifier:
             # p(a|D)
             aspect_prob = self.af.attribute_labels_input(graph=graph)
 
+
             mask_true_label = self.af.mask_for_true_label(X_ids)
 
             # Y_att.shape = (batch size * max review length, max review length, attributes num)

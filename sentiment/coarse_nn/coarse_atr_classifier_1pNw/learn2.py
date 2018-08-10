@@ -59,7 +59,7 @@ if __name__ == "__main__":
         #'attribute_loss_theta': 2.0,
         'aspect_prob_threshold': 0.16,
         'keep_prob_lstm': 0.5,
-        'complement': 0,
+        'complement': 1,
         'model_save_path': '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/coarse_1pNw_ckpt_reg%s_lr%s_aspect%s_mat%s/'%(str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
         'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/coarse_nn/model/coarse_1pNw_ckpt_reg%s_lr%s_aspect%s_mat%s/'%(str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
         # 'sr_path': '',

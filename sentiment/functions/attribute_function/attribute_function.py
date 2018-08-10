@@ -361,6 +361,11 @@ class AttributeFunction:
         return embeddings
 
     def mask_for_true_label(self, X):
+        """
+        for coarse model to mask labels of padded sentences.
+        :param X: 
+        :return: 
+        """
         X = tf.cast(X, dtype='float32')
         temp = tf.reduce_min(X, axis=1)
         ones = tf.ones_like(temp, dtype='float32') * self.nn_config['padding_word_index']
