@@ -9,7 +9,7 @@ elif os.getlogin() == 'liu121':
 from sentiment.functions.attribute_function.attribute_function import AttributeFunction
 from sentiment.functions.attribute_function.metrics import Metrics
 from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
-from sentiment.functions.train.coarse_atr_train import CoarseTrain
+from sentiment.functions.train.coarse_atr_train2 import CoarseTrain
 
 import tensorflow as tf
 
