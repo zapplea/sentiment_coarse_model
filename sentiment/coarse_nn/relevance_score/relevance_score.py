@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 print('coarse_nn/relevance_score/relevance_score.py is expired and will not be maintained forever. '
       'To make sure the integrity of the program, please use functions/relevance_function/atr_relevance_score.py to replace it.')
+print('Exit the program')
+exit()
 # TODO: need to use threshold to predict if the Y is 1
 # TODO: need to eliminate the influence of padded sentence
 class RelScore:
