@@ -101,30 +101,36 @@ class RelScore:
                               multiples=[1, self.nn_config['max_review_length'], 1])
         return tf.reshape(aspect_prob, shape=(-1, self.nn_config['attributes_num']))
 
-    def sigmoid_loss(self, score, Y_att, atr_rel_prob, aspect_prob, graph):
+    # TODO: mask loss of padded sentences
+    def sigmoid_loss(self, score, Y_att, atr_rel_prob, aspect_prob, mask, graph):
         """
-        :param score: shape=(batch size, attributes num)
+        :param score: shape=(batch size*max review length, attributes num)
         :return: 
         """
+        # mask loss of padded sentences
+
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.multiply(aspect_prob,
                                                                tf.multiply(
-                                                                   tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
-                                                                                                           logits=score),
+                                                                   tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
+                                                                                                                       logits=score),
+                                                                               mask),
                                                                    atr_rel_prob)),
                                                    axis=1),
                                      tf.reduce_sum(graph.get_collection('reg'))))
         tf.add_to_collection('atr_loss', loss)
         return loss
 
-    def sigmoid_loss_v2(self, score, Y_att, atr_rel_prob, aspect_prob, graph):
+    def sigmoid_loss_v2(self, score, Y_att, atr_rel_prob, aspect_prob, mask, graph):
         """
         In this loss function, we add p(x|a)logp(x|a)
         :param score: shape=(batch size, attributes num)
         :return: 
         """
+        # mask loss of padded sentences
         rel_prob_reg = tf.multiply(tf.log(atr_rel_prob),atr_rel_prob)
-        loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.add(tf.multiply(tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
-                                                                                                                          logits=score),
+        loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.add(tf.multiply(tf.multiply(tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
+                                                                                                                                      logits=score),
+                                                                                              mask),
                                                                                   atr_rel_prob),
                                                                       aspect_prob),
                                                           -rel_prob_reg),

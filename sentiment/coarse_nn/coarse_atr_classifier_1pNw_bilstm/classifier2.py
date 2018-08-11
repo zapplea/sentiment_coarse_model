@@ -80,7 +80,7 @@ class Classifier:
             # the existence of -inf is because of padded sentence in which all words are #PAD#
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
-            # the mask is used to eliminate the influence of padded sentences when calculate p(x|a)
+            # the mask is used to eliminate the influence of padded sentences when calculate p(x|a) and loss
             mask = tf.where(condition, tf.zeros_like(score),tf.ones_like(score))
             # aspect_prob.shape = (batch size * max review length ,attributes num)
             aspect_prob = relscore.expand_aspect_prob(aspect_prob, graph)
@@ -89,7 +89,7 @@ class Classifier:
             # coarse score
             # score = relscore.coarse_atr_score(aspect_prob=aspect_prob, rel_prob=atr_rel_prob, atr_score=score)
             # loss.shape=(batch_size*max review length, attributes num)
-            loss = relscore.sigmoid_loss_v2(score, Y_att, atr_rel_prob, aspect_prob, graph)
+            loss = relscore.sigmoid_loss_v2(score, Y_att, atr_rel_prob, aspect_prob,mask, graph)
             #loss = tf.multiply(atr_rel_prob,tf.multiply(aspect_prob,loss))
             tf.add_to_collection('coarse_atr_loss',loss)
             pred = self.af.prediction(score, graph)
