@@ -104,7 +104,7 @@ class RelScore:
     # TODO: mask loss of padded sentences
     def sigmoid_loss(self, score, Y_att, atr_rel_prob, aspect_prob, mask, graph):
         """
-        :param score: shape=(batch size*max review length, attributes num)
+        :param score: shape=(batch size * max review length, attributes num)
         :return: 
         """
         # mask loss of padded sentences
@@ -123,7 +123,7 @@ class RelScore:
     def sigmoid_loss_v2(self, score, Y_att, atr_rel_prob, aspect_prob, mask, graph):
         """
         In this loss function, we add p(x|a)logp(x|a)
-        :param score: shape=(batch size, attributes num)
+        :param score: shape=(batch size * max review length, attributes num)
         :return: 
         """
         # mask loss of padded sentences
