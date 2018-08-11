@@ -162,7 +162,7 @@ class CoarseTrain:
                         if max_f1_score < _f1_score:
                             early_stop_count=0
                             max_f1_score = _f1_score
-                            # saver.save(sess,self.nn_config['model_save_path'],global_step=i+1)
+                            saver.save(sess,self.nn_config['model_save_path'],global_step=i+1)
                         else:
                             early_stop_count+=1
                         print('Max Micro F1 score: ', max_f1_score)

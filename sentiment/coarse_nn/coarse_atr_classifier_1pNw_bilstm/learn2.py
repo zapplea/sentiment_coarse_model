@@ -64,7 +64,7 @@ if __name__ == "__main__":
         'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt_reg%s_lr%s_aspect%s_mat%s/'%(str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
         # 'sr_path': '',
         'train_mod':'sigmoid',
-        'early_stop_limit':20
+        'early_stop_limit':100
     }
     path = Path(nn_config['model_save_path'])
     if not path.exists():
