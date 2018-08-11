@@ -34,8 +34,8 @@ if __name__ == "__main__":
             'attribute_mat_size': 5,
             'attributes_num': 7,
             }
-    reg_rate = [3E-4, 3E-3, 3E-2, 3E-1]
-    lr =       [3E-3, 3E-3, 3E-3, 3E-3]
+    reg_rate = [3E-4, 3E-3, 3E-2, 3E-1, 3E-4, 3E-4, 3E-4]
+    lr =       [3E-3, 3E-3, 3E-3, 3E-3, 3E-4, 3E-5, 3E-6]
     nn_config = {
         # fixed parameter
         'attributes_num': seed['attributes_num'],
