@@ -15,10 +15,10 @@ module load cuda/8.0.61
 module load tensorflow/1.6.0-py36-gpu
 echo "loaded"
 
-if [ $1 = 2 ];
+if [ $1 = "learn2" ];
 then
     python learn2.py --num $2
-elif [ $1 = 4 ];
+elif [ $1 = "learn4" ];
 then
-    python learn4.py --num $2
+    python learn4.py --num $2 --dataset $3
 fi
