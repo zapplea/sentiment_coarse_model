@@ -127,7 +127,10 @@ class RelScore:
         :return: 
         """
         # mask loss of padded sentences
+        condition=tf.equal(atr_rel_prob,tf.zeros_like(atr_rel_prob))
+        atr_rel_prob=tf.where(condition,tf.ones_like(atr_rel_prob),atr_rel_prob)
         rel_prob_reg = tf.multiply(tf.log(atr_rel_prob),atr_rel_prob)
+
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.add(tf.multiply(tf.multiply(tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
                                                                                                                                       logits=score),
                                                                                               mask),
