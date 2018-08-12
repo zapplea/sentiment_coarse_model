@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --get-user-env
-#SBATCH --job-name="transfer_nn : ilp_1pNw"
+#SBATCH --job-name="coarse_nn : 1pNw_bilstm"
 #SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --mem=200GB
