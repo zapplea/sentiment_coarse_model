@@ -15,4 +15,10 @@ module load cuda/8.0.61
 module load tensorflow/1.6.0-py36-gpu
 echo "loaded"
 
-python learn2.py --num $1
+if [ $1 = 2 ];
+then
+    python learn2.py --num $2
+elif [ $1 = 4 ];
+then
+    python learn4.py --num $2
+fi
