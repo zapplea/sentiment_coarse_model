@@ -174,5 +174,5 @@ class CoarseTrain:
                     # if early_stop_count>self.nn_config['early_stop_limit']:
                     #     break
 
-            saver.save(sess, self.nn_config['model_save_path'], global_step=i + 1)
+                saver.save(sess, self.nn_config['model_save_path'], global_step=i + 1)
 
