@@ -28,6 +28,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
     parser.add_argument('--dataset',type=str, default='1.5')
+    parser.add_argument('--train_mod',type=str,default='v1')
     args = parser.parse_args()
     seed = {'lstm_cell_size': 300,
             'word_dim': 300,
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         'words_num': 40,
         'word_dim': seed['word_dim'],
         'is_mat': True,
-        'epoch': 1000,
+        'epoch': 100,
         'batch_size': 20,
         'lstm_cell_size': seed['lstm_cell_size'],
         'lookup_table_words_num': 34934,  # 2074276 for Chinese word embedding
@@ -61,11 +62,11 @@ if __name__ == "__main__":
         'aspect_prob_threshold': 0.16,
         'keep_prob_lstm': 0.5,
         'complement': 0,
-        'model_save_path': '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckptv2_dataset%s_reg%s_lr%s_aspect%s_mat%s/'%(args.dataset,str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
-        'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckptv2_dataset%s_reg%s_lr%s_aspect%s_mat%s/'%(args.dataset,str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
+        'model_save_path': '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'%(args.train_mod,args.dataset,str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
+        'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'%(args.train_mod,args.dataset,str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
         # 'sr_path': '',
-        'train_mod':'sigmoid',
-        'early_stop_limit':20
+        'train_mod':args.train_mod,
+        'early_stop_limit':10000
     }
     path = Path(nn_config['model_save_path'])
     if not path.exists():

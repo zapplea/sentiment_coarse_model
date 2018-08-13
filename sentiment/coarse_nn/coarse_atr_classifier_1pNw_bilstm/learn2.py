@@ -27,6 +27,7 @@ def main(nn_config,data_config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
+    parser.add_argument('--train_mod', type=str, default='v1')
     args = parser.parse_args()
     seed = {'lstm_cell_size': 300,
             'word_dim': 300,
@@ -60,10 +61,10 @@ if __name__ == "__main__":
         'aspect_prob_threshold': 0.16,
         'keep_prob_lstm': 0.5,
         'complement': 0,
-        'model_save_path': '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt_reg%s_lr%s_aspect%s_mat%s/'%(str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
-        'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt_reg%s_lr%s_aspect%s_mat%s/'%(str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
+        'model_save_path': '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_reg%s_lr%s_aspect%s_mat%s/'%(args.train_mod,str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
+        'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_reg%s_lr%s_aspect%s_mat%s/'%(args.train_mod,str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size'])),
         # 'sr_path': '',
-        'train_mod':'sigmoid',
+        'train_mod':args.train_mod,
         'early_stop_limit':100
     }
     path = Path(nn_config['model_save_path'])

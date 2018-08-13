@@ -17,8 +17,8 @@ echo "loaded"
 
 if [ $1 = "learn2" ];
 then
-    python learn2.py --num $2
+    python learn2.py --num $2 --train_mod $3
 elif [ $1 = "learn4" ];
 then
-    python learn4.py --num $2 --dataset $3
+    python learn4.py --num $2 --dataset $3 --train_mod $4
 fi

@@ -12,12 +12,13 @@ import argparse
 
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 from sentiment.util.coarse.atr_data_generator import DataGenerator as coarse_DataGenerator
-from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGenerator
+from sentiment.util.fine.atr_data_feeder import DataFeeder as fine_DataGenerator
 
-def main(coarse_nn_configs, fine_nn_configs, coarse_data_configs, fine_data_configs):
-    coarse_dg = coarse_DataGenerator(coarse_data_configs,coarse_nn_configs)
-    fine_dg = fine_DataGenerator(fine_data_configs, fine_nn_configs)
-    cl = Classifier(coarse_nn_configs, fine_nn_configs, coarse_dg, fine_dg)
+def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config):
+    coarse_dg = coarse_DataGenerator(coarse_data_config)
+    fine_dg = fine_DataGenerator(fine_data_config)
+
+    cl = Classifier(coarse_nn_config, fine_nn_config, coarse_dg, fine_dg)
     cl.train()
 
 
@@ -96,58 +97,30 @@ if __name__ == "__main__":
     reg_rate = [3E-5, ]
     lr = [3E-4, ]
 
-    if os.getlogin()=="lujunyu":
+    coarse_nn_config['sr_path']='/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/model/ckpt_bi_5mention_6.19/'
+    coarse_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
+    coarse_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl'
+    coarse_data_config['train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_train_data.pkl'
+    coarse_data_config['test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_test_data.pkl'
+    coarse_data_config['wordembedding_file_path'] = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
+    coarse_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
+    coarse_data_config['fine_sentences_file'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_sentences_data.pkl'
+    coarse_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
 
-        coarse_nn_config['sr_path']='/home/lujunyu/repository/sentiment_coarse_model/sentiment/coarse_nn/coarse_atr_classifier_1pNw_bilstm/ckpt_bi_5mention_6.19/'
-        coarse_data_config['train_source_file_path']='/home/lujunyu/dataset/yelp/yelp_lda_trainset.pkl'
-        coarse_data_config['test_source_file_path']='/home/lujunyu/dataset/yelp/yelp_lda_testset.pkl'
-        coarse_data_config['train_data_file_path']='/home/lujunyu/repository/sentiment_coarse_model/sentiment/transfer_nn/coarse_train_data.pkl'
-        coarse_data_config['test_data_file_path']='/home/lujunyu/repository/sentiment_coarse_model/sentiment/transfer_nn/coarse_test_data.pkl'
-        coarse_data_config['wordembedding_file_path']='~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin'
-        coarse_data_config['stopwords_file_path']='~/dataset/semeval2016/stopwords.txt'
-        coarse_data_config['fine_sentences_file']='/home/lujunyu/repository/sentiment_coarse_model/sentiment/transfer_nn/fine_sentences_data.pkl'
-        coarse_data_config['dictionary']='/home/lujunyu/repository/sentiment_coarse_model/sentiment/util/word_dic/data_dictionary.pkl'
+    fine_nn_config['sr_path']='/datastore/liu121/sentidata2/resultdata/transfer/model'
+    fine_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl'
+    fine_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_test.pkl'
+    fine_data_config['train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_train_data.pkl'
+    fine_data_config['test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_test_data.pkl'
+    fine_data_config['wordembedding_file_path'] = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
+    fine_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
+    fine_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
 
-        fine_nn_config['sr_path']=''
-        fine_data_config['train_source_file_path'] = '/home/lujunyu/dataset/semeval2016/absa_resturant_train.pkl'
-        fine_data_config['test_source_file_path'] = '/home/lujunyu/dataset/semeval2016/absa_resturant_test.pkl'
-        fine_data_config['train_data_file_path'] = '/home/lujunyu/repository/sentiment_coarse_model/sentiment/transfer_nn/fine_train_data.pkl'
-        fine_data_config['test_data_file_path'] = '/home/lujunyu/repository/sentiment_coarse_model/sentiment/transfer_nn/fine_test_data.pkl'
-        fine_data_config['wordembedding_file_path']='~/dataset/word2vec-GoogleNews-vectors/GoogleNews-vectors-negative300.bin'
-        fine_data_config['stopwords_file_path']='~/dataset/semeval2016/stopwords.txt'
-        fine_data_config['dictionary'] = '/home/lujunyu/repository/sentiment_coarse_model/sentiment/util/word_dic/data_dictionary.pkl'
-
-        fine_nn_config['reg_rage'] = reg_rate[args.num]
-        fine_nn_config['lr'] = lr[args.num]
-        # path of tensorboard files
-        fine_nn_config['tfb_filePath'] = ''
-        fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
-
-    elif os.getlogin() == "liu121":
-        coarse_nn_config['sr_path']='/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/model/ckpt_bi_5mention_6.19/'
-        coarse_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
-        coarse_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl'
-        coarse_data_config['train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_train_data.pkl'
-        coarse_data_config['test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_test_data.pkl'
-        coarse_data_config['wordembedding_file_path'] = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
-        coarse_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
-        coarse_data_config['fine_sentences_file'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_sentences_data.pkl'
-        coarse_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
-
-        fine_nn_config['sr_path']='/datastore/liu121/sentidata2/resultdata/transfer/model'
-        fine_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl'
-        fine_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_test.pkl'
-        fine_data_config['train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_train_data.pkl'
-        fine_data_config['test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_test_data.pkl'
-        fine_data_config['wordembedding_file_path'] = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
-        fine_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
-        fine_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
-
-        fine_nn_config['reg_rage'] = reg_rate[args.num]
-        fine_nn_config['lr'] = lr[args.num]
-        fine_nn_config['tfb_filePath'] = '/datastore/liu121/sentidata2/resultdata/transfer/tfb/mat%s_reg%s_lr%s'\
-                                         %(str(fine_nn_config['attribute_mat_size']),str(reg_rate[args.num]),str(lr[args.num]))
-        fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
+    fine_nn_config['reg_rage'] = reg_rate[args.num]
+    fine_nn_config['lr'] = lr[args.num]
+    fine_nn_config['tfb_filePath'] = '/datastore/liu121/sentidata2/resultdata/transfer/tfb/mat%s_reg%s_lr%s'\
+                                     %(str(fine_nn_config['attribute_mat_size']),str(reg_rate[args.num]),str(lr[args.num]))
+    fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
 
 
     main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
