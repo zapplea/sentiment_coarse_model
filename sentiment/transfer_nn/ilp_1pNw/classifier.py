@@ -11,8 +11,8 @@ elif getpass.getuser() == "lizhou":
 from sentiment.coarse_nn.coarse_atr_classifier_1pNw_bilstm.classifier import Classifier as coarse_Classifier
 from sentiment.sep_nn.fine_atr_classifier_1pNw_bilstm.classifier import Classifier as fine_Classifier
 from sentiment.transfer_nn.transfer.transfer_ilp import Transfer
-from sentiment.functions.train.trans_atr_train_bilstm2 import TransferTrain
-
+from sentiment.functions.train.trans_atr_train_bilstm import TransferTrain
+#TODO: 1. table in transfer 2. table in tranfer train.
 class Classifier:
     def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_generator, fine_data_generator):
         self.coarse_nn_config = coarse_nn_config
