@@ -129,9 +129,9 @@ def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
 
 if __name__ =="__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num', type=int, default=0)
-    parser.add_argument('--dataset',type=str,default='3')
-    parser.add_argument('--train_mod',type=str,default='v1')
+    parser.add_argument('--num', type=int, default=0,help='the num of lr and reg_rate')
+    parser.add_argument('--dataset',type=str,default='3', help='which dataset will be used')
+    parser.add_argument('--train_mod',type=str,default='v1', help='the version of loss function')
     args = parser.parse_args()
     seed = {'lstm_cell_size': 300,
             'word_dim': 300,
@@ -206,40 +206,39 @@ if __name__ =="__main__":
 
     if getpass.getuser() == "liu121":
         coarse_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
-                                      %(str(args.train_mod),str(args.dataset),str(reg_rate[args.num]),str(lr[args.num]),str())
+                                      %(str(args.train_mod),str(args.dataset),str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size']))
 
         coarse_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
         coarse_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl'
         coarse_data_config[
             'train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v%s.pkl'%str(args.dataset)
         coarse_data_config[
-            'test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_test_data.pkl'
+            'test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_test_data_v%s.pkl'%str(args.dataset)
         coarse_data_config[
             'wordembedding_file_path'] = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
-        coarse_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
+        # coarse_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
         coarse_data_config[
-            'fine_sentences_file'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_sentences_data.pkl'
-        coarse_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
+            'fine_sentences_file'] = '/datastore/liu121/sentidata2/expdata/fine_data/fine_sentences_data.pkl'
+        # coarse_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
 
-        fine_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/transfer/model'
+        fine_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/transfer/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
+                                    %(str(args.train_mod),str(args.dataset),str(reg_rate[args.num]),str(lr[args.num]),str(seed['attributes_num']),str(seed['attribute_mat_size']))
         fine_data_config[
             'train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl'
         fine_data_config[
             'test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_test.pkl'
         fine_data_config[
-            'train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_train_data.pkl'
+            'train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl'
         fine_data_config[
-            'test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/fine_grain/data/fine_test_data.pkl'
+            'test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl'
         fine_data_config[
             'wordembedding_file_path'] = '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin'
-        fine_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
-        fine_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
+        # fine_data_config['stopwords_file_path'] = '/datastore/liu121/sentidata2/expdata/stopwords.txt'
+        # fine_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
 
         fine_nn_config['reg_rage'] = reg_rate[args.num]
         fine_nn_config['lr'] = lr[args.num]
-        fine_nn_config['tfb_filePath'] = '/datastore/liu121/sentidata2/resultdata/transfer/tfb/mat%s_reg%s_lr%s' \
-                                         % (str(fine_nn_config['attribute_mat_size']), str(reg_rate[args.num]),
-                                            str(lr[args.num]))
+        fine_nn_config['tfb_filePath'] = fine_nn_config['sr_path']
         fine_nn_config['coarse_attributes_num'] = coarse_nn_config['attributes_num']
 
     main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
