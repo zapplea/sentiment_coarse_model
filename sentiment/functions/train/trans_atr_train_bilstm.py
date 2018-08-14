@@ -65,7 +65,6 @@ class TransferTrain:
             FN = graph.get_collection('FN')[0]
             FP = graph.get_collection('FP')[0]
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
-            table_data = self.dg.table
 
             # tfb
             micro_f1,micro_pre,micro_rec,macro_f1,macro_pre,macro_rec, tfb_loss=self.tfb.metrics_scalar()
