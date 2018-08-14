@@ -205,12 +205,13 @@ if __name__ =="__main__":
     lr = [3E-4, ]
 
     if getpass.getuser() == "liu121":
-        coarse_nn_config['sr_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/model/ckpt_bi_5mention_6.19/'
+        coarse_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
+                                      %(str(args.train_mod),str(args.dataset),str(reg_rate[args.num]),str(lr[args.num]),str())
 
         coarse_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
         coarse_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl'
         coarse_data_config[
-            'train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_train_data.pkl'
+            'train_data_file_path'] = '/datastore/liu121/sentidata2/expdata/coarse_data/coarse_train_data_v%s.pkl'%str(args.dataset)
         coarse_data_config[
             'test_data_file_path'] = '/datastore/liu121/sentidata2/expdata/transfer/coarse_grain/data/coarse_test_data.pkl'
         coarse_data_config[
