@@ -141,23 +141,3 @@ class RelScore:
                                      tf.reduce_sum(graph.get_collection('reg'))))
         tf.add_to_collection('atr_loss', loss)
         return loss
-
-    def kl_loss(self, score, atr_rel_prob, aspect_prob, graph):
-        """
-        This is KL divergence, used to measure the difference between 
-        :param score: (batch size * max reviews length, attributes num)
-        :param aspect_prob: (batch size * max reviews length, attributes num)
-        :param graph: 
-        :return: 
-        """
-        p_distribution = aspect_prob
-        q_distribution = tf.nn.sigmoid(score)
-
-        kld = tf.reduce_sum(
-            tf.multiply(tf.multiply(q_distribution, tf.log(tf.truediv(q_distribution, p_distribution))), atr_rel_prob),
-            axis=1)
-        # TODO: need to refine the size of atr_rel_prob.
-        loss = tf.reduce_mean(tf.add(kld
-                                     , tf.reduce_sum(graph.get_collection('reg'))))
-        tf.add_to_collection('atr_loss', loss)
-        return loss
