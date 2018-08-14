@@ -201,8 +201,8 @@ if __name__ =="__main__":
         'top_k_data': 30
     }
 
-    reg_rate = [3E-5, ]
-    lr = [3E-4, ]
+    reg_rate = [3E-4, 3E-3, 3E-2, 3E-1, 3E-4, 3E-4, 3E-4]
+    lr = [3E-3, 3E-3, 3E-3, 3E-3, 3E-4, 3E-5, 3E-6]
 
     if getpass.getuser() == "liu121":
         coarse_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
