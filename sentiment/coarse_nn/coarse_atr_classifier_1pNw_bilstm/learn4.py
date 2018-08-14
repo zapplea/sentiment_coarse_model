@@ -33,7 +33,7 @@ if __name__ == "__main__":
     seed = {'lstm_cell_size': 300,
             'word_dim': 300,
             'attribute_mat_size': 5,
-            'attributes_num': 7,
+            'attributes_num': 6,
             }
     reg_rate = [3E-4, 3E-3, 3E-2, 3E-1, 3E-4, 3E-4, 3E-4]
     lr =       [3E-3, 3E-3, 3E-3, 3E-3, 3E-4, 3E-5, 3E-6]
