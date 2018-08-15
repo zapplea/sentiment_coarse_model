@@ -50,6 +50,9 @@ class Analysis:
         self.id2word={}
         for word in self.fine_word_dic:
             self.id2word[word]=self.fine_word_dic[word]
+        print(len(self.id2word))
+        print(self.id2word[34933])
+        exit()
 
     def check_table(self):
         print(len(self.coarse_word_dic))
