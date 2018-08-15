@@ -79,13 +79,16 @@ class CoarseTrain:
                     TP_vec = []
                     FP_vec = []
                     FN_vec = []
+                    aspect_data = sess.run(A_mat)
                     dataset=self.dg.data_generator('train')
+                    print('aspect_data0: ')
+                    print(aspect_data[0])
                     for att_labels_data,sentences_data in dataset:
                         sess.run(
                             train_step,
                             feed_dict={X: sentences_data, Y_att: att_labels_data,
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
-
+                    
                         # _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,score_data,true_labels_data,lookup_table_data,check_data\
                         #     = sess.run(
                         #     [train_step, loss, TP, FP, FN, pred, score, score_pre,score,true_labels,lookup_table,check],
