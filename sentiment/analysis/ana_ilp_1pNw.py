@@ -60,6 +60,9 @@ class Analysis:
     def transfer_data_generator(self):
         coarse_cl = self.cl.coarse_classifier()
         init_data = self.cl.transfer(coarse_cl)
+        coarse_A = init_data['coarse_A']
+        print(coarse_A[0])
+        exit()
         return init_data
 
     def aspect_mention_vector_nearest_word(self,init_data):
@@ -87,7 +90,6 @@ class Analysis:
                 k_nearest[label]['mention_%s' % str(j)]=[]
                 for word in map[i][j][:self.config_ana['top_k']]:
                     k_nearest[label]['mention_%s'%str(j)].append(self.id2word[word[0]])
-        print(k_nearest)
         report_filePath = os.path.join(self.config_ana['report'],'aspect_nearest_top%s.json'%str(self.config_ana['top_k']))
         with open(report_filePath,'w+') as f:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
@@ -235,7 +237,7 @@ if __name__ =="__main__":
             'fine_sentences_file'] = '/datastore/liu121/sentidata2/expdata/fine_data/fine_sentences_data.pkl'
         # coarse_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
 
-        fine_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/transfer/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
+        fine_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
                                     %(str(args.train_mod),str(args.dataset),str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(fine_nn_config['attributes_num']),str(seed['attribute_mat_size']))
         fine_data_config[
             'train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl'
