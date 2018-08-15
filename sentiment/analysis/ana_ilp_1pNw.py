@@ -56,6 +56,7 @@ class Analysis:
         print('PAD id: ',self.coarse_word_dic['#PAD#'])
 
     def transfer_data_generator(self):
+        print('transfer_data_generator')
         coarse_cl = self.cl.coarse_classifier()
         init_data = self.cl.transfer(coarse_cl)
         return init_data
@@ -124,6 +125,8 @@ def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
     path = Path(config_ana['report'])
     if not path.exists():
         path.mkdir(parents=True,exist_ok=True)
+
+
     ana = Analysis(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana)
     init_data = ana.transfer_data_generator()
     ana.aspect_mention_vector_nearest_word(init_data)
