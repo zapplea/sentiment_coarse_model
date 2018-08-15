@@ -195,7 +195,7 @@ class DataFeeder():
 
         return attribute_ground_truth, sentence_ground_truth
 
-    def fine_sentences(self,attribute,sentence):
+    def fine_sentences(self):
         if os.path.exists(self.data_config['fine_sentences_file']):
             with open(self.data_config['fine_sentences_file'],'rb') as f:
                 fine_sent = pickle.load(f)

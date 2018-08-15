@@ -158,7 +158,7 @@ class Transfer:
                 bilstm_fw_bias.load(bilstm_fw_bias_data,sess)
                 bilstm_bw_kernel.load(bilstm_bw_kernel_data,sess)
                 bilstm_bw_bias.load(bilstm_bw_bias_data,sess)
-                X_data_list = self.coarse_data_generator.fine_sentences(fine_dg.train_label,fine_dg.train_sentence)
+                X_data_list = self.coarse_data_generator.fine_sentences()
                 label_id = 0
                 ilp_data={}
                 for X_data in X_data_list:
