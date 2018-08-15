@@ -210,7 +210,7 @@ if __name__ =="__main__":
 
     if getpass.getuser() == "liu121":
         coarse_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/coarse_nn/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
-                                      %(str(args.train_mod),str(args.dataset),str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(seed['attributes_num']),str(seed['attribute_mat_size']))
+                                      %(str(args.train_mod),str(args.dataset),str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(coarse_nn_config['attributes_num']),str(seed['attribute_mat_size']))
 
         coarse_data_config['train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl'
         coarse_data_config['test_source_file_path'] = '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_testset.pkl'
@@ -226,7 +226,7 @@ if __name__ =="__main__":
         # coarse_data_config['dictionary'] = '/datastore/liu121/sentidata2/expdata/data_dictionary.pkl'
 
         fine_nn_config['sr_path'] = '/datastore/liu121/sentidata2/resultdata/transfer/model/ckpt%s_dataset%s_reg%s_lr%s_aspect%s_mat%s/'\
-                                    %(str(args.train_mod),str(args.dataset),str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(seed['attributes_num']),str(seed['attribute_mat_size']))
+                                    %(str(args.train_mod),str(args.dataset),str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(fine_nn_config['attributes_num']),str(seed['attribute_mat_size']))
         fine_data_config[
             'train_source_file_path'] = '/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl'
         fine_data_config[
