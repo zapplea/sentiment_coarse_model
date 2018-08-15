@@ -160,14 +160,19 @@ class DataFeeder():
     def load_train_data(self):
         if os.path.exists(self.config['train_data_file_path']) and os.path.getsize(self.config['train_data_file_path']) > 0:
             with open(self.config['train_data_file_path'],'rb') as f:
-                attribute_dic, word_dic, label, sentence, word_embed = pickle.load(f)
+                attribute_dic = pickle.load(f)
+                word_dic = pickle.load(f)
+                label = pickle.load(f)
+                sentence = pickle.load(f)
+                word_embed = pickle.load(f)
 
         return label, sentence , attribute_dic , word_dic ,word_embed
 
     def load_test_data(self):
         if os.path.exists(self.config['test_data_file_path']) and os.path.getsize(self.config['test_data_file_path']) > 0:
             with open(self.config['test_data_file_path'],'rb') as f:
-                label, sentence = pickle.load(f)
+                label = pickle.load(f)
+                sentence = pickle.load(f)
 
         return label, sentence
 
