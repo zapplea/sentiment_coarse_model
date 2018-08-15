@@ -106,9 +106,6 @@ class Transfer:
                 print('restore begin')
                 saver.restore(sess, model_file)
                 print('restore finish')
-                print('calculate table')
-                table_data = sess.run([table])
-                print('end calculate table')
                 A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data,table_data =\
                     sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,table])
             # A_data.shape=(attributes num, mat size, attribute dim)
@@ -161,7 +158,7 @@ class Transfer:
                 bilstm_fw_bias.load(bilstm_fw_bias_data,sess)
                 bilstm_bw_kernel.load(bilstm_bw_kernel_data,sess)
                 bilstm_bw_bias.load(bilstm_bw_bias_data,sess)
-                X_data_list = self.coarse_data_generator.fine_sentences(fine_dg.train_attribute_ground_truth,fine_dg.train_sentence_ground_truth)
+                X_data_list = self.coarse_data_generator.fine_sentences(fine_dg.train_label,fine_dg.train_sentence)
                 label_id = 0
                 ilp_data={}
                 for X_data in X_data_list:

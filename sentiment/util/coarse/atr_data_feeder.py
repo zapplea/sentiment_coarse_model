@@ -200,17 +200,18 @@ class DataFeeder():
             with open(self.data_config['fine_sentences_file'],'rb') as f:
                 fine_sent = pickle.load(f)
         else:
-            # with open(self.data_config['fine_sentences_file'],'wb') as f:
-            # r = np.repeat(np.reshape(attribute.transpose()[0],[1995,1]),axis=1,repeats=40) * sentence
-            # print(r[~np.all(r == 0, axis=1)].astype(int).shape)
-            fine_sent = []
-            for atr_vec in attribute.transpose():
-                r = np.repeat(np.reshape(atr_vec, [2000, 1]), axis=1, repeats=40) * sentence
-                r = np.reshape(r[~np.all(r == 0, axis=1)].astype(int),[-1,1,40])
-                fine_sent.append(r)
-            fine_sent = np.array(fine_sent)
-            with open(self.data_config['fine_sentences_file'], 'wb') as f:
-                pickle.dump(fine_sent,f)
+            pass
+            # # with open(self.data_config['fine_sentences_file'],'wb') as f:
+            # # r = np.repeat(np.reshape(attribute.transpose()[0],[1995,1]),axis=1,repeats=40) * sentence
+            # # print(r[~np.all(r == 0, axis=1)].astype(int).shape)
+            # fine_sent = []
+            # for atr_vec in attribute.transpose():
+            #     r = np.repeat(np.reshape(atr_vec, [2000, 1]), axis=1, repeats=40) * sentence
+            #     r = np.reshape(r[~np.all(r == 0, axis=1)].astype(int),[-1,1,40])
+            #     fine_sent.append(r)
+            # fine_sent = np.array(fine_sent)
+            # with open(self.data_config['fine_sentences_file'], 'wb') as f:
+            #     pickle.dump(fine_sent,f)
         return fine_sent
 
 

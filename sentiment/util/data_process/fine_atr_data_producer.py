@@ -76,9 +76,9 @@ class FineAtrDataProd:
         sentence = self.get_word_id(tmp, word_dic)
         sentence = sentence[train_data_mask]
 
-        with open(self.config['fine_train_data_filePath'], 'wb') as f:
-            pickle.dump((attribute_dic, word_dic, label, sentence, word_embed), f)
-        return attribute_dic,word_dic
+        # with open(self.config['fine_train_data_filePath'], 'wb') as f:
+        #     pickle.dump((attribute_dic, word_dic, label, sentence, word_embed), f)
+        return attribute_dic,word_dic,label,sentence
 
     def test_data_producer(self,attribute_dic,dictionary):
         with open(self.config['fine_test_source_filePath'], 'rb') as f:
@@ -89,17 +89,29 @@ class FineAtrDataProd:
         sentence = self.get_word_id(tmp, dictionary)
         sentence = sentence[test_data_mask]
 
-        with open(self.config['fine_test_data_filePath'], 'wb') as f:
-            pickle.dump((label, sentence), f)
+        # with open(self.config['fine_test_data_filePath'], 'wb') as f:
+        #     pickle.dump((label, sentence), f)
+
+    def transfer_data_producer(self,label,sentence):
+        fine_sent = []
+        for atr_vec in label.transpose():
+            r = np.repeat(np.reshape(atr_vec, [2000, 1]), axis=1, repeats=40) * sentence
+            r = np.reshape(r[~np.all(r == 0, axis=1)].astype(int),[-1,1,40])
+            fine_sent.append(r)
+        fine_sent = np.array(fine_sent)
+        with open(self.config['fine_sentences_file'], 'wb') as f:
+            pickle.dump(fine_sent,f)
 
 if __name__=="__main__":
-    config={'words_num':'',
-            'padding_word_index':'',
-            'dictionary':'',
-            'fine_train_source_filePath':'',
-            'fine_train_data_filePath':'',
-            'fine_test_source_filePath':'',
-            'fine_test_data_filePath':''}
+    config={'words_num':40,
+            'padding_word_index':34933,
+            'dictionary':'/datastore/liu121/sentidata2/expdata/data_dictionary.pkl',
+            'fine_train_source_filePath':'/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_train.pkl',
+            'fine_train_data_filePath':'/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl',
+            'fine_test_source_filePath':'/datastore/liu121/sentidata2/expdata/semeval2016/absa_resturant_test.pkl',
+            'fine_test_data_filePath':'/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',
+            'fine_sentences_file':'/datastore/liu121/sentidata2/expdata/fine_data/fine_sentences_data.pkl'}
     prod = FineAtrDataProd(config)
-    attribute_dic,dictionary=prod.train_data_producer()
-    prod.test_data_producer(attribute_dic,dictionary)
+    attribute_dic,dictionary,label,sentence=prod.train_data_producer()
+    # prod.test_data_producer(attribute_dic,dictionary)
+    prod.transfer_data_producer(label,sentence)
