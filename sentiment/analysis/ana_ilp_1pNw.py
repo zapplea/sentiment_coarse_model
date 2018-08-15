@@ -153,9 +153,9 @@ if __name__ =="__main__":
         'epoch': 1000,
         'batch_size': 34,
         'lstm_cell_size': seed['lstm_cell_size'],
-        'lookup_table_words_num': 41486,  # 2074276 for Chinese word embedding
-        'padding_word_index': 41485,  # the index of #PAD# in word embeddings list
-        'unk_word_index': 41484,
+        'lookup_table_words_num': 34934,  # 2074276 for Chinese word embedding
+        'padding_word_index': 34933,  # the index of #PAD# in word embeddings list
+        # 'unk_word_index': 41484,
         # flexible parameter
         'reg_rate': 0.003,
         'lr': 0.0003,  # learing rate
@@ -165,7 +165,7 @@ if __name__ =="__main__":
         'aspect_prob_threshold': 0.2,
         'keep_prob_lstm': 0.5,
         'complement': 0,
-        'trian_mod':args.train_mod
+        'train_mod':args.train_mod
     }
     fine_nn_config = {
         # fixed parameter
@@ -179,9 +179,9 @@ if __name__ =="__main__":
         'epoch': 1000,
         'batch_size': 10,
         'lstm_cell_size': seed['lstm_cell_size'],
-        'lookup_table_words_num': 41486,
+        'lookup_table_words_num': 34934,
         'padding_word_index': coarse_nn_config['padding_word_index'],  # the index of #PAD# in word embeddings list
-        'unk_word_index': coarse_nn_config['unk_word_index'],
+        # 'unk_word_index': coarse_nn_config['unk_word_index'],
         # flexible parameter
         # 'reg_rate': 3E-5,
         # 'lr': 3E-4,

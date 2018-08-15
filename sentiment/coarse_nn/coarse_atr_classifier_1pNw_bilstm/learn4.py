@@ -52,7 +52,7 @@ if __name__ == "__main__":
         'lstm_cell_size': seed['lstm_cell_size'],
         'lookup_table_words_num': 34934,  # 2074276 for Chinese word embedding
         'padding_word_index': 34933,  # the index of #PAD# in word embeddings list
-        'unk_word_index': 34932, # TODO: check wheter the unk have been recognized.
+        #'unk_word_index': 34932, # TODO: check wheter the unk have been recognized.
         # flexible parameter
         'reg_rate': reg_rate[args.num],
         'lr': lr[args.num],  # learing rate

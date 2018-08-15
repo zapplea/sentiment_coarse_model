@@ -25,7 +25,6 @@ class Classifier:
         self.tra=TransferTrain(fine_nn_config,self.fine_dg)
 
     def coarse_classifier(self):
-        print(self.coarse_nn_config)
         coarse_cl = coarse_Classifier(self.coarse_nn_config, self.coarse_dg)
         return coarse_cl
 
