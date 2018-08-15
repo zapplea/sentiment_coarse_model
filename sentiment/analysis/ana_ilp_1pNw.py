@@ -69,7 +69,7 @@ class Analysis:
         print('aspect_A: ',aspect_A.shape)
 
         map = []
-        for i in range(len(self.coarse_nn_config['attributes_num'])):
+        for i in range(self.coarse_nn_config['attributes_num']):
             aspect_matrix = aspect_A[i]
             distance = sklearn.metrics.pairwise.pairwise_distances(aspect_matrix,table)
             map.append([])
@@ -96,7 +96,7 @@ class Analysis:
         attribute_A = init_data['init_A']
         table = init_data['init_table']
         map = []
-        for i in range(len(self.fine_nn_config['attributes_num'])):
+        for i in range(self.fine_nn_config['attributes_num']):
             attribute_matrix = attribute_A[i]
             distance = sklearn.metrics.pairwise.pairwise_distances(attribute_matrix, table)
             map.append([])
