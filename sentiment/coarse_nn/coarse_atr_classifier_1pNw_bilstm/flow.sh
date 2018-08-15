@@ -9,4 +9,4 @@
 #sbatch run_learn.sh "learn4" 0 5 "v1"
 
 sbatch run_learn.sh "learn4" 0 0 "v1"
-sbatch run_learn.sh "learn4" 0 0 "v2"
+#sbatch run_learn.sh "learn4" 0 0 "v2"
