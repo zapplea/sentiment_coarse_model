@@ -98,14 +98,12 @@ class Transfer:
             else:
                 A = graph.get_collection('A_vec')[0]
                 O = graph.get_collection('o_vec')[0]
-        with graph.device('/gpu:1'):
+        with graph.device('/gpu:0'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph,config=config) as sess:
                 model_file = tf.train.latest_checkpoint(self.coarse_nn_config['sr_path'])
-                print('restore begin')
                 saver.restore(sess, model_file)
-                print('restore finish')
                 A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data,table_data =\
                     sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,table])
             # A_data.shape=(attributes num, mat size, attribute dim)
@@ -114,7 +112,6 @@ class Transfer:
         # ##################### #
         #      media model      #
         # ##################### #
-        print('media model')
         graph = self.media_model()
         with graph.as_default():
             # score_pre.shape = (batch size, 1, words num)
@@ -149,9 +146,7 @@ class Transfer:
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph,config=config) as sess:
                 # table.load(table_data,sess)
-                print('table length: ',str(len(table_data)))
                 sess.run(init,feed_dict={table:table_data})
-                print('after table')
                 A.load(A_data,sess)
                 O.load(O_data,sess)
                 bilstm_fw_kernel.load(bilstm_fw_kernel_data,sess)
