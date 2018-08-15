@@ -106,6 +106,7 @@ class Transfer:
                 saver.restore(sess, model_file)
                 A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data,table_data =\
                     sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,table])
+            coarse_A=A_data
             # A_data.shape=(attributes num, mat size, attribute dim)
             A_data= np.reshape(A_data,newshape=(1,self.coarse_nn_config['attributes_num']*self.coarse_nn_config['attribute_mat_size'],self.coarse_nn_config['attribute_dim']))
 
@@ -192,7 +193,7 @@ class Transfer:
         init_data = {'init_A': A_data, 'init_O': O_data,
                      'init_bilstm_fw_kernel': bilstm_fw_kernel_data, 'init_bilstm_fw_bias': bilstm_fw_bias_data,
                      'init_bilstm_bw_kernel':bilstm_bw_kernel_data,'init_bilstm_bw_bias':bilstm_bw_bias_data, 'init_table':table_data,
-                     'coarse_A': A}
+                     'coarse_A': coarse_A}
         return init_data
 
 

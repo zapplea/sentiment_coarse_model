@@ -63,7 +63,7 @@ class Analysis:
         return init_data
 
     def aspect_mention_vector_nearest_word(self,init_data):
-        aspect_A = init_data['coarse_A']
+        aspect_A = init_data['coarse_A'][0]
         table = init_data['init_table']
         print('table: ',table.shape)
         print('aspect_A: ',aspect_A.shape)
