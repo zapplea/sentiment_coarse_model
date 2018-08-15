@@ -64,10 +64,14 @@ class Analysis:
 
     def aspect_mention_vector_nearest_word(self,init_data):
         aspect_A = init_data['coarse_A']
+        table = init_data['init_table']
+        print('table: ',table.shape)
+        print('aspect_A: ',aspect_A.shape)
+
         map = []
         for i in range(len(self.aspect_dic)):
             aspect_matrix = aspect_A[i]
-            distance = sklearn.metrics.pairwise.pairwise_distances(aspect_matrix,self.coarse_table)
+            distance = sklearn.metrics.pairwise.pairwise_distances(aspect_matrix,table)
             map.append([])
             for j in range(distance.shape()[0]):
                 map[i].append([])
@@ -89,12 +93,12 @@ class Analysis:
 
 
     def attribute_mention_vector_nearest_word(self,init_data):
-        print('attribute mention vector nearest word')
         attribute_A = init_data['init_A']
+        table = init_data['init_table']
         map = []
         for i in range(len(self.attribute_dic)):
             attribute_matrix = attribute_A[i]
-            distance = sklearn.metrics.pairwise.pairwise_distances(attribute_matrix, self.fine_table)
+            distance = sklearn.metrics.pairwise.pairwise_distances(attribute_matrix, table)
             map.append([])
             for j in range(distance.shape()[0]):
                 map[i].append([])
