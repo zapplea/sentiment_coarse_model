@@ -61,6 +61,7 @@ class Analysis:
         return init_data
 
     def aspect_mention_vector_nearest_word(self,init_data):
+        print('aspect_mention_vector_nearest_word')
         aspect_A = init_data['coarse_A']
         map = []
         for i in range(len(self.aspect_dic)):
@@ -87,6 +88,7 @@ class Analysis:
 
 
     def attribute_mention_vector_nearest_word(self,init_data):
+        print('attribute mention vector nearest word')
         attribute_A = init_data['init_A']
         map = []
         for i in range(len(self.attribute_dic)):
