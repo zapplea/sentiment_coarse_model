@@ -48,8 +48,9 @@ class Analysis:
             self.fine_sentences = pickle.load(f)
             self.fine_table = pickle.load(f)
         self.id2word={}
-        for word in self.coarse_word_dic:
-            self.id2word[word]=self.coarse_word_dic[word]
+        for word in self.fine_word_dic:
+            self.id2word[word]=self.fine_word_dic[word]
+        print('#PAD#: ',self.fine_word_dic['#PAD#'])
         print(len(self.id2word))
         print(self.id2word[34933])
         exit()
