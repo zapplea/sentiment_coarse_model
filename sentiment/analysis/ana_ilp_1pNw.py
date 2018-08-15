@@ -14,8 +14,8 @@ import json
 import argparse
 
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
-from sentiment.util.coarse.atr_data_generator import DataGenerator as coarse_DataGenerator
-from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGenerator
+from sentiment.util.coarse.atr_data_feeder import DataFeeder as coarse_DataFeeder
+from sentiment.util.fine.atr_data_feeder import DataFeeder as fine_DataFeeder
 
 # TODO: analyze init_data
 # TODO: 1. mapping between labels
@@ -23,9 +23,9 @@ from sentiment.util.fine.atr_data_generator import DataGenerator as fine_DataGen
 # TODO: check whether coarse and fine use the same table
 class Analysis:
     def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana):
-        coarse_dg = coarse_DataGenerator(coarse_data_config)
-        fine_dg = fine_DataGenerator(fine_data_config)
-        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_dg, fine_dg)
+        coarse_df = coarse_DataFeeder(coarse_data_config,coarse_nn_config)
+        fine_df = fine_DataFeeder(fine_data_config)
+        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_df, fine_df)
         self.coarse_nn_config = coarse_nn_config
         self.fine_nn_config = fine_nn_config
 
