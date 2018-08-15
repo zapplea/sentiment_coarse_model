@@ -73,9 +73,9 @@ class Analysis:
             aspect_matrix = aspect_A[i]
             distance = sklearn.metrics.pairwise.pairwise_distances(aspect_matrix,table)
             map.append([])
-            for j in range(distance.shape()[0]):
+            for j in range(distance.shape[0]):
                 map[i].append([])
-                for l in range(distance.shape()[1]):
+                for l in range(distance.shape[1]):
                     value = distance[j][l]
                     map[i][j].append((l,value))
                 map[i][j] = sorted(map[i][j],key=operator.itemgetter(1))
@@ -100,9 +100,9 @@ class Analysis:
             attribute_matrix = attribute_A[i]
             distance = sklearn.metrics.pairwise.pairwise_distances(attribute_matrix, table)
             map.append([])
-            for j in range(distance.shape()[0]):
+            for j in range(distance.shape[0]):
                 map[i].append([])
-                for l in range(distance.shape()[1]):
+                for l in range(distance.shape[1]):
                     value = distance[j][l]
                     map[i][j].append((l, value))
                 map[i][j] = sorted(map[i][j], key=operator.itemgetter(1))
