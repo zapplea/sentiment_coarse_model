@@ -7,7 +7,6 @@ elif getpass.getuser() == "lizhou":
 
 import os
 import pickle
-import argparse
 import sklearn
 import operator
 from pathlib import Path

@@ -9,7 +9,7 @@ elif getpass.getuser() == 'liu121':
 elif getpass.getuser() == "lizhou":
     sys.path.append('/media/data2tb4/yibing2/sentiment_coarse_model/')
 from sentiment.functions.initializer.initializer import Initializer
-from sentiment.coarse_nn.relevance_score.relevance_score import RelScore
+from sentiment.functions.relevance_function.atr_relevance_score import RelScore
 from sentiment.functions.ilp.ilp import AttributeIlp
 
 import tensorflow as tf
