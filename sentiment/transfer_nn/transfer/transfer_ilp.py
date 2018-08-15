@@ -91,7 +91,7 @@ class Transfer:
             bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
             bilstm_bw_kernel =graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
             bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
-            table = graph.get_collection('table')[0]
+            table = graph.get_collection('table_val')[0]
             if self.coarse_nn_config['is_mat']:
                 A = graph.get_collection('A_mat')[0]
                 O = graph.get_collection('o_mat')[0]
