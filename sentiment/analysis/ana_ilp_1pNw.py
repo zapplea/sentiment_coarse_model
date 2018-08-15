@@ -134,8 +134,8 @@ def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
 if __name__ =="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--hype_num', type=int, default=0,help='the num of lr and reg_rate')
-    parser.add_argument('--dataset',type=str,default='3', help='which dataset will be used')
-    parser.add_argument('--train_mod',type=str,default='v1', help='the version of loss function')
+    parser.add_argument('--dataset',type=str,default='0', help='which dataset will be used')
+    parser.add_argument('--train_mod',type=str,default='v2', help='the version of loss function')
     args = parser.parse_args()
     seed = {'lstm_cell_size': 300,
             'word_dim': 300,
@@ -165,6 +165,7 @@ if __name__ =="__main__":
         'aspect_prob_threshold': 0.2,
         'keep_prob_lstm': 0.5,
         'complement': 0,
+        'trian_mod':args.train_mod
     }
     fine_nn_config = {
         # fixed parameter
