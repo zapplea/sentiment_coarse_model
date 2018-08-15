@@ -65,11 +65,11 @@ class Analysis:
     def aspect_mention_vector_nearest_word(self,init_data):
         aspect_A = init_data['coarse_A']
         table = init_data['init_table']
-        print('table: ',table.shape)
-        print('aspect_A: ',aspect_A.shape)
-
+        id2aspect={}
+        for key in self.aspect_dic:
+            id2aspect[self.aspect_dic[key]]=key
         map = []
-        for i in range(self.coarse_nn_config['attributes_num']):
+        for i in range(len(id2aspect)-1):
             aspect_matrix = aspect_A[i]
             distance = sklearn.metrics.pairwise.pairwise_distances(aspect_matrix,table)
             map.append([])
@@ -79,15 +79,18 @@ class Analysis:
                     value = distance[j][l]
                     map[i][j].append((l,value))
                 map[i][j] = sorted(map[i][j],key=operator.itemgetter(1))
+        print(map)
+        exit()
         k_nearest={}
-        for i in range(len(self.aspect_dic)):
-            label = self.aspect_dic[i]
+        for i in range(len(id2aspect)-1):
+            label = id2aspect[i]
             k_nearest[label]={}
             for j in range(len(map[i])):
                 k_nearest[label]['mention_%s' % str(j)]=[]
                 for word in map[i][j][:self.config_ana['top_k']]:
                     k_nearest[label]['mention_%s'%str(j)].append(self.id2word[word[0]])
-        report_filePath = os.path.join(self.config_ana['report'],'aspect_nearest_top%s.pkl'%str(self.config_ana['top_k']))
+        print(k_nearest)
+        report_filePath = os.path.join(self.config_ana['report'],'aspect_nearest_top%s.json'%str(self.config_ana['top_k']))
         with open(report_filePath,'w+') as f:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
 
@@ -96,7 +99,10 @@ class Analysis:
         attribute_A = init_data['init_A']
         table = init_data['init_table']
         map = []
-        for i in range(self.fine_nn_config['attributes_num']):
+        id2attribute = {}
+        for key in self.attribute_dic:
+            id2attribute[self.attribute_dic[key]] = key
+        for i in range(len(id2attribute)-1):
             attribute_matrix = attribute_A[i]
             distance = sklearn.metrics.pairwise.pairwise_distances(attribute_matrix, table)
             map.append([])
@@ -107,15 +113,15 @@ class Analysis:
                     map[i][j].append((l, value))
                 map[i][j] = sorted(map[i][j], key=operator.itemgetter(1))
         k_nearest = {}
-        for i in range(len(self.attribute_dic)):
-            label = self.attribute_dic[i]
+        for i in range(len(id2attribute)-1):
+            label = id2attribute[i]
             k_nearest[label] = {}
             for j in range(len(map[i])):
                 k_nearest[label]['mention_%s' % str(j)] = []
                 for word in map[i][j][:self.config_ana['top_k']]:
                     k_nearest[label]['mention_%s' % str(j)].append(self.id2word[word[0]])
         report_filePath = os.path.join(self.config_ana['report'],
-                                       'attribute_nearest_top%s.pkl' % str(self.config_ana['top_k']))
+                                       'attribute_nearest_top%s.json' % str(self.config_ana['top_k']))
         with open(report_filePath, 'w+') as f:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
 
