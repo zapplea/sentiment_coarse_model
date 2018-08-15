@@ -79,8 +79,6 @@ class Analysis:
                     value = distance[j][l]
                     map[i][j].append((l,value))
                 map[i][j] = sorted(map[i][j],key=operator.itemgetter(1))
-        print(map)
-        exit()
         k_nearest={}
         for i in range(len(id2aspect)-1):
             label = id2aspect[i]
