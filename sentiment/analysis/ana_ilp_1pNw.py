@@ -47,6 +47,9 @@ class Analysis:
             self.attribute_labels=pickle.load(f)
             self.fine_sentences = pickle.load(f)
             self.fine_table = pickle.load(f)
+        self.id2word={}
+        for word in self.fine_word_dic:
+            self.id2word[word]=self.fine_word_dic[word]
 
     def check_table(self):
         print(len(self.coarse_word_dic))
@@ -79,7 +82,7 @@ class Analysis:
             for j in range(len(map[i])):
                 k_nearest[label]['mention_%s' % str(j)]=[]
                 for word in map[i][j][:self.config_ana['top_k']]:
-                    k_nearest[label]['mention_%s'%str(j)].append(self.coarse_table[word[0]])
+                    k_nearest[label]['mention_%s'%str(j)].append(self.id2word[word[0]])
         report_filePath = os.path.join(self.config_ana['report'],'aspect_nearest_top%s.pkl'%str(self.config_ana['top_k']))
         with open(report_filePath,'w+') as f:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
@@ -106,7 +109,7 @@ class Analysis:
             for j in range(len(map[i])):
                 k_nearest[label]['mention_%s' % str(j)] = []
                 for word in map[i][j][:self.config_ana['top_k']]:
-                    k_nearest[label]['mention_%s' % str(j)].append(self.fine_table[word[0]])
+                    k_nearest[label]['mention_%s' % str(j)].append(self.id2word[word[0]])
         report_filePath = os.path.join(self.config_ana['report'],
                                        'attribute_nearest_top%s.pkl' % str(self.config_ana['top_k']))
         with open(report_filePath, 'w+') as f:
