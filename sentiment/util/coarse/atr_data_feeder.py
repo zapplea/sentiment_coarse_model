@@ -183,38 +183,6 @@ class DataFeeder():
             sentence_ground_truth  = pickle.load(f)
             table = pickle.load(f)
             f.close()
-        else:
-            f = open(self.data_config['train_data_file_path'], 'wb')
-            with open(self.data_config['train_source_file_path'],'rb') as ff:
-                tmp = pickle.load(ff)
-            word_embed = gensim.models.KeyedVectors.load_word2vec_format(self.data_config['wordembedding_file_path'],binary=True, unicode_errors='ignore')
-
-            ##Generate attribute_dic
-            aspect_dic ={'RESTAURANT': 0, 'SERVICE': 1, 'FOOD': 2
-            , 'DRINKS': 3, 'AMBIENCE': 4, 'LOCATION': 5,'OTHER':6}
-            pickle.dump(aspect_dic,f)
-
-            ###Generate dictionary
-            with open(self.data_config['dictionary'],'rb') as wd:
-                word_list = pickle.load(wd)
-                dictionary = pickle.load(wd)
-            pickle.dump(dictionary,f)
-
-            attribute_ground_truth = self.get_aspect_probility(tmp)
-            train_data_mask = tmp['text'].drop_duplicates().reset_index().index
-            attribute_ground_truth = attribute_ground_truth[train_data_mask]
-            pickle.dump(attribute_ground_truth, f)
-            sentence_ground_truth = self.get_word_id(tmp,dictionary)
-            sentence_ground_truth = sentence_ground_truth[train_data_mask]
-            pickle.dump(sentence_ground_truth, f)
-
-
-            ###Generate table
-            table = self.table_generator(word_embed,word_list)
-            print(table.shape)
-            pickle.dump(table, f , protocol = 4)
-
-            f.close()
 
         return attribute_ground_truth, sentence_ground_truth , aspect_dic , dictionary ,table
 
@@ -224,18 +192,7 @@ class DataFeeder():
             attribute_ground_truth = pickle.load(f)
             sentence_ground_truth  = pickle.load(f)
             f.close()
-        else:
-            f = open(self.data_config['test_data_file_path'], 'wb')
-            with open(self.data_config['test_source_file_path'],'rb') as ff:
-                tmp = pickle.load(ff)
-            test_data_mask = tmp['text'].drop_duplicates().reset_index().index
-            attribute_ground_truth = self.get_aspect_probility(tmp)
-            attribute_ground_truth = attribute_ground_truth[test_data_mask]
-            pickle.dump(attribute_ground_truth, f)
-            sentence_ground_truth = self.get_word_id(tmp,dictionary)
-            sentence_ground_truth = sentence_ground_truth[test_data_mask]
-            pickle.dump(sentence_ground_truth, f)
-            f.close()
+
         return attribute_ground_truth, sentence_ground_truth
 
     def fine_sentences(self,attribute,sentence):
