@@ -106,6 +106,9 @@ class Transfer:
                 print('restore begin')
                 saver.restore(sess, model_file)
                 print('restore finish')
+                print('calculate table')
+                table_data = sess.run([table])
+                print('end calculate table')
                 A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data,table_data =\
                     sess.run([A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,table])
             # A_data.shape=(attributes num, mat size, attribute dim)
