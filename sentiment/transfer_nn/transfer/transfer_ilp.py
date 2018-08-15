@@ -114,6 +114,7 @@ class Transfer:
         # ##################### #
         #      media model      #
         # ##################### #
+        print('media model')
         graph = self.media_model()
         with graph.as_default():
             # score_pre.shape = (batch size, 1, words num)
@@ -143,12 +144,14 @@ class Transfer:
                 A = graph.get_collection('A_vec')[0]
                 O = graph.get_collection('o_vec')[0]
             init = tf.global_variables_initializer()
-        with graph.device('/gpu:1'):
+        with graph.device('/gpu:0'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph,config=config) as sess:
                 # table.load(table_data,sess)
+                print('table length: ',str(len(table_data)))
                 sess.run(init,feed_dict={table:table_data})
+                print('after table')
                 A.load(A_data,sess)
                 O.load(O_data,sess)
                 bilstm_fw_kernel.load(bilstm_fw_kernel_data,sess)
