@@ -88,7 +88,7 @@ class CoarseTrain:
                             train_step,
                             feed_dict={X: sentences_data, Y_att: att_labels_data,
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
-                    
+
                         # _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data ,score_data,true_labels_data,lookup_table_data,check_data\
                         #     = sess.run(
                         #     [train_step, loss, TP, FP, FN, pred, score, score_pre,score,true_labels,lookup_table,check],
