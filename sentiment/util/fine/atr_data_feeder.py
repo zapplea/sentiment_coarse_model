@@ -42,6 +42,7 @@ class DataFeeder():
         self.train_labels,self.train_sentences = self.train_labels[:self.config['top_k_data']] , self.train_sentences[:self.config['top_k_data']]
         print('train.shape: ',self.train_sentences.shape)
         print('test.shape: ',self.train_sentences.shape)
+        print()
         exit()
         self.train_data_size = len(self.train_labels)
         self.test_data_size = len(self.test_labels)
