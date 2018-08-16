@@ -69,6 +69,7 @@ class FineAtrTrain:
                 sess.run(init, feed_dict={table: table_data})
                 early_stop_count = 0
                 for i in range(self.nn_config['epoch']):
+                    print('epoch: ',self.nn_config['epoch'])
                     loss_vec = []
                     pred_vec = []
                     score_vec = []
@@ -78,8 +79,8 @@ class FineAtrTrain:
                     FP_vec = []
                     FN_vec = []
                     aspect_data = sess.run(A_mat)
-                    print('aspect_data0: ')
-                    print(aspect_data[0])
+                    # print('aspect_data0: ')
+                    # print(aspect_data[0])
                     dataset = self.dg.data_generator('train')
                     for att_labels_data, sentences_data in dataset:
                         _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data \
@@ -89,10 +90,10 @@ class FineAtrTrain:
                                        keep_prob_lstm: self.nn_config['keep_prob_lstm']})
 
                         ###Show training message
-                        loss_vec.append(train_loss)
-                        TP_vec.append(TP_data)
-                        FP_vec.append(FP_data)
-                        FN_vec.append(FN_data)
+                        # loss_vec.append(train_loss)
+                        # TP_vec.append(TP_data)
+                        # FP_vec.append(FP_data)
+                        # FN_vec.append(FN_data)
                         # for n in range(self.nn_config['batch_size']):
                         #     pred_vec.append(pred_data[n])
                         #     score_vec.append(score_data[n])
@@ -114,6 +115,7 @@ class FineAtrTrain:
                         FN_vec = []
                         dataset = self.dg.data_generator('val')
                         for att_labels_data, sentences_data in dataset:
+                            print('test sentences data: ',sentences_data.shape)
                             test_loss, pred_data, score_data, score_pre_data, TP_data, FP_data, FN_data = sess.run(
                                 [loss, pred, score, score_pre, TP, FP, FN],
                                 feed_dict={X: sentences_data,
