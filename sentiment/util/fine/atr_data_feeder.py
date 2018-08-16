@@ -41,7 +41,7 @@ class DataFeeder():
         self.train_sentences, self.train_labels = self.unison_shuffled_copies(self.train_sentences, self.train_labels)
         self.train_labels,self.train_sentences = self.train_labels[:self.config['top_k_data']] , self.train_sentences[:self.config['top_k_data']]
         print('train.shape: ',self.train_sentences.shape)
-        print('test.shape: ',self.train_sentences.shape)
+        print('test.shape: ',self.test_sentences.shape)
         print()
         exit()
         self.train_data_size = len(self.train_labels)
@@ -173,11 +173,13 @@ class DataFeeder():
         return label, sentence , attribute_dic , word_dic ,word_embed
 
     def load_test_data(self):
+        print('test path: ',self.config['test_data_file_path'])
         if os.path.exists(self.config['test_data_file_path']) and os.path.getsize(self.config['test_data_file_path']) > 0:
             with open(self.config['test_data_file_path'],'rb') as f:
                 label = pickle.load(f)
                 sentence = pickle.load(f)
-
+        print('test len sentence: ',sentence.shape)
+        print('test len label: ', label.shape)
         return label, sentence
 
 
