@@ -75,14 +75,14 @@ class FineAtrDataProd:
         label = label[train_data_mask]
         sentence = self.get_word_id(tmp, word_dic)
         sentence = sentence[train_data_mask]
-
+        print('train: ', np.amax(sentence))
         with open(self.config['fine_train_data_filePath'], 'wb') as f:
             pickle.dump(attribute_dic,f)
             pickle.dump(word_dic,f)
             pickle.dump(label, f)
             pickle.dump(sentence, f)
             pickle.dump(word_embed, f)
-            print('train: ',np.amax(sentence))
+
         return attribute_dic,word_dic,label,sentence
 
     def test_data_producer(self,attribute_dic,dictionary):
@@ -93,11 +93,11 @@ class FineAtrDataProd:
         label = label[test_data_mask]
         sentence = self.get_word_id(tmp, dictionary)
         sentence = sentence[test_data_mask]
-
+        print('test: ', np.amax(sentence))
         with open(self.config['fine_test_data_filePath'], 'wb') as f:
             pickle.dump(label, f)
             pickle.dump(sentence, f)
-            print('test: ',np.amax(sentence))
+
 
     def transfer_data_producer(self,label,sentence):
         fine_sent = []
@@ -120,5 +120,5 @@ if __name__=="__main__":
             'fine_sentences_file':'/datastore/liu121/sentidata2/expdata/fine_data/fine_sentences_data.pkl'}
     prod = FineAtrDataProd(config)
     attribute_dic,dictionary,label,sentence=prod.train_data_producer()
-    # prod.test_data_producer(attribute_dic,dictionary)
+    prod.test_data_producer(attribute_dic,dictionary)
     prod.transfer_data_producer(label,sentence)
