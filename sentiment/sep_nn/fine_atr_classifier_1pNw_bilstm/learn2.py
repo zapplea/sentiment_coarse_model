@@ -24,9 +24,8 @@ def main(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args = parser.add_argument('--num',type=int,default=0)
-    print('sssssssssssssssssssssssssssss')
-    reg_rate=[1E-5]
-    lr=[1E-4]
+    reg_rate=[1E-5,]
+    lr=[1E-4,]
     config = {
         'fine_train_data_file': '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl',
         'fine_test_data_file': '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',
