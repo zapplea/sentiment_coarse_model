@@ -127,11 +127,14 @@ class Analysis:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
 
     def check_fine_dataset(self):
-        max=0
         with open(self.fine_data_config['train_data_file_path'], 'rb') as f:
             attribute_dic,word_dic,label,sentence,word_embed = pickle.load(f)
             print('max fine train data id: ',np.amax(sentence))
-
+            print(np.max(label))
+        with open(self.fine_data_config['test_data_file_path'], 'rb') as f:
+            label,sentence = pickle.load(f)
+            print('max fine test data id: ',np.amax(sentence))
+            print(np.max(label))
 
 def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config):
     if getpass.getuser()=="liu121":
