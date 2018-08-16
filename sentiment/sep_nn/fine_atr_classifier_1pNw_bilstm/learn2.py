@@ -24,6 +24,7 @@ def main(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args = parser.add_argument('--num',type=int,default=0)
+    print('sssssssssssssssssssssssssssss')
     reg_rate=[1E-5]
     lr=[1E-4]
     config = {
