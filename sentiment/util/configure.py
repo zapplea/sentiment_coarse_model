@@ -8,11 +8,11 @@ config = {
         'coarse_test_data_file': '/hdd/lujunyu/dataset/sentiment_coarse_model/coarse/test_data.pkl',
         'fine_train_source_file': '/hdd/lujunyu/dataset/sentiment_coarse_model/fine/absa_resturant_train.pkl',
         'fine_test_source_file': '/hdd/lujunyu/dataset/sentiment_coarse_model/fine/absa_resturant_test.pkl',
-        'fine_train_data_file': '/hdd/lujunyu/dataset/sentiment_coarse_model/fine/train_data.pkl',
-        'fine_test_data_file': '/hdd/lujunyu/dataset/sentiment_coarse_model/fine/test_data.pkl',
+        'fine_train_data_file': '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl', # '/hdd/lujunyu/dataset/sentiment_coarse_model/fine/train_data.pkl',
+        'fine_test_data_file': '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',#'/hdd/lujunyu/dataset/sentiment_coarse_model/fine/test_data.pkl',
         'wordembedding_file_path': '/hdd/lujunyu/dataset/glove/glove.42B.300d.pkl',
-        'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
-        'dictionary': '/hdd/lujunyu/dataset/sentiment_coarse_model/data_dictionary_old.pkl',
+        #'stopwords_file_path': '~/dataset/semeval2016/stopwords.txt',
+        #'dictionary': '/hdd/lujunyu/dataset/sentiment_coarse_model/data_dictionary_old.pkl',
 
 
 
