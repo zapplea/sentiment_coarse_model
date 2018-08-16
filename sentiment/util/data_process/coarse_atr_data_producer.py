@@ -105,7 +105,7 @@ class CoarseAtrDataProd:
         # print('sentence shape: ',sentence.shape)
         # print('label shape: ',label.shape)
         # print('stars shape: ',stars.shape)
-
+        print('max sentence: ',np.amax(sentence))
         ###Generate word_embed
         with open(self.config['train_data_filePath'], 'wb') as f:
             pickle.dump(aspect_dic,f)
@@ -129,6 +129,7 @@ class CoarseAtrDataProd:
         sentence = sentence[test_data_mask]
         sentence_len = sentence_len[test_data_mask]
         label = self.add_other(sentence_len, label, stars)
+        print('max sentence: ', np.amax(sentence))
         with open(self.config['test_data_filePath'], 'wb') as f:
             pickle.dump(label, f)
             pickle.dump(sentence, f)
