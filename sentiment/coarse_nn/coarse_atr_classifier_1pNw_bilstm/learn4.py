@@ -27,7 +27,7 @@ def main(nn_config,data_config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
-    parser.add_argument('--dataset',type=str, default='1.5')
+    parser.add_argument('--dataset',type=str, default='0')
     parser.add_argument('--train_mod',type=str,default='v1')
     args = parser.parse_args()
     seed = {'lstm_cell_size': 300,
