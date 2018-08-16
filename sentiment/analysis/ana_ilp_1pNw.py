@@ -24,10 +24,10 @@ from sentiment.util.fine.atr_data_feeder import DataFeeder as fine_DataFeeder
 # TODO: check whether coarse and fine use the same table
 class Analysis:
     def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana):
-        # coarse_df = coarse_DataFeeder(coarse_data_config,coarse_nn_config)
-        # fine_df = fine_DataFeeder(fine_data_config)
-        # self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_df, fine_df)
-        # self.coarse_nn_config = coarse_nn_config
+        coarse_df = coarse_DataFeeder(coarse_data_config,coarse_nn_config)
+        fine_df = fine_DataFeeder(fine_data_config)
+        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_df, fine_df)
+        self.coarse_nn_config = coarse_nn_config
         self.fine_nn_config = fine_nn_config
 
         self.coarse_data_config=coarse_data_config
@@ -35,22 +35,22 @@ class Analysis:
 
         self.config_ana = config_ana
 
-        # with open(self.coarse_data_config['train_data_file_path'],'rb') as f:
-        #     self.aspect_dic = pickle.load(f)
-        #     self.coarse_word_dic=pickle.load(f)
-        #     self.aspect_labels = pickle.load(f)
-        #     self.coarse_sentences = pickle.load(f)
-        #     self.coarse_table = pickle.load(f)
-        #
-        # with open(self.fine_data_config['train_data_file_path'],'rb') as f:
-        #     self.attribute_dic = pickle.load(f)
-        #     self.fine_word_dic = pickle.load(f)
-        #     self.attribute_labels=pickle.load(f)
-        #     self.fine_sentences = pickle.load(f)
-        #     self.fine_table = pickle.load(f)
-        # self.id2word={}
-        # for word in self.fine_word_dic:
-        #     self.id2word[self.fine_word_dic[word]]=word
+        with open(self.coarse_data_config['train_data_file_path'],'rb') as f:
+            self.aspect_dic = pickle.load(f)
+            self.coarse_word_dic=pickle.load(f)
+            self.aspect_labels = pickle.load(f)
+            self.coarse_sentences = pickle.load(f)
+            self.coarse_table = pickle.load(f)
+
+        with open(self.fine_data_config['train_data_file_path'],'rb') as f:
+            self.attribute_dic = pickle.load(f)
+            self.fine_word_dic = pickle.load(f)
+            self.attribute_labels=pickle.load(f)
+            self.fine_sentences = pickle.load(f)
+            self.fine_table = pickle.load(f)
+        self.id2word={}
+        for word in self.fine_word_dic:
+            self.id2word[self.fine_word_dic[word]]=word
 
     def check_table(self):
         print(len(self.coarse_word_dic))
