@@ -12,6 +12,7 @@ import operator
 from pathlib import Path
 import json
 import argparse
+import numpy as np
 
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 from sentiment.util.coarse.atr_data_feeder import DataFeeder as coarse_DataFeeder
@@ -125,6 +126,13 @@ class Analysis:
         with open(report_filePath, 'w+') as f:
             json.dump(k_nearest, f, indent=4, sort_keys=False)
 
+    def check_fine_dataset(self):
+        max=0
+        with open(self.fine_data_config['train_data_file_path'], 'rb') as f:
+            attribute_dic,word_dic,label,sentence,word_embed = pickle.load(f)
+            print('max fine train data id: ',np.amax(sentence))
+
+
 def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config):
     if getpass.getuser()=="liu121":
         config_ana={'top_k':5,
@@ -138,8 +146,9 @@ def main(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config)
 
 
     ana = Analysis(coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana)
-    init_data = ana.transfer_data_generator()
-    ana.aspect_mention_vector_nearest_word(init_data)
+    ana.check_fine_dataset()
+    # init_data = ana.transfer_data_generator()
+    # ana.aspect_mention_vector_nearest_word(init_data)
     # ana.attribute_mention_vector_nearest_word(init_data)
 
 if __name__ =="__main__":
