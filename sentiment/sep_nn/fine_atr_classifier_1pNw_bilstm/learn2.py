@@ -23,7 +23,7 @@ def main(config):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    args = parser.add_argument('--hype_num',type=int,default=0)
+    args = parser.add_argument('--num',type=int,default=0)
     reg_rate=[1E-5]
     lr=[1E-4]
     config = {
@@ -46,17 +46,17 @@ if __name__ == "__main__":
         'attributes_num': 12,
         'batch_size': 200,
         # flexible parameter
-        'reg_rate': reg_rate[args.hype_num],
+        'reg_rate': reg_rate[args.num],
         'attribute_loss_theta': 3.0,
-        'lr': lr[args.hype_num],  # learing rate
+        'lr': lr[args.num],  # learing rate
         'keep_prob_lstm': 0.5,
         'top_k_data': -1,
         'early_stop_limit':100
     }
     config['report_filePath']='/datatstore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info'\
-                              %(str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(config['attribute_mat_size']))
+                              %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
     config['tfb_filePath'] = '/datatstore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s'\
-                              %(str(reg_rate[args.hype_num]),str(lr[args.hype_num]),str(config['attribute_mat_size']))
+                              %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
     path=Path(config['tfb_filePath'])
     if not path.exists():
         path.mkdir(parents=True, exist_ok=True)
