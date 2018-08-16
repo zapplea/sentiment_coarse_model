@@ -1,10 +1,11 @@
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "7" ## 0
 import sys
-if os.getlogin() == 'yibing':
+import getpass
+if getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
 elif os.getlogin() == 'lujunyu':
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "7"  ## 0
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
 elif os.getlogin() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
