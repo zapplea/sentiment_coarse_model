@@ -100,12 +100,15 @@ class CoarseAtrDataProd:
         sentence,sentence_len = self.get_word_id(tmp, word_dic)
         sentence = sentence[train_data_mask]
         sentence_len = sentence_len[train_data_mask]
-        label = self.add_other(sentence_len,label,stars)
+        if self.config['param'] != 0:
+            label = self.add_other(sentence_len,label,stars)
         # print('train data mask: \n',train_data_mask)
         # print('sentence shape: ',sentence.shape)
         # print('label shape: ',label.shape)
         # print('stars shape: ',stars.shape)
-        print('max sentence: ',np.amax(sentence))
+        print('max train sentence: ',np.amax(sentence))
+        print('train sentence shape: ',sentence.shape)
+        print('train labels shape: ',label.shape)
         ###Generate word_embed
         with open(self.config['train_data_filePath'], 'wb') as f:
             pickle.dump(aspect_dic,f)
@@ -128,8 +131,11 @@ class CoarseAtrDataProd:
         sentence, sentence_len = self.get_word_id(tmp, word_dic)
         sentence = sentence[test_data_mask]
         sentence_len = sentence_len[test_data_mask]
-        label = self.add_other(sentence_len, label, stars)
-        print('max sentence: ', np.amax(sentence))
+        if self.config['param']!=0:
+            label = self.add_other(sentence_len, label, stars)
+        print('max test sentence: ', np.amax(sentence))
+        print('test sentence shape: ', sentence.shape)
+        print('test labels shape: ', label.shape)
         with open(self.config['test_data_filePath'], 'wb') as f:
             pickle.dump(label, f)
             pickle.dump(sentence, f)
@@ -139,7 +145,7 @@ if __name__=='__main__':
     # parser = argparse.ArgumentParser()
     # parser.add_argument('--num',type=str,default=0)
     # args=parser.parse_args()
-    param=[1,1.2,1.3,1.4]
+    param=[0,]
     for key in param:
         data_config={
             'train_source_filePath': '/datastore/liu121/sentidata2/expdata/yelp/yelp_lda_trainset.pkl',
