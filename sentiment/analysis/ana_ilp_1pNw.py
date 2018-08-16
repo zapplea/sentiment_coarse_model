@@ -24,10 +24,10 @@ from sentiment.util.fine.atr_data_feeder import DataFeeder as fine_DataFeeder
 # TODO: check whether coarse and fine use the same table
 class Analysis:
     def __init__(self, coarse_nn_config, fine_nn_config, coarse_data_config, fine_data_config, config_ana):
-        coarse_df = coarse_DataFeeder(coarse_data_config,coarse_nn_config)
-        fine_df = fine_DataFeeder(fine_data_config)
-        self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_df, fine_df)
-        self.coarse_nn_config = coarse_nn_config
+        # coarse_df = coarse_DataFeeder(coarse_data_config,coarse_nn_config)
+        # fine_df = fine_DataFeeder(fine_data_config)
+        # self.cl = Classifier(coarse_nn_config, fine_nn_config, coarse_df, fine_df)
+        # self.coarse_nn_config = coarse_nn_config
         self.fine_nn_config = fine_nn_config
 
         self.coarse_data_config=coarse_data_config
