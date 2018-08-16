@@ -40,6 +40,8 @@ class DataFeeder():
         self.test_labels, self.test_sentences = self.load_test_data()
         self.train_sentences, self.train_labels = self.unison_shuffled_copies(self.train_sentences, self.train_labels)
         self.train_labels,self.train_sentences = self.train_labels[:self.config['top_k_data']] , self.train_sentences[:self.config['top_k_data']]
+        print('train.shape: ',self.train_labels.shape)
+        exit()
         self.train_data_size = len(self.train_labels)
         self.test_data_size = len(self.test_labels)
 
