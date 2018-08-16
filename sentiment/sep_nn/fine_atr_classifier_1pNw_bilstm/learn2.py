@@ -54,9 +54,9 @@ if __name__ == "__main__":
         'top_k_data': -1,
         'early_stop_limit':100
     }
-    config['report_filePath']='/datatstore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info'\
+    config['report_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info'\
                               %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
-    config['tfb_filePath'] = '/datatstore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s'\
+    config['tfb_filePath'] = '/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s'\
                               %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
     path=Path(config['tfb_filePath'])
     if not path.exists():
