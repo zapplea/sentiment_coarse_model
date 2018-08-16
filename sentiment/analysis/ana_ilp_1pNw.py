@@ -35,22 +35,22 @@ class Analysis:
 
         self.config_ana = config_ana
 
-        with open(self.coarse_data_config['train_data_file_path'],'rb') as f:
-            self.aspect_dic = pickle.load(f)
-            self.coarse_word_dic=pickle.load(f)
-            self.aspect_labels = pickle.load(f)
-            self.coarse_sentences = pickle.load(f)
-            self.coarse_table = pickle.load(f)
-
-        with open(self.fine_data_config['train_data_file_path'],'rb') as f:
-            self.attribute_dic = pickle.load(f)
-            self.fine_word_dic = pickle.load(f)
-            self.attribute_labels=pickle.load(f)
-            self.fine_sentences = pickle.load(f)
-            self.fine_table = pickle.load(f)
-        self.id2word={}
-        for word in self.fine_word_dic:
-            self.id2word[self.fine_word_dic[word]]=word
+        # with open(self.coarse_data_config['train_data_file_path'],'rb') as f:
+        #     self.aspect_dic = pickle.load(f)
+        #     self.coarse_word_dic=pickle.load(f)
+        #     self.aspect_labels = pickle.load(f)
+        #     self.coarse_sentences = pickle.load(f)
+        #     self.coarse_table = pickle.load(f)
+        #
+        # with open(self.fine_data_config['train_data_file_path'],'rb') as f:
+        #     self.attribute_dic = pickle.load(f)
+        #     self.fine_word_dic = pickle.load(f)
+        #     self.attribute_labels=pickle.load(f)
+        #     self.fine_sentences = pickle.load(f)
+        #     self.fine_table = pickle.load(f)
+        # self.id2word={}
+        # for word in self.fine_word_dic:
+        #     self.id2word[self.fine_word_dic[word]]=word
 
     def check_table(self):
         print(len(self.coarse_word_dic))
