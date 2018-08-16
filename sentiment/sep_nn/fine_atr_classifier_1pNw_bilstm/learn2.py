@@ -28,8 +28,8 @@ if __name__ == "__main__":
     reg_rate=[1E-5,]
     lr=[1E-4,]
     config = {
-        'fine_train_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl',
-        'fine_test_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',
+        'train_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl',
+        'test_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',
         'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
 
         'lstm_cell_size': 300,
