@@ -165,7 +165,7 @@ if __name__ =="__main__":
             'attribute_mat_size': 5
             }
     coarse_nn_config = {  # fixed parameter
-        'attributes_num': 6,
+        'attributes_num': 7,
         'attribute_dim': seed['word_dim'],
         'attribute_mat_size': seed['attribute_mat_size'],
         # number of attribute mention prototypes in a attribute matrix
