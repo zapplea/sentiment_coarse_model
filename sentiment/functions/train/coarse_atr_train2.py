@@ -33,7 +33,7 @@ class CoarseTrain:
             X = graph.get_collection('X')[0]
             # labels
             Y_att = graph.get_collection('Y_att')[0]
-            #Attribute mat
+            # Attribute mat
             A_mat=graph.get_collection('A_mat')[0]
             # train_step
             train_step = graph.get_collection('opt')[0]
@@ -80,9 +80,9 @@ class CoarseTrain:
                     FP_vec = []
                     FN_vec = []
                     aspect_data = sess.run(A_mat)
-                    dataset=self.dg.data_generator('train')
                     print('aspect_data0: ')
                     print(aspect_data[0])
+                    dataset=self.dg.data_generator('train')
                     for att_labels_data,sentences_data in dataset:
                         sess.run(
                             train_step,
@@ -146,21 +146,21 @@ class CoarseTrain:
                     #     print('Macro F1 score:', np.mean(_f1_score), ' Macro precision:', np.mean(_precision),
                     #           ' Macro recall:', np.mean(_recall))
                     #
+                    #
                     #     # tfb
-                    #     micro_f1.load(np.mean(_f1_score))
-                    #     micro_pre.load(np.mean(_precision))
-                    #     micro_rec.load(np.mean(_recall))
+                    #     macro_f1.load(np.mean(_f1_score))
+                    #     macro_pre.load(np.mean(_precision))
+                    #     macro_rec.load(np.mean(_recall))
                     #
                     #     _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
                     #     _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
                     #     _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                     #     print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                     #           ' Micro recall:', np.mean(_recall))
-                    #
                     #     # tfb
-                    #     macro_f1.load(np.mean(_f1_score))
-                    #     macro_pre.load(np.mean(_precision))
-                    #     macro_rec.load(np.mean(_recall))
+                    #     micro_f1.load(np.mean(_f1_score))
+                    #     micro_pre.load(np.mean(_precision))
+                    #     micro_rec.load(np.mean(_recall))
                     #
                     #     # A_mat_value=sess.run(A_mat)
                     #     # for i in range(3):

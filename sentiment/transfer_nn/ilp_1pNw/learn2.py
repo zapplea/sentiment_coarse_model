@@ -9,7 +9,7 @@ elif getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
 
 import argparse
-
+from pathlib import Path
 from sentiment.transfer_nn.ilp_1pNw.classifier import Classifier
 from sentiment.util.coarse.atr_data_generator import DataGenerator as coarse_DataGenerator
 from sentiment.util.fine.atr_data_feeder import DataFeeder as fine_DataGenerator
