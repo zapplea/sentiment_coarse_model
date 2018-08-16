@@ -69,7 +69,7 @@ class FineAtrTrain:
                 sess.run(init, feed_dict={table: table_data})
                 early_stop_count = 0
                 for i in range(self.nn_config['epoch']):
-                    print('epoch: ',i)
+                    print('\nepoch: ',i)
                     loss_vec = []
                     pred_vec = []
                     score_vec = []
@@ -79,8 +79,8 @@ class FineAtrTrain:
                     FP_vec = []
                     FN_vec = []
                     aspect_data = sess.run(A_mat)
-                    # print('aspect_data0: ')
-                    # print(aspect_data[0])
+                    print('aspect_data0: ')
+                    print(aspect_data[0])
                     dataset = self.dg.data_generator('train')
                     for att_labels_data, sentences_data in dataset:
                         _, train_loss, TP_data, FP_data, FN_data, pred_data, score_data, score_pre_data \
@@ -132,7 +132,7 @@ class FineAtrTrain:
                             #     score_pre_vec.append(score_pre_data[n])
                         # print_op.visualization_test(self.dg,vocab,aspect_list,pred_vec,score_vec,score_pre_vec,i,self.mt,
                         #                             loss_vec,TP_vec,FP_vec,FN_vec)
-                        print('\nVal_loss:%.10f' % np.mean(loss_vec))
+                        print('Val_loss:%.10f' % np.mean(loss_vec))
                         # tfb
                         tfb_loss.load(np.mean(loss_vec))
                         s = sess.run(summ)
