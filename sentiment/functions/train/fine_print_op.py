@@ -33,8 +33,6 @@ def print_sentence(dg, vocab, index, flag):
         elif flag == 'test':
             for word in dg.test_sentence[r]:
                 if word != 34933:
-                    print(word)
-                    print(len(vocab))
                     sentence.append(vocab[word])
     print('Review: ', ' '.join(sentence))
 
