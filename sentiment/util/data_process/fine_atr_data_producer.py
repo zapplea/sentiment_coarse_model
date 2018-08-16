@@ -82,6 +82,7 @@ class FineAtrDataProd:
             pickle.dump(label, f)
             pickle.dump(sentence, f)
             pickle.dump(word_embed, f)
+            print('train: ',np.amax(sentence))
         return attribute_dic,word_dic,label,sentence
 
     def test_data_producer(self,attribute_dic,dictionary):
@@ -96,6 +97,7 @@ class FineAtrDataProd:
         with open(self.config['fine_test_data_filePath'], 'wb') as f:
             pickle.dump(label, f)
             pickle.dump(sentence, f)
+            print('test: ',np.amax(sentence))
 
     def transfer_data_producer(self,label,sentence):
         fine_sent = []
