@@ -42,8 +42,6 @@ class DataFeeder():
         self.train_labels,self.train_sentences = self.train_labels[:self.config['top_k_data']] , self.train_sentences[:self.config['top_k_data']]
         print('train.shape: ',self.train_sentences.shape)
         print('test.shape: ',self.test_sentences.shape)
-        print()
-        exit()
         self.train_data_size = len(self.train_labels)
         self.test_data_size = len(self.test_labels)
 
@@ -178,8 +176,6 @@ class DataFeeder():
             with open(self.config['test_data_file_path'],'rb') as f:
                 label = pickle.load(f)
                 sentence = pickle.load(f)
-        print('test len sentence: ',sentence.shape)
-        print('test len label: ', label.shape)
         return label, sentence
 
 
