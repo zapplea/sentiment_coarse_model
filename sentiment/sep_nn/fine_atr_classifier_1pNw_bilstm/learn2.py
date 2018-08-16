@@ -23,7 +23,7 @@ def main(config):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    args = parser.add_argument('--hype_num',str=int,default=0)
+    args = parser.add_argument('--hype_num',type=int,default=0)
     reg_rate=[1E-5]
     lr=[1E-4]
     config = {
