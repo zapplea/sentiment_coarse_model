@@ -109,23 +109,23 @@ class RelScore:
         """
         # mask loss of padded sentences
 
-        # loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.multiply(aspect_prob,
-        #                                                        tf.multiply(
-        #                                                            tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
-        #                                                                                                                logits=score),
-        #                                                                        mask),
-        #                                                            atr_rel_prob)),
-        #                                            axis=1),
-        #                              tf.reduce_sum(graph.get_collection('reg'))))
-
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.multiply(aspect_prob,
-                                                                tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(
-                                                                                labels=Y_att,
-                                                                                logits=score),
-                                                                            mask),
-                                                              ),
+                                                               tf.multiply(
+                                                                   tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att,
+                                                                                                                       logits=score),
+                                                                               mask),
+                                                                   atr_rel_prob)),
                                                    axis=1),
                                      tf.reduce_sum(graph.get_collection('reg'))))
+
+        # loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.multiply(aspect_prob,
+        #                                                         tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(
+        #                                                                         labels=Y_att,
+        #                                                                         logits=score),
+        #                                                                     mask),
+        #                                                       ),
+        #                                            axis=1),
+        #                              tf.reduce_sum(graph.get_collection('reg'))))
 
         tf.add_to_collection('atr_loss', loss)
         return loss
