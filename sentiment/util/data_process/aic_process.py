@@ -11,7 +11,7 @@ class AiC:
             for row in data:
                 print(row)
                 count+=1
-                if count==10:
+                if count==20:
                     exit()
 
 
