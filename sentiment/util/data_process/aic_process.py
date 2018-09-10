@@ -10,7 +10,9 @@ class AiC:
 
     def reader(self):
         data = pd.read_csv(self.config['train_filePath'])
-        print(type(data.iloc[:10]))
+        data = data.values
+        print(type(data))
+        print(data.shape)
 
 
 if __name__ == "__main__":
