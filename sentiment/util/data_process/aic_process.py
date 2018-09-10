@@ -1,4 +1,5 @@
 import pandas as pd
+import jieba
 
 class AiC:
     def __init__(self,config):
@@ -6,7 +7,7 @@ class AiC:
 
     def reader(self):
         data = pd.read_csv(self.config['train_filePath'])
-        print(data.head(10))
+        print(data[0])
 
 
 if __name__ == "__main__":
