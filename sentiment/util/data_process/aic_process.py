@@ -1,18 +1,12 @@
-import csv
+import pandas as pd
 
 class AiC:
     def __init__(self,config):
         self.config = config
 
     def reader(self):
-        with open(self.config['train_filePath'], newline='') as csvfile:
-            data = csv.reader(csvfile, delimiter=' ', quotechar='|')
-            count = 0
-            for row in data:
-                print(row)
-                count+=1
-                if count==100:
-                    exit()
+        data = pd.read_csv(self.config['train_filePath'])
+        print(data.head(10))
 
 
 if __name__ == "__main__":
