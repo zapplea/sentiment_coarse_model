@@ -3,6 +3,7 @@ sys.path.append('/datastore/liu121/py-package/jieba')
 
 import pandas as pd
 import jieba
+import re
 
 class AiC:
     def __init__(self,config):
@@ -20,9 +21,9 @@ class AiC:
         print('valid shape: ',self.valid_data.shape)
 
 
-    def split_sentence(self,sentence):
-        sentence.split('。')
-        return sentence
+    def split_reivew(self,paragraph):
+        for sent in re.findall(u'[^!?。\.\!\?]+[!?。\.\!\?]?', paragraph, flags=re.U):
+            yield sent
 
 
 if __name__ == "__main__":
@@ -31,6 +32,6 @@ if __name__ == "__main__":
               'valid_filePath':'/datastore/liu121/sentidata2/expdata/aic2018/valid/sentiment_analysis_validationset.csv',}
     aic = AiC(config)
     aic.reader()
-    sentence = aic.train_data[0][1]
-    sentence = aic.split_sentence(sentence)
-    print(sentence)
+    reivew = aic.train_data[0][1]
+    sentences = list(aic.split_reivew(reivew))
+    print(sentences)
