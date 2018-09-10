@@ -10,18 +10,19 @@ class AiC:
 
     def reader(self):
         data = pd.read_csv(self.config['train_filePath'])
-        train_data = data.values
-        print('train shape: ',train_data.shape)
+        self.train_data = data.values
+        print('train shape: ',self.train_data.shape)
         data = pd.read_csv(self.config['testa_filePath'])
-        testa_data = data.values
-        print('test shape: ',testa_data.shape)
+        self.testa_data = data.values
+        print('test shape: ',self.testa_data.shape)
         data = pd.read_csv(self.config['valid_filePath'])
-        valid_data = data.values
-        print('valid shape: ',valid_data.shape)
+        self.valid_data = data.values
+        print('valid shape: ',self.valid_data.shape)
 
 
     def split_sentence(self,sentence):
-        pass
+        sentence.split('。')
+        return sentence
 
 
 if __name__ == "__main__":
@@ -30,3 +31,6 @@ if __name__ == "__main__":
               'valid_filePath':'/datastore/liu121/sentidata2/expdata/aic2018/valid/sentiment_analysis_validationset.csv',}
     aic = AiC(config)
     aic.reader()
+    sentence = aic.train_data[0]
+    sentence = aic.split_sentence(sentence)
+    print(sentence)
