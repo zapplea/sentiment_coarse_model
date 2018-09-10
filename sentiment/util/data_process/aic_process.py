@@ -31,6 +31,6 @@ if __name__ == "__main__":
               'valid_filePath':'/datastore/liu121/sentidata2/expdata/aic2018/valid/sentiment_analysis_validationset.csv',}
     aic = AiC(config)
     aic.reader()
-    sentence = aic.train_data[0]
+    sentence = aic.train_data[0][0]
     sentence = aic.split_sentence(sentence)
     print(sentence)
