@@ -11,8 +11,7 @@ class AiC:
     def reader(self):
         data = pd.read_csv(self.config['train_filePath'])
         data = data.values
-        print(type(data))
-        print(data.shape)
+        print(data[0])
 
 
 if __name__ == "__main__":
