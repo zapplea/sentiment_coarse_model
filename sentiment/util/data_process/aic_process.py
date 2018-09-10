@@ -21,7 +21,7 @@ class AiC:
 
 
     def split_sentence(self,sentence):
-
+        pass
 
 
 if __name__ == "__main__":
