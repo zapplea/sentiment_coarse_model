@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/datastore/liu121/py-package/jieba')
+
 import pandas as pd
 import jieba
 
