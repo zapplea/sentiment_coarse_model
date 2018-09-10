@@ -7,9 +7,12 @@ class AiC:
     def reader(self):
         with open(self.config['train_filePath'], newline='') as csvfile:
             data = csv.reader(csvfile, delimiter=' ', quotechar='|')
+            count = 0
             for row in data:
                 print(row)
-                exit()
+                count+=1
+                if count==10:
+                    exit()
 
 
 if __name__ == "__main__":
