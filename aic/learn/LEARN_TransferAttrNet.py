@@ -9,15 +9,18 @@ elif getpass.getuser() == 'liu121':
 
 import argparse
 
-from aic.coarse_net.attr_net import AttributeNet
-from aic.trains.coarse_atr_train import CoarseAtrTrain
+from aic.coarse_net.attr_net import AttributeNet as CoarseAttributeNet
+from aic.fine_net.attr_net import AttributeNet as FineAttributeNet
+from aic.trains.transfer_atr_train import TransAtrTrain
 from aic.data_process.attr_datafeeder import DataFeeder
 
 def main(config):
-    net = AttributeNet(config)
     datafeeder = DataFeeder(config)
-    train = CoarseAtrTrain(config,datafeeder)
-    train.train(net.classifier)
+    train = TransAtrTrain(config, datafeeder)
+    fine_net = FineAttributeNet(config)
+    init_data = train.transfer(fine_net.classifier)
+    coarse_net = CoarseAttributeNet(config)
+    train.train(coarse_net.classifier,init_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

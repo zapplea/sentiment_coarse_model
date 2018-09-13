@@ -136,7 +136,7 @@ class CoarseCommFunction:
 
     def attribute_labels_input(self,graph):
         Y_ = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='int32')
-        graph.add_to_collection('Y_',Y_)
+        graph.add_to_collection('Y_att',Y_)
         return Y_
 
     def sequence_length(self, X, graph):

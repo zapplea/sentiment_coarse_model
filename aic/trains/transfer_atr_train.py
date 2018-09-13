@@ -16,38 +16,63 @@ from pathlib import Path
 from aic.functions.metrics import Metrics
 from aic.functions.tfb_utils import Tfb
 
-
-class FineAtrTrain:
-    def __init__(self,config, data_feeder):
-        self.train_config ={
-                           'epoch': 1000,
-                           'reg_rate': 1E-5,
-                           'lr': 1E-4,
-                           'keep_prob_lstm': 0.5,
-                           'top_k_data': -1,
-                           'early_stop_limit': 100,
-                           'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
-                                          % ('1e-5', '0.0001', '3'),
-                           'report_filePath':'/datastore/liu121/sentidata2/resultdata/fine_nn/report/',
-                            'sr_path':'/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
-                                      % ('1e-5', '0.0001', '3'),
-
-                        }
+class TransAtrTrain:
+    def __init__(self,config,data_feeder):
+        self.train_config = {
+                            'epoch': 1000,
+                            'reg_rate': 1E-5,
+                            'lr': 1E-4,
+                            'keep_prob_lstm': 0.5,
+                            'top_k_data': -1,
+                            'early_stop_limit': 100,
+                            'tfb_filePath': '/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
+                                            % ('1e-5', '0.0001', '3'),
+                            'report_filePath': '/datastore/liu121/sentidata2/resultdata/fine_nn/report/',
+                            'sr_path': '/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
+                                       % ('1e-5', '0.0001', '3'),
+                            }
         for name in ['tfb_filePath', 'report_filePath','sr_path']:
             path = Path(self.train_config[name])
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
         self.train_config['report_filePath'] = self.train_config['report_filePath'] +'report_reg%s_lr%s_mat%s.info'% ('1e-5', '0.0001', '3')
         self.train_config.update(config)
+
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
         self.mt = Metrics()
         self.tfb = Tfb(self.train_config)
 
+    def transfer(self,classifier):
+        graph,saver = classifier()
 
-    def train(self,classifier):
-        graph, saver = classifier()
+        with graph.as_default():
+            bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
+            bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
+            bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
+            bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
+            A = graph.get_collection('A_mat')[0]
+            O = graph.get_collection('o_mat')[0]
+            table = graph.get_collection('table')[0]
+
+        with graph.device('/gpu:0'):
+            config = tf.ConfigProto(allow_soft_placement=True)
+            config.gpu_options.allow_growth = True
+            with tf.Session(graph=graph, config=config) as sess:
+                model_file = tf.train.latest_checkpoint(self.train_config['sr_path'])
+                saver.restore(sess, model_file)
+                table_data, A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data=\
+                    sess.run([table,A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias])
+                init={'table':table_data,'A':A_data,'O':O_data,
+                      'bilstm_fw_kernel':bilstm_fw_kernel_data,
+                      'bilstm_fw_bias':bilstm_fw_bias_data,
+                      'bilstm_bw_kernel':bilstm_bw_kernel_data,
+                      'bilstm_bw_bias':bilstm_bw_bias_data}
+                return init
+
+    def train(self,classifier, init_data):
+        graph, saver = classifier
         with graph.as_default():
             # input
             X = graph.get_collection('X')[0]
@@ -56,14 +81,18 @@ class FineAtrTrain:
             # train_step
             train_step = graph.get_collection('opt')[0]
             #
-            table = graph.get_collection('table')[0]
-            #
             loss = graph.get_collection('atr_loss')[0]
 
             pred = graph.get_collection('atr_pred')[0]
 
-            score = graph.get_collection('score')[0]
-            score_pre = graph.get_collection('score_pre')[0]
+            bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
+            bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
+            bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
+            bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
+            A = graph.get_collection('A_mat')[0]
+            O = graph.get_collection('o_mat')[0]
+            table = graph.get_collection('table')[0]
+
             keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
 
             # tfb
@@ -74,22 +103,27 @@ class FineAtrTrain:
 
             # attribute function
             init = tf.global_variables_initializer()
-        table_data = self.dg.table
 
         with graph.device('/gpu:0'):
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
-                sess.run(init, feed_dict={table: table_data})
+                sess.run(init, feed_dict={table: init_data['table']})
+                A.load(init_data['A'], sess)
+                O.load(init_data['O'], sess)
+                bilstm_fw_kernel.load(init_data['bilstm_fw_kernel'], sess)
+                bilstm_fw_bias.load(init_data['bilstm_fw_bias'], sess)
+                bilstm_bw_kernel.load(init_data['bilstm_bw_kernel'], sess)
+                bilstm_bw_bias.load(init_data['bilstm_bw_bias'], sess)
+
                 early_stop_count = 0
                 best_f1_score = 0
                 for i in range(self.train_config['epoch']):
-
                     dataset = self.dg.data_generator('train')
                     for att_labels_data, sentences_data in dataset:
-                        _, train_loss, pred_data, score_data, score_pre_data \
+                        _, train_loss, pred_data \
                             = sess.run(
-                            [train_step, loss, pred, score, score_pre],
+                            [train_step, loss, pred],
                             feed_dict={X: sentences_data, Y_att: att_labels_data,
                                        keep_prob_lstm: self.train_config['keep_prob_lstm']})
 
@@ -103,8 +137,8 @@ class FineAtrTrain:
                         FN_vec = []
                         dataset = self.dg.data_generator('val')
                         for att_labels_data, sentences_data in dataset:
-                            test_loss, pred_data, score_data, score_pre_data = sess.run(
-                                [loss, pred, score, score_pre],
+                            test_loss, pred_data= sess.run(
+                                [loss, pred],
                                 feed_dict={X: sentences_data,
                                            Y_att: att_labels_data,
                                            keep_prob_lstm: 1.0
@@ -127,23 +161,20 @@ class FineAtrTrain:
                         s = sess.run(summ)
                         writer.add_summary(s, i)
 
-
-
                         _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
                         _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
                         _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
                         print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                               ' Micro recall:', np.mean(_recall))
-
                         # tfb
                         micro_f1.load(np.mean(_f1_score))
                         micro_pre.load(np.mean(_precision))
                         micro_rec.load(np.mean(_recall))
+
                         if best_f1_score<_f1_score:
                             early_stop_count+=1
                         else:
                             early_stop_count=0
                             best_f1_score=_f1_score
-                            saver.save(sess,self.train_config['sr_path'])
                         if early_stop_count>self.train_config['early_stop_limit']:
                             break

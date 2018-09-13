@@ -11,13 +11,13 @@ import argparse
 
 from aic.fine_net.attr_net import AttributeNet
 from aic.trains.fine_atr_train import FineAtrTrain
-from aic.data_process.fine_attr_datafeeder import DataFeeder
+from aic.data_process.attr_datafeeder import DataFeeder
 
 def main(config):
     net = AttributeNet(config)
     datafeeder = DataFeeder(config)
     train = FineAtrTrain(config,datafeeder)
-    train.train(net.classifier())
+    train.train(net.classifier)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

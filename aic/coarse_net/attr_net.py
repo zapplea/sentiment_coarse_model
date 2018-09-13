@@ -72,11 +72,8 @@ class AttributeNet:
             score_e = self.af.sentence_score(A_e, X, mask, graph)
             # score.shape = (batch size*max review length, attributes num, words num)
             score = tf.add(score_lstm, score_e)
-            graph.add_to_collection('score_pre', score)
-
             # score.shape = (batch size*max review length, attributes num)
             score = tf.reduce_max(score, axis=2)
-            graph.add_to_collection('score', score)
             # shape = (batch size*max review length, attributes num)
             sentence_prob = self.af.sentence_sigmoid(score,graph)
             #shape = (batch size*max review length, coarse attributes num)
@@ -85,5 +82,7 @@ class AttributeNet:
             review_score = self.af.review_score(sentence_prob,mask,review_len,graph)
             pred = self.af.prediction(review_score,graph)
             loss = self.af.sigmoid_loss(review_score,Y_att,graph)
+            opt = self.comm.optimizer(loss,graph)
+            saver = tf.train.Saver()
 
-
+            return graph,saver
