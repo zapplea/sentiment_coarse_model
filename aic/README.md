@@ -16,6 +16,3 @@ program will update the corresponding parameters in net/train/data process.
 # 3. About data
 The data should be converted from text to id format and then fed to the model. In this program, we assume that the train, test, and validation 
 data has been generated and only is the datafeeder module implemented to feed data. The data preprocess programs can be included under directory "data_preprocess"
-
-# 4. How to run
-You can use "pyton3 LEARN_XXX --num YYY" to run a model.
