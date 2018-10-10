@@ -28,7 +28,9 @@ class AttributeNet:
             'batch_size': 200,
             'atr_pred_threshold': 0,
             'review_atr_pred_threshold':0.5,
-            'max_review_len':20
+            'max_review_len':20,
+            'reg_rate': 1E-5,
+            'lr': 1E-4,
         }
         self.nn_config.update(config)
         self.af = AttributeFunction(self.nn_config)

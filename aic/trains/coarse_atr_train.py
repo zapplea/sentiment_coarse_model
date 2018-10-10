@@ -21,8 +21,6 @@ class CoarseAtrTrain:
     def __init__(self,config, data_feeder):
         self.train_config ={
                            'epoch': 1000,
-                           'reg_rate': 1E-5,
-                           'lr': 1E-4,
                            'keep_prob_lstm': 0.5,
                            'top_k_data': -1,
                            'early_stop_limit': 100,

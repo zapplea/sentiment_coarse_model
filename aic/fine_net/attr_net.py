@@ -24,7 +24,9 @@ class AttributeNet:
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
             'attributes_num': 12,
             'batch_size': 200,
-            'atr_pred_threshold': 0
+            'atr_pred_threshold': 0,
+            'reg_rate': 1E-5,
+            'lr': 1E-4,
         }
         self.nn_config.update(config)
         self.af = AttributeFunction(self.nn_config)

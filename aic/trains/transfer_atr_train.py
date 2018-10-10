@@ -46,7 +46,6 @@ class TransAtrTrain:
 
     def transfer(self,classifier):
         graph,saver = classifier()
-
         with graph.as_default():
             bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
             bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')

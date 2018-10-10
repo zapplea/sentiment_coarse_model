@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 class Initializer:
     @staticmethod
@@ -182,3 +183,367 @@ class AttributeFunction:
 class SentimentFunction:
     def __init__(self,nn_config):
         self.nn_config = nn_config
+        self.initializer = Initializer.parameter_initializer
+
+    def sentiment_matrix(self, graph):
+        W = tf.get_variable(name='senti_mat', initializer=self.initializer(shape=(
+            self.nn_config['normal_senti_prototype_num'] * 3 + self.nn_config['attribute_senti_prototype_num'] *
+            self.nn_config['attributes_num'],
+            self.nn_config['sentiment_dim']), dtype='float32'))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
+        graph.add_to_collection('W', W)
+        return W
+
+    def senti_extors_mat(self, graph):
+        """
+        input a matrix to extract sentiment expression for attributes in sentences. The last one extract sentiment expression for non-attribute.
+        The non-attribute only has one sentiment: NEU
+        shape of the extractors matrix: [3*attribute numbers+1, 
+                              normal sentiment prototype numbers*3 + attributes sentiment prototypes number*attribute number,
+                              sentiment epression dim(sentiment dim)]
+        :param graph: 
+        :return: 
+        """
+        extors = self.sentiment_extract_mat()
+        extors = tf.constant(extors, dtype='float32')
+        graph.add_to_collection('senti_extractor', extors)
+        return extors
+
+    # @ normal_function
+    def sentiment_extract_mat(self):
+        """
+        This function return a matrix to extract expression prototype for all (yi,ai) combinations.
+        :return: [ sentiment extractor for one sentence[...,[1,...],...,[0,...],...] ,...] 
+        """
+        # label = np.ones(shape=(self.nn_config['attributes_num'],), dtype='float32')
+        extors = []
+        for i in range(self.nn_config['attributes_num']):
+            # attribute sentiment prototypes
+            att_senti_ext = np.zeros(shape=(self.nn_config['attributes_num'],), dtype='float32')
+            att_senti_ext[i] = 1
+            att_senti_ext = self.extor_expandNtile(att_senti_ext, proto_num='attribute_senti_prototype_num')
+            for j in range(3):
+                # normal sentiment prototypes
+                normal_senti_ext = np.zeros(shape=(3,), dtype='float32')
+                normal_senti_ext[j] = 1
+                normal_senti_ext = self.extor_expandNtile(normal_senti_ext, proto_num='normal_senti_prototype_num')
+                extors.append(np.concatenate([normal_senti_ext, att_senti_ext], axis=0))
+        for i in range(3):
+            # non-attribute sentiment prototypes
+            o_att_senti_ext = np.zeros(shape=(self.nn_config['attributes_num']), dtype='float32')
+            o_att_senti_ext = self.extor_expandNtile(o_att_senti_ext, 'attribute_senti_prototype_num')
+            # non-attribute normal sentiment prototypes
+            o_normal_senti_ext = np.zeros(shape=(3,), dtype='float32')
+            o_normal_senti_ext[i] = 1
+            o_normal_senti_ext = self.extor_expandNtile(o_normal_senti_ext, proto_num='normal_senti_prototype_num')
+            extors.append(np.concatenate([o_normal_senti_ext, o_att_senti_ext], axis=0))
+        return np.array(extors)
+
+    # @ normal_function
+    def extor_expandNtile(self, extor, proto_num):
+        """
+
+        :param exter: it is extractor  
+        :return: 
+        """
+        extor = np.expand_dims(extor, axis=1)
+        extor = np.tile(extor, reps=[1, self.nn_config[proto_num]])
+        extor = np.expand_dims(extor, axis=2)
+        extor = np.tile(extor, reps=[1, 1, self.nn_config['sentiment_dim']])
+        extor = np.reshape(extor, (-1, self.nn_config['sentiment_dim']))
+        return extor
+
+    def extors_mask(self, extors, graph):
+        """
+        when calculate p(w|h), need to eliminate the the influence of false sentiment.
+        :param extor: shape = (3*attribute numbers +3, 
+                               self.nn_config['normal_senti_prototype_num'] * 3 +
+                               self.nn_config['attribute_senti_prototype_num'] * self.nn_config['attributes_num'],
+                               sentiment dim)
+        :param graph: 
+        :return: (3*attributes number+3, number of sentiment expression prototypes)
+        """
+        extors = tf.reduce_sum(extors, axis=2)
+        condition = tf.equal(extors, np.zeros_like(extors, dtype='float32'))
+        mask = tf.where(condition, tf.zeros_like(extors, dtype='float32'), tf.ones_like(extors, dtype='float32'))
+        graph.add_to_collection('extors_mask', mask)
+        return mask
+
+    def relative_pos_matrix(self, graph):
+        V = tf.get_variable(name='relative_pos',
+                            initializer=self.initializer(shape=(self.nn_config['rps_num'], self.nn_config['rp_dim']),
+                                                          dtype='float32'))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
+        graph.add_to_collection('V', V)
+        return V
+
+    def relative_pos_ids(self, graph):
+        """
+        :param graph: 
+        :return: shape = (number of words, number of words)
+        """
+        id4sentence = []
+        for i in range(self.nn_config['words_num']):
+            id4word_i = []
+            for j in range(self.nn_config['words_num']):
+                if abs(i - j) < self.nn_config['rps_num']:
+                    id4word_i.append(abs(i - j))
+                else:
+                    id4word_i.append(self.nn_config['rps_num'] - 1)
+            id4sentence.append(id4word_i)
+        rp_ids = tf.constant(id4sentence, dtype='int32')
+        graph.add_to_collection('relative_pos_ids', rp_ids)
+        return rp_ids
+
+    def beta(self, graph):
+        """
+
+        :param graph: 
+        :return: beta weight, shape=(rp_dim)
+        """
+        b = tf.get_variable(name='beta',
+                            initializer=self.initializer(shape=(self.nn_config['rp_dim'],), dtype='float32'))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
+        graph.add_to_collection('beta', b)
+        return b
+
+    def sentiment_attention(self, H, W, m, graph):
+        """
+        :param h: shape = (batch size, number of words, lstm cell size)
+        :param W: shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size). 3*attribute numbers is
+        3 sentiment for each attributes; 3 is sentiment for non-attribute entity, it only has normal sentiment, not attribute
+        specific sentiment.
+        :param m: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
+        :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
+        """
+        # H.shape = (batch size, words num, 3+3*attributes number, word dim)
+        H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, 3 * self.nn_config['attributes_num'] + 3, 1])
+        # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
+        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['normal_senti_prototype_num'] * 3 +
+                                                          self.nn_config['attribute_senti_prototype_num'] *
+                                                          self.nn_config['attributes_num'],
+                                                          1])
+        # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
+        temp = tf.multiply(m, tf.exp(tf.reduce_sum(tf.multiply(H, W), axis=4)))
+
+        # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
+        denominator = tf.reduce_sum(temp, axis=3, keepdims=True)
+
+        denominator = tf.tile(denominator, multiples=[1, 1, 1,
+                                                      self.nn_config['normal_senti_prototype_num'] * 3 +
+                                                      self.nn_config['attribute_senti_prototype_num'] * self.nn_config[
+                                                          'attributes_num']])
+        attention = tf.truediv(temp, denominator)
+        graph.add_to_collection('senti_attention', attention)
+        return attention
+
+    def attended_sentiment(self, W, attention, graph):
+        """
+        :param W: all (yi,ai); shape = (3*number of attribute +3, sentiment prototypes, sentiment dim)
+        :param attention: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes)
+        :param graph: 
+        :return: (batch size,number of words, 3+3*attributes number, sentiment dim)
+        """
+        # attention.shape = (batch size, number of words, 3+3*attributes number, number of sentiment prototypes, sentiment dim)
+        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['sentiment_dim']])
+        attended_W = tf.reduce_sum(tf.multiply(attention, W), axis=3)
+        graph.add_to_collection('attended_W', attended_W)
+        return attended_W
+
+    def item1(self, W, H, graph):
+        """
+
+        :param W: shape = (batch size,number of words, 3+3*attributes number, sentiment dim)
+        :param H: shape = (batch size, number of words, word dim)
+        :return: shape = (batch size,number of words, 3+3*attributes number)
+        """
+        # H.shape = (batch size,number of words, 3+3*attributes number, sentiment dim)
+        H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, 3 * self.nn_config['attributes_num'] + 3, 1])
+        item1_score = tf.reduce_sum(tf.multiply(W, H), axis=3)
+        graph.add_to_collection('item1_score', item1_score)
+        return item1_score
+
+    def words_attribute_mat2vec(self, H, A_mat, graph):
+        """
+        convert attribtes matrix to attributes vector for each words in a sentence. A_mat include non-attribute mention matrix.
+        :param H: shape = (batch size, number of words, word dim)
+        :param A_mat: (number of atr, atr mat size, atr dim)
+        :param graph: 
+        :return: shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
+        """
+        # H.shape = (batch size, words number, attribute number+1, word dim)
+        H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'] + 1, 1])
+        # H.shape = (batch size, words number, attribute number+1, attribute mat size, word dim)
+        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # attention.shape = (batch size, words number, attribute number, attribute mat size)
+        attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
+        # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        graph.add_to_collection('words_attributes', words_A)
+        return words_A
+
+    # association between attribute and sentiment: towards specific attribute
+    def attribute_distribution(self, A, H, graph):
+        """
+        distribution of all attributes in this sentence
+        :param A: A.shape = (attributes number +1 , attributes dim(=lstm cell size)) or 
+                  A.shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
+        :param H: batch size, words num, word dim
+        :param graph: 
+        :return: shape = (batch size, number of attributes+1, wrods number)
+        """
+        if not self.nn_config['is_mat']:
+            H = tf.reshape(H, shape=(-1, self.nn_config['lstm_cell_size']))
+            # A.shape=(number of attributes+1, attribute dim(=lstm cell size))
+            # A_dist = (batch size,number of attributes+1,number of words)
+            A_dist = tf.nn.softmax(tf.transpose(tf.reshape(tf.matmul(A, H, transpose_b=True),
+                                                           shape=(self.nn_config['attributes_num'] + 1, -1,
+                                                                  self.nn_config['words_num'])), [1, 0, 2]))
+        else:
+            # A.shape = (batch size, number of words, number of attributes+1, attribute dim(=lstm cell dim))
+            # H.shape = (batch size, number of words, number of attributes+1, word dim)
+
+            H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'] + 1, 1])
+            # A_dist.shape = (batch size, attributes number, words number)
+            A_dist = tf.nn.softmax(tf.transpose(tf.reduce_sum(tf.multiply(A, H), axis=3), [0, 2, 1]))
+
+        graph.add_to_collection('attribute_distribution', A_dist)
+        return A_dist
+
+    def rd_Vi(self, A_dist, V, rp_ids, graph):
+        """
+        :param A_dist: shape = (batch size, number of attributes+1, number of words)
+        :param V: shape = (number of relative position, relative position dim)
+        :param rp_ids: shape = (number of words, number of words)
+        :param graph:
+        :return: realtive position vector of each attribute at each position.
+        shape = (batch size, number of attributes+1, number of words, relative position dim)
+        """
+        # rp_mat.shape = (number of words, number of words, rp_dim)
+        rp_mat=tf.nn.embedding_lookup(V,rp_ids)
+        # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rp_dim']])
+        # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
+        # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+        A_Vi = tf.reduce_sum(tf.multiply(A_dist,rp_mat),axis=3)
+        graph.add_to_collection('A_Vi', A_Vi)
+        return A_Vi
+
+    def mask_for_pad_in_score(self, X, graph):
+        """
+        This mask is used in score, to eliminate the influence of pad words when reduce_max. This this mask need to add to the score.
+        Since 0*inf = nan
+        :param X: the value is word id. shape=(batch size, max words num)
+        :param graph: 
+        :return: 
+        """
+        paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
+        condition = tf.equal(paddings, X)
+        mask = tf.where(condition, tf.ones_like(X, dtype='float32') * tf.convert_to_tensor(-np.inf),
+                        tf.zeros_like(X, dtype='float32'))
+        return mask
+
+    # sentiment score
+    def score(self, item1, item2, mask, graph):
+        """
+        :param item1: shape = (batch size,number of words, 3+3*attributes number)
+        :param item2: shape=(batch size, number of attributes+1, number of words)
+        :param graph: 
+        :return: (batch size, 3+3*attributes number, number of words) this is all combinations of yi and ai
+        """
+        # item1.shape = (batch size, 3+3*attributes number, number of words)
+        item1 = tf.transpose(item1, [0, 2, 1])
+        # item2.shape = (batch size, 3+3*attributes number, number of words)
+        item2 = tf.reshape(tf.tile(tf.expand_dims(item2, axis=2), [1, 1, 3, 1]),
+                           shape=(-1, 3 * self.nn_config['attributes_num'] + 3, self.nn_config['words_num']))
+        # score.shape = (batch size, 3+3*attributes number, number of words)
+        score = tf.add(item1, item2)
+        # mask.shape = (batch size, attributes number, words num)
+        mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, 3 + 3 * self.nn_config['attributes_num'], 1])
+        # eliminate influence of #PAD#
+        score = tf.add(score, mask)
+
+        return score
+
+    def coarse_score(self,fine_score,graph):
+        """
+        
+        :param fine_score: shape = (batch size*max review length, number of attributes+1,3)
+        :return: sahpe = (batch size, coarse attr num + 1, 3)
+        """
+        # shape = (fine attr num*3+3, coarse attr num*3+3)
+        W = tf.get_variable(name='fine2coarse',
+                            initializer=self.initializer(shape=(self.nn_config['attributes_num']*3+3, self.nn_config['coarse_attributes_num']*3+3), dtype='float32'))
+        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
+        # shape = (batch size * max review length, attr num*3 + 3)
+        fine_score = tf.reshape(fine_score,shape=(-1, self.nn_config['attributes_num']*3+3))
+        # shape = (batch size * max review length, coarse attr num*3 + 3)
+        coarse_score= tf.matmul(fine_score,W)
+        # shape = (batch size, max review length, coarse attr num*3 + 3)
+        coarse_score = tf.reshape(coarse_score,shape=(-1,self.nn_config['max_review_len'],self.nn_config['coarse_attributes_num']*3+3))
+        # sahpe = (batch size, coarse attr num*3 + 3)
+        coarse_score = tf.reduce_sum(coarse_score,axis=1)
+        return tf.reshape(coarse_score,shape=(-1,self.nn_config['coarse_attributes_num']+1,3))
+
+
+    def softmax_loss(self, labels, logits, graph):
+        """
+
+        :param labels: (batch size, number of attributes+1,3)
+        :param logits: (batch_size, number of attributes + 1, 3)
+        :return: 
+        """
+
+        loss = tf.reduce_mean(tf.add(
+            tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels, logits=logits, dim=-1), axis=1),
+            tf.reduce_sum(graph.get_collection('senti_reg'))))
+        graph.add_to_collection('senti_loss', loss)
+        return loss
+
+    def expand_attr_labels(self, labels):
+        """
+
+        :param graph: 
+        :return: shape = (batch size, attributes number+1)
+        """
+
+        Y_att = labels
+        # TODO: add non-attribute
+        batch_size = tf.shape(Y_att)[0]
+        non_attr = tf.zeros((batch_size, 1), dtype='float32')
+        condition = tf.equal(tf.reduce_sum(Y_att, axis=1, keepdims=True), non_attr)
+        non_attr = tf.where(condition, tf.ones_like(non_attr), non_attr)
+        Y_att = tf.concat([Y_att, non_attr], axis=1)
+        return Y_att
+
+    def joint_optimizer(self, senti_loss, attr_loss, graph):
+        """
+
+        :param senti_loss: 
+        :param attr_loss: 
+        :return: 
+        """
+        loss = senti_loss + attr_loss
+        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
+        graph.add_to_collection('joint_opt', opt)
+        return opt
+
+    def prediction(self,name, score, Y_atr, graph):
+        """
+        :param score: shape = (batch size, attributes numbers+1,3)
+        :param Y_atr: shape = (batch size, attributes numbers+1)
+        :param graph: 
+        :return: 
+        """
+        # score.shape = (batch size, attributes numbers+1,3)
+        score = tf.nn.softmax(logits=score,axis=-1)
+        # pred.shape =(batch size, attributes number +1 , 3)
+        pred = tf.where(tf.equal(tf.reduce_max(score,axis=2,keep_dims=True),score),tf.ones_like(score),tf.zeros_like(score))
+        # use Y_atr to mask non-activated attributes' sentiment
+        Y_atr = tf.tile(tf.expand_dims(Y_atr,axis=2),multiples=[1,1,3])
+        pred = tf.multiply(Y_atr, pred)
+
+        graph.add_to_collection(name, pred)
+        return pred

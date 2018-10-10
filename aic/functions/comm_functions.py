@@ -1,5 +1,6 @@
 """include functions can be used both in sentiment recognization and attribute extraction"""
 import tensorflow as tf
+import numpy as np
 
 class FineCommFunction:
     def __init__(self,nn_config):
@@ -16,6 +17,17 @@ class FineCommFunction:
         Y_att = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='float32')
         graph.add_to_collection('Y_att', Y_att)
         return Y_att
+
+    def sentiment_labels_input(self, graph):
+        """
+        :param graph: 
+        :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
+        """
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
+                                 dtype='float32')
+        # TODO: add non-attribute
+        graph.add_to_collection('Y_senti', Y_senti)
+        return Y_senti
 
     def sequence_length(self, X, graph):
         """
@@ -80,13 +92,13 @@ class FineCommFunction:
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
-        graph.add_to_collection('sentence_bilstm_outputs', outputs)
+        scope_name = tf.contrib.framework.get_name_scope()
         graph.add_to_collection('reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
         graph.add_to_collection('reg',
                                 tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
         return outputs
 
     def optimizer(self, loss, graph):
@@ -262,6 +274,16 @@ class CoarseCommFunction:
         graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
+    def sentiment_labels_input(self, graph):
+        """
+        :param graph: 
+        :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
+        """
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
+                                 dtype='float32')
+        # TODO: add non-attribute
+        graph.add_to_collection('Y_senti', Y_senti)
+        return Y_senti
 
 
 
