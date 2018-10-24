@@ -33,11 +33,12 @@ class Dataset:
             raise StopIteration
         return labels_batch,sentences_batch
 
+# TODO: check whether coarse and fine use the same wordembedding.
 class DataFeeder():
     def __init__(self, config):
         self.data_config = {
-                            'train_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl',
-                            'test_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',
+                            'train_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/train_fine.pkl',
+                            'test_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/dev_fine.pkl',
                             'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
                           }
         self.data_config.update(config)
@@ -84,10 +85,11 @@ class DataFeeder():
                 attribute_dic = pickle.load(f)
                 word_dic = pickle.load(f)
                 label = pickle.load(f)
+                _ = pickle.load(f)
                 sentence = pickle.load(f)
                 word_embed = pickle.load(f)
 
-            return label, sentence , attribute_dic , word_dic ,word_embed
+            return label, sentence, attribute_dic, word_dic, word_embed
 
     def load_test_data(self):
         print('test path: ',self.data_config['test_data_file_path'])
@@ -97,6 +99,9 @@ class DataFeeder():
                 sentence = pickle.load(f)
             return label, sentence
 
+if __name__ == "__main__":
+    data_config = {}
+    df = DataFeeder(data_config)
 
 
 
