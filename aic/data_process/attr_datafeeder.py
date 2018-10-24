@@ -89,7 +89,6 @@ class DataFeeder():
                 label = data[2]
                 _ = data[3]
                 sentence = data[4]
-                print(sentence.shape)
                 word_embed = data[5]
 
             return label, sentence, attribute_dic, word_dic, word_embed
@@ -100,7 +99,9 @@ class DataFeeder():
             with open(self.data_config['test_data_file_path'],'rb') as f:
                 data = pickle.load(f)
                 label = data[0]
-                _ = data[1]
+                print(label.shape)
+                sent = data[1]
+                print(sent.shape)
                 sentence = data[2]
                 print(sentence.shape)
             return label, sentence
