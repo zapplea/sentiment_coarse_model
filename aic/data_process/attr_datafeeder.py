@@ -100,8 +100,8 @@ class DataFeeder():
                 data = pickle.load(f)
                 label = data[0]
                 _ = data[1]
-                sentence = data[2]
-                print(sentence[:2])
+                sentence = data[2][:2]
+                print(type(sentence))
                 exit()
                 # sentence = np.array(sentence[:2],dtype='float32')
 
