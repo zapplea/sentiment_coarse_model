@@ -37,6 +37,7 @@ class Dataset:
 class DataFeeder():
     def __init__(self, config):
         self.data_config = {
+                            'top_k_data':2000,
                             'train_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/train_fine.pkl',
                             'test_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/dev_fine.pkl',
                             'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
@@ -86,8 +87,6 @@ class DataFeeder():
                 attribute_dic = data[0]
                 word_dic = data[1]
                 label = data[2]
-                print(label.shape)
-                exit()
                 _ = data[3]
                 sentence = data[4]
                 word_embed = data[5]
