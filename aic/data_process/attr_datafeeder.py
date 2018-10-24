@@ -87,8 +87,12 @@ class DataFeeder():
                 attribute_dic = data[0]
                 word_dic = data[1]
                 label = data[2]
-                _ = data[3]
+                print(label.shape)
+                sent = data[3]
+                print(sent.shape)
                 sentence = data[4]
+                print(sentence.shape)
+                print('========')
                 word_embed = data[5]
 
             return label, sentence, attribute_dic, word_dic, word_embed
