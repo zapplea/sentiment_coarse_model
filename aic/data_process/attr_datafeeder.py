@@ -89,6 +89,7 @@ class DataFeeder():
                 label = data[2]
                 _ = data[3]
                 sentence = data[4]
+                print(sentence.shape)
                 word_embed = data[5]
 
             return label, sentence, attribute_dic, word_dic, word_embed
@@ -101,6 +102,7 @@ class DataFeeder():
                 label = data[0]
                 _ = data[1]
                 sentence = data[2]
+                print(sentence.shape)
             return label, sentence
 
 if __name__ == "__main__":
