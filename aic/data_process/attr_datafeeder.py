@@ -106,9 +106,9 @@ class DataFeeder():
                 print(label.shape)
                 sent = data[1]
                 print(sent.shape)
-                sentence = np.array(data[2],dtype='float32')
+                sentence = data[2]
                 print('sentence type: ',type(sentence))
-                print('sentence1: ',sentence[0])
+                print('sentence1: ',len(sentence[0]))
             return label, sentence
 
 if __name__ == "__main__":
