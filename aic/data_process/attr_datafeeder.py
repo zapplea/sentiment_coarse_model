@@ -83,6 +83,9 @@ class DataFeeder():
         if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
             with open(self.data_config['train_data_file_path'],'rb') as f:
                 attribute_dic = pickle.load(f)
+                print(type(attribute_dic))
+                print(len(attribute_dic))
+                exit()
                 word_dic = pickle.load(f)
                 label = pickle.load(f)
                 _ = pickle.load(f)
