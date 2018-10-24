@@ -96,8 +96,10 @@ class DataFeeder():
         print('test path: ',self.data_config['test_data_file_path'])
         if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
             with open(self.data_config['test_data_file_path'],'rb') as f:
-                label = pickle.load(f)
-                sentence = pickle.load(f)
+                data = pickle.load(f)
+                label = data[0]
+                _ = data[1]
+                sentence = data[2]
             return label, sentence
 
 if __name__ == "__main__":
