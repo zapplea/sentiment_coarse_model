@@ -94,7 +94,6 @@ class DataFeeder():
             return label, sentence, attribute_dic, word_dic, word_embed
 
     def load_test_data(self):
-        print('test path: ',self.data_config['test_data_file_path'])
         if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
             with open(self.data_config['test_data_file_path'],'rb') as f:
                 data = pickle.load(f)
