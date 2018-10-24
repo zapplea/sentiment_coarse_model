@@ -106,7 +106,7 @@ class DataFeeder():
                 print(label.shape)
                 sent = data[1]
                 print(sent.shape)
-                sentence = data[2]
+                sentence = np.array(data[2],dtype='float32')
                 print('sentence type: ',type(sentence))
                 print('sentence1: ',sentence[0])
             return label, sentence
