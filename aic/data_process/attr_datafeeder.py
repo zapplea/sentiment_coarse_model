@@ -101,10 +101,7 @@ class DataFeeder():
                 label = data[0]
                 _ = data[1]
                 sentence = data[2]
-                for s in sentence:
-                    s=np.array(s,dtype='float32')
-                    if len(s)!=242:
-                        print(len(s))
+                sentence = np.array(sentence[:500],dtype='float32')
 
             return label, sentence
 
