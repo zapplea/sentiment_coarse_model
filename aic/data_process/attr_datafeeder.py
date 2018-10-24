@@ -99,11 +99,11 @@ class DataFeeder():
                 data = pickle.load(f)
                 label = data[0]
                 _ = data[1]
-                sentence = data[2][:2]
+                sentence = data[2][:]
                 new_sentence =[]
                 for s in sentence:
                     new_sentence.append(s)
-                print(np.array(new_sentence,dtype='int32'))
+                print(np.array(new_sentence,dtype='int32').shape)
                 exit()
                 # sentence = np.array(sentence[:2],dtype='float32')
 
