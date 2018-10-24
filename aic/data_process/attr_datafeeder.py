@@ -87,12 +87,8 @@ class DataFeeder():
                 attribute_dic = data[0]
                 word_dic = data[1]
                 label = data[2]
-                print(label.shape)
-                sent = data[3]
-                print(sent.shape)
+                _ = data[3]
                 sentence = data[4]
-                print(sentence.shape)
-                print('========')
                 word_embed = data[5]
 
             return label, sentence, attribute_dic, word_dic, word_embed
@@ -103,13 +99,13 @@ class DataFeeder():
             with open(self.data_config['test_data_file_path'],'rb') as f:
                 data = pickle.load(f)
                 label = data[0]
-                print(label.shape)
-                sent = data[1]
-                print(sent.shape)
+                _ = data[1]
                 sentence = data[2]
                 for s in sentence:
+                    s=np.array(s,dtype='float32')
                     if len(s)!=242:
                         print(len(s))
+
             return label, sentence
 
 if __name__ == "__main__":
