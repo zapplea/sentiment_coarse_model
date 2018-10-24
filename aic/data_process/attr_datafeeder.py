@@ -108,6 +108,7 @@ class DataFeeder():
                 print(sent.shape)
                 sentence = data[2]
                 print(sentence.shape)
+                print(sentence)
             return label, sentence
 
 if __name__ == "__main__":
