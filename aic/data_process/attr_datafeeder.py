@@ -100,7 +100,10 @@ class DataFeeder():
                 label = data[0]
                 _ = data[1]
                 sentence = data[2][:2]
-                print(type(sentence))
+                new_sentence =[]
+                for s in sentence:
+                    new_sentence.append(s)
+                print(np.array(new_sentence,dtype='int32'))
                 exit()
                 # sentence = np.array(sentence[:2],dtype='float32')
 
