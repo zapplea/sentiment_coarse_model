@@ -84,6 +84,8 @@ class DataFeeder():
             with open(self.data_config['train_data_file_path'],'rb') as f:
                 data=pickle.load(f)
                 attribute_dic = data[0]
+                print(attribute_dic.shape)
+                exit()
                 word_dic = data[1]
                 label = data[2]
                 _ = data[3]
