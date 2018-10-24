@@ -101,8 +101,9 @@ class DataFeeder():
                 label = data[0]
                 _ = data[1]
                 sentence = data[2]
-                sentence = np.array(sentence[:2],dtype='float32')
-                print(sentence)
+                print(sentence[:2])
+                exit()
+                # sentence = np.array(sentence[:2],dtype='float32')
 
             return label, sentence
 
