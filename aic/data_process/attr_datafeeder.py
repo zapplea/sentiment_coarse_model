@@ -107,8 +107,9 @@ class DataFeeder():
                 sent = data[1]
                 print(sent.shape)
                 sentence = data[2]
-                print('sentence type: ',type(sentence))
-                print('sentence1: ',len(sentence[0]))
+                for s in sentence:
+                    if len(s)!=242:
+                        print(len(s))
             return label, sentence
 
 if __name__ == "__main__":
