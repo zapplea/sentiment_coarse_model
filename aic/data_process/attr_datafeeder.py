@@ -101,7 +101,7 @@ class DataFeeder():
                 label = data[0]
                 _ = data[1]
                 sentence = data[2]
-                sentence = np.array(sentence[:200],dtype='float32')
+                sentence = np.array(sentence[100:200],dtype='float32')
 
             return label, sentence
 
