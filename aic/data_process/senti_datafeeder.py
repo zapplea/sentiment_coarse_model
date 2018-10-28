@@ -39,15 +39,14 @@ class Dataset:
 class DataFeeder():
     def __init__(self, config):
         self.data_config = {
-                            'train_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_train_data.pkl',
-                            'test_data_file_path': '/datastore/liu121/sentidata2/expdata/fine_data/fine_test_data.pkl',
-                            'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
+                            'train_data_file_path': '/hdd/lujunyu/dataset/meituan/train.pkl',
+                            'test_data_file_path': '/hdd/lujunyu/dataset/meituan/dev.pkl',
+                            'batch_size':1
                           }
         self.data_config.update(config)
         self.train_attr_labels, self.train_senti_labels, self.train_sentences,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
         self.test_attr_labels, self.test_senti_labels, self.test_sentences = self.load_test_data()
         self.train_sentences, self.train_attr_labels, self.train_senti_labels = self.unison_shuffled_copies(self.train_sentences, self.train_attr_labels, self.train_senti_labels)
-        self.train_attr_labels, self.train_attr_labels, self.train_sentences = self.train_attr_labels[:self.data_config['top_k_data']], self.train_senti_labels[:self.data_config['top_k_data']], self.train_sentences[:self.data_config['top_k_data']]
         print('train.shape: ',self.train_sentences.shape)
         print('test.shape: ',self.test_sentences.shape)
         self.train_data_size = len(self.train_attr_labels)
@@ -85,12 +84,7 @@ class DataFeeder():
     def load_train_data(self):
         if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
             with open(self.data_config['train_data_file_path'],'rb') as f:
-                attribute_dic = pickle.load(f)
-                word_dic = pickle.load(f)
-                attr_labels = pickle.load(f)
-                senti_labels = pickle.load(f)
-                sentence = pickle.load(f)
-                word_embed = pickle.load(f)
+                attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
 
             return attr_labels, senti_labels, sentence , attribute_dic , word_dic ,word_embed
 
@@ -98,9 +92,7 @@ class DataFeeder():
         print('test path: ',self.data_config['test_data_file_path'])
         if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
             with open(self.data_config['test_data_file_path'],'rb') as f:
-                attr_labels = pickle.load(f)
-                senti_labels = pickle.load(f)
-                sentence = pickle.load(f)
+                attr_labels, senti_labels, sentence = pickle.load(f)
             return attr_labels, senti_labels, sentence
 
 

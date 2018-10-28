@@ -220,7 +220,7 @@ class SentimentFunction:
 
     def relative_pos_matrix(self, graph):
         V = tf.get_variable(name='relative_pos',
-                            initializer=tf.random_uniform(shape=(self.nn_config['rps_num'], self.nn_config['rp_dim']),
+                            initializer=tf.random_uniform(shape=(self.nn_config['rps_num'], self.nn_config['rps_dim']),
                                                           dtype='float32'))
         graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
         graph.add_to_collection('relpos_matrix', V)
@@ -251,7 +251,7 @@ class SentimentFunction:
         :return: beta weight, shape=(rp_dim)
         """
         b = tf.get_variable(name='beta',
-                            initializer=tf.random_uniform(shape=(self.nn_config['rp_dim'],), dtype='float32'))
+                            initializer=tf.random_uniform(shape=(self.nn_config['rps_dim'],), dtype='float32'))
         graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
         graph.add_to_collection('beta', b)
         return b
@@ -372,7 +372,7 @@ class SentimentFunction:
         # rp_mat.shape = (number of words, number of words, rp_dim)
         rp_mat=tf.nn.embedding_lookup(V,rp_ids)
         # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
-        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rp_dim']])
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rps_dim']])
         # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
         A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
         # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)

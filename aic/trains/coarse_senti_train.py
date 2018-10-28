@@ -20,14 +20,16 @@ from aic.functions.tfb_utils import Tfb
 class CoarseSentiTrain:
     def __init__(self,config, data_feeder):
         self.train_config ={
-                           'epoch': 1000,
+                           'epoch': 100,
                            'keep_prob_lstm': 0.5,
                            'top_k_data': -1,
-                           'early_stop_limit': 100,
-                           'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/fine_nn/senti_model/ckpt_reg%s_lr%s_mat%s/' \
+                           'early_stop_limit': 2,
+                           'tfb_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment2/ckpt_reg%s_lr%s_mat%s/' \
                                           % ('1e-5', '0.0001', '3'),
-                           'report_filePath':'/datastore/liu121/sentidata2/resultdata/fine_nn/senti_report/',
-                            'sr_path':'/datastore/liu121/sentidata2/resultdata/fine_nn/senti_model/ckpt_reg%s_lr%s_mat%s/' \
+                           'init_model':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
+                                          % ('1e-5', '0.0001', '3'),
+                           'report_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment2/senti_report/',
+                            'sr_path':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
                                       % ('1e-5', '0.0001', '3'),
 
                         }
@@ -99,12 +101,13 @@ class CoarseSentiTrain:
                 print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
                       ' Micro recall:', np.mean(_recall))
 
-                if best_f1_score < _f1_score:
+                if best_f1_score > _f1_score:
                     early_stop_count += 1
                 else:
                     early_stop_count = 0
                     best_f1_score = _f1_score
-                    saver.save(sess, self.train_config['sr_path'])
+                    _save_path = saver.save(sess, self.train_config['sr_path'])
+                    print("succ saving model in " + _save_path)
                 if early_stop_count > self.train_config['early_stop_limit']:
                     break
 
@@ -143,22 +146,26 @@ class CoarseSentiTrain:
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
                 sess.run(init, feed_dict={table: table_data})
+                if self.train_config['init_model']:
+                    model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
+                    saver.restore(sess, model_path)
+                    print("sucess init %s" % self.train_config['init_model'])
                 dic = {'sess':sess,'X':X, 'Y_att':Y_att,'Y_senti':Y_senti,'keep_prob_lstm':keep_prob_lstm,'saver':saver}
                 # ##############
                 # train attr   #
                 # ##############
-                dic['train_step'] = attr_train_step
-                dic['loss'] = attr_loss
-                dic['pred'] = attr_pred
-                self.__train__(dic)
+                # dic['train_step'] = attr_train_step
+                # dic['loss'] = attr_loss
+                # dic['pred'] = attr_pred
+                # self.__train__(dic)
 
                 # ##########################
                 # train senti (optional)   #
                 # ##########################
-                dic['train_step'] = senti_train_step
-                dic['loss'] = senti_loss
-                dic['pred'] = senti_pred
-                self.__train__(dic)
+                # dic['train_step'] = senti_train_step
+                # dic['loss'] = senti_loss
+                # dic['pred'] = senti_pred
+                # self.__train__(dic)
 
                 # ##########################
                 # train joint              #

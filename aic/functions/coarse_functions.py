@@ -271,7 +271,7 @@ class SentimentFunction:
 
     def relative_pos_matrix(self, graph):
         V = tf.get_variable(name='relative_pos',
-                            initializer=self.initializer(shape=(self.nn_config['rps_num'], self.nn_config['rp_dim']),
+                            initializer=self.initializer(shape=(self.nn_config['rps_num'], self.nn_config['rps_dim']),
                                                           dtype='float32'))
         graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
         graph.add_to_collection('V', V)
@@ -302,7 +302,7 @@ class SentimentFunction:
         :return: beta weight, shape=(rp_dim)
         """
         b = tf.get_variable(name='beta',
-                            initializer=self.initializer(shape=(self.nn_config['rp_dim'],), dtype='float32'))
+                            initializer=self.initializer(shape=(self.nn_config['rps_dim'],), dtype='float32'))
         graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
         graph.add_to_collection('beta', b)
         return b
@@ -423,7 +423,7 @@ class SentimentFunction:
         # rp_mat.shape = (number of words, number of words, rp_dim)
         rp_mat=tf.nn.embedding_lookup(V,rp_ids)
         # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
-        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rp_dim']])
+        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rps_dim']])
         # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
         A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
         # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
@@ -443,6 +443,7 @@ class SentimentFunction:
         condition = tf.equal(paddings, X)
         mask = tf.where(condition, tf.ones_like(X, dtype='float32') * tf.convert_to_tensor(-np.inf),
                         tf.zeros_like(X, dtype='float32'))
+        mask = tf.reshape(mask, shape=[-1, self.nn_config['words_num']])
         return mask
 
     # sentiment score
@@ -473,10 +474,11 @@ class SentimentFunction:
         :param fine_score: shape = (batch size*max review length, number of attributes+1,3)
         :return: sahpe = (batch size, coarse attr num + 1, 3)
         """
-        # shape = (fine attr num*3+3, coarse attr num*3+3)
-        W = tf.get_variable(name='fine2coarse',
-                            initializer=self.initializer(shape=(self.nn_config['attributes_num']*3+3, self.nn_config['coarse_attributes_num']*3+3), dtype='float32'))
-        graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
+        with tf.variable_scope('coarse_senti',reuse=tf.AUTO_REUSE):
+            # shape = (fine attr num*3+3, coarse attr num*3+3)
+            W = tf.get_variable(name='fine2coarse',
+                                initializer=self.initializer(shape=(self.nn_config['attributes_num']*3+3, self.nn_config['coarse_attributes_num']*3+3), dtype='float32'))
+            graph.add_to_collection('senti_reg', tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         # shape = (batch size * max review length, attr num*3 + 3)
         fine_score = tf.reshape(fine_score,shape=(-1, self.nn_config['attributes_num']*3+3))
         # shape = (batch size * max review length, coarse attr num*3 + 3)
@@ -526,7 +528,7 @@ class SentimentFunction:
         :return: 
         """
         loss = senti_loss + attr_loss
-        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
+        opt = tf.train.AdamOptimizer(self.nn_config['lr'],name='joint_opt').minimize(loss)
         graph.add_to_collection('joint_opt', opt)
         return opt
 
