@@ -100,8 +100,6 @@ class DataFeeder():
                 label = data[0]
                 _ = data[1]
                 sentence = data[2]
-                print(sentence.shape)
-                exit()
             return label, sentence
 
 if __name__ == "__main__":
