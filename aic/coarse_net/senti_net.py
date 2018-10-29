@@ -15,32 +15,33 @@ from aic.functions.coarse_functions import AttributeFunction
 
 class SentimentNet:
     def __init__(self,config):
-        self.nn_config = config
-        self.sf = SentimentFunction(self.nn_config)
-        self.comm = CoarseCommFunction(self.nn_config)
-        self.af = AttributeFunction(self.nn_config)
         self.nn_config = {
-            'words_num': 40,
+            'words_num': 210,
             'lstm_cell_size': 300,
             'word_dim': 300,
             'attribute_dim': 300,
-            'lookup_table_words_num': 34934,  # 34934,2074276 for Chinese word embedding
-            'padding_word_index': 34933,  # 34933,the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 116141,  # 34934,2074276 for Chinese word embedding
+            'padding_word_index': 116140,  # 34933,the index of #PAD# in word embeddings list
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
-            'attributes_num': 12,  # fine attributes number
-            'coarse_attributes_num': 22,
-            'batch_size': 200,
+            'attributes_num': 20,  # fine attributes number
+            'coarse_attributes_num': 20,
             'atr_pred_threshold': 0,
             'review_atr_pred_threshold': 0.5,
-            'max_review_len': 20,
-            'normal_senti_prototype_num': None,
-            'attribute_senti_prototype_num': None,
+            'max_review_len': 19,
+            'normal_senti_prototype_num': 4,
+            'attribute_senti_prototype_num': 4,
             'sentiment_dim': 300,
-            'rps_num': None,
-            'rps_dim': None,
+            'rps_num': 5,
+            'rps_dim': 100,
             'reg_rate': 1E-5,
             'lr': 1E-4,
+            'is_mat':True
         }
+        self.nn_config.update(config)
+        self.sf = SentimentFunction(self.nn_config)
+        self.comm = CoarseCommFunction(self.nn_config)
+        self.af = AttributeFunction(self.nn_config)
+
 
     def classifier(self):
         graph = tf.Graph()
@@ -177,10 +178,12 @@ class SentimentNet:
             graph.add_to_collection('joint_senti_score', joint_coarse_score)
             # softmax loss
             # TODO: check reg
-            senti_loss = self.sf.softmax_loss(labels=Y_senti, logits=joint_coarse_score, graph=graph)
-            joint_opt = self.sf.joint_optimizer(senti_loss, attr_loss, graph)
+            joint_loss = self.sf.softmax_loss(labels=Y_senti, logits=joint_coarse_score, graph=graph)
+            tf.add_to_collection('joint_loss', joint_loss)
+            joint_opt = self.sf.joint_optimizer(joint_loss, attr_loss, graph)
             # TODO: in coarse, should mask the prediction of padded sentences.
             joint_pred = self.sf.prediction(name='joint_senti_pred',score=joint_coarse_score, Y_atr=attr_pred, graph=graph)
+            tf.add_to_collection('joint_pred', joint_pred)
             saver = tf.train.Saver()
 
             return graph, saver

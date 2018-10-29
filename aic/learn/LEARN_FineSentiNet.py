@@ -9,6 +9,10 @@ elif getpass.getuser() == 'liu121':
 
 import argparse
 
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"  ## 0
+
 from aic.fine_net.senti_net import SentimentNet
 from aic.trains.fine_senti_train import FineSentiTrain
 from aic.data_process.senti_datafeeder import DataFeeder
@@ -31,9 +35,9 @@ if __name__ == "__main__":
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num]
             }
-    config['tfb_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s' \
+    config['tfb_filePath']='/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s' \
                             % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['report_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info' \
+    config['report_filePath']='/hdd/lujunyu/model/meituan/coarse_nn/report/sentiment/report_reg%s_lr%s_mat%s.info' \
                               % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
 
     main(config)

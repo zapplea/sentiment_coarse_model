@@ -16,23 +16,25 @@ from aic.functions.fine_functions import AttributeFunction
 class SentimentNet:
     def __init__(self,config):
         self.nn_config = {
-            'words_num': 40,
+            'words_num': 242,
+            'max_review_len':15,
             'lstm_cell_size': 300,
             'word_dim': 300,
             'attribute_dim': 300,
-            'lookup_table_words_num': 34934,  # 34934,2074276 for Chinese word embedding
-            'padding_word_index': 34933,  # 34933,the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 5075,  # 34934,2074276 for Chinese word embedding
+            'padding_word_index': 5074,  # 34933,the index of #PAD# in word embeddings list
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
             'attributes_num': 12,
-            'batch_size': 200,
+            'batch_size': 20,
             'atr_pred_threshold': 0,
-            'normal_senti_prototype_num': None,
-            'attribute_senti_prototype_num':None,
+            'normal_senti_prototype_num': 4,
+            'attribute_senti_prototype_num':4,
             'sentiment_dim':300,
-            'rps_num':None,
-            'rps_dim':None,
+            'rps_num':5,
+            'rps_dim':100,
             'reg_rate': 1E-5,
             'lr': 1E-4,
+            'is_mat': True
         }
         self.nn_config.update(config)
         self.sf = SentimentFunction(self.nn_config)

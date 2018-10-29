@@ -12,6 +12,7 @@ elif getpass.getuser() == "lizhou":
 import tensorflow as tf
 import numpy as np
 from pathlib import Path
+import time
 
 from aic.functions.metrics import Metrics
 from aic.functions.tfb_utils import Tfb
@@ -23,10 +24,10 @@ class CoarseAtrTrain:
                            'epoch': 1000,
                            'keep_prob_lstm': 0.5,
                            'top_k_data': -1,
-                           'early_stop_limit': 100,
-                           'tfb_filePath':'/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s' \
+                           'early_stop_limit': 2,
+                           'tfb_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/model/ckpt_reg%s_lr%s_mat%s' \
                                           % ('1e-5', '0.0001', '3'),
-                           'report_filePath':'/datastore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info' \
+                           'report_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/report/report_reg%s_lr%s_mat%s.info' \
                                              % ('1e-5', '0.0001', '3')
 
                         }
@@ -77,6 +78,7 @@ class CoarseAtrTrain:
                 sess.run(init, feed_dict={table: table_data})
                 early_stop_count = 0
                 best_f1_score = 0
+                print_and_valid = 0
                 for i in range(self.train_config['epoch']):
                     dataset = self.dg.data_generator('train')
                     for att_labels_data, sentences_data in dataset:
@@ -85,8 +87,10 @@ class CoarseAtrTrain:
                             [train_step, loss, pred],
                             feed_dict={X: sentences_data, Y_att: att_labels_data,
                                        keep_prob_lstm: self.train_config['keep_prob_lstm']})
+                        print_and_valid += 1
 
-                    if i % 1 == 0 and i != 0:
+                    if print_and_valid % 1 == 0 and print_and_valid != 0:
+                        print(time.strftime(' %Y-%m-%d %H:%M:%S', time.localtime(time.time())), print_and_valid)
                         loss_vec = []
                         pred_vec = []
                         score_vec = []
@@ -131,11 +135,13 @@ class CoarseAtrTrain:
                         micro_f1.load(np.mean(_f1_score))
                         micro_pre.load(np.mean(_precision))
                         micro_rec.load(np.mean(_recall))
-
-                        if best_f1_score<_f1_score:
+                        print(best_f1_score)
+                        if best_f1_score>_f1_score:
                             early_stop_count+=1
                         else:
                             early_stop_count=0
                             best_f1_score=_f1_score
+                            _save_path = saver.save(sess, self.train_config['tfb_filePath'])
+                            print("succ saving model in " + _save_path)
                         if early_stop_count>self.train_config['early_stop_limit']:
                             break

@@ -16,21 +16,19 @@ from aic.functions.comm_functions import CoarseCommFunction
 class AttributeNet:
     def __init__(self,config):
         self.nn_config = {
-            'words_num': 40,
+            'words_num': 210,
             'lstm_cell_size': 300,
             'word_dim': 300,
             'attribute_dim': 300,
-            'lookup_table_words_num': 34934,  # 34934,2074276 for Chinese word embedding
-            'padding_word_index': 34933,  # 34933,the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 116141,  # 34934,2074276 for Chinese word embedding
+            'padding_word_index': 116140,  # 34933,the index of #PAD# in word embeddings list
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
-            'attributes_num': 12, # fine attributes number
-            'coarse_attributes_num':22,
-            'batch_size': 200,
+            'attributes_num': 20, # fine attributes number
+            'coarse_attributes_num':20,
+            'batch_size': 2,
             'atr_pred_threshold': 0,
             'review_atr_pred_threshold':0.5,
-            'max_review_len':20,
-            'reg_rate': 1E-5,
-            'lr': 1E-4,
+            'max_review_len':19
         }
         self.nn_config.update(config)
         self.af = AttributeFunction(self.nn_config)
@@ -68,7 +66,7 @@ class AttributeNet:
             o_e = self.af.words_nonattribute_mat2vec(X, o, graph)
             A_e = A_e - o_e
 
-            mask = self.comm.mask_for_pad_in_score(X_ids, graph)
+            mask = self.comm.mask_for_pad_in_score(reshaped_X_ids, graph)
             score_lstm = self.af.sentence_score(A_lstm, H, mask, graph)
             # score.shape = (batch size*max review length, attributes num, words num)
             score_e = self.af.sentence_score(A_e, X, mask, graph)
@@ -85,6 +83,6 @@ class AttributeNet:
             pred = self.af.prediction(review_score,graph)
             loss = self.af.sigmoid_loss(review_score,Y_att,graph)
             opt = self.comm.optimizer(loss,graph)
-            saver = tf.train.Saver()
+            saver = tf.train.Saver(max_to_keep=1)
 
             return graph,saver

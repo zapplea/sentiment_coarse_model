@@ -13,6 +13,7 @@ class Dataset:
             self.batch_size=self.dataset_len
         else:
             self.batch_size=kwargs['batch_size']
+            self.dict = kwargs['dict']
         self.labels=labels
         self.sentences=sentences
         self.count=0
@@ -29,10 +30,12 @@ class Dataset:
                 labels_batch=self.labels[self.count:]
                 sentences_batch=self.sentences[self.count:]
             self.count+=self.batch_size
+            sentences_batch = self.sent2batch(sentences_batch, self.dict)
         else:
             raise StopIteration
         return labels_batch,sentences_batch
 
+<<<<<<< HEAD
 # TODO: check whether coarse and fine use the same wordembedding.
 class DataFeeder():
     def __init__(self, config):
@@ -41,12 +44,29 @@ class DataFeeder():
                             'train_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/train_fine.pkl',
                             'test_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/dev_fine.pkl',
                             'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
+=======
+    def sent2batch(self, batch, word_dic):
+        res = []
+        for text in batch:
+            tmp = []
+            for sent in text:
+                tmp.append([word_dic[x] for x in sent.split()])
+            res.append(np.array(tmp))
+        return np.array(res)
+
+class DataFeeder():
+    def __init__(self, config):
+        self.data_config = {
+                            'train_data_path': '/hdd/lujunyu/dataset/meituan/train.pkl',
+                            'test_data_path': '/hdd/lujunyu/dataset/meituan/dev.pkl',
+                            'top_k_data':10,
+                            'batch_size':2,
+>>>>>>> master
                           }
         self.data_config.update(config)
         self.train_labels, self.train_sentences,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
         self.test_labels, self.test_sentences = self.load_test_data()
         self.train_sentences, self.train_labels = self.unison_shuffled_copies(self.train_sentences, self.train_labels)
-        self.train_labels,self.train_sentences = self.train_labels[:self.data_config['top_k_data']] , self.train_sentences[:self.data_config['top_k_data']]
         print('train.shape: ',self.train_sentences.shape)
         print('test.shape: ',self.test_sentences.shape)
         self.train_data_size = len(self.train_labels)
@@ -61,9 +81,9 @@ class DataFeeder():
         # [( emb_id,fname,row_index m_id,c_id,typeText)]
 
         if flag == 'train':
-            dataset = Dataset(self.train_labels,self.train_sentences,batch_size=self.data_config['batch_size'])
+            dataset = Dataset(self.train_labels,self.train_sentences,batch_size=self.data_config['batch_size'],dict=self.dictionary)
         else:
-            dataset = Dataset(self.test_labels,self.test_sentences, batch_size=self.data_config['batch_size'])
+            dataset = Dataset(self.test_labels,self.test_sentences, batch_size=self.data_config['batch_size'], dict=self.dictionary)
         # during validation and test, to avoid errors are counted repeatedly,
         # we need to avoid the same data sended back repeately
         return dataset
@@ -81,6 +101,7 @@ class DataFeeder():
         return a[p], b[p]
 
     def load_train_data(self):
+<<<<<<< HEAD
         if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
             with open(self.data_config['train_data_file_path'],'rb') as f:
                 data=pickle.load(f)
@@ -101,6 +122,18 @@ class DataFeeder():
                 _ = data[1]
                 sentence = data[2]
             return label, sentence
+=======
+        with open(self.data_config['train_data_path'],'rb') as f:
+            attribute_dic, word_dic,label, sentence, word_embed  = pickle.load(f)
+
+        return label, sentence , attribute_dic , word_dic ,word_embed
+
+    def load_test_data(self):
+        print('test path: ',self.data_config['test_data_path'])
+        with open(self.data_config['test_data_path'],'rb') as f:
+            label, sentence = pickle.load(f)
+        return label, sentence
+>>>>>>> master
 
 if __name__ == "__main__":
     data_config = {}

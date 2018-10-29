@@ -23,7 +23,7 @@ class FineCommFunction:
         :param graph: 
         :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num'], 3),
                                  dtype='float32')
         # TODO: add non-attribute
         graph.add_to_collection('Y_senti', Y_senti)
@@ -142,12 +142,12 @@ class CoarseCommFunction:
 
     def sentences_input(self,graph):
         X = tf.placeholder(shape=(None,self.nn_config['max_review_len'],self.nn_config['words_num']),dtype='int32')
-        X = tf.reshape(X,shape=(-1,self.nn_config['words_num']))
+        # X = tf.reshape(X,shape=(-1,self.nn_config['words_num']))
         graph.add_to_collection('X',X)
         return X
 
     def attribute_labels_input(self,graph):
-        Y_ = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='int32')
+        Y_ = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='float32')
         graph.add_to_collection('Y_att',Y_)
         return Y_
 
@@ -191,6 +191,7 @@ class CoarseCommFunction:
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
         mask = tf.where(condition, tf.ones_like(X, dtype='float32') * (-np.inf), tf.zeros_like(X, dtype='float32'))
+        mask =  tf.reshape(mask, shape=[-1,self.nn_config['words_num']])
         return mask
 
         # should use variable share
@@ -279,7 +280,9 @@ class CoarseCommFunction:
         :param graph: 
         :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
+
+        ## TODO: ???+1
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num'], 3),
                                  dtype='float32')
         # TODO: add non-attribute
         graph.add_to_collection('Y_senti', Y_senti)
