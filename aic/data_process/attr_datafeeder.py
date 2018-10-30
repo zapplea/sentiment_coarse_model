@@ -35,16 +35,6 @@ class Dataset:
             raise StopIteration
         return labels_batch,sentences_batch
 
-<<<<<<< HEAD
-# TODO: check whether coarse and fine use the same wordembedding.
-class DataFeeder():
-    def __init__(self, config):
-        self.data_config = {
-                            'top_k_data':2000,
-                            'train_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/train_fine.pkl',
-                            'test_data_file_path': '/datastore/liu121/sentidata2/expdata/aic2018/fine_data/dev_fine.pkl',
-                            'wordembedding_file_path': '/datastore/liu121/wordEmb/googlenews/GoogleNews-vectors-negative300.bin',
-=======
     def sent2batch(self, batch, word_dic):
         res = []
         for text in batch:
@@ -61,7 +51,6 @@ class DataFeeder():
                             'test_data_path': '/hdd/lujunyu/dataset/meituan/dev.pkl',
                             'top_k_data':10,
                             'batch_size':2,
->>>>>>> master
                           }
         self.data_config.update(config)
         self.train_labels, self.train_sentences,self.aspect_dic , self.dictionary,self.table = self.load_train_data()
@@ -101,39 +90,16 @@ class DataFeeder():
         return a[p], b[p]
 
     def load_train_data(self):
-<<<<<<< HEAD
-        if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
-            with open(self.data_config['train_data_file_path'],'rb') as f:
-                data=pickle.load(f)
-                attribute_dic = data[0]
-                word_dic = data[1]
-                label = data[2]
-                _ = data[3]
-                sentence = data[4]
-                word_embed = data[5]
-
-            return label, sentence, attribute_dic, word_dic, word_embed
-
-    def load_test_data(self):
-        if os.path.exists(self.data_config['test_data_file_path']) and os.path.getsize(self.data_config['test_data_file_path']) > 0:
-            with open(self.data_config['test_data_file_path'],'rb') as f:
-                data = pickle.load(f)
-                label = data[0]
-                _ = data[1]
-                sentence = data[2]
-            return label, sentence
-=======
         with open(self.data_config['train_data_path'],'rb') as f:
-            attribute_dic, word_dic,label, sentence, word_embed  = pickle.load(f)
+            attribute_dic, word_dic,label,_, sentence, word_embed  = pickle.load(f)
 
         return label, sentence , attribute_dic , word_dic ,word_embed
 
     def load_test_data(self):
         print('test path: ',self.data_config['test_data_path'])
         with open(self.data_config['test_data_path'],'rb') as f:
-            label, sentence = pickle.load(f)
+            label, _, sentence = pickle.load(f)
         return label, sentence
->>>>>>> master
 
 if __name__ == "__main__":
     data_config = {}
