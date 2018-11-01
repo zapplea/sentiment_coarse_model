@@ -10,23 +10,23 @@ class FineCommFunction:
         X = tf.placeholder(
             shape=(None, self.nn_config['words_num']),
             dtype='int32')
-        graph.add_to_collection('X', X)
+        graph.add_to_collection('X',X)
         return X
 
     def attribute_labels_input(self, graph):
         Y_att = tf.placeholder(shape=(None, self.nn_config['attributes_num']), dtype='float32')
-        graph.add_to_collection('Y_att', Y_att)
+        graph.add_to_collection('Y_att',Y_att)
         return Y_att
 
-    def sentiment_labels_input(self, graph):
+    def sentiment_labels_input(self,graph):
         """
         :param graph: 
         :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num'], 3),
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
                                  dtype='float32')
         # TODO: add non-attribute
-        graph.add_to_collection('Y_senti', Y_senti)
+        graph.append('Y_senti', Y_senti)
         return Y_senti
 
     def sequence_length(self, X, graph):
@@ -65,16 +65,16 @@ class FineCommFunction:
         :param graph: 
         :return: 
         """
-        keep_prob = tf.placeholder(dtype='float32')
-        graph.add_to_collection('keep_prob_lstm', keep_prob)
+        # TODO: add regularizer
+        keep_prob_lstm = tf.placeholder(dtype='float32')
+        graph.add_to_collection('keep_prob_lstm',keep_prob_lstm)
         # graph.add_to_collection('keep_prob_lstm',keep_prob)
-        cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size']),input_keep_prob=keep_prob , output_keep_prob=keep_prob,state_keep_prob=keep_prob)
+        cell = tf.contrib.rnn.DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(self.nn_config['lstm_cell_size']),input_keep_prob=self.keep_prob_lstm , output_keep_prob=self.keep_prob_lstm,state_keep_prob=self.keep_prob_lstm)
         # outputs.shape = (batch size, max_time, cell size)
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
-        graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
 
-    def sentence_bilstm(self, X, seq_len, graph):
+    def sentence_bilstm(self,name, X, seq_len, reg, graph):
         """
         return a lstm of a sentence
         :param X: shape = (batch size, words number, word dim)
@@ -82,8 +82,8 @@ class FineCommFunction:
         :param graph: 
         :return: 
         """
-        keep_prob = tf.placeholder(dtype='float32')
-        graph.add_to_collection('keep_prob_lstm', keep_prob)
+        keep_prob_bilstm = tf.placeholder(dtype='float32')
+        graph.add_to_collection('keep_prob_bilstm',keep_prob_bilstm)
 
         fw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size'] / 2))
         bw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size'] / 2))
@@ -93,18 +93,16 @@ class FineCommFunction:
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
         scope_name = tf.contrib.framework.get_name_scope()
-        graph.add_to_collection('reg',
-                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+        reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
-        graph.add_to_collection('reg',
-                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+        reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
         return outputs
 
-    def optimizer(self, loss, graph):
-        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
-        graph.add_to_collection('opt', opt)
-        return opt
+    # def optimizer(self, loss, graph):
+    #     opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
+    #     graph.add_to_collection('opt', opt)
+    #     return opt
 
     def is_word_padding_input(self, X, graph):
         """
@@ -120,20 +118,14 @@ class FineCommFunction:
         mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1, 1, self.nn_config['word_dim']])
         return mask
 
-    def lookup_table(self, X, mask, graph):
+    def lookup_table(self, X, mask, table, graph):
         """
         :param X: shape = (batch_size, words numbers)
         :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
-                               dtype='float32')
-        graph.add_to_collection('table', table)
-        table = tf.Variable(table, name='table')
-        graph.add_to_collection('table_val',table)
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings, mask)
-        graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
 class CoarseCommFunction:
@@ -213,7 +205,7 @@ class CoarseCommFunction:
         graph.add_to_collection('sentence_lstm_outputs', outputs)
         return outputs
 
-    def sentence_bilstm(self, X, seq_len, graph):
+    def sentence_bilstm(self,name, X, seq_len, reg, graph):
         """
         return a lstm of a sentence
         :param X: shape = (batch size, words number, word dim)
@@ -221,8 +213,8 @@ class CoarseCommFunction:
         :param graph: 
         :return: 
         """
-        keep_prob = tf.placeholder(dtype='float32')
-        graph.add_to_collection('keep_prob_lstm', keep_prob)
+        keep_prob_bilstm = tf.placeholder(dtype='float32')
+        graph.add_to_collection('keep_prob_bilstm', keep_prob_bilstm)
 
         fw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size'] / 2))
         bw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size'] / 2))
@@ -231,19 +223,11 @@ class CoarseCommFunction:
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
-        graph.add_to_collection('sentence_bilstm_outputs', outputs)
-        graph.add_to_collection('reg',
-                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+        reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
-        graph.add_to_collection('reg',
-                                tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
+        reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
         return outputs
-
-    def optimizer(self, loss, graph):
-        opt = tf.train.AdamOptimizer(self.nn_config['lr']).minimize(loss)
-        graph.add_to_collection('opt', opt)
-        return opt
 
     def is_word_padding_input(self, X, graph):
         """
@@ -259,20 +243,14 @@ class CoarseCommFunction:
         mask = tf.tile(tf.expand_dims(mask, axis=2), multiples=[1, 1, self.nn_config['word_dim']])
         return mask
 
-    def lookup_table(self, X, mask, graph):
+    def lookup_table(self, X, mask, table, graph):
         """
         :param X: shape = (batch_size, words numbers)
         :param mask: used to prevent update of #PAD#
         :return: shape = (batch_size, words numbers, word dim)
         """
-        table = tf.placeholder(shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
-                               dtype='float32')
-        graph.add_to_collection('table', table)
-        table = tf.Variable(table, name='table')
-        graph.add_to_collection('table_val',table)
         embeddings = tf.nn.embedding_lookup(table, X, partition_strategy='mod', name='lookup_table')
         embeddings = tf.multiply(embeddings, mask)
-        graph.add_to_collection('lookup_table', embeddings)
         return embeddings
 
     def sentiment_labels_input(self, graph):
@@ -280,9 +258,7 @@ class CoarseCommFunction:
         :param graph: 
         :return: shape=[batch_size, number of attributes+1, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
         """
-
-        ## TODO: ???+1
-        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num'], 3),
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, 3),
                                  dtype='float32')
         # TODO: add non-attribute
         graph.add_to_collection('Y_senti', Y_senti)

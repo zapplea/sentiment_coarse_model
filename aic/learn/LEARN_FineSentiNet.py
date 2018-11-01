@@ -18,10 +18,10 @@ from aic.trains.fine_senti_train import FineSentiTrain
 from aic.data_process.senti_datafeeder import DataFeeder
 
 def main(config):
-    net = SentimentNet(config)
+    model_dic = SentimentNet.build(config)
     datafeeder = DataFeeder(config)
     train = FineSentiTrain(config,datafeeder)
-    train.train(net.classifier)
+    train.train(model_dic)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
