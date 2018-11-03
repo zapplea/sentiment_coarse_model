@@ -16,29 +16,7 @@ from aic.functions.multiGPU_builders import SentiNetBuilder
 
 class SentimentNet:
     def __init__(self,config, graph, table):
-        self.nn_config = {
-            'words_num': 210,
-            'lstm_cell_size': 300,
-            'word_dim': 300,
-            'attribute_dim': 300,
-            'lookup_table_words_num': 116141,  # 34934,2074276 for Chinese word embedding
-            'padding_word_index': 116140,  # 34933,the index of #PAD# in word embeddings list
-            'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
-            'attributes_num': 20,  # fine attributes number
-            'coarse_attributes_num': 20,
-            'atr_pred_threshold': 0,
-            'review_atr_pred_threshold': 0.5,
-            'max_review_len': 19,
-            'normal_senti_prototype_num': 4,
-            'attribute_senti_prototype_num': 4,
-            'sentiment_dim': 300,
-            'rps_num': 5,
-            'rps_dim': 100,
-            'reg_rate': 1E-5,
-            'lr': 1E-4,
-            'is_mat':True
-        }
-        self.nn_config.update(config)
+        self.nn_config = config
         self.sf = SentimentFunction(self.nn_config)
         self.comm = CoarseCommFunction(self.nn_config)
         self.af = AttributeFunction(self.nn_config)

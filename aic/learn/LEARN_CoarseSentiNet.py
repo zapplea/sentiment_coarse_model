@@ -38,5 +38,5 @@ if __name__ == "__main__":
                             % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
     config['report_filePath']='/hdd/lujunyu/model/meituan/coarse_nn/report/sentiment/report_reg%s_lr%s_mat%s.info' \
                               % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-
     main(config)
+

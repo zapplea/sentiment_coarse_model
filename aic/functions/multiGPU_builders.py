@@ -3,17 +3,18 @@ import tensorflow as tf
 class SentiNetBuilder:
     def __init__(self,config):
         self.nn_config = {
-            'words_num': 242,
-            'max_review_len': 15,
+            'words_num': 210,
             'lstm_cell_size': 300,
             'word_dim': 300,
             'attribute_dim': 300,
-            'lookup_table_words_num': 5075,  # 34934,2074276 for Chinese word embedding
-            'padding_word_index': 5074,  # 34933,the index of #PAD# in word embeddings list
+            'lookup_table_words_num': 116141,  # 34934,2074276 for Chinese word embedding
+            'padding_word_index': 116140,  # 34933,the index of #PAD# in word embeddings list
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
-            'attributes_num': 12,
-            'batch_size': 20,
+            'attributes_num': 20,  # fine attributes number
+            'coarse_attributes_num': 20,
             'atr_pred_threshold': 0,
+            'review_atr_pred_threshold': 0,
+            'max_review_len': 19,
             'normal_senti_prototype_num': 4,
             'attribute_senti_prototype_num': 4,
             'sentiment_dim': 300,
@@ -22,7 +23,7 @@ class SentiNetBuilder:
             'reg_rate': 1E-5,
             'lr': 1E-4,
             'is_mat': True,
-            'gpu_num': 4,
+            'gpu_num':4
         }
         self.nn_config.update(config)
 
@@ -147,6 +148,7 @@ class SentiNetBuilder:
                 table = tf.placeholder(
                     shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
                     dtype='float32')
+                graph.add_to_collection('table',table)
                 table = tf.Variable(table, name='table')
                 opt = tf.train.AdamOptimizer(self.nn_config['lr'])
                 for k in range(self.nn_config['gpu_num']):

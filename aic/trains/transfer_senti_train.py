@@ -44,19 +44,20 @@ class TransSentiTrain:
         self.mt = Metrics()
         self.tfb = Tfb(self.train_config)
 
-    def transfer(self,classifier):
-        graph,saver = classifier()
+    def transfer(self,model_dic):
+        graph = model_dic['graph']
+        saver = model_dic['saver']
         with graph.as_default():
             bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
             bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
             bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
             bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
-            A = graph.get_collection('A_mat')[0]
-            O = graph.get_collection('o_mat')[0]
-            table = graph.get_collection('table')[0]
-            senti_matrix= graph.get_collection('senti_matrix')[0]
-            relpos_matrix = graph.get_collection('relpos_matrix')[0]
-            beta = graph.get_collection('beta')[0]
+            A = graph.get_tensor_by_name('A_mat')
+            O = graph.get_tensor_by_name('o_mat')
+            table = graph.get_tensor_by_name('table')
+            senti_matrix= graph.get_tensor_by_name('senti_mat')
+            relpos_matrix = graph.get_tensor_by_name('relative_pos')
+            beta = graph.get_tensor_by_name('beta')
 
         with graph.device('/gpu:0'):
             config = tf.ConfigProto(allow_soft_placement=True)
@@ -141,41 +142,41 @@ class TransSentiTrain:
                 if early_stop_count > self.train_config['early_stop_limit']:
                     break
 
-    def train(self,classifier, init_data):
-        graph, saver = classifier
+    def train(self,model_dic, init_data):
+        graph = model_dic['graph']
+        saver = model_dic['saver']
+
         with graph.as_default():
-            # input
-            X = graph.get_collection('X')[0]
-            # labels
-            Y_att = graph.get_collection('Y_att')[0]
-            Y_senti = graph.get_collection('Y_senti')[0]
-            # train_step
-            attr_train_step = graph.get_collection('attr_opt')[0]
-            senti_train_step = graph.get_collection('senti_opt')[0]
-            joint_train_step = graph.get_collection('joint_opt')[0]
-            #
-            table = graph.get_collection('table')[0]
-            # loss
-            attr_loss = graph.get_collection('atr_loss')[0]
-            senti_loss = graph.get_collection('senti_loss')[0]
-            joint_loss = graph.get_collection('joint_loss')[0]
+            # # input
+            # X = graph.get_collection('X')[0]
+            # # labels
+            # Y_att = graph.get_collection('Y_att')[0]
+            # Y_senti = graph.get_collection('Y_senti')[0]
+            # # train_step
+            # attr_train_step = graph.get_collection('attr_opt')[0]
+            # senti_train_step = graph.get_collection('senti_opt')[0]
+            # joint_train_step = graph.get_collection('joint_opt')[0]
+            # #
+            # table = graph.get_collection('table')[0]
+            # # loss
+            # attr_loss = graph.get_collection('atr_loss')[0]
+            # senti_loss = graph.get_collection('senti_loss')[0]
+            # joint_loss = graph.get_collection('joint_loss')[0]
 
-            # pred
-            attr_pred = graph.get_collection('atr_pred')[0]
-            senti_pred = graph.get_collection('senti_pred')[0]
+            # # pred
+            # attr_pred = graph.get_collection('atr_pred')[0]
+            # senti_pred = graph.get_collection('senti_pred')[0]
 
-            bilstm_fw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
-            bilstm_fw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
-            bilstm_bw_kernel = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
-            bilstm_bw_bias = graph.get_tensor_by_name('sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
-            A = graph.get_collection('A_mat')[0]
-            O = graph.get_collection('o_mat')[0]
-            table = graph.get_collection('table')[0]
-            senti_mat = graph.get_collection('senti_matrix')[0]
-            relpos_mat = graph.get_collection('relpos_matrix')[0]
-            beta = graph.get_collection('beta')[0]
-
-            keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
+            bilstm_fw_kernel = graph.get_tensor_by_name('sentiment/sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')
+            bilstm_fw_bias = graph.get_tensor_by_name('sentiment/sentence_bilstm/bidirectional_rnn/fw/basic_lstm_cell/bias:0')
+            bilstm_bw_kernel = graph.get_tensor_by_name('sentiment/sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')
+            bilstm_bw_bias = graph.get_tensor_by_name('sentiment/sentence_bilstm/bidirectional_rnn/bw/basic_lstm_cell/bias:0')
+            A = graph.get_tensor_by_name('sentiment/A_mat')
+            O = graph.get_tensor_by_name('sentiment/o_mat')
+            table = graph.get_tensor_by_name('table')
+            senti_mat = graph.get_tensor_by_name('senti_mat')
+            relpos_mat = graph.get_tensor_by_name('relative_pos')
+            beta = graph.get_tensor_by_name('beta')
 
             # attribute function
             init = tf.global_variables_initializer()
@@ -194,28 +195,32 @@ class TransSentiTrain:
                 senti_mat.load(init_data['senti_matrix'],sess)
                 relpos_mat.load(init_data['relpos_matrix'],sess)
                 beta.load(init_data['beta'],sess)
-                dic = {'sess': sess, 'X': X, 'Y_att': Y_att, 'Y_senti': Y_senti, 'keep_prob_lstm': keep_prob_lstm,
-                       'saver': saver}
+                dic = {'sess': sess, 'saver': model_dic['saver']}
+
                 # ##############
                 # train attr   #
                 # ##############
-                dic['train_step'] = attr_train_step
-                dic['loss'] = attr_loss
-                dic['pred'] = attr_pred
-                self.__train__(dic)
+                dic['train_step'] = model_dic['train_step']['attr']
+                dic['loss'] = model_dic['loss']['attr']
+                dic['pred'] = model_dic['pred_labels']['attr']
+                dic['test_mod'] = 'attr'
+
+                self.__train__(dic, graph, model_dic['gpu_num'])
 
                 # ##########################
                 # train senti (optional)   #
                 # ##########################
-                dic['train_step'] = senti_train_step
-                dic['loss'] = senti_loss
-                dic['pred'] = senti_pred
-                self.__train__(dic)
+                dic['train_step'] = model_dic['train_step']['senti']
+                dic['loss'] = model_dic['loss']['senti']
+                dic['pred'] = model_dic['pred_labels']['senti']
+                dic['test_mod'] = 'senti'
+                self.__train__(model_dic, graph, model_dic['gpu_num'])
 
                 # ##########################
                 # train joint              #
                 # ##########################
-                dic['train_step'] = joint_train_step
-                dic['loss'] = joint_loss
-                dic['pred'] = joint_pred
-                self.__train__(dic)
+                dic['train_step'] = model_dic['train_step']['joint']
+                dic['loss'] = model_dic['loss']['joint']
+                dic['pred'] = model_dic['pred_labels']['joint']
+                dic['test_mod'] = 'joint'
+                self.__train__(model_dic, graph, model_dic['gpu_num'])

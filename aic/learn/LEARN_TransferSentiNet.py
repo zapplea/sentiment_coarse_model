@@ -17,10 +17,10 @@ from aic.data_process.attr_datafeeder import DataFeeder
 def main(config):
     datafeeder = DataFeeder(config)
     train = TransSentiTrain(config, datafeeder)
-    fine_net = FineSentiNet(config)
-    init_data = train.transfer(fine_net.classifier)
-    coarse_net = CoarseSentiNet(config)
-    train.train(coarse_net.classifier,init_data)
+    model_dic = FineSentiNet.build(config)
+    init_data = train.transfer(model_dic)
+    model_dic = CoarseSentiNet.build(config)
+    train.train(model_dic,init_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
