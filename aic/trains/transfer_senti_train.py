@@ -77,28 +77,23 @@ class TransSentiTrain:
                       'beta':beta_data}
                 return init
 
-    def __train__(self,dic):
+    def __train__(self, dic, graph, gpu_num):
         sess = dic['sess']
         train_step = dic['train_step']
         loss = dic['loss']
         pred = dic['pred']
-        X=dic['X']
-        Y_att = dic['Y_att']
-        Y_senti = dic['Y_senti']
-        keep_prob_lstm = dic['keep_prob_lstm']
         saver = dic['saver']
         early_stop_count = 0
         best_f1_score = 0
 
         for i in range(self.train_config['epoch']):
-
             dataset = self.dg.data_generator('train')
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
+                data_dict = {'X_data':sentences_data,'Y_att_data':attr_labels_data,
+                             'Y_senti_data':senti_labels_data,'keep_prob':self.train_config['keep_prob_lstm']}
+                feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                 _, train_loss, pred_data, \
-                    = sess.run(
-                    [train_step, loss, pred, ],
-                    feed_dict={X: sentences_data, Y_att: attr_labels_data, Y_senti: senti_labels_data,
-                               keep_prob_lstm: self.train_config['keep_prob_lstm']})
+                    = sess.run([train_step, loss, pred],feed_dict=feed_dict)
 
             if i % 1 == 0 and i != 0:
                 loss_vec = []
@@ -106,16 +101,26 @@ class TransSentiTrain:
                 FP_vec = []
                 FN_vec = []
                 dataset = self.dg.data_generator('val')
-                for att_labels_data, senti_labels_data, sentences_data in dataset:
+                for attr_labels_data, senti_labels_data, sentences_data in dataset:
+                    data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
+                                 'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
+                    feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                     test_loss, pred_data = sess.run(
                         [loss, pred],
-                        feed_dict={X: sentences_data,
-                                   Y_att: att_labels_data, Y_senti: senti_labels_data,
-                                   keep_prob_lstm: 1.0
-                                   })
-                    TP_data = self.mt.TP(att_labels_data, pred_data)
-                    FP_data = self.mt.FP(att_labels_data, pred_data)
-                    FN_data = self.mt.FN(att_labels_data, pred_data)
+                        feed_dict=feed_dict)
+                    if dic['test_mod'] == 'attr':
+                        TP_data = self.mt.TP(attr_labels_data, pred_data)
+                        FP_data = self.mt.FP(attr_labels_data, pred_data)
+                        FN_data = self.mt.FN(attr_labels_data, pred_data)
+                    else:
+                        d0 = senti_labels_data.shape[0]
+                        d1 = senti_labels_data.shape[1]
+                        d2 = senti_labels_data.shape[2]
+                        senti_labels_data = np.reshape(senti_labels_data,newshape=(d0,d1*d2))
+                        pred_data = np.reshape(pred_data,newshape=(d0,d1*d2))
+                        TP_data = self.mt.TP(senti_labels_data, pred_data)
+                        FP_data = self.mt.FP(senti_labels_data, pred_data)
+                        FN_data = self.mt.FN(senti_labels_data, pred_data)
                     ###Show test message
                     TP_vec.append(TP_data)
                     FP_vec.append(FP_data)
@@ -127,11 +132,11 @@ class TransSentiTrain:
                 FN_vec = np.concatenate(FN_vec, axis=0)
                 print('Val_loss:%.10f' % np.mean(loss_vec))
 
-                _precision = self.mt.precision(TP_vec, FP_vec, 'micro')
-                _recall = self.mt.recall(TP_vec, FN_vec, 'micro')
-                _f1_score = self.mt.f1_score(_precision, _recall, 'micro')
-                print('Micro F1 score:', _f1_score, ' Micro precision:', np.mean(_precision),
-                      ' Micro recall:', np.mean(_recall))
+                _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
+                _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
+                _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
+                print('Macro F1 score:', _f1_score, ' Macro precision:', np.mean(_precision),
+                      ' Macro recall:', np.mean(_recall))
 
                 if best_f1_score < _f1_score:
                     early_stop_count += 1
