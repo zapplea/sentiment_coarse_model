@@ -19,19 +19,19 @@ from aic.functions.tfb_utils import Tfb
 class TransSentiTrain:
     def __init__(self,config,data_feeder):
         self.train_config = {
-                            'epoch': 1000,
+                            'epoch': 10,
                             'reg_rate': 1E-5,
                             'lr': 1E-4,
                             'keep_prob_lstm': 0.5,
                             'top_k_data': -1,
-                            'early_stop_limit': 100,
-                            'tfb_filePath': '/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
-                                            % ('1e-5', '0.0001', '3'),
-                            'report_filePath': '/datastore/liu121/sentidata2/resultdata/fine_nn/report/',
-                            'sr_path': '/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
+                            'early_stop_limit': 2,
+                            'report_filePath': '/datastore/liu121/sentidata2/report/transfer_nn/',
+                            'sr_path': '/datastore/liu121/sentidata2/result/fine_nn/model/ckpt_reg%s_lr%s_mat%s/' \
                                        % ('1e-5', '0.0001', '3'),
+                            'initial_file_path':'/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s/' \
+                                           %('1e-5','0.0001','3'),
                             }
-        for name in ['tfb_filePath', 'report_filePath','sr_path']:
+        for name in ['report_filePath','sr_path']:
             path = Path(self.train_config[name])
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
@@ -42,7 +42,6 @@ class TransSentiTrain:
         self.dg = data_feeder
         # self.cl is a class
         self.mt = Metrics()
-        self.tfb = Tfb(self.train_config)
 
     def transfer(self,model_dic):
         graph = model_dic['graph']
@@ -63,7 +62,7 @@ class TransSentiTrain:
             config = tf.ConfigProto(allow_soft_placement=True)
             config.gpu_options.allow_growth = True
             with tf.Session(graph=graph, config=config) as sess:
-                model_file = tf.train.latest_checkpoint(self.train_config['sr_path'])
+                model_file = tf.train.latest_checkpoint(self.train_config['initial_file_path'])
                 saver.restore(sess, model_file)
                 table_data, A_data, O_data, bilstm_fw_kernel_data, bilstm_fw_bias_data, bilstm_bw_kernel_data, bilstm_bw_bias_data,senti_matrix_data,relpos_matrix_data,beta_data=\
                     sess.run([table,A,O,bilstm_fw_kernel,bilstm_fw_bias,bilstm_bw_kernel,bilstm_bw_bias,senti_matrix,relpos_matrix,beta])
@@ -75,7 +74,7 @@ class TransSentiTrain:
                       'senti_matrix':senti_matrix_data,
                       'relpos_matrix':relpos_matrix_data,
                       'beta':beta_data}
-                return init
+        return init
 
     def __train__(self, dic, graph, gpu_num):
         sess = dic['sess']
@@ -186,46 +185,45 @@ class TransSentiTrain:
             # attribute function
             init = tf.global_variables_initializer()
 
-        with graph.device('/gpu:0'):
-            config = tf.ConfigProto(allow_soft_placement=True)
-            config.gpu_options.allow_growth = True
-            with tf.Session(graph=graph, config=config) as sess:
-                sess.run(init, feed_dict={table: init_data['table']})
-                A.load(init_data['A'], sess)
-                O.load(init_data['O'], sess)
-                bilstm_fw_kernel.load(init_data['bilstm_fw_kernel'], sess)
-                bilstm_fw_bias.load(init_data['bilstm_fw_bias'], sess)
-                bilstm_bw_kernel.load(init_data['bilstm_bw_kernel'], sess)
-                bilstm_bw_bias.load(init_data['bilstm_bw_bias'], sess)
-                senti_mat.load(init_data['senti_matrix'],sess)
-                relpos_mat.load(init_data['relpos_matrix'],sess)
-                beta.load(init_data['beta'],sess)
-                dic = {'sess': sess, 'saver': model_dic['saver']}
+        config = tf.ConfigProto(allow_soft_placement=True)
+        config.gpu_options.allow_growth = True
+        with tf.Session(graph=graph, config=config) as sess:
+            sess.run(init, feed_dict={table: init_data['table']})
+            A.load(init_data['A'], sess)
+            O.load(init_data['O'], sess)
+            bilstm_fw_kernel.load(init_data['bilstm_fw_kernel'], sess)
+            bilstm_fw_bias.load(init_data['bilstm_fw_bias'], sess)
+            bilstm_bw_kernel.load(init_data['bilstm_bw_kernel'], sess)
+            bilstm_bw_bias.load(init_data['bilstm_bw_bias'], sess)
+            senti_mat.load(init_data['senti_matrix'],sess)
+            relpos_mat.load(init_data['relpos_matrix'],sess)
+            beta.load(init_data['beta'],sess)
+            dic = {'sess': sess, 'saver': model_dic['saver']}
 
-                # ##############
-                # train attr   #
-                # ##############
-                dic['train_step'] = model_dic['train_step']['attr']
-                dic['loss'] = model_dic['loss']['attr']
-                dic['pred'] = model_dic['pred_labels']['attr']
-                dic['test_mod'] = 'attr'
+            # ##############
+            # train attr   #
+            # ##############
+            dic['train_step'] = model_dic['train_step']['attr']
+            dic['loss'] = model_dic['loss']['attr']
+            dic['pred'] = model_dic['pred_labels']['attr']
+            dic['test_mod'] = 'attr'
 
-                self.__train__(dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'])
 
-                # ##########################
-                # train senti (optional)   #
-                # ##########################
-                dic['train_step'] = model_dic['train_step']['senti']
-                dic['loss'] = model_dic['loss']['senti']
-                dic['pred'] = model_dic['pred_labels']['senti']
-                dic['test_mod'] = 'senti'
-                self.__train__(model_dic, graph, model_dic['gpu_num'])
+            # ##########################
+            # train senti (optional)   #
+            # ##########################
+            dic['train_step'] = model_dic['train_step']['senti']
+            dic['loss'] = model_dic['loss']['senti']
+            dic['pred'] = model_dic['pred_labels']['senti']
+            dic['test_mod'] = 'senti'
+            self.__train__(model_dic, graph, model_dic['gpu_num'])
 
-                # ##########################
-                # train joint              #
-                # ##########################
-                dic['train_step'] = model_dic['train_step']['joint']
-                dic['loss'] = model_dic['loss']['joint']
-                dic['pred'] = model_dic['pred_labels']['joint']
-                dic['test_mod'] = 'joint'
-                self.__train__(model_dic, graph, model_dic['gpu_num'])
+            # ##########################
+            # train joint              #
+            # ##########################
+            dic['train_step'] = model_dic['train_step']['joint']
+            dic['loss'] = model_dic['loss']['joint']
+            dic['pred'] = model_dic['pred_labels']['joint']
+            dic['test_mod'] = 'joint'
+            self.__train__(model_dic, graph, model_dic['gpu_num'])

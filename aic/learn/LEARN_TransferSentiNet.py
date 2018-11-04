@@ -34,9 +34,13 @@ if __name__ == "__main__":
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
             }
-    config['tfb_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s' \
-                            % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['report_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info' \
-                              % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
+    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_fine.pkl'
+    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_fine.pkl'
+
+    config['sr_path'] = '/datastore/liu121/sentidata2/result/transfer_nn/ckpt_reg%s_lr%s_mat%s' \
+                        % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
+    config['initial_file_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s' % ('1E-5', '0.0001', '5')
+    config['report_filePath'] = '/datastore/liu121/sentidata2/report/transfer_nn/report_reg%s_lr%s_mat%s.info' \
+                                % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
 
     main(config)
