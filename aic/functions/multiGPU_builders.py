@@ -23,7 +23,8 @@ class SentiNetBuilder:
             'reg_rate': 1E-5,
             'lr': 1E-4,
             'is_mat': True,
-            'gpu_num':4
+            'gpu_num':4,
+            'elmo':{}
         }
         self.nn_config.update(config)
 
@@ -183,3 +184,67 @@ class SentiNetBuilder:
                 'pred_labels':{'attr':attr_pred_labels, 'senti':senti_pred_labels, 'joint':joint_pred_labels},
                 'loss':{'attr':attr_loss, 'senti':senti_loss, 'joint':joint_loss},
                 'saver':saver,'graph':graph, 'gpu_num':self.nn_config['gpu_num']}
+
+    def build_models_with_elmo(self, Model, Elmo):
+        graph = tf.Graph()
+        models = []
+        attr_tower_grads = []
+        senti_tower_grads = []
+        joint_tower_grads = []
+        with tf.device('/cpu:0'):
+            with graph.as_default():
+                global_step = tf.get_variable(
+                    'global_step', [],
+                    initializer=tf.constant_initializer(0), trainable=False)
+                table = tf.placeholder(
+                    shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
+                    dtype='float32')
+                graph.add_to_collection('table', table)
+                table = tf.Variable(table, name='table')
+                opt = tf.train.AdamOptimizer(self.nn_config['lr'])
+                for k in range(self.nn_config['gpu_num']):
+                    with tf.device('/gpu:%d' % k):
+                        with tf.variable_scope('elmo',reuse=k>0):
+                            self.nn_config['elmo']['graph']=graph
+                            lm_model = Elmo(self.nn_config['elmo'],False)
+
+
+                        with tf.variable_scope('sentiment', reuse=k > 0):
+                            model = Model(self.nn_config, graph=graph, table=table, elmo=lm_model)
+                            models.append(model)
+                            if self.nn_config['elmo']['trainable']:
+                                var_list = None
+                            else:
+                                var_list=graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,scope='sentiment')
+                            # attribute
+                            grad = opt.compute_gradients(graph.get_collection('attr_loss')[-1],
+                                                         aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE, var_list= var_list)
+                            attr_tower_grads.append(grad)
+                            # sentiment
+                            grad = opt.compute_gradients(graph.get_collection('senti_loss')[-1],
+                                                         aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE, var_list= var_list)
+                            senti_tower_grads.append(grad)
+                            # joint
+                            grad = opt.compute_gradients(graph.get_collection('joint_loss')[-1],
+                                                         aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE, var_list= var_list)
+                            joint_tower_grads.append(grad)
+                # gradient and train step
+                attr_avg_grads = self.average_gradients(attr_tower_grads)
+                attr_train_step = opt.apply_gradients(attr_avg_grads, global_step=global_step)
+
+                senti_avg_grads = self.average_gradients(senti_tower_grads)
+                senti_train_step = opt.apply_gradients(senti_avg_grads, global_step=global_step)
+
+                joint_avg_grads = self.average_gradients(joint_tower_grads)
+                joint_train_step = opt.apply_gradients(joint_avg_grads, global_step=global_step)
+                # label
+                attr_pred_labels, senti_pred_labels, joint_pred_labels = self.concat_pred_labels(graph,
+                                                                                                 self.nn_config[
+                                                                                                     'gpu_num'])
+                # loss
+                attr_loss, senti_loss, joint_loss = self.average_loss(graph, self.nn_config['gpu_num'])
+                saver = tf.train.Saver()
+        return {'train_step': {'attr': attr_train_step, 'senti': senti_train_step, 'joint': joint_train_step},
+                'pred_labels': {'attr': attr_pred_labels, 'senti': senti_pred_labels, 'joint': joint_pred_labels},
+                'loss': {'attr': attr_loss, 'senti': senti_loss, 'joint': joint_loss},
+                'saver': saver, 'graph': graph, 'gpu_num': self.nn_config['gpu_num']}
