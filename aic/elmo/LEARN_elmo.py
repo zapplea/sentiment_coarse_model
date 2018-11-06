@@ -23,7 +23,7 @@ def main(args):
 
     # number of tokens in training data (this for 1B Word Benchmark)
     n_train_tokens = 768648884
-
+    # TODO: there is not epoch
     options = {
         'bidirectional': True,
 
@@ -50,6 +50,10 @@ def main(args):
     prefix = args.train_prefix
     data = BidirectionalLMDataset(prefix, vocab, test=False,
                                   shuffle_on_load=True)
+    # TODO: analyze data
+    data_gen = data.iter_batches(128 * 3, 20)
+    print(type(data_gen))
+    exit()
 
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir

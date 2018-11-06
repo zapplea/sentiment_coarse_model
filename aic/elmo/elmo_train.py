@@ -258,14 +258,11 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
     bidirectional = options.get('bidirectional', False)
     with tf.Session(graph=graph,config=tf.ConfigProto(
             allow_soft_placement=True)) as sess:
-        print('initiate')
         sess.run(init)
-        print('after train')
         # load the checkpoint data if needed
         if restart_ckpt_file is not None:
             loader = tf.train.Saver()
             loader.restore(sess, restart_ckpt_file)
-        print('writer')
         summary_writer = tf.summary.FileWriter(tf_log_dir, sess.graph)
 
         # For each batch:
@@ -276,13 +273,10 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
         # We also need to be careful with the LSTM states.  We will
         # collect the final LSTM states after each batch, then feed
         # them back in as the initial state for the next batch
-        print('batch size')
         batch_size = options['batch_size']
         unroll_steps = options['unroll_steps']
         n_train_tokens = options.get('n_train_tokens', 768648884)
-        print('1')
         n_tokens_per_batch = batch_size * unroll_steps * n_gpus
-        print('2')
         n_batches_per_epoch = int(n_train_tokens / n_tokens_per_batch)
         n_batches_total = options['n_epochs'] * n_batches_per_epoch
         print("Training for %s epochs and %s batches" % (
