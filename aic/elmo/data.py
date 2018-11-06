@@ -330,10 +330,7 @@ class LMDataset(object):
         shuffle_on_load = if True, then shuffle the sentences after loading.
         '''
         self._vocab = vocab
-        print('filepatter: ',filepattern)
         self._all_shards = glob.glob(filepattern)
-        print('_all_shards:', self._all_shards)
-        exit()
         print('Found %d shards at %s' % (len(self._all_shards), filepattern))
         self._shards_to_choose = []
 
