@@ -311,9 +311,12 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
 
         X = {'token_ids': inputs, 'tokens_characters': char_inputs,
                  'next_token_id': targets}
+        print('len X: ',len(X))
         print(inputs[0])
+        print(inputs[1])
         print('==========')
         print(targets[0])
+        print(targets[1])
         exit()
         yield X
 
