@@ -407,7 +407,7 @@ class LanguageModel(object):
                         initial_state=self.init_lstm_state[-1])
                 self.final_lstm_state.append(final_state)
 
-            self.lstm_outputs = _lstm_output_unpacked
+
             # (batch_size * unroll_steps, 512)
             lstm_output_flat = tf.reshape(
                 tf.stack(_lstm_output_unpacked, axis=1), [-1, projection_dim])
@@ -416,6 +416,8 @@ class LanguageModel(object):
                 # add dropout to output
                 lstm_output_flat = tf.nn.dropout(lstm_output_flat,
                                                  keep_prob)
+            tf.add_to_collection('lstm_output_embeddings',
+                                 _lstm_output_unpacked)
 
             lstm_outputs.append(lstm_output_flat)
 
