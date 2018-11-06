@@ -314,6 +314,7 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
         print(inputs[0])
         print('==========')
         print(targets[0])
+        exit()
         yield X
 
 class LMDataset(object):
