@@ -1,13 +1,12 @@
 '''
 Train and test bidirectional language models.
 '''
-
 import tensorflow as tf
 import numpy as np
 
 from tensorflow.python.ops.init_ops import glorot_uniform_initializer
 
-from .data import InvalidNumberOfCharacters
+from aic.elmo.data import InvalidNumberOfCharacters
 
 DTYPE = 'float32'
 DTYPE_INT = 'int64'

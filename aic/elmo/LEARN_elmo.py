@@ -1,9 +1,16 @@
+import getpass
+import sys
+if getpass.getuser() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model/')
+elif getpass.getuser() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model/')
+elif getpass.getuser() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model/')
 import argparse
-
 import numpy as np
 
-from .elmo_train import train, load_options_latest_checkpoint, load_vocab
-from .data import BidirectionalLMDataset
+from aic.elmo.elmo_train import train, load_options_latest_checkpoint, load_vocab
+from aic.elmo.data import BidirectionalLMDataset
 
 
 def main(args):

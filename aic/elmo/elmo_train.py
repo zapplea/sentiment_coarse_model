@@ -5,8 +5,8 @@ import re
 import tensorflow as tf
 import numpy as np
 
-from .elmo_net import LanguageModel
-from .data import Vocabulary, UnicodeCharsVocabulary, InvalidNumberOfCharacters
+from aic.elmo.elmo_net import LanguageModel
+from aic.elmo.data import Vocabulary, UnicodeCharsVocabulary, InvalidNumberOfCharacters
 
 
 def print_variable_summary():
