@@ -410,12 +410,17 @@ class LMDataset(object):
 
         print('Loaded %d sentences.' % len(ids))
         print('Finished loading')
+        for id in ids:
+            print('len: ',len(id))
+        exit()
         return list(zip(ids, chars_ids))
 
     def get_sentence(self):
         while True:
             if self._i == self._nids:
                 self._ids = self._load_random_shard()
+                print(self._ids)
+                exit()
             ret = self._ids[self._i]
             self._i += 1
             yield ret
