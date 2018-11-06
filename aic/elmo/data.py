@@ -286,9 +286,9 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
                         # No more data, exhaust current streams and quit
                         no_more_data = True
                         break
-                print('cur_stream')
-                print(cur_stream)
-                exit()
+                # print('cur_stream')
+                # print(cur_stream)
+                # exit()
                 how_many = min(len(cur_stream[i][0]) - 1, num_steps - cur_pos)
                 next_pos = cur_pos + how_many
 
@@ -311,7 +311,9 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
 
         X = {'token_ids': inputs, 'tokens_characters': char_inputs,
                  'next_token_id': targets}
-
+        print(inputs[0])
+        print('==========')
+        print(targets[0])
         yield X
 
 class LMDataset(object):
