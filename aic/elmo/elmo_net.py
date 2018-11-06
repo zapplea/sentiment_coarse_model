@@ -435,7 +435,7 @@ class LanguageModel(object):
         batch_size = self.options['batch_size']
         unroll_steps = self.options['unroll_steps']
 
-        n_tokens_vocab = self.options['n_tokens_vocab']
+        n_tokens_vocab = self.options['ne_tokens_vocab']
 
         # DEFINE next_token_id and *_reverse placeholders for the gold input
         def _get_next_token_placeholders(suffix):

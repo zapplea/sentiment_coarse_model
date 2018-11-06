@@ -211,9 +211,11 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
 
             print_variable_summary()
 
+            print('grads')
             # calculate the mean of each gradient across all GPUs
             grads = average_gradients(tower_grads, options['batch_size'], options)
             grads, norm_summary_ops = clip_grads(grads, options, True, global_step)
+            print('after grads')
             norm_summaries.extend(norm_summary_ops)
 
             # log the training perplexity
@@ -254,11 +256,12 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
             hist_summary_op = tf.summary.merge(histogram_summaries)
 
             init = tf.initialize_all_variables()
-
+    print('before training')
     # do the training loop
     bidirectional = options.get('bidirectional', False)
     with tf.Session(graph=graph,config=tf.ConfigProto(
             allow_soft_placement=True)) as sess:
+        print('initiate')
         sess.run(init)
         # load the checkpoint data if needed
         if restart_ckpt_file is not None:
