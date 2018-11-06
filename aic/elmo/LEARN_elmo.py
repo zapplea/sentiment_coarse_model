@@ -16,7 +16,10 @@ from aic.elmo.data import BidirectionalLMDataset
 def main(args):
     # load the vocab
     vocab = load_vocab(args.vocab_file, 50)
-
+    table = vocab._word_to_id
+    print('0: ',table[0])
+    print('1: ',table[1])
+    print('5310: ',table[5310])
     # define the options
     batch_size = 128  # batch size for each GPU
     n_gpus = 3
