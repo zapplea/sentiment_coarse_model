@@ -52,8 +52,11 @@ def main(args):
                                   shuffle_on_load=True)
     # TODO: analyze data
     data_gen = data.iter_batches(128 * 3, 20)
-    print(type(data_gen))
-    exit()
+    for batch_no, batch in enumerate(data_gen, start=1):
+        # slice the input in the batch for the feed_dict
+        X = batch
+        print(type(X))
+        exit()
 
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
