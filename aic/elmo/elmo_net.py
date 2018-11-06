@@ -407,7 +407,7 @@ class LanguageModel(object):
                         initial_state=self.init_lstm_state[-1])
                 self.final_lstm_state.append(final_state)
 
-            
+
             # (batch_size * unroll_steps, 512)
             lstm_output_flat = tf.reshape(
                 tf.stack(_lstm_output_unpacked, axis=1), [-1, projection_dim])
