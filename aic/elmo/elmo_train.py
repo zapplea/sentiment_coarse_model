@@ -260,6 +260,7 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
             allow_soft_placement=True)) as sess:
         print('initiate')
         sess.run(init)
+        print('after train')
         # load the checkpoint data if needed
         if restart_ckpt_file is not None:
             loader = tf.train.Saver()
