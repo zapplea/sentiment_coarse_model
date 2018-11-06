@@ -36,5 +36,8 @@ what's the behavior of the same variable when multiple gpu is used.
 4. for elmo
 confirm bidirectional in hyperparameter
 
+5.data process
+how to process number? convert to NUM4 format?
+
 # Question:
 1. we use sentiment_bilstm twice for sentiment and attribute seperately, should I combine them to one?
