@@ -55,9 +55,13 @@ def main(args):
     for batch_no, batch in enumerate(data_gen, start=1):
         # slice the input in the batch for the feed_dict
         X = batch
+        # TODO: analyze 1. how to generate next id
+        # TODO:         2. how to generate reverse.
+        # TODO:         3. how to process pad
         print(X.keys())
         print('=============')
         print(X['token_ids'])
+        print(X['next_token_ids'])
         print('=============')
         print(X['token_ids_reverse'])
         exit()
