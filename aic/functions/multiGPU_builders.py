@@ -48,7 +48,6 @@ class SentiNetBuilder:
                 print(g)
 
             g0, v0 = grad_and_vars[0]
-            print('g0: ',g0)
             print('==================')
 
             if g0 is None:
