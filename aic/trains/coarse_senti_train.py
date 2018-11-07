@@ -32,6 +32,7 @@ class CoarseSentiTrain:
                                       % ('1e-5', '0.0001', '3'),
 
                         }
+        self.train_config.update(config)
         for name in ['report_filePath','sr_path']:
             path = Path(self.train_config[name])
             if not path.exists():
