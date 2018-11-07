@@ -1,13 +1,8 @@
 import pickle
 import numpy as np
-with open('/datastore/liu121/sentidata2/expdata/aic2018/fine_data/dev_fine.pkl','rb') as f:
-    data = pickle.load(f)
-    sentence = []
-    for s in data[2]:
-        sentence.append(s)
-    sentence=np.array(sentence,dtype='int32')
-    data=(data[0],data[1],sentence)
-    print(data[0].shape,' ',data[1].shape,' ',data[2].shape)
+with open('/datastore/liu121/sentidata2/expdata/aic2018/coarse_data/train_coarse.pkl','rb') as f:
+    attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
+    print(senti_labels.shape)
 
-with open('/datastore/liu121/sentidata2/expdata/aic2018/fine_data/dev_fine.pkl','wb') as f:
-    pickle.dump(data,f)
+# with open('/datastore/liu121/sentidata2/expdata/aic2018/coarse_data/dev_fine.pkl','wb') as f:
+#     pickle.dump(data,f)
