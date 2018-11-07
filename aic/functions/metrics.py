@@ -24,6 +24,10 @@ class Metrics:
         else:
             return np.sum(TP) / (np.sum(TP) + np.sum(FP) + 1e-10)
 
+    def per_precision(self,TP,FP):
+        return np.divide(TP,np.add(TP,FP)+1e-10)
+
+
     def recall(self, TP, FN, flag):
         assert flag == 'macro' or flag == 'micro', 'Please enter right flag...'
         if flag == 'macro':
@@ -35,6 +39,9 @@ class Metrics:
         else:
             return np.sum(TP) / (np.sum(TP) + np.sum(FN) + 1e-10)
 
+    def per_recall(self,TP, FN):
+        return np.divide(TP, np.add(TP,FN)+1e-10)
+
     def f1_score(self, precision, recall, flag):
         assert flag == 'macro' or flag == 'micro', 'Please enter right flag...'
         if flag == 'macro':
@@ -44,3 +51,6 @@ class Metrics:
             return res
         else:
             return 2 * precision * recall / (precision + recall + 1e-10)
+
+    def per_f1_score(self,per_precision, per_recall):
+        return 2*per_precision*per_recall/(per_precision+per_recall+1e-10)

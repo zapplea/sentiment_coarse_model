@@ -10,16 +10,15 @@ import argparse
 import numpy as np
 
 from aic.elmo.elmo_train import train, load_options_latest_checkpoint, load_vocab
-from aic.elmo.data import BidirectionalLMDataset
+from aic.elmo.datafeeder import BidirectionalLMDataset
 
 
 def main(args):
-    # load the vocab
-    vocab = load_vocab(args.vocab_file, 50)
-    table = vocab._id_to_word
     # define the options
     batch_size = 128  # batch size for each GPU
     n_gpus = args.gpu_num
+    prefix = args.train_file
+    data = BidirectionalLMDataset(prefix, shuffle_on_load=True)
 
     # number of tokens in training data (this for 1B Word Benchmark)
     n_train_tokens = 768648884
@@ -47,9 +46,6 @@ def main(args):
         'n_negative_samples_batch': 8192,
     }
 
-    prefix = args.train_prefix
-    data = BidirectionalLMDataset(prefix, vocab, test=False,
-                                  shuffle_on_load=True)
     gen = data._data_forward.get_sentence()
     d = list(next(gen))
     print(d[0])
@@ -78,8 +74,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', help='Location of checkpoint files')
-    parser.add_argument('--vocab_file', help='Vocabulary file')
-    parser.add_argument('--train_prefix', help='Prefix for train files')
+    parser.add_argument('--train_file', help='Prefix for train files')
     parser.add_argument('--gpu_num',type=int,default=3)
 
     args = parser.parse_args()

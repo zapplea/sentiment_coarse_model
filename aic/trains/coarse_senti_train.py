@@ -116,6 +116,14 @@ class CoarseSentiTrain:
                 print('Macro F1 score:', _f1_score, ' Macro precision:', np.mean(_precision),
                       ' Macro recall:', np.mean(_recall))
 
+                # per class metrics
+                per_precision = self.mt.per_precision(TP_vec, FP_vec)
+                per_recall = self.mt.per_recall(TP_vec, FN_vec)
+                per_f1_score = self.mt.per_f1_score(per_precision,per_recall)
+                for i in range(per_precision.shape[0]):
+                    print(self.dg.id_to_aspect_dic[i],':','\nf1 score: ',per_f1_score[i],'\nprecision: ',per_precision[i],'\nrecall: ',per_recall[i])
+
+
                 if best_f1_score < _f1_score:
                     early_stop_count += 1
                 else:

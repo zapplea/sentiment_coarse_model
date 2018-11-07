@@ -45,6 +45,7 @@ class DataFeeder():
                           }
         self.data_config.update(config)
         self.train_attr_labels, self.train_senti_labels, self.train_sentences,self.aspect_dic , self.dictionary, self.table = self.load_train_data()
+        self.id_to_aspect_dic = dict((v,k) for k,v in self.aspect_dic.items())
         self.test_attr_labels, self.test_senti_labels, self.test_sentences = self.load_test_data()
         self.train_sentences, self.train_attr_labels, self.train_senti_labels = self.unison_shuffled_copies(self.train_sentences, self.train_attr_labels, self.train_senti_labels)
         print('train.shape: ',self.train_sentences.shape)
