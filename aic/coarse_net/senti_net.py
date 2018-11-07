@@ -80,7 +80,7 @@ class SentimentNet:
         # sentiment extraction #
         # #################### #
         # sentiment lstm
-        with tf.variable_scope('senti_sentence_bilstm'):
+        with tf.variable_scope('senti_sentence_bilstm',reuse=tf.AUTO_REUSE):
             # H.shape = (batch size * max review length, max_time, cell size)
             senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, graph=self.graph, scope_name='sentiment/senti_sentence_bilstm')
         # Y_senti.shape = [batch_size, number of attributes + 1, 3]
