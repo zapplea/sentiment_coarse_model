@@ -43,6 +43,10 @@ class SentiNetBuilder:
             #   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))
             # We need to average the gradients across each GPU.
 
+            for g,v in grad_and_vars:
+                print(v.name)
+                print(g)
+
             g0, v0 = grad_and_vars[0]
 
             if g0 is None:
