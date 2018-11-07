@@ -48,9 +48,11 @@ class SentiNetBuilder:
                 print(g)
 
             g0, v0 = grad_and_vars[0]
+            print('g0: ',g0)
 
             if g0 is None:
                 # no gradient for this variable, skip it
+                print('g0 is None')
                 average_grads.append((g0, v0))
                 continue
 
