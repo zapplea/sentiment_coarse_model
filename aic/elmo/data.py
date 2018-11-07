@@ -281,9 +281,10 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
             while cur_pos < num_steps:
                 if cur_stream[i] is None or len(cur_stream[i][0]) <= 1:
                     try:
+                        # give one batch to cur_stream[i]
                         cur_stream[i] = list(next(generator))
-                        print(len(cur_stream[i]))
-                        print(cur_stream[i])
+                        for j in range(10):
+                            print(len(cur_stream[i][j]))
                         exit()
                     except StopIteration:
                         # No more data, exhaust current streams and quit
@@ -382,7 +383,7 @@ class LMDataset(object):
             shard_name: file path.
 
         Returns:
-            list of (id, char_id) tuples.
+            list of (id, char_id) tuples. the id is not padded.
         """
         print('Loading data from: %s' % shard_name)
         with open(shard_name) as f:
@@ -410,17 +411,12 @@ class LMDataset(object):
 
         print('Loaded %d sentences.' % len(ids))
         print('Finished loading')
-        for id in ids:
-            print('len: ',len(id))
-        exit()
         return list(zip(ids, chars_ids))
 
     def get_sentence(self):
         while True:
             if self._i == self._nids:
                 self._ids = self._load_random_shard()
-                print(self._ids)
-                exit()
             ret = self._ids[self._i]
             self._i += 1
             yield ret
