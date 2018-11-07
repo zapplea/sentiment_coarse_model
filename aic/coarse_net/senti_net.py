@@ -43,7 +43,7 @@ class SentimentNet:
         X = self.comm.lookup_table(reshaped_X_ids, words_pad_M, self.table, self.graph)
 
         # lstm
-        with tf.variable_scope('sentence_bilstm'):
+        with tf.variable_scope('sentence_bilstm', reuse=tf.AUTO_REUSE):
             # H.shape = (batch size*max review length, max_time, cell size)
             attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, reg=self.reg,graph=self.graph,scope_name='sentiment/sentence_bilstm')
         A, o = self.af.attribute_mat(self.reg,self.graph)
