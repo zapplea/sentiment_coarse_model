@@ -49,6 +49,7 @@ class SentiNetBuilder:
 
             g0, v0 = grad_and_vars[0]
             print('g0: ',g0)
+            print('==================')
 
             if g0 is None:
                 # no gradient for this variable, skip it
