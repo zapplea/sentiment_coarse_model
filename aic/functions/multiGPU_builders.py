@@ -45,10 +45,10 @@ class SentiNetBuilder:
 
             g0, v0 = grad_and_vars[0]
 
-            if g0 is None:
-                # no gradient for this variable, skip it
-                average_grads.append((g0, v0))
-                continue
+            # if g0 is None:
+            #     # no gradient for this variable, skip it
+            #     average_grads.append((g0, v0))
+            #     continue
 
             if isinstance(g0, tf.IndexedSlices):
                 # If the gradient is type IndexedSlices then this is a sparse
@@ -70,6 +70,9 @@ class SentiNetBuilder:
                 # a normal tensor can just do a simple average
                 grads = []
                 for g, v in grad_and_vars:
+                    if g is None:
+                        average_grads.append((g,v))
+                        continue
                     # Add 0 dimension to the gradients to represent the tower.
                     expanded_g = tf.expand_dims(g, 0)
                     # Append on a 'tower' dimension which we will average over
