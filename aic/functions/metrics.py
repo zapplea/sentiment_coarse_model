@@ -2,17 +2,35 @@ import tensorflow as tf
 import numpy as np
 
 class Metrics:
-    def TP(self,true_labels,pred_labels):
-        return np.count_nonzero(true_labels*pred_labels,axis=0).astype('float32')
+    def TP(self,true_labels,pred_labels,mod = 'attr'):
+        if mod =='attr':
+            result = true_labels*pred_labels
+        else:
+            result = np.sum(true_labels*pred_labels,axis=2)
+        return np.count_nonzero(result,axis=0).astype('float32')
 
-    def TN(self,true_labels,pred_labels):
-        return np.count_nonzero((pred_labels-1)*(true_labels-1),axis=0).astype('float32')
+    def TN(self,true_labels,pred_labels, mod='attr'):
+        if mod == 'attr':
+            result = (pred_labels-1)*(true_labels-1)
+        else:
+            result = np.sum((pred_labels-1)*(true_labels-1),axis=2)
 
-    def FP(self,true_labels, pred_labels):
-        return np.count_nonzero(pred_labels*(true_labels-1), axis=0).astype('float32')
+        return np.count_nonzero(result,axis=0).astype('float32')
 
-    def FN(self,true_labels, pred_labels):
-        return np.count_nonzero((pred_labels-1)*true_labels,axis=0).astype('float32')
+    def FP(self,true_labels, pred_labels,mod='attr'):
+        if mod == 'attr':
+            result = pred_labels*(true_labels-1)
+        else:
+            result = np.sum(pred_labels*(true_labels-1),axis=2)
+        return np.count_nonzero(result, axis=0).astype('float32')
+
+    def FN(self,true_labels, pred_labels, mod ='attr'):
+        if mod == "attr":
+            result = (pred_labels-1)*true_labels
+        else:
+            result = np.sum((pred_labels-1)*true_labels, axis=2)
+
+        return np.count_nonzero(result,axis=0).astype('float32')
 
     def precision(self, TP, FP, flag):
         assert flag == 'macro' or flag == 'micro', 'Please enter right flag...'
@@ -54,3 +72,9 @@ class Metrics:
 
     def per_f1_score(self,per_precision, per_recall):
         return 2*per_precision*per_recall/(per_precision+per_recall+1e-10)
+
+    def report(self,info,file=None,mod='std'):
+        if mod=='std':
+            print(info)
+        else:
+            file.write(info+'\n')

@@ -107,19 +107,9 @@ class TransSentiTrain:
                     test_loss, pred_data = sess.run(
                         [loss, pred],
                         feed_dict=feed_dict)
-                    if dic['test_mod'] == 'attr':
-                        TP_data = self.mt.TP(attr_labels_data, pred_data)
-                        FP_data = self.mt.FP(attr_labels_data, pred_data)
-                        FN_data = self.mt.FN(attr_labels_data, pred_data)
-                    else:
-                        d0 = senti_labels_data.shape[0]
-                        d1 = senti_labels_data.shape[1]
-                        d2 = senti_labels_data.shape[2]
-                        senti_labels_data = np.reshape(senti_labels_data,newshape=(d0,d1*d2))
-                        pred_data = np.reshape(pred_data,newshape=(d0,d1*d2))
-                        TP_data = self.mt.TP(senti_labels_data, pred_data)
-                        FP_data = self.mt.FP(senti_labels_data, pred_data)
-                        FN_data = self.mt.FN(senti_labels_data, pred_data)
+                    TP_data = self.mt.TP(attr_labels_data, pred_data, mod=dic['test_mod'])
+                    FP_data = self.mt.FP(attr_labels_data, pred_data, mod=dic['test_mod'])
+                    FN_data = self.mt.FN(attr_labels_data, pred_data, mod=dic['test_mod'])
                     ###Show test message
                     TP_vec.append(TP_data)
                     FP_vec.append(FP_data)

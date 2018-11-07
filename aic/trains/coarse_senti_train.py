@@ -42,6 +42,7 @@ class CoarseSentiTrain:
         self.dg = data_feeder
         # self.cl is a class
         self.mt = Metrics()
+        self.outf=open(self.train_config['report_filePath'],'w+')
 
     def generate_feed_dict(self,graph, gpu_num, data_dict):
         feed_dict = {}
@@ -74,6 +75,7 @@ class CoarseSentiTrain:
                     = sess.run([train_step, loss, pred],feed_dict=feed_dict)
 
             if i % 1 == 0 and i != 0:
+                self.mt.report('epoch: %d'%i)
                 loss_vec = []
                 TP_vec = []
                 FP_vec = []
@@ -86,19 +88,11 @@ class CoarseSentiTrain:
                     test_loss, pred_data = sess.run(
                         [loss, pred],
                         feed_dict=feed_dict)
-                    if dic['test_mod'] == 'attr':
-                        TP_data = self.mt.TP(attr_labels_data, pred_data)
-                        FP_data = self.mt.FP(attr_labels_data, pred_data)
-                        FN_data = self.mt.FN(attr_labels_data, pred_data)
-                    else:
-                        d0 = senti_labels_data.shape[0]
-                        d1 = senti_labels_data.shape[1]
-                        d2 = senti_labels_data.shape[2]
-                        senti_labels_data = np.reshape(senti_labels_data,newshape=(d0,d1*d2))
-                        pred_data = np.reshape(pred_data,newshape=(d0,d1*d2))
-                        TP_data = self.mt.TP(senti_labels_data, pred_data)
-                        FP_data = self.mt.FP(senti_labels_data, pred_data)
-                        FN_data = self.mt.FN(senti_labels_data, pred_data)
+
+                    TP_data = self.mt.TP(attr_labels_data, pred_data,mod=dic['test_mod'])
+                    FP_data = self.mt.FP(attr_labels_data, pred_data,mod=dic['test_mod'])
+                    FN_data = self.mt.FN(attr_labels_data, pred_data,mod=dic['test_mod'])
+
                     ###Show test message
                     TP_vec.append(TP_data)
                     FP_vec.append(FP_data)
@@ -108,20 +102,22 @@ class CoarseSentiTrain:
                 TP_vec = np.concatenate(TP_vec, axis=0)
                 FP_vec = np.concatenate(FP_vec, axis=0)
                 FN_vec = np.concatenate(FN_vec, axis=0)
-                print('Val_loss:%.10f' % np.mean(loss_vec))
+                self.mt.report('Val_loss:%.10f' % np.mean(loss_vec))
 
                 _precision = self.mt.precision(TP_vec, FP_vec, 'macro')
                 _recall = self.mt.recall(TP_vec, FN_vec, 'macro')
                 _f1_score = self.mt.f1_score(_precision, _recall, 'macro')
-                print('Macro F1 score:', _f1_score, ' Macro precision:', np.mean(_precision),
-                      ' Macro recall:', np.mean(_recall))
+                self.mt.report('Macro F1 score: %.10f\nMacro precision:%.10f\nMacro recall:%.10f'
+                               %(_f1_score,np.mean(_precision),np.mean(_recall)))
 
                 # per class metrics
                 per_precision = self.mt.per_precision(TP_vec, FP_vec)
                 per_recall = self.mt.per_recall(TP_vec, FN_vec)
                 per_f1_score = self.mt.per_f1_score(per_precision,per_recall)
                 for i in range(per_precision.shape[0]):
-                    print(self.dg.id_to_aspect_dic[i],':','\nf1 score: ',per_f1_score[i],'\nprecision: ',per_precision[i],'\nrecall: ',per_recall[i])
+                    self.mt.report('%s f1 score: %.10f precision: %.10f recall: %.10f'
+                                   %(self.dg.id_to_aspect_dic[i],per_f1_score[i],per_precision[i],per_recall[i]))
+
 
 
                 if best_f1_score < _f1_score:
@@ -175,6 +171,7 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
+            self.mt.report('===========attr============')
             dic['train_step'] = model_dic['train_step']['attr']
             dic['loss'] = model_dic['loss']['attr']
             dic['pred'] = model_dic['pred_labels']['attr']
@@ -185,6 +182,7 @@ class CoarseSentiTrain:
             # ##########################
             # train senti (optional)   #
             # ##########################
+            self.mt.report('===========senti============')
             dic['train_step'] = model_dic['train_step']['senti']
             dic['loss'] = model_dic['loss']['senti']
             dic['pred'] = model_dic['pred_labels']['senti']
@@ -194,6 +192,7 @@ class CoarseSentiTrain:
             # ##########################
             # train joint              #
             # ##########################
+            self.mt.report('===========joint============')
             dic['train_step'] = model_dic['train_step']['joint']
             dic['loss'] = model_dic['loss']['joint']
             dic['pred'] = model_dic['pred_labels']['joint']
