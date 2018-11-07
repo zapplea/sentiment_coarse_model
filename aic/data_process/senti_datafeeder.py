@@ -86,6 +86,8 @@ class DataFeeder():
         return a[p], b[p], c[p]
 
     def load_train_data(self):
+        print(os.path.exists(self.data_config['train_data_file_path']))
+        print(os.path.getsize(self.data_config['train_data_file_path']) > 0)
         if os.path.exists(self.data_config['train_data_file_path']) and os.path.getsize(self.data_config['train_data_file_path']) > 0:
             with open(self.data_config['train_data_file_path'],'rb') as f:
                 attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
