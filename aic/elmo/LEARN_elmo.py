@@ -52,7 +52,7 @@ def main(args):
                                   shuffle_on_load=True)
     gen = data._data_forward.get_sentence()
     d = list(next(gen))
-    print(len(d))
+    print(d[0])
     exit()
     # TODO: analyze data
     data_gen = data.iter_batches(128 * 3, 20)
