@@ -36,7 +36,7 @@ class SentimentNet:
         # TODO: lookup table
         X = self.comm.lookup_table(X_ids, words_pad_M,self.table,self.graph)
         # lstm
-        with tf.variable_scope('sentence_bilstm'):
+        with tf.variable_scope('sentence_bilstm',reuse=tf.AUTO_REUSE):
             seq_len = self.comm.sequence_length(X_ids,self.graph)
             # H.shape = (batch size, max_time, cell size)
             attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, self.reg,self.graph)
@@ -71,7 +71,7 @@ class SentimentNet:
         # sentiment extraction #
         # #################### #
         # sentiment lstm
-        with tf.variable_scope('senti_sentence_bilstm'):
+        with tf.variable_scope('senti_sentence_bilstm',reuse=tf.AUTO_REUSE):
             # H.shape = (batch size, max_time, cell size)
             senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, self.graph)
         # Y_senti.shape = [batch_size, number of attributes + 1, 3]

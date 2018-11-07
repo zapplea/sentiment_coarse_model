@@ -29,11 +29,11 @@ class AttributeFunction:
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        A_mat = tf.Variable(initial_value=self.initializer(shape=(self.nn_config['attributes_num'],
+        A_mat = tf.get_variable(name='A_mat',initializer=self.initializer(shape=(self.nn_config['attributes_num'],
                                                                     self.nn_config['attribute_mat_size'],
                                                                     self.nn_config['attribute_dim']),
                                                             dtype='float32'))
-        o_mat = tf.Variable(initial_value=self.initializer(shape=(1,
+        o_mat = tf.get_variable(name='o_mat',initializer=self.initializer(shape=(1,
                                                                    self.nn_config['attribute_mat_size'],
                                                                    self.nn_config['attribute_dim']),
                                                             dtype='float32'))

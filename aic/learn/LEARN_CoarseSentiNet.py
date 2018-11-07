@@ -35,8 +35,8 @@ if __name__ == "__main__":
                 'batch_size':15,
                 'gpu_num':3
             }
-    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_fine.pkl'
-    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_fine.pkl'
+    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
+    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'
 
     config['sr_path'] = '/datastore/liu121/sentidata2/result/coarse_nn/ckpt_reg%s_lr%s_mat%s' \
                         % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))

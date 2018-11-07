@@ -167,13 +167,10 @@ class SentiNetBuilder:
                             grad = opt.compute_gradients(graph.get_collection('joint_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
                             joint_tower_grads.append(grad)
                 # gradient and train step
-                print('attribute===========')
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
                 attr_train_step = opt.apply_gradients(attr_avg_grads,global_step=global_step)
-                print('sentiment===========')
                 senti_avg_grads = self.average_gradients(senti_tower_grads)
                 senti_train_step = opt.apply_gradients(senti_avg_grads, global_step=global_step)
-                print('joint===========')
                 joint_avg_grads = self.average_gradients(joint_tower_grads)
                 joint_train_step = opt.apply_gradients(joint_avg_grads,global_step=global_step)
                 # label
