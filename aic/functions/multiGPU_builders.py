@@ -79,7 +79,10 @@ class SentiNetBuilder:
                     grads.append(expanded_g)
 
                 # Average over the 'tower' dimension.
-                grad = tf.concat(grads, 0)
+                if len(grads)>1:
+                    grad = tf.concat(grads, 0)
+                else:
+                    grad = grads
                 grad = tf.reduce_mean(grad, 0)
 
             # the Variables are redundant because they are shared
