@@ -42,6 +42,5 @@ if __name__ == "__main__":
                         % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
     config['report_filePath'] = '/datastore/liu121/sentidata2/report/coarse_nn/report_reg%s_lr%s_mat%s.info' \
                                 % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    print('main')
     main(config)
 
