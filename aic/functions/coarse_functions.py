@@ -19,12 +19,12 @@ class AttributeFunction:
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        A_mat = tf.get_variable(name='A_mat',initialer=self.initializer(shape=(self.nn_config['attributes_num'],
+        A_mat = tf.get_variable(name='A_mat',initializer=self.initializer(shape=(self.nn_config['attributes_num'],
                                                                     self.nn_config['attribute_mat_size'],
                                                                     self.nn_config['attribute_dim']),
                                                             dtype='float32'))
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
-        o_mat = tf.get_variable(name='o_mat',initialer=self.initializer(shape=(1,
+        o_mat = tf.get_variable(name='o_mat',initializer=self.initializer(shape=(1,
                                                                    self.nn_config['attribute_mat_size'],
                                                                    self.nn_config['attribute_dim']),
                                                             dtype='float32'))
