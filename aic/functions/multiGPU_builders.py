@@ -45,10 +45,10 @@ class SentiNetBuilder:
 
             g0, v0 = grad_and_vars[0]
 
-            # if g0 is None:
-            #     # no gradient for this variable, skip it
-            #     average_grads.append((g0, v0))
-            #     continue
+            if g0 is None:
+                # no gradient for this variable, skip it
+                average_grads.append((g0, v0))
+                continue
 
             if isinstance(g0, tf.IndexedSlices):
                 # If the gradient is type IndexedSlices then this is a sparse
@@ -70,19 +70,13 @@ class SentiNetBuilder:
                 # a normal tensor can just do a simple average
                 grads = []
                 for g, v in grad_and_vars:
-                    if g is None:
-                        average_grads.append((g,v))
-                        continue
                     # Add 0 dimension to the gradients to represent the tower.
                     expanded_g = tf.expand_dims(g, 0)
                     # Append on a 'tower' dimension which we will average over
                     grads.append(expanded_g)
 
                 # Average over the 'tower' dimension.
-                if len(grads)>1:
-                    grad = tf.concat(grads, 0)
-                else:
-                    grad = grads
+                grad = tf.concat(grads, 0)
                 grad = tf.reduce_mean(grad, 0)
 
             # the Variables are redundant because they are shared
@@ -173,12 +167,13 @@ class SentiNetBuilder:
                             grad = opt.compute_gradients(graph.get_collection('joint_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
                             joint_tower_grads.append(grad)
                 # gradient and train step
+                print('attribute===========')
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
                 attr_train_step = opt.apply_gradients(attr_avg_grads,global_step=global_step)
-
+                print('sentiment===========')
                 senti_avg_grads = self.average_gradients(senti_tower_grads)
                 senti_train_step = opt.apply_gradients(senti_avg_grads, global_step=global_step)
-
+                print('joint===========')
                 joint_avg_grads = self.average_gradients(joint_tower_grads)
                 joint_train_step = opt.apply_gradients(joint_avg_grads,global_step=global_step)
                 # label
@@ -214,9 +209,8 @@ class SentiNetBuilder:
                             self.nn_config['elmo']['graph']=graph
                             lm_model = Elmo(self.nn_config['elmo'],False)
 
-
                         with tf.variable_scope('sentiment', reuse=k > 0):
-                            model = Model(self.nn_config, graph=graph, table=table, elmo=lm_model)
+                            model = Model(self.nn_config, graph=graph, table=table)
                             models.append(model)
                             if self.nn_config['elmo']['trainable']:
                                 var_list = None
