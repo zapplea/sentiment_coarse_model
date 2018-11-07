@@ -283,9 +283,6 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
                     try:
                         # give one batch to cur_stream[i]
                         cur_stream[i] = list(next(generator))
-                        for j in range(10):
-                            print(len(cur_stream[i][j]))
-                        exit()
                     except StopIteration:
                         # No more data, exhaust current streams and quit
                         no_more_data = True

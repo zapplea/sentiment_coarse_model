@@ -50,6 +50,10 @@ def main(args):
     prefix = args.train_prefix
     data = BidirectionalLMDataset(prefix, vocab, test=False,
                                   shuffle_on_load=True)
+    gen = data._data_forward.get_sentence()
+    d = list(next(gen))
+    print(len(d))
+    exit()
     # TODO: analyze data
     data_gen = data.iter_batches(128 * 3, 20)
     for batch_no, batch in enumerate(data_gen, start=1):
