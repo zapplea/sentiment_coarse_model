@@ -7,10 +7,6 @@ with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/dev_coar
     print(attr_labels.shape)
     non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
     non_attr_senti = np.tile(non_attr,reps=[1,3])
-    for i in range(attr_labels.shape[0]):
-        al = attr_labels[i]
-        if np.sum(al) == 0:
-            non_attr_senti[i][1]=1
     print(non_attr_senti.shape)
     non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
     print(non_attr_senti.shape)
