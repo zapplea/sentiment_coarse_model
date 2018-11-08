@@ -18,7 +18,7 @@ class SentiNetBuilder:
             'normal_senti_prototype_num': 4,
             'attribute_senti_prototype_num': 4,
             'sentiment_dim': 300,
-            'sentiment_num':4,
+            'sentiment_num':3,
             'rps_num': 5,
             'rps_dim': 100,
             'reg_rate': 1E-5,
