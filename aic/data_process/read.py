@@ -14,8 +14,10 @@ with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pk
     print(non_attr_senti.shape)
     non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
     print(non_attr_senti.shape)
+    print(senti_labels[0])
     senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
     print(senti_labels.shape)
+    print(senti_labels[0])
 
 # with open('/datastore/liu121/sentidata2/expdata/aic2018/coarse_data/dev_fine.pkl','wb') as f:
 #     pickle.dump(data,f)
