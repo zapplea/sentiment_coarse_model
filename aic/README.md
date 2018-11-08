@@ -39,5 +39,9 @@ confirm bidirectional in hyperparameter
 5.data process
 how to process number? convert to NUM4 format?
 
+6.sentiment label
+(1) add not mention
+(4) for data: non attribute will be not mention. other attribute will be not mention if [0, 0, 0]
+
 # Question:
 1. we use sentiment_bilstm twice for sentiment and attribute seperately, should I combine them to one?
