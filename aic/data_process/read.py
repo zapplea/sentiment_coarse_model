@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 
-with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/dev_coarse.pkl','rb') as f:
+with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/train_coarse.pkl','rb') as f:
     attr_labels, senti_labels, sentence = pickle.load(f)
     print(senti_labels.shape)
     print(attr_labels.shape)
@@ -15,7 +15,7 @@ with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/dev_coar
     print(senti_labels.shape)
     print(senti_labels[0])
 
-with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl','wb') as f:
+with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl','wb') as f:
     pickle.dump((attr_labels, senti_labels, sentence),f)
 
 # with open('/datastore/liu121/sentidata2/expdata/aic2018/coarse_data/dev_fine.pkl','wb') as f:
