@@ -1,15 +1,16 @@
 #!/bin/bash
 #SBATCH --get-user-env
-#SBATCH --job-name="liu121"
-#SBATCH --time=01:00:00
+#SBATCH --job-name="sentiment net"
+#SBATCH --time=140:00:00
 #SBATCH --nodes=1
-#SBATCH --mem=10GB
+#SBATCH --mem=200GB
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
+#SBATCH --gres=gpu:3
 #SBATCH --qos=express
 echo "loading"
 module load python/3.6.1
 module load tensorflow/1.9.0-py36-gpu
 echo "loaded"
 
-python ../learn/LEARN_FineAttrNet.py
+python ../learn/LEARN_CoarseSentiNet.py
