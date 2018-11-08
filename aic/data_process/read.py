@@ -20,7 +20,7 @@ with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pk
     print(senti_labels[0])
 
 with open('/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl','wb') as f:
-    pickle.dump(f,(attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed))
+    pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed),f)
 
 # with open('/datastore/liu121/sentidata2/expdata/aic2018/coarse_data/dev_fine.pkl','wb') as f:
 #     pickle.dump(data,f)
