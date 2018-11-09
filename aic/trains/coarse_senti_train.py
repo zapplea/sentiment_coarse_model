@@ -48,9 +48,11 @@ class CoarseSentiTrain:
     def generate_feed_dict(self,graph, gpu_num, data_dict):
         feed_dict = {}
         train_mod = math.ceil(data_dict['X_data'].shape[0]/gpu_num)
+        self.mt.report('trainmod:%s'%str(train_mod),self.outf,'report')
         for k in range(gpu_num):
             start = k*train_mod
             end = start + train_mod
+            self.mt.report('start:%s, end:%s' %(str(start),str(end)), self.outf, 'report')
             feed_dict[graph.get_collection('X')[k]] = data_dict['X_data'][start:end]
             feed_dict[graph.get_collection('Y_att')[k]] = data_dict['Y_att_data'][start:end]
             feed_dict[graph.get_collection('Y_senti')[k]] = data_dict['Y_senti_data'][start:end]
