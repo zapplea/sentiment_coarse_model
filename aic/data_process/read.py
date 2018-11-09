@@ -26,12 +26,12 @@ def test(infile,outfile):
 if __name__=='__main__':
     path = {'coarse_train_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/train_coarse.pkl',
             'coarse_train_out':'/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl',
-            'coarse_test_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/test_coarse.pkl',
-            'coarse_test_out':'/datastore/liu121/sentidata2/data/aic2018/coarse_data/test_coarse.pkl',
+            'coarse_test_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/dev_coarse.pkl',
+            'coarse_test_out':'/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl',
             'fine_train_in':'/datastore/liu121/sentidata2/data/aic2018/fine_data_backup/train_fine.pkl',
             'fine_train_out':'/datastore/liu121/sentidata2/data/aic2018/fine_data/train_fine.pkl',
-            'fine_test_in':'/datastore/liu121/sentidata2/data/aic2018/fine_data_backup/test_fine.pkl',
-            'fine_test_out':'/datastore/liu121/sentidata2/data/aic2018/fine_data/test_fine.pkl',
+            'fine_test_in':'/datastore/liu121/sentidata2/data/aic2018/fine_data_backup/dev_fine.pkl',
+            'fine_test_out':'/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl',
            }
     train(path['coarse_train_in'],path['coarse_train_out'])
     test(path['coarse_test_in'],path['coarse_test_out'])
