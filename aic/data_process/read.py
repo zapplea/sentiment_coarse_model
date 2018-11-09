@@ -10,7 +10,7 @@ def train(infile,outfile):
         senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
 
     with open(outfile,'wb') as f:
-        pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed),f)
+        pickle.dump((attribute_dic, word_dic, attr_labels[:20], senti_labels[:20], sentence[:20], word_embed),f)
 
 def test(infile,outfile):
     with open(infile,'rb') as f:
@@ -21,7 +21,7 @@ def test(infile,outfile):
         senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
 
     with open(outfile,'wb') as f:
-        pickle.dump((attr_labels, senti_labels, sentence),f)
+        pickle.dump((attr_labels[:20], senti_labels[:20], sentence[:20]),f)
 
 if __name__=='__main__':
     path = {'coarse_train_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/train_coarse.pkl',
