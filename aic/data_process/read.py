@@ -11,6 +11,7 @@ def train(infile,outfile):
 
     with open(outfile,'wb') as f:
         pickle.dump((attribute_dic, word_dic, attr_labels[:20], senti_labels[:20], sentence[:20], word_embed),f)
+    print('train successful')
 
 def test(infile,outfile):
     with open(infile,'rb') as f:
@@ -22,6 +23,7 @@ def test(infile,outfile):
 
     with open(outfile,'wb') as f:
         pickle.dump((attr_labels[:20], senti_labels[:20], sentence[:20]),f)
+    print('test success')
 
 if __name__=='__main__':
     path = {'coarse_train_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/train_coarse.pkl',
