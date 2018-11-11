@@ -94,6 +94,14 @@ class CoarseSentiTrain:
                     data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                                  'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
                     feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
+
+                    result = sess.run(tf.get_collection('var_attr_loss')[0],feed_dict=feed_dict)
+                    print('attr_loss: ',result)
+                    result = sess.run(tf.get_collection('var_senti_H')[0],feed_dict=feed_dict)
+                    print(result.shape)
+                    result = sess.run(tf.get_collection('var_attention')[0],feed_dict=feed_dict)
+                    print(result.shape)
+                    exit()
                     attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
                         [attr_loss,senti_loss, attr_pred,senti_pred],
                         feed_dict=feed_dict)

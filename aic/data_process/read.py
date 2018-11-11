@@ -12,13 +12,13 @@ def train(infile,outfile):
         attr_labels=attr_labels[:top_k]
         senti_labels=senti_labels[:top_k]
         sentence=sentence[:top_k]
-        print('train:\n')
+        print('train:')
         print('senti labels shape: ',senti_labels.shape)
         print('attr labels shape: ',attr_labels.shape)
         print('sentence shape: ',sentence.shape)
     with open(outfile,'wb') as f:
         pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed),f)
-    print('train successful')
+    print('train successful\n')
 
 def test(infile,outfile):
     with open(infile,'rb') as f:
@@ -31,9 +31,9 @@ def test(infile,outfile):
         senti_labels = senti_labels[:top_k]
         sentence = sentence[:top_k]
         print('test:\n')
-        print('senti labels shape: %s\n'%str(senti_labels.shape))
-        print('attr labels shape: %s\n'%str(attr_labels.shape))
-        print('sentence shape: %s\n'%str(sentence.shape))
+        print('senti labels shape: %s'%str(senti_labels.shape))
+        print('attr labels shape: %s'%str(attr_labels.shape))
+        print('sentence shape: %s'%str(sentence.shape))
     with open(outfile,'wb') as f:
         pickle.dump((attr_labels, senti_labels, sentence),f)
     print('test success')

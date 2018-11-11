@@ -75,7 +75,7 @@ class SentimentNet:
         for reg in self.reg['attr_reg']:
             reg_list.append(reg)
         attr_loss = self.af.sigmoid_loss('attr_loss', review_score, Y_att, reg_list, self.graph)
-
+        tf.add_to_collection('var_attr_loss',attr_loss)
         # #################### #
         # sentiment extraction #
         # #################### #
@@ -83,6 +83,7 @@ class SentimentNet:
         with tf.variable_scope('senti_sentence_bilstm',reuse=tf.AUTO_REUSE):
             # H.shape = (batch size * max review length, max_time, cell size)
             senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, graph=self.graph, scope_name='sentiment/senti_sentence_bilstm')
+            tf.add_to_collection('var_senti_H',senti_H)
         # Y_senti.shape = [batch_size, number of attributes + 1, 3]
         Y_senti = self.comm.sentiment_labels_input(graph=self.graph)
         # sentiment expression prototypes matrix
@@ -104,6 +105,7 @@ class SentimentNet:
         W = tf.multiply(extors_mat, W)
         # shape = (batch size*max review length, number of words, 3+3*attributes number, number of sentiment prototypes)
         attention = self.sf.sentiment_attention(senti_H, W, extors_mask_mat, self.graph)
+        tf.add_to_collection('var_attention',attention)
         # attended_W.shape = (batch size*max review length,number of words, 3+3*attributes number, sentiment dim)
         attended_W = self.sf.attended_sentiment(W, attention, self.graph)
         # shape = (batch size*max review length,number of words, 3+3*attributes number)
