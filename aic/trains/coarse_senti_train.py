@@ -80,7 +80,6 @@ class CoarseSentiTrain:
                 print('var senti H')
                 result = sess.run(tf.get_collection('var_senti_H')[0], feed_dict=feed_dict)
                 print(result.shape)
-                exit()
                 print('var attention')
                 result = sess.run(tf.get_collection('var_attention')[0], feed_dict=feed_dict)
                 print(result.shape)
