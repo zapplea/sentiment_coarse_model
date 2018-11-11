@@ -247,13 +247,13 @@ class SentimentFunction:
         reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
         return b
 
-    def sentiment_attention(self, H, W, m, graph):
+    def sentiment_attention(self, H, W, mask, graph):
         """
         :param h: shape = (batch size, number of words, lstm cell size)
         :param W: shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size). 3*attribute numbers is
         3 sentiment for each attributes; 3 is sentiment for non-attribute entity, it only has normal sentiment, not attribute
         specific sentiment.
-        :param m: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
+        :param mask: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
         :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
         """
         # # H.shape = (batch size, words num, 3+3*attributes number, word dim)
@@ -283,9 +283,27 @@ class SentimentFunction:
         :param graph: 
         :return: (batch size,number of words, 3+3*attributes number, sentiment dim)
         """
-        # attention.shape = (batch size, number of words, 3+3*attributes number, number of sentiment prototypes, sentiment dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['sentiment_dim']])
-        attended_W = tf.reduce_sum(tf.multiply(attention, W), axis=3)
+        # # attention.shape = (batch size, number of words, 3+3*attributes number, number of sentiment prototypes, sentiment dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['sentiment_dim']])
+        # attended_W = tf.reduce_sum(tf.multiply(attention, W), axis=3)
+
+        # shape of each scalar in attention splits = (batch size, number of words, 1, number of sentiment prototypes)
+        attention_splits = tf.split(attention,
+                                    num_or_size_splits=self.nn_config['sentiment_num'] * (
+                                    1 + self.nn_config['attributes_num']),
+                                    axis=2)
+        # shape of each scalar in W splits = (1, sentiment prototypes, sentiment dim)
+        W_splits = tf.split(W,
+                            num_or_size_splits=self.nn_config['sentiment_num'] * (1 + self.nn_config['attributes_num']),
+                            axis=0)
+        # (3*attribute num+3, batch size ,number of words, 1, sentiment dim)
+        attented_W_ls = []
+        for a, w in zip(attention_splits, W_splits):
+            # (batch size ,number of words, sentiment dim) --> (batch size ,number of words, 1, sentiment dim)
+            attented_W_ls.append(tf.expand_dims(tf.tensordot(a, w, axes=[[-2, -1], [0, 1]]), axis=2))
+        # (batch size,number of words, 3+3*attributes number, sentiment dim)
+        attended_W = tf.concat(attented_W_ls, axis=2)
+
         return attended_W
 
     def item1(self, W, H, graph):
