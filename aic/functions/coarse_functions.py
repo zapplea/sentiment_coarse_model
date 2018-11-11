@@ -312,7 +312,7 @@ class SentimentFunction:
         :param m: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
         :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
         """
-        with tf.device('/gpu:0'):
+        with tf.device('/cpu:0'):
             # H.shape = (batch size, words num, 3+3*attributes number, word dim)
             H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['sentiment_num'] * self.nn_config[
                 'attributes_num'] + self.nn_config['sentiment_num'], 1])
