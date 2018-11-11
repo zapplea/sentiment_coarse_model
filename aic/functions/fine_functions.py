@@ -374,12 +374,15 @@ class SentimentFunction:
         """
         # rp_mat.shape = (number of words, number of words, rp_dim)
         rp_mat=tf.nn.embedding_lookup(V,rp_ids)
-        # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
-        A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rps_dim']])
-        # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
-        A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
-        # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
-        A_Vi = tf.reduce_sum(tf.multiply(A_dist,rp_mat),axis=3)
+        # # A_dist.shape = (batch size, number of attributes+1, number of words,relative position dim)
+        # A_dist = tf.tile(tf.expand_dims(A_dist,axis=3),multiples=[1,1,1,self.nn_config['rps_dim']])
+        # # A_dist.shape = (batch size, number of attributes+1, number of words, number of words,relative position dim)
+        # A_dist = tf.tile(tf.expand_dims(A_dist,axis=2),multiples=[1,1,self.nn_config['words_num'],1,1])
+        # # A_Vi.shape = (batch size, number of attributes+1, number of words, relative position dim)
+        # A_Vi = tf.reduce_sum(tf.multiply(A_dist,rp_mat),axis=3)
+
+        # shape= (batch size, number of attributes+1, number of words, relative position dim)
+        A_Vi = tf.tensordot(A_dist, rp_mat, axes=[[2], [1]])
         return A_Vi
 
     def mask_for_pad_in_score(self, X, graph):
