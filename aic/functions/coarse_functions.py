@@ -19,17 +19,15 @@ class AttributeFunction:
         :param graph: 
         :return: shape = (attributes number+1, attribute mat size, attribute dim)
         """
-        with tf.device('/cpu:0'):
-            A_mat = tf.get_variable(name='A_mat',initializer=self.initializer(shape=(self.nn_config['attributes_num'],
-                                                                        self.nn_config['attribute_mat_size'],
-                                                                        self.nn_config['attribute_dim']),
-                                                                dtype='float32'))
+        A_mat = tf.get_variable(name='A_mat',initializer=self.initializer(shape=(self.nn_config['attributes_num'],
+                                                                    self.nn_config['attribute_mat_size'],
+                                                                    self.nn_config['attribute_dim']),
+                                                            dtype='float32'))
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
-        with tf.device('/cpu:0'):
-            o_mat = tf.get_variable(name='o_mat',initializer=self.initializer(shape=(1,
-                                                                       self.nn_config['attribute_mat_size'],
-                                                                       self.nn_config['attribute_dim']),
-                                                                dtype='float32'))
+        o_mat = tf.get_variable(name='o_mat',initializer=self.initializer(shape=(1,
+                                                                   self.nn_config['attribute_mat_size'],
+                                                                   self.nn_config['attribute_dim']),
+                                                            dtype='float32'))
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(o_mat))
         return A_mat,o_mat
 
@@ -132,11 +130,10 @@ class AttributeFunction:
         :param graph: 
         :return: (batch size, coarse_attributes_num)
         """
-        with tf.device('/cpu:0'):
-            W = tf.get_variable(name='W_trans',
-                                initializer=self.initializer(shape=(self.nn_config['coarse_attributes_num'],
-                                                                    self.nn_config['attributes_num']),
-                                                             dtype='float32'))
+        W = tf.get_variable(name='W_trans',
+                            initializer=self.initializer(shape=(self.nn_config['coarse_attributes_num'],
+                                                                self.nn_config['attributes_num']),
+                                                         dtype='float32'))
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         # shape = (batch size * max review length, coarse_attributes_num, attributes num)
         sentence_prob = tf.tile(tf.expand_dims(sentence_prob,axis=1),multiples=[1,self.nn_config['coarse_attributes_num'],1])
@@ -185,11 +182,10 @@ class SentimentFunction:
         self.initializer = Initializer.parameter_initializer
 
     def sentiment_matrix(self,reg,graph):
-        with tf.device('/cpu:0'):
-            W = tf.get_variable(name='senti_mat', initializer=self.initializer(shape=(
-                self.nn_config['normal_senti_prototype_num'] * self.nn_config['sentiment_num'] + self.nn_config['attribute_senti_prototype_num'] *
-                self.nn_config['attributes_num'],
-                self.nn_config['sentiment_dim']), dtype='float32'))
+        W = tf.get_variable(name='senti_mat', initializer=self.initializer(shape=(
+            self.nn_config['normal_senti_prototype_num'] * self.nn_config['sentiment_num'] + self.nn_config['attribute_senti_prototype_num'] *
+            self.nn_config['attributes_num'],
+            self.nn_config['sentiment_dim']), dtype='float32'))
         reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         return W
 
@@ -267,10 +263,9 @@ class SentimentFunction:
         return mask
 
     def relative_pos_matrix(self, reg, graph):
-        with tf.device('/cpu:0'):
-            V = tf.get_variable(name='relative_pos',
-                                initializer=self.initializer(shape=(self.nn_config['rps_num'], self.nn_config['rps_dim']),
-                                                              dtype='float32'))
+        V = tf.get_variable(name='relative_pos',
+                            initializer=self.initializer(shape=(self.nn_config['rps_num'], self.nn_config['rps_dim']),
+                                                          dtype='float32'))
         reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(V))
         return V
 
@@ -297,32 +292,30 @@ class SentimentFunction:
         :param graph: 
         :return: beta weight, shape=(rp_dim)
         """
-        with tf.device('/cpu:0'):
-            b = tf.get_variable(name='beta',
-                                initializer=self.initializer(shape=(self.nn_config['rps_dim'],), dtype='float32'))
+        b = tf.get_variable(name='beta',
+                            initializer=self.initializer(shape=(self.nn_config['rps_dim'],), dtype='float32'))
         reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(b))
         return b
 
-    def sentiment_attention(self, H, W, m, graph):
+    def sentiment_attention(self, H, W, mask, graph):
         """
-        :param h: shape = (batch size, number of words, lstm cell size)
+        :param H: shape = (batch size, number of words, lstm cell size)
         :param W: shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size). 3*attribute numbers is
         3 sentiment for each attributes; 3 is sentiment for non-attribute entity, it only has normal sentiment, not attribute
         specific sentiment.
-        :param m: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
+        :param mask: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
         :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
         """
-        with tf.device('/cpu:0'):
-            # H.shape = (batch size, words num, 3+3*attributes number, word dim)
-            H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['sentiment_num'] * self.nn_config[
-                'attributes_num'] + self.nn_config['sentiment_num'], 1])
-            # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
-            H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['normal_senti_prototype_num'] * self.nn_config['sentiment_num'] +
-                                                              self.nn_config['attribute_senti_prototype_num'] *
-                                                              self.nn_config['attributes_num'],
-                                                              1])
+        # # H.shape = (batch size, words num, 3+3*attributes number, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['sentiment_num'] * self.nn_config[
+        #     'attributes_num'] + self.nn_config['sentiment_num'], 1])
+        # # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['normal_senti_prototype_num'] * self.nn_config['sentiment_num'] +
+        #                                                   self.nn_config['attribute_senti_prototype_num'] *
+        #                                                   self.nn_config['attributes_num'],
+        #                                                   1])
         # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
-        temp = tf.multiply(m, tf.exp(tf.reduce_sum(tf.multiply(H, W), axis=4)))
+        temp = tf.multiply(mask, tf.exp(tf.tensordot(H, W,axes=[[-1],[-1]])))
 
         # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
         denominator = tf.reduce_sum(temp, axis=3, keepdims=True)
@@ -466,10 +459,9 @@ class SentimentFunction:
         :return: sahpe = (batch size, coarse attr num + 1, 3)
         """
         with tf.variable_scope('coarse_senti',reuse=tf.AUTO_REUSE):
-            with tf.device('/cpu:0'):
-                # shape = (fine attr num*3+3, coarse attr num*3+3)
-                W = tf.get_variable(name='fine2coarse',
-                                    initializer=self.initializer(shape=(self.nn_config['attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num'], self.nn_config['coarse_attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num']), dtype='float32'))
+            # shape = (fine attr num*3+3, coarse attr num*3+3)
+            W = tf.get_variable(name='fine2coarse',
+                                initializer=self.initializer(shape=(self.nn_config['attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num'], self.nn_config['coarse_attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num']), dtype='float32'))
             reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         # shape = (batch size * max review length, attr num*3 + 3)
         fine_score = tf.reshape(fine_score,shape=(-1, self.nn_config['attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num']))

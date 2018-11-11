@@ -33,7 +33,7 @@ if __name__ == "__main__":
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
                 'batch_size':6,
-                'gpu_num':2
+                'gpu_num':3
             }
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'

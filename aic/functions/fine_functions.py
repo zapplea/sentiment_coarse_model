@@ -256,15 +256,15 @@ class SentimentFunction:
         :param m: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
         :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
         """
-        # H.shape = (batch size, words num, 3+3*attributes number, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, 3 * self.nn_config['attributes_num'] + 3, 1])
-        # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['normal_senti_prototype_num'] * 3 +
-                                                          self.nn_config['attribute_senti_prototype_num'] *
-                                                          self.nn_config['attributes_num'],
-                                                          1])
+        # # H.shape = (batch size, words num, 3+3*attributes number, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, 3 * self.nn_config['attributes_num'] + 3, 1])
+        # # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['normal_senti_prototype_num'] * 3 +
+        #                                                   self.nn_config['attribute_senti_prototype_num'] *
+        #                                                   self.nn_config['attributes_num'],
+        #                                                   1])
         # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
-        temp = tf.multiply(m, tf.exp(tf.reduce_sum(tf.multiply(H, W), axis=4)))
+        temp = tf.multiply(mask, tf.exp(tf.tensordot(H, W, axes=[[-1], [-1]])))
 
         # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
         denominator = tf.reduce_sum(temp, axis=3, keepdims=True)
