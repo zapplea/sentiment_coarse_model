@@ -152,7 +152,7 @@ class SentimentNet:
         # mask the situation when attribute doesn't appear
         attr_pred_labels = self.sf.expand_attr_labels(attr_pred_labels,self.graph)
         # in here the mask use predicted attribute label as input. This is different from the above.
-        mask = tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[batch_size, 1, 3])
+        mask = tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3]),axis=1),multiples=[1,batch_size,1,1])
         # score.shape = (batch size, number of attributes+1,3)
         joint_fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, 3)), mask)
         # sahpe = (batch size, coarse attr num + 1, 3)
