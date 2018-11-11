@@ -134,7 +134,7 @@ class SentimentNet:
         # mask the situation when attribute doesn't appear
         Y_att = self.sf.expand_attr_labels(Y_att, self.graph)
         # in here, the mask use true attribuges labels as input. This is different from the joint loss
-        batch_size = int(score.get_shape()[0])
+        batch_size = score.get_shape()[0]
         mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[batch_size, 1, 3])
         # fine_score.shape = (batch size*max review length, number of attributes+1,3)
         fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
