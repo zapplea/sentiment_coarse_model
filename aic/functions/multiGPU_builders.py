@@ -4,9 +4,9 @@ class SentiNetBuilder:
     def __init__(self,config):
         self.nn_config = {
             'words_num': 210,
-            'lstm_cell_size': 200,
+            'lstm_cell_size': 300,
             'word_dim': 300,
-            'attribute_dim': 200,
+            'attribute_dim': 300,
             'lookup_table_words_num': 116141,  # 34934,2074276 for Chinese word embedding
             'padding_word_index': 116140,  # 34933,the index of #PAD# in word embeddings list
             'attribute_mat_size': 3,  # number of attribute mention prototypes in a attribute matrix
@@ -17,7 +17,7 @@ class SentiNetBuilder:
             'max_review_len': 19,
             'normal_senti_prototype_num': 3,
             'attribute_senti_prototype_num': 3,
-            'sentiment_dim': 200,
+            'sentiment_dim': 300,
             'sentiment_num':3,
             'rps_num': 5,
             'rps_dim': 100,
