@@ -108,8 +108,10 @@ class SentimentNet:
         tf.add_to_collection('var_attention',attention)
         # attended_W.shape = (batch size*max review length,number of words, 3+3*attributes number, sentiment dim)
         attended_W = self.sf.attended_sentiment(W, attention, self.graph)
+        tf.add_to_collection('var_attended_W',attended_W)
         # shape = (batch size*max review length,number of words, 3+3*attributes number)
         item1 = self.sf.item1(attended_W, senti_H, self.graph)
+        tf.add_to_collection('var_item1',item1)
         # A_dist.shape = (batch size*max review length, number of attributes+1, wrods number)
         if self.nn_config['is_mat']:
             A = tf.concat([A, o], axis=0)
