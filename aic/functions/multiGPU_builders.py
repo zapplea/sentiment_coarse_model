@@ -142,7 +142,7 @@ class SentiNetBuilder:
         attr_tower_grads = []
         senti_tower_grads = []
         joint_tower_grads = []
-        with tf.device('/gpu:%d'%self.nn_config['gpu_num']):
+        with tf.device('/cpu:0'):
             with graph.as_default():
                 global_step = tf.get_variable(
                     'global_step', [],
