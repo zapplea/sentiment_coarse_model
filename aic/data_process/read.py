@@ -8,9 +8,15 @@ def train(infile,outfile):
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
         senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
-
+        attr_labels=attr_labels[:20]
+        senti_labels=senti_labels[:20]
+        sentence=sentence[:20]
+        print('train:\n')
+        print('senti labels shape: ',senti_labels.shape)
+        print('attr labels shape: ',attr_labels.shape)
+        print('sentence shape: ',sentence.shape)
     with open(outfile,'wb') as f:
-        pickle.dump((attribute_dic, word_dic, attr_labels[:20], senti_labels[:20], sentence[:20], word_embed),f)
+        pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed),f)
     print('train successful')
 
 def test(infile,outfile):
@@ -20,9 +26,15 @@ def test(infile,outfile):
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
         senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
-
+        attr_labels = attr_labels[:20]
+        senti_labels = senti_labels[:20]
+        sentence = sentence[:20]
+        print('test:\n')
+        print('senti labels shape: %s\n'%str(senti_labels.shape))
+        print('attr labels shape: %s\n'%str(attr_labels.shape))
+        print('sentence shape: %s\n'%str(sentence.shape))
     with open(outfile,'wb') as f:
-        pickle.dump((attr_labels[:20], senti_labels[:20], sentence[:20]),f)
+        pickle.dump((attr_labels, senti_labels, sentence),f)
     print('test success')
 
 if __name__=='__main__':
