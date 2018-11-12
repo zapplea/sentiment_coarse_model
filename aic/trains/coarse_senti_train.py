@@ -76,10 +76,10 @@ class CoarseSentiTrain:
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-                coarse_socre = sess.run(graph.get_collection('coarse_score'),feed_dict=feed_dict)
-                print('coarse_score:\n',coarse_socre)
-                print('attr_train_loss: ',attr_train_loss)
-                print('senti_train_loss: ', senti_train_loss)
+                # coarse_socre = sess.run(graph.get_collection('coarse_score'),feed_dict=feed_dict)
+                # print('coarse_score:\n',coarse_socre)
+                # print('attr_train_loss: ',attr_train_loss)
+                # print('senti_train_loss: ', senti_train_loss)
             if i % 1 == 0 and i != 0:
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
                 attr_loss_vec = []
@@ -100,8 +100,8 @@ class CoarseSentiTrain:
                     attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
                         [attr_loss,senti_loss, attr_pred,senti_pred],
                         feed_dict=feed_dict)
-                    print('attr_test_loss: ', attr_train_loss)
-                    print('senti_test_loss: ', senti_train_loss)
+                    # print('attr_test_loss: ', attr_train_loss)
+                    # print('senti_test_loss: ', senti_train_loss)
                     TP_data = self.mt.TP(attr_labels_data, attr_pred_data)
                     FP_data = self.mt.FP(attr_labels_data, attr_pred_data)
                     FN_data = self.mt.FN(attr_labels_data, attr_pred_data)
