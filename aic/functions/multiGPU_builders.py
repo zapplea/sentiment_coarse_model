@@ -180,7 +180,6 @@ class SentiNetBuilder:
                 # loss
                 attr_loss, senti_loss, joint_loss = self.average_loss(graph, self.nn_config['gpu_num'])
                 saver = tf.train.Saver()
-                print('================in build model')
         return {'train_step':{'attr':attr_train_step, 'senti':senti_train_step, 'joint':joint_train_step},
                 'pred_labels':{'attr':attr_pred_labels, 'senti':senti_pred_labels, 'joint':joint_pred_labels},
                 'loss':{'attr':attr_loss, 'senti':senti_loss, 'joint':joint_loss},

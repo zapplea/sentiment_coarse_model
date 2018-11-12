@@ -63,7 +63,7 @@ class CoarseSentiTrain:
         attr_loss = dic['loss']['attr']
         senti_loss = dic['loss']['senti']
         attr_pred = dic['pred']['attr']
-        senti_pred = dic['pred']['attr']
+        senti_pred = dic['pred']['senti']
         saver = dic['saver']
         early_stop_count = 0
         best_f1_score = 0
