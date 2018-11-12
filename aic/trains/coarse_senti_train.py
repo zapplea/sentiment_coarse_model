@@ -110,7 +110,7 @@ class CoarseSentiTrain:
 
                     print(senti_labels_data.shape)
                     senti_labels_data = self.mt.caliberate(senti_labels_data)
-                    print(senti_labels_data.sahpe)
+                    print(senti_labels_data.shape)
                     exit()
                     senti_pred_data = self.mt.caliberate(senti_pred_data)
                     TP_data = self.mt.TP(senti_labels_data[:,:-1,:], senti_pred_data[:,:-1,:])
