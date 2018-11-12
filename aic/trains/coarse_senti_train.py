@@ -89,6 +89,7 @@ class CoarseSentiTrain:
                 senti_FN_vec = []
 
                 dataset = self.dg.data_generator('val')
+                print('===============test=============')
                 for attr_labels_data, senti_labels_data, sentences_data in dataset:
                     data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                                  'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
@@ -117,18 +118,18 @@ class CoarseSentiTrain:
                     senti_FN_vec.append(FN_data)
                     senti_loss_vec.append(senti_test_loss)
 
-                TP_vec = np.concatenate(attr_TP_vec, axis=0)
-                FP_vec = np.concatenate(attr_FP_vec, axis=0)
-                FN_vec = np.concatenate(attr_FN_vec, axis=0)
+                TP_vec = np.sum(attr_TP_vec, axis=0)
+                FP_vec = np.sum(attr_FP_vec, axis=0)
+                FN_vec = np.sum(attr_FN_vec, axis=0)
                 loss_value = np.mean(attr_loss_vec)
                 self.mt.report('attribute metrics\n',self.outf,'report')
                 self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
                 print('attribute metrics:')
                 _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic)
 
-                TP_vec = np.concatenate(senti_TP_vec, axis=0)
-                FP_vec = np.concatenate(senti_FP_vec, axis=0)
-                FN_vec = np.concatenate(senti_FN_vec, axis=0)
+                TP_vec = np.sum(senti_TP_vec, axis=0)
+                FP_vec = np.sum(senti_FP_vec, axis=0)
+                FN_vec = np.sum(senti_FN_vec, axis=0)
                 loss_value = np.mean(senti_loss_vec)
                 if dic['test_mod'] !='attr':
                     self.mt.report('sentiment metrics\n', self.outf, 'report')
