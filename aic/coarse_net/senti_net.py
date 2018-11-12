@@ -135,12 +135,12 @@ class SentimentNet:
         # shape = (batch size,attributes num +1)
         Y_att = self.sf.expand_attr_labels(Y_att, self.graph)
         # in here, the mask use true attribuges labels as input. This is different from the joint loss
-        mask = tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3]), axis=1),
-                       multiples=[1, self.nn_config['max_review_len'], 1, 1])
+        mask = tf.reshape(tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, self.nn_config['sentiment_num']]), axis=1),
+                       multiples=[1, self.nn_config['max_review_len'], 1, 1]),shape=(-1,self.nn_config['attributes_num']+1,self.nn_config['sentiment_num']))
         # fine_score.shape = (batch size*max review length, number of attributes+1,3)
         tf.add_to_collection('score',score)
         tf.add_to_collection('mask',mask)
-        fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
+        fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, self.nn_config['sentiment_num'])), mask)
         tf.add_to_collection('fine_score',fine_score)
         # sahpe = (batch size, coarse attr num + 1, 3)
         coarse_score = self.sf.coarse_score(fine_score,self.reg,self.graph)
@@ -157,9 +157,10 @@ class SentimentNet:
         # mask the situation when attribute doesn't appear
         attr_pred_labels = self.sf.expand_attr_labels(attr_pred_labels,self.graph)
         # in here the mask use predicted attribute label as input. This is different from the above.
-        mask = tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3]),axis=1),multiples=[1,self.nn_config['max_review_len'],1,1])
+        mask = tf.reshape(tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, self.nn_config['sentiment_num']]),axis=1),multiples=[1,self.nn_config['max_review_len'],1,1]),
+                          shape=(-1,self.nn_config['attributes_num']+1,self.nn_config['sentiment_num']))
         # score.shape = (batch size, number of attributes+1,3)
-        joint_fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, 3)), mask)
+        joint_fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, self.nn_config['sentiment_num'])), mask)
         tf.add_to_collection('joint_fine_score', joint_fine_score)
         # sahpe = (batch size, coarse attr num + 1, 3)
         joint_coarse_score = self.sf.coarse_score(joint_fine_score,self.reg,self.graph)
