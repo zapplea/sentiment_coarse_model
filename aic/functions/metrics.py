@@ -7,11 +7,7 @@ class Metrics:
         :param label: (batch size, attributes+1,3) 
         :return: 
         """
-        print(label.shape)
-        result = np.sum(label,axis=2)
-        print(result.shape)
-        print(result)
-        notmention_label = np.expand_dims(result,axis=2)
+        notmention_label = np.expand_dims(np.sum(label,axis=2),axis=2)
         condition = np.equal(notmention_label,np.zeros_like(notmention_label))
         notmention_label = np.where(condition,np.ones_like(notmention_label),np.zeros_like(notmention_label))
         # shape = (batch size, attributes+1,4)

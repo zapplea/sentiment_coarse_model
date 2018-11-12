@@ -83,7 +83,7 @@ class CoarseSentiTrain:
                 # exit()
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-
+                print('senti pred labels:', senti_pred_data.shape)
             if i % 1 == 0 and i != 0:
                 self.mt.report('epoch: %d'%i,self.outf,'report')
                 attr_loss_vec = []
