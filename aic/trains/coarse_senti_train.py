@@ -78,7 +78,8 @@ class CoarseSentiTrain:
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 # print('attr_train_loss: ',attr_train_loss)
                 # print('senti_train_loss: ', senti_train_loss)
-            if i % 1 == 0 and i != 0:
+            if i % self.train_config['epoch_mod'] == 0 and i != 0:
+                self.mt.report('epoch: %d'%i)
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
                 attr_loss_vec = []
                 attr_TP_vec = []
@@ -166,6 +167,7 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
+            self.mt.report('attr in training')
             self.mt.report('===========attr============',self.outf,'report')
             dic['train_step'] = model_dic['train_step']['attr']
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
@@ -176,6 +178,7 @@ class CoarseSentiTrain:
             # ##########################
             # train senti (optional)   #
             # ##########################
+            self.mt.report('senti in training')
             self.mt.report('===========senti============',self.outf,'report')
             dic['train_step'] = model_dic['train_step']['senti']
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
@@ -186,6 +189,7 @@ class CoarseSentiTrain:
             # ##########################
             # train joint              #
             # ##########################
+            self.mt.report('joint in training')
             self.mt.report('===========joint============',self.outf,'report')
             dic['train_step'] = model_dic['train_step']['joint']
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
