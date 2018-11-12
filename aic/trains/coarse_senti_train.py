@@ -79,11 +79,14 @@ class CoarseSentiTrain:
                 # print(result.shape)
                 print('joint pred 2:')
                 result = sess.run(tf.get_collection('joint_pred_2')[0],feed_dict=feed_dict)
+                print('name:',tf.get_collection('joint_pred_2')[0].name)
                 print(result.shape)
-                exit()
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
+                print('name: ',senti_pred.name)
+                print('shape: ',senti_pred.get_shape())
                 print('senti pred labels:', senti_pred_data.shape)
+                exit()
             # if i % 1 == 0 and i != 0:
             #     self.mt.report('epoch: %d'%i,self.outf,'report')
             #     attr_loss_vec = []

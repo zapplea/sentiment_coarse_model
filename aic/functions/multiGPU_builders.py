@@ -119,7 +119,7 @@ class SentiNetBuilder:
             joint_total_pred_labels.append(graph.get_collection('joint_pred_labels')[i])
         attr_pred_labels = tf.concat(attr_total_pred_labels, axis=0)
         senti_pred_labels = tf.concat(senti_total_pred_labels, axis=0)
-        joint_pred_labels = tf.concat(joint_total_pred_labels, axis=0)
+        joint_pred_labels = tf.concat(joint_total_pred_labels, axis=0,name='joint_pred_2')
         graph.add_to_collection('joint_pred_2',joint_pred_labels)
 
         return attr_pred_labels, senti_pred_labels, joint_pred_labels
