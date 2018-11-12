@@ -8,8 +8,10 @@ class Metrics:
         :return: 
         """
         print(label.shape)
-        exit()
-        notmention_label = np.expand_dims(np.sum(label,axis=2),axis=2)
+        result = np.sum(label,axis=2)
+        print(result.shape)
+        print(result)
+        notmention_label = np.expand_dims(result,axis=2)
         condition = np.equal(notmention_label,np.zeros_like(notmention_label))
         notmention_label = np.where(condition,np.ones_like(notmention_label),np.zeros_like(notmention_label))
         # shape = (batch size, attributes+1,4)
