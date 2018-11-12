@@ -166,8 +166,6 @@ class SentimentNet:
         self.graph.add_to_collection('joint_loss', joint_loss)
         # TODO: in coarse, should mask the prediction of padded sentences.
         joint_pred_labels = self.sf.prediction(name='joint_pred_labels',score=joint_coarse_score, Y_att=attr_pred_labels, graph=self.graph)
-        tf.add_to_collection('joint_coarse_score',joint_coarse_score)
-        tf.add_to_collection('joint_pred',joint_pred_labels)
 
     @staticmethod
     def build(config):

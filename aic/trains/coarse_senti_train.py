@@ -77,84 +77,78 @@ class CoarseSentiTrain:
                 # print('joint_coarse_score:')
                 # result = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
                 # print(result.shape)
-                print('joint pred 2:')
-                result = sess.run(tf.get_collection('joint_pred_2')[0],feed_dict=feed_dict)
-                print('name:',tf.get_collection('joint_pred_2')[0].name)
-                print(result.shape)
+                # print('joint pred 2:')
+                # result = sess.run(tf.get_collection('joint_pred_2')[0],feed_dict=feed_dict)
+                # print('name:',tf.get_collection('joint_pred_2')[0].name)
+                # print(result.shape)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-                print('name: ',senti_pred.name)
-                print('shape: ',senti_pred.get_shape())
-                print('senti pred labels:', senti_pred_data.shape)
-                exit()
-            # if i % 1 == 0 and i != 0:
-            #     self.mt.report('epoch: %d'%i,self.outf,'report')
-            #     attr_loss_vec = []
-            #     attr_TP_vec = []
-            #     attr_FP_vec = []
-            #     attr_FN_vec = []
-            #
-            #     senti_loss_vec = []
-            #     senti_TP_vec = []
-            #     senti_FP_vec = []
-            #     senti_FN_vec = []
-            #
-            #     dataset = self.dg.data_generator('val')
-            #     for attr_labels_data, senti_labels_data, sentences_data in dataset:
-            #         data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
-            #                      'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
-            #         feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
-            #         attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
-            #             [attr_loss,senti_loss, attr_pred,senti_pred],
-            #             feed_dict=feed_dict)
-            #
-            #         TP_data = self.mt.TP(attr_labels_data, attr_pred_data)
-            #         FP_data = self.mt.FP(attr_labels_data, attr_pred_data)
-            #         FN_data = self.mt.FN(attr_labels_data, attr_pred_data)
-            #
-            #         ###Show test message
-            #         attr_TP_vec.append(TP_data)
-            #         attr_FP_vec.append(FP_data)
-            #         attr_FN_vec.append(FN_data)
-            #         attr_loss_vec.append(attr_test_loss)
-            #         senti_labels_data = self.mt.caliberate(senti_labels_data)
-            #         print('senti pred labels:',senti_pred_data.shape)
-            #         exit()
-            #         senti_pred_data = self.mt.caliberate(senti_pred_data)
-            #         TP_data = self.mt.TP(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
-            #         FP_data = self.mt.FP(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
-            #         FN_data = self.mt.FN(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
-            #         senti_TP_vec.append(TP_data)
-            #         senti_FP_vec.append(FP_data)
-            #         senti_FN_vec.append(FN_data)
-            #         senti_loss_vec.append(senti_test_loss)
-            #
-            #     TP_vec = np.concatenate(attr_TP_vec, axis=0)
-            #     FP_vec = np.concatenate(attr_FP_vec, axis=0)
-            #     FN_vec = np.concatenate(attr_FN_vec, axis=0)
-            #     loss_value = np.mean(attr_loss_vec)
-            #     self.mt.report('attribute metrics\n',self.outf,'report')
-            #     self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-            #     _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
-            #
-            #     TP_vec = np.concatenate(senti_TP_vec, axis=0)
-            #     FP_vec = np.concatenate(senti_FP_vec, axis=0)
-            #     FN_vec = np.concatenate(senti_FN_vec, axis=0)
-            #     loss_value = np.mean(senti_loss_vec)
-            #     if dic['test_mod'] !='attr':
-            #         self.mt.report('sentiment metrics\n', self.outf, 'report')
-            #         self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-            #         _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
-            #
-            #
-            #     if best_f1_score < _f1_score:
-            #         early_stop_count += 1
-            #     else:
-            #         early_stop_count = 0
-            #         best_f1_score = _f1_score
-            #         saver.save(sess, self.train_config['sr_path'])
-            #     if early_stop_count > self.train_config['early_stop_limit']:
-            #         break
+            if i % 1 == 0 and i != 0:
+                self.mt.report('epoch: %d'%i,self.outf,'report')
+                attr_loss_vec = []
+                attr_TP_vec = []
+                attr_FP_vec = []
+                attr_FN_vec = []
+
+                senti_loss_vec = []
+                senti_TP_vec = []
+                senti_FP_vec = []
+                senti_FN_vec = []
+
+                dataset = self.dg.data_generator('val')
+                for attr_labels_data, senti_labels_data, sentences_data in dataset:
+                    data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
+                                 'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
+                    feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
+                    attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
+                        [attr_loss,senti_loss, attr_pred,senti_pred],
+                        feed_dict=feed_dict)
+
+                    TP_data = self.mt.TP(attr_labels_data, attr_pred_data)
+                    FP_data = self.mt.FP(attr_labels_data, attr_pred_data)
+                    FN_data = self.mt.FN(attr_labels_data, attr_pred_data)
+
+                    ###Show test message
+                    attr_TP_vec.append(TP_data)
+                    attr_FP_vec.append(FP_data)
+                    attr_FN_vec.append(FN_data)
+                    attr_loss_vec.append(attr_test_loss)
+                    senti_labels_data = self.mt.caliberate(senti_labels_data)
+                    senti_pred_data = self.mt.caliberate(senti_pred_data)
+                    TP_data = self.mt.TP(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
+                    FP_data = self.mt.FP(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
+                    FN_data = self.mt.FN(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
+                    senti_TP_vec.append(TP_data)
+                    senti_FP_vec.append(FP_data)
+                    senti_FN_vec.append(FN_data)
+                    senti_loss_vec.append(senti_test_loss)
+
+                TP_vec = np.concatenate(attr_TP_vec, axis=0)
+                FP_vec = np.concatenate(attr_FP_vec, axis=0)
+                FN_vec = np.concatenate(attr_FN_vec, axis=0)
+                loss_value = np.mean(attr_loss_vec)
+                self.mt.report('attribute metrics\n',self.outf,'report')
+                self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
+                _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
+
+                TP_vec = np.concatenate(senti_TP_vec, axis=0)
+                FP_vec = np.concatenate(senti_FP_vec, axis=0)
+                FN_vec = np.concatenate(senti_FN_vec, axis=0)
+                loss_value = np.mean(senti_loss_vec)
+                if dic['test_mod'] !='attr':
+                    self.mt.report('sentiment metrics\n', self.outf, 'report')
+                    self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
+                    _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
+
+
+                if best_f1_score < _f1_score:
+                    early_stop_count += 1
+                else:
+                    early_stop_count = 0
+                    best_f1_score = _f1_score
+                    saver.save(sess, self.train_config['sr_path'])
+                if early_stop_count > self.train_config['early_stop_limit']:
+                    break
 
     def train(self,model_dic):
         graph = model_dic['graph']

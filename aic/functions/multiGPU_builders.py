@@ -117,10 +117,9 @@ class SentiNetBuilder:
             attr_total_pred_labels.append(graph.get_collection('attr_pred_labels')[i])
             senti_total_pred_labels.append(graph.get_collection('senti_pred_labels')[i])
             joint_total_pred_labels.append(graph.get_collection('joint_pred_labels')[i])
-        attr_pred_labels = tf.concat(attr_total_pred_labels, axis=0,name='attr_pred_2')
-        senti_pred_labels = tf.concat(senti_total_pred_labels, axis=0,name='senti_pred_2')
-        joint_pred_labels = tf.concat(joint_total_pred_labels, axis=0,name='joint_pred_2')
-        graph.add_to_collection('joint_pred_2',joint_pred_labels)
+        attr_pred_labels = tf.concat(attr_total_pred_labels, axis=0)
+        senti_pred_labels = tf.concat(senti_total_pred_labels, axis=0)
+        joint_pred_labels = tf.concat(joint_total_pred_labels, axis=0)
 
         return attr_pred_labels, senti_pred_labels, joint_pred_labels
 
@@ -204,9 +203,9 @@ class SentiNetBuilder:
                 opt = tf.train.AdamOptimizer(self.nn_config['lr'])
                 for k in range(self.nn_config['gpu_num']):
                     with tf.device('/gpu:%d' % k):
-                        with tf.variable_scope('elmo',reuse=k>0):
-                            self.nn_config['elmo']['graph']=graph
-                            lm_model = Elmo(self.nn_config['elmo'],False)
+                        # with tf.variable_scope('elmo',reuse=k>0):
+                        #     self.nn_config['elmo']['graph']=graph
+                        #     lm_model = Elmo(self.nn_config['elmo'],False)
 
                         with tf.variable_scope('sentiment', reuse=k > 0):
                             model = Model(self.nn_config, graph=graph, table=table)
