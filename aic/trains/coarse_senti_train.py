@@ -129,7 +129,7 @@ class CoarseSentiTrain:
                 loss_value = np.mean(attr_loss_vec)
                 self.mt.report('attribute metrics\n',self.outf,'report')
                 self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-                _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
+                _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic)
 
                 TP_vec = np.concatenate(senti_TP_vec, axis=0)
                 FP_vec = np.concatenate(senti_FP_vec, axis=0)
