@@ -541,6 +541,6 @@ class SentimentFunction:
         pred = tf.where(tf.equal(tf.reduce_max(score,axis=2,keep_dims=True),score),tf.ones_like(score),tf.zeros_like(score))
         # use Y_atr to mask non-activated attributes' sentiment
         Y_att = tf.tile(tf.expand_dims(Y_att,axis=2),multiples=[1,1,self.nn_config['sentiment_num']])
-        pred = tf.multiply(Y_att, pred)
+        pred = tf.multiply(Y_att, pred,name=name)
         graph.add_to_collection(name, pred)
         return pred
