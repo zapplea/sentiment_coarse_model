@@ -96,8 +96,9 @@ class CoarseSentiTrain:
                     attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
                         [attr_loss,senti_loss, attr_pred,senti_pred],
                         feed_dict=feed_dict)
-
+                    print('attr pred data shape: ',attr_pred_data.shape)
                     TP_data = self.mt.TP(attr_labels_data, attr_pred_data)
+                    print('TP data shape: ',np.array(TP_data).shape)
                     FP_data = self.mt.FP(attr_labels_data, attr_pred_data)
                     FN_data = self.mt.FN(attr_labels_data, attr_pred_data)
 
@@ -122,6 +123,7 @@ class CoarseSentiTrain:
                 loss_value = np.mean(attr_loss_vec)
                 self.mt.report('attribute metrics\n',self.outf,'report')
                 self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
+                print('attribute metrics:')
                 _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic)
 
                 TP_vec = np.concatenate(senti_TP_vec, axis=0)
