@@ -9,6 +9,8 @@ elif getpass.getuser() == 'lujunyu':
     os.environ["CUDA_VISIBLE_DEVICES"] = "2"  ## 0
 elif getpass.getuser() == 'liu121':
     sys.path.append('/home/liu121/sentiment_coarse_model')
+elif getpass.getuser() == 'root':
+    sys.path.append('/root/sentiment_coarse_model')
 
 import argparse
 from aic.coarse_net.senti_net import SentimentNet
