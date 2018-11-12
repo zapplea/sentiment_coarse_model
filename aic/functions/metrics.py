@@ -1,11 +1,16 @@
-import tensorflow as tf
 import numpy as np
 
 class Metrics:
     def caliberate(self,label):
-        notmention_label = tf.tile(np.sum(label,axis=2),axis=2)
+        """
+        [pos, neu, neg] --> [pos, neu, neg, not mention]
+        :param label: (batch size, attributes+1,3) 
+        :return: 
+        """
+        notmention_label = np.expand_dims(np.sum(label,axis=2),axis=2)
         condition = np.equal(notmention_label,np.zeros_like(notmention_label))
         notmention_label = np.where(condition,np.ones_like(notmention_label),np.zeros_like(notmention_label))
+        # shape = (batch size, attributes+1,4)
         label = np.concatenate([label,notmention_label],axis=2)
         d0=label.shape[0]
         return np.reshape(label,newshape=[d0,-1])
