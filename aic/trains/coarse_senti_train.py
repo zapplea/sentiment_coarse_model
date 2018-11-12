@@ -89,6 +89,13 @@ class CoarseSentiTrain:
                 # print('var item1:')
                 # result = sess.run(tf.get_collection('var_item1')[0], feed_dict=feed_dict)
                 # print(result.shape)
+                print('fine_score:')
+                result = sess.run(tf.get_collection('fine_score')[0],feed_dict=feed_dict)
+                print(result.shape)
+                print('coarse_score:')
+                result = sess.run(tf.get_collection('coarse_score')[0], feed_dict=feed_dict)
+                print(result.shape)
+                exit()
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
 
