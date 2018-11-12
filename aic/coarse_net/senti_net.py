@@ -135,11 +135,14 @@ class SentimentNet:
         Y_att = self.sf.expand_attr_labels(Y_att, self.graph)
         # in here, the mask use true attribuges labels as input. This is different from the joint loss
         batch_size = tf.shape(score)[0]
-        mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[batch_size, 1, 3])
+        mask = tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3]), axis=1),
+                       multiples=[1, batch_size, 1, 1])
         # fine_score.shape = (batch size*max review length, number of attributes+1,3)
         fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
+        tf.add_to_collection('fine_score',fine_score)
         # sahpe = (batch size, coarse attr num + 1, 3)
         coarse_score = self.sf.coarse_score(fine_score,self.reg,self.graph)
+        tf.add_to_collection('coarse_score',coarse_score)
         # softmax loss
         # TODO: check reg
         reg_list = []
@@ -155,8 +158,10 @@ class SentimentNet:
         mask = tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3]),axis=1),multiples=[1,batch_size,1,1])
         # score.shape = (batch size, number of attributes+1,3)
         joint_fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, 3)), mask)
+        tf.add_to_collection('joint_fine_score', joint_fine_score)
         # sahpe = (batch size, coarse attr num + 1, 3)
         joint_coarse_score = self.sf.coarse_score(joint_fine_score,self.reg,self.graph)
+        tf.add_to_collection('joint_coarse_score', joint_coarse_score)
         # softmax loss
         senti_loss_of_joint = self.sf.softmax_loss(name='senti_loss_of_joint', labels=Y_senti, logits=joint_coarse_score,
                                                    reg_list=reg_list, graph=self.graph)
