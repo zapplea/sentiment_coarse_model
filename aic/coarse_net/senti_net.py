@@ -173,4 +173,5 @@ class SentimentNet:
     def build(config):
         builder = SentiNetBuilder(config)
         dic = builder.build_models(SentimentNet)
+        print('============in build')
         return dic
