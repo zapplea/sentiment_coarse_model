@@ -138,6 +138,8 @@ class SentimentNet:
         mask = tf.tile(tf.expand_dims(tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3]), axis=1),
                        multiples=[1, batch_size, 1, 1])
         # fine_score.shape = (batch size*max review length, number of attributes+1,3)
+        tf.add_to_collection('score',score)
+        tf.add_to_collection('mask',mask)
         fine_score = tf.multiply(tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, 3)), mask)
         tf.add_to_collection('fine_score',fine_score)
         # sahpe = (batch size, coarse attr num + 1, 3)
