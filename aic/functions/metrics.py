@@ -87,7 +87,7 @@ class Metrics:
             per_recall = np.reshape(per_recall,
                                     newshape=(self.config['attributes_num'], 4))
             per_f1_score = np.reshape(per_f1_score,newshape=(self.config['attributes_num'], 4))
-            sentiment=['pos','neu','neg','not mention']
+            sentiment=['pos','neu','neg','nmt']
             for i in range(per_f1_score.shape[0]):
                 for j in range(per_f1_score.shape[1]):
                     self.report('%s.%s f1 score: %.10f precision: %.10f recall: %.10f'
