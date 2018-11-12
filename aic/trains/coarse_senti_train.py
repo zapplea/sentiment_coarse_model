@@ -74,13 +74,13 @@ class CoarseSentiTrain:
                 data_dict = {'X_data':sentences_data,'Y_att_data':attr_labels_data,
                              'Y_senti_data':senti_labels_data,'keep_prob':self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
-                print('joint_coarse_score:')
-                result = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
-                print(result.shape)
-                print('joint pred:')
-                result = sess.run(tf.get_collection('joint_pred')[0],feed_dict=feed_dict)
-                print(result.shape)
-                exit()
+                # print('joint_coarse_score:')
+                # result = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
+                # print(result.shape)
+                # print('joint pred:')
+                # result = sess.run(tf.get_collection('joint_pred')[0],feed_dict=feed_dict)
+                # print(result.shape)
+                # exit()
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
 
@@ -115,6 +115,8 @@ class CoarseSentiTrain:
                     attr_FN_vec.append(FN_data)
                     attr_loss_vec.append(attr_test_loss)
                     senti_labels_data = self.mt.caliberate(senti_labels_data)
+                    print('senti pred labels:',senti_pred_data.shape)
+                    exit()
                     senti_pred_data = self.mt.caliberate(senti_pred_data)
                     TP_data = self.mt.TP(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
                     FP_data = self.mt.FP(senti_labels_data[:,:-4], senti_pred_data[:,:-4])
