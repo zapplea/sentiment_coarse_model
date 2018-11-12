@@ -39,14 +39,14 @@ class FineSentiTrain:
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
-        self.mt = Metrics()
+        self.mt = Metrics(self.train_config)
         self.outf = open(self.train_config['report_filePath'], 'w+')
 
-    def generate_feed_dict(self,graph, gpu_num, data_dict):
+    def generate_feed_dict(self, graph, gpu_num, data_dict):
         feed_dict = {}
-        train_mod = math.ceil(data_dict['X_data'].shape[0]/gpu_num)
+        train_mod = math.ceil(data_dict['X_data'].shape[0] / gpu_num)
         for k in range(gpu_num):
-            start = k*train_mod
+            start = k * train_mod
             end = start + train_mod
             feed_dict[graph.get_collection('X')[k]] = data_dict['X_data'][start:end]
             feed_dict[graph.get_collection('Y_att')[k]] = data_dict['Y_att_data'][start:end]
@@ -60,7 +60,7 @@ class FineSentiTrain:
         attr_loss = dic['loss']['attr']
         senti_loss = dic['loss']['senti']
         attr_pred = dic['pred']['attr']
-        senti_pred = dic['pred']['attr']
+        senti_pred = dic['pred']['senti']
         saver = dic['saver']
         early_stop_count = 0
         best_f1_score = 0
@@ -68,14 +68,16 @@ class FineSentiTrain:
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
-                data_dict = {'X_data':sentences_data,'Y_att_data':attr_labels_data,
-                             'Y_senti_data':senti_labels_data,'keep_prob':self.train_config['keep_prob_lstm']}
-                feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
+                data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
+                             'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
+                feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
-                    = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-
-            if i % 1 == 0 and i != 0:
-                self.mt.report('epoch: %d'%i,self.outf,'report')
+                    = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred], feed_dict=feed_dict)
+                # print('attr_train_loss: ',attr_train_loss)
+                # print('senti_train_loss: ', senti_train_loss)
+            if i % self.train_config['epoch_mod'] == 0 and i != 0:
+                self.mt.report('epoch: %d' % i)
+                self.mt.report('\nepoch: %d' % i, self.outf, 'report')
                 attr_loss_vec = []
                 attr_TP_vec = []
                 attr_FP_vec = []
@@ -90,46 +92,50 @@ class FineSentiTrain:
                 for attr_labels_data, senti_labels_data, sentences_data in dataset:
                     data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                                  'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
-                    feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
-                    attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
-                        [attr_loss,senti_loss, attr_pred,senti_pred],
+                    feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
+                    attr_test_loss, senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
+                        [attr_loss, senti_loss, attr_pred, senti_pred],
                         feed_dict=feed_dict)
-
-                    TP_data = self.mt.TP(attr_labels_data, attr_pred_data,mod=dic['test_mod'])
-                    FP_data = self.mt.FP(attr_labels_data, attr_pred_data,mod=dic['test_mod'])
-                    FN_data = self.mt.FN(attr_labels_data, attr_pred_data,mod=dic['test_mod'])
+                    # print('attr_test_loss: ', attr_train_loss)
+                    # print('senti_test_loss: ', senti_train_loss)
+                    TP_data = self.mt.TP(attr_labels_data, attr_pred_data)
+                    FP_data = self.mt.FP(attr_labels_data, attr_pred_data)
+                    FN_data = self.mt.FN(attr_labels_data, attr_pred_data)
 
                     ###Show test message
                     attr_TP_vec.append(TP_data)
                     attr_FP_vec.append(FP_data)
                     attr_FN_vec.append(FN_data)
                     attr_loss_vec.append(attr_test_loss)
-
-                    TP_data = self.mt.TP(senti_labels_data[:,:-2,:], senti_pred_data[:,:-2,:], mod=dic['test_mod'])
-                    FP_data = self.mt.FP(senti_labels_data[:,:-2,:], senti_pred_data[:,:-2,:], mod=dic['test_mod'])
-                    FN_data = self.mt.FN(senti_labels_data[:,:-2,:], senti_pred_data[:,:-2,:], mod=dic['test_mod'])
+                    senti_labels_data = self.mt.caliberate(senti_labels_data)
+                    senti_pred_data = self.mt.caliberate(senti_pred_data)
+                    TP_data = self.mt.TP(senti_labels_data[:, :-4], senti_pred_data[:, :-4])
+                    FP_data = self.mt.FP(senti_labels_data[:, :-4], senti_pred_data[:, :-4])
+                    FN_data = self.mt.FN(senti_labels_data[:, :-4], senti_pred_data[:, :-4])
                     senti_TP_vec.append(TP_data)
                     senti_FP_vec.append(FP_data)
                     senti_FN_vec.append(FN_data)
                     senti_loss_vec.append(senti_test_loss)
 
-                TP_vec = np.concatenate(attr_TP_vec, axis=0)
-                FP_vec = np.concatenate(attr_FP_vec, axis=0)
-                FN_vec = np.concatenate(attr_FN_vec, axis=0)
+                TP_vec = np.sum(attr_TP_vec, axis=0)
+                FP_vec = np.sum(attr_FP_vec, axis=0)
+                FN_vec = np.sum(attr_FN_vec, axis=0)
                 loss_value = np.mean(attr_loss_vec)
-                self.mt.report('attribute metrics\n',self.outf,'report')
+                self.mt.report('attribute metrics\n', self.outf, 'report')
                 self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-                _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
+                _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec, outf=self.outf,
+                                                            id_to_aspect_dic=self.dg.id_to_aspect_dic, mod='attr')
 
-                TP_vec = np.concatenate(senti_TP_vec, axis=0)
-                FP_vec = np.concatenate(senti_FP_vec, axis=0)
-                FN_vec = np.concatenate(senti_FN_vec, axis=0)
+                TP_vec = np.sum(senti_TP_vec, axis=0)
+                FP_vec = np.sum(senti_FP_vec, axis=0)
+                FN_vec = np.sum(senti_FN_vec, axis=0)
                 loss_value = np.mean(senti_loss_vec)
-                if dic['test_mod'] !='attr':
+                if dic['test_mod'] != 'attr':
                     self.mt.report('sentiment metrics\n', self.outf, 'report')
                     self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-                    _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspet_dic)
-
+                    _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,
+                                                                outf=self.outf,
+                                                                id_to_aspect_dic=self.dg.id_to_aspect_dic, mod='senti')
 
                 if best_f1_score < _f1_score:
                     early_stop_count += 1
@@ -140,31 +146,9 @@ class FineSentiTrain:
                 if early_stop_count > self.train_config['early_stop_limit']:
                     break
 
-    def train(self,model_dic):
+    def train(self, model_dic):
         graph = model_dic['graph']
         with graph.as_default():
-            # # input
-            # X = graph.get_collection('X')[0]
-            # # labels
-            # Y_att = graph.get_collection('Y_att')[0]
-            # Y_senti = graph.get_collection('Y_senti')[0]
-            # # train_step
-            # attr_train_step = graph.get_collection('attr_opt')[0]
-            # senti_train_step = graph.get_collection('senti_opt')[0]
-            # joint_train_step = graph.get_collection('joint_opt')[0]
-            # #
-            # table = graph.get_collection('table')[0]
-            # #loss
-            # attr_loss = graph.get_collection('atr_loss')[0]
-            # senti_loss = graph.get_collection('senti_loss')[0]
-            # joint_loss = graph.get_collection('joint_loss')[0]
-            #
-            # # pred
-            # attr_pred = graph.get_collection('atr_pred')[0]
-            # senti_pred = graph.get_collection('senti_pred')[0]
-            # joint_pred = graph.get_collection('joint_pred')[0]
-            #
-            # keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
         table_data = self.dg.table
@@ -182,30 +166,32 @@ class FineSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            self.mt.report('===========attr============',self.outf,'report')
+            self.mt.report('attr in training')
+            self.mt.report('===========attr============', self.outf, 'report')
             dic['train_step'] = model_dic['train_step']['attr']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['loss'] = {'attr': model_dic['loss']['attr'], 'senti': model_dic['loss']['joint']}
+            dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'attr'
-
             self.__train__(dic, graph, model_dic['gpu_num'])
 
             # ##########################
             # train senti (optional)   #
             # ##########################
-            # self.mt.report('===========senti============')
-            # dic['train_step'] = model_dic['train_step']['senti']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
-            # dic['test_mod'] = 'senti'
-            # self.__train__(model_dic, graph, model_dic['gpu_num'])
+            self.mt.report('senti in training')
+            self.mt.report('===========senti============', self.outf, 'report')
+            dic['train_step'] = model_dic['train_step']['senti']
+            dic['loss'] = {'attr': model_dic['loss']['attr'], 'senti': model_dic['loss']['senti']}
+            dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['senti']}
+            dic['test_mod'] = 'senti'
+            self.__train__(dic, graph, model_dic['gpu_num'])
 
             # ##########################
             # train joint              #
             # ##########################
-            self.mt.report('===========joint============',self.outf,'report')
+            self.mt.report('joint in training')
+            self.mt.report('===========joint============', self.outf, 'report')
             dic['train_step'] = model_dic['train_step']['joint']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['loss'] = {'attr': model_dic['loss']['attr'], 'senti': model_dic['loss']['joint']}
+            dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'joint'
-            self.__train__(model_dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'])
