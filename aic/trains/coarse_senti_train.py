@@ -149,28 +149,6 @@ class CoarseSentiTrain:
     def train(self,model_dic):
         graph = model_dic['graph']
         with graph.as_default():
-            # # input
-            # X = graph.get_collection('X')[0]
-            # # labels
-            # Y_att = graph.get_collection('Y_att')[0]
-            # Y_senti = graph.get_collection('Y_senti')[0]
-            # # train_step
-            # attr_train_step = graph.get_collection('attr_opt')[0]
-            # senti_train_step = graph.get_collection('senti_opt')[0]
-            # joint_train_step = graph.get_collection('joint_opt')[0]
-            # #
-            # table = graph.get_collection('table')[0]
-            # #loss
-            # attr_loss = graph.get_collection('atr_loss')[0]
-            # senti_loss = graph.get_collection('senti_loss')[0]
-            # joint_loss = graph.get_collection('joint_loss')[0]
-            #
-            # # pred
-            # attr_pred = graph.get_collection('atr_pred')[0]
-            # senti_pred = graph.get_collection('senti_pred')[0]
-            # joint_pred = graph.get_collection('joint_pred')[0]
-            #
-            # keep_prob_lstm = graph.get_collection('keep_prob_lstm')[0]
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
         table_data = self.dg.table
@@ -193,18 +171,17 @@ class CoarseSentiTrain:
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
             dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'attr'
-
             self.__train__(dic, graph, model_dic['gpu_num'])
 
             # ##########################
             # train senti (optional)   #
             # ##########################
-            self.mt.report('===========senti============')
+            self.mt.report('===========senti============',self.outf,'report')
             dic['train_step'] = model_dic['train_step']['senti']
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
             dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
             dic['test_mod'] = 'senti'
-            self.__train__(model_dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'])
 
             # ##########################
             # train joint              #
@@ -214,4 +191,4 @@ class CoarseSentiTrain:
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
             dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'joint'
-            self.__train__(model_dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'])
