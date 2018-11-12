@@ -36,9 +36,10 @@ if __name__ == "__main__":
                 'lr': lr[args.num],
                 'batch_size':100,
                 'gpu_num':2,
-                'epoch':20,
+                'epoch':100,
                 'attributes_num':20,
-                'epoch_mod':5
+                'epoch_mod':10,
+                'early_stop_limit':5
             }
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'
