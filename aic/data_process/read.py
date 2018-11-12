@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 
-top_k = 10
+top_k = None
 def train(infile,outfile):
     with open(infile,'rb') as f:
         attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
