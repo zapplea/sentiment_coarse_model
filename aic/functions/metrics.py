@@ -71,14 +71,14 @@ class Metrics:
         per_precision = self.per_precision(TP_vec, FP_vec)
         per_recall = self.per_recall(TP_vec, FN_vec)
         _f1_score = self.macro_f1_score(per_precision, per_recall)
-        self.report('Macro F1 score: %.10f\nMacro precision:%.10f\nMacro recall:%.10f'
+        self.report('Macro F1 score: %.5f\nMacro precision:%.5f\nMacro recall:%.5f'
                        % (_f1_score, _precision, _recall), outf, 'report')
 
         # per class metrics
         per_f1_score = self.per_f1_score(per_precision, per_recall)
         if mod == 'attr':
             for i in range(per_f1_score.shape[0]):
-                self.report('%s f1 score: %.10f precision: %.10f recall: %.10f'
+                self.report('%s f1 score: %.5f          precision: %.5f           recall: %.5f'
                                % (id_to_aspect_dic[i], per_f1_score[i], per_precision[i], per_recall[i]), outf,
                                'report')
         else:
@@ -90,7 +90,7 @@ class Metrics:
             sentiment=['pos','neu','neg','nmt']
             for i in range(per_f1_score.shape[0]):
                 for j in range(per_f1_score.shape[1]):
-                    self.report('%s.%s f1 score: %.10f precision: %.10f recall: %.10f'
+                    self.report('%s.%s f1 score: %.5f          precision: %.5f         recall: %.5f'
                                 % (id_to_aspect_dic[i],sentiment[j], per_f1_score[i][j], per_precision[i][j], per_recall[i][j]), outf,
                                 'report')
         return _f1_score

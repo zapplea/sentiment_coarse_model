@@ -98,6 +98,8 @@ class CoarseSentiTrain:
                     attr_test_loss,senti_test_loss, attr_pred_data, senti_pred_data = sess.run(
                         [attr_loss,senti_loss, attr_pred,senti_pred],
                         feed_dict=feed_dict)
+                    print('attr_test_loss: ', attr_train_loss)
+                    print('senti_test_loss: ', senti_train_loss)
                     TP_data = self.mt.TP(attr_labels_data, attr_pred_data)
                     FP_data = self.mt.FP(attr_labels_data, attr_pred_data)
                     FN_data = self.mt.FN(attr_labels_data, attr_pred_data)
