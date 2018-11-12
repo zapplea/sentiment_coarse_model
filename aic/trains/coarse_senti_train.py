@@ -74,13 +74,6 @@ class CoarseSentiTrain:
                 data_dict = {'X_data':sentences_data,'Y_att_data':attr_labels_data,
                              'Y_senti_data':senti_labels_data,'keep_prob':self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
-                # print('joint_coarse_score:')
-                # result = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
-                # print(result.shape)
-                # print('joint pred 2:')
-                # result = sess.run(tf.get_collection('joint_pred_2')[0],feed_dict=feed_dict)
-                # print('name:',tf.get_collection('joint_pred_2')[0].name)
-                # print(result.shape)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
             if i % 1 == 0 and i != 0:

@@ -73,6 +73,7 @@ class Metrics:
 
         # per class metrics
         per_f1_score = self.per_f1_score(per_precision, per_recall)
+        print('shape of per precision: ',per_precision.shape)
         for i in range(per_precision.shape[0]):
             self.report('%s f1 score: %.10f precision: %.10f recall: %.10f'
                            % (id_to_aspect_dic[i], per_f1_score[i], per_precision[i], per_recall[i]), outf,
