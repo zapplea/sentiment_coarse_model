@@ -1,6 +1,9 @@
 import numpy as np
 
 class Metrics:
+    def __init__(self,config):
+        self.config = config
+
     def caliberate(self,label):
         """
         [pos, neu, neg] --> [pos, neu, neg, not mention]
@@ -61,7 +64,7 @@ class Metrics:
 
 
 
-    def calculate_metrics_score(self,TP_vec, FP_vec, FN_vec,outf,id_to_aspect_dic):
+    def calculate_metrics_score(self,TP_vec, FP_vec, FN_vec,outf,id_to_aspect_dic, mod='attr'):
         _precision = self.macro_precision(TP_vec, FP_vec)
         _recall = self.macro_recall(TP_vec, FN_vec)
 
@@ -73,9 +76,21 @@ class Metrics:
 
         # per class metrics
         per_f1_score = self.per_f1_score(per_precision, per_recall)
-        print('shape of per precision: ',per_precision.shape)
-        for i in range(per_precision.shape[0]):
-            self.report('%s f1 score: %.10f precision: %.10f recall: %.10f'
-                           % (id_to_aspect_dic[i], per_f1_score[i], per_precision[i], per_recall[i]), outf,
-                           'report')
+        if mod == 'attr':
+            for i in range(per_f1_score.shape[0]):
+                self.report('%s f1 score: %.10f precision: %.10f recall: %.10f'
+                               % (id_to_aspect_dic[i], per_f1_score[i], per_precision[i], per_recall[i]), outf,
+                               'report')
+        else:
+            per_precision = np.reshape(per_precision,
+                                      newshape=(self.config['attributes_num'], 4))
+            per_recall = np.reshape(per_recall,
+                                    newshape=(self.config['attributes_num'], 4))
+            per_f1_score = np.reshape(per_f1_score,newshape=(self.config['attributes_num'], 4))
+            sentiment=['pos','neu','neg','not mention']
+            for i in range(per_f1_score.shape[0]):
+                for j in range(per_f1_score.shape[1]):
+                    self.report('%s.%s f1 score: %.10f precision: %.10f recall: %.10f'
+                                % (id_to_aspect_dic[i],sentiment[j], per_f1_score[i][j], per_precision[i][j], per_recall[i][j]), outf,
+                                'report')
         return _f1_score
