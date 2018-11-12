@@ -141,6 +141,7 @@ class SentimentNet:
         mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
         # sahpe = (batch size, coarse attr num + 1, 3)
         coarse_score = tf.multiply(self.sf.coarse_score(fine_score,self.reg,self.graph),mask)
+        tf.add_to_collection('coarse_score',coarse_score)
         # softmax loss
         # TODO: check reg
         reg_list = []
