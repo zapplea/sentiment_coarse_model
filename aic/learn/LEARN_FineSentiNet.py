@@ -35,14 +35,17 @@ if __name__ == "__main__":
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
                 'gpu_num':2,
-                'batch_size':20
+                'batch_size':20,
+                'epoch': 100,
+                'attributes_num':None,
+                'epoch_mod':None,
+                'early_stop_limit':None,
             }
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/train_fine.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl'
 
-    config['sr_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s'\
+    config['sr_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s/'\
                         %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
-    config['report_filePath']='/datastore/liu121/sentidata2/report/fine_nn/report_reg%s_lr%s_mat%s.info' \
-                              % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
+    config['report_filePath']='/datastore/liu121/sentidata2/report/fine_nn/'
 
     main(config)
