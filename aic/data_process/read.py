@@ -58,3 +58,5 @@ if __name__=='__main__':
            }
     # train(path['coarse_train_in'],path['coarse_train_out'])
     # test(path['coarse_test_in'],path['coarse_test_out'])
+    train(path['fine_train_in'],path['fine_train_out'])
+    test(path['fine_test_in'],path['fine_test_out'])
