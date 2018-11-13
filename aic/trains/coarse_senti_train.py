@@ -138,7 +138,7 @@ class CoarseSentiTrain:
                     _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='senti')
 
 
-                if best_f1_score < _f1_score:
+                if best_f1_score >= _f1_score:
                     early_stop_count += 1
                 else:
                     early_stop_count = 0
