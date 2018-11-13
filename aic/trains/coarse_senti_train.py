@@ -39,6 +39,7 @@ class CoarseSentiTrain:
                 path.mkdir(parents=True, exist_ok=True)
         self.train_config['report_filePath'] = self.train_config['report_filePath'] +'report_reg%s_lr%s_mat%s.info'% \
                                                (str(self.train_config['reg_rate']), str(self.train_config['lr']), str(self.train_config['attribute_mat_size']))
+        self.train_config['sr_path'] = self.train_config['sr_path']+'model'
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
