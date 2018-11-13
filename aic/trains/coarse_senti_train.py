@@ -147,6 +147,7 @@ class CoarseSentiTrain:
                     saver.save(sess, self.train_config['sr_path'])
                 if early_stop_count > self.train_config['early_stop_limit']:
                     break
+        saver.save(sess, self.train_config['sr_path'])
 
     def train(self,model_dic):
         graph = model_dic['graph']
