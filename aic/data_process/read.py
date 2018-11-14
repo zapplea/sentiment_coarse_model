@@ -25,7 +25,7 @@ def train(infile,outfile):
     print('train successful\n')
 
 def test(infile,outfile):
-    print('test:\n')
+    print('test:')
     with open(infile,'rb') as f:
         attr_labels, senti_labels, sentence = pickle.load(f)
         print('shape of sentence: ', sentence.shape)
