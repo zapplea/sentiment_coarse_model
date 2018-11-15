@@ -34,11 +34,11 @@ if __name__ == "__main__":
                 'attribute_mat_size': 5,
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
-                'batch_size':4,
+                'batch_size':6,
                 'gpu_num':2,
-                'epoch':11,
+                'epoch':3,
                 'attributes_num':20,
-                'epoch_mod':2,
+                'epoch_mod':1,
                 'early_stop_limit':2
             }
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
