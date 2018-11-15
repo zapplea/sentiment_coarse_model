@@ -28,14 +28,14 @@ if __name__ == "__main__":
     parser.add_argument('--num', type=int, default=0)
     args = parser.parse_args()
 
-    reg_rate = [1E-5, ]
-    lr =       [1E-4, ]
+    reg_rate = [1E-5, 1E-3, 1E-2, 1E-1]
+    lr =       [1E-4, 1E-4, 1E-4, 1E-4]
     config = {
                 'attribute_mat_size': 5,
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
                 'batch_size':6,
-                'gpu_num':2,
+                'gpu_num':3,
                 'epoch':3,
                 'attributes_num':20,
                 'epoch_mod':1,
