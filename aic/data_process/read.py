@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 
-top_k = None
+top_k = 500
 def train(infile,outfile):
     print('train:')
     with open(infile,'rb') as f:
@@ -9,7 +9,6 @@ def train(infile,outfile):
         print('shape of sentence: ',sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
-        return
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
@@ -31,7 +30,6 @@ def test(infile,outfile):
         print('shape of sentence: ', sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
-        return
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
