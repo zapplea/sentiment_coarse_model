@@ -419,8 +419,8 @@ class SentimentFunction:
         # # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
         # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
         # words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
-        attention_ls= tf.split(attention, num_or_size_splits=self.nn_config['attributes_num'],axis=2)
-        A_mat_ls = tf.split(A_mat,num_or_size_splits=self.nn_config['attributes_num'],axis=0)
+        attention_ls= tf.split(attention, num_or_size_splits=self.nn_config['attributes_num']+1,axis=2)
+        A_mat_ls = tf.split(A_mat,num_or_size_splits=self.nn_config['attributes_num']+1,axis=0)
         # att.shape = (batch size, words num, 1, attribute mat size)
         # mat.shape = (1, attribute mat size, attribute dim)
         words_A_ls = []
