@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
                 'batch_size':2,
-                'gpu_num':1,
+                'gpu_num':2,
                 'epoch':3,
                 'attributes_num':20,
                 'epoch_mod':1,
