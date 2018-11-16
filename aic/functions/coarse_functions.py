@@ -45,9 +45,19 @@ class AttributeFunction:
         H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
         # attention.shape = (batch size, words number, attribute number, attribute mat size)
         attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
-        # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
-        words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        attention_ls= tf.split(attention, num_or_size_splits=self.nn_config['attributes_num'],axis=2)
+        A_mat_ls = tf.split(A_mat,num_or_size_splits=self.nn_config['attributes_num'],axis=0)
+        # att.shape = (batch size, words num, 1, attribute mat size)
+        # mat.shape = (1, attribute mat size, attribute dim)
+        words_A_ls = []
+        for att, mat in zip(attention_ls,A_mat_ls):
+            # scalar.shape=(batch size, words num,1, attribute dim)
+            words_A_ls.append(tf.expand_dims(tf.tensordot(att,mat,axes=[[2,3],[0,1]]),axis=2))
+        words_A = tf.concat(words_A_ls,axis=2)
+
         return words_A
 
     def words_nonattribute_mat2vec(self, H, o_mat, graph):
