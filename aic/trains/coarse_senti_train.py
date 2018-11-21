@@ -77,8 +77,10 @@ class CoarseSentiTrain:
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-                # print('attr_train_loss: ',attr_train_loss)
-                # print('senti_train_loss: ', senti_train_loss)
+                print('sentence_data shape:',sentences_data.shape)
+                print('attr_labels_data shape: ',attr_labels_data.shape)
+                print('attr_train_loss: ',attr_train_loss)
+                print('senti_train_loss: ', senti_train_loss)
             if i % self.train_config['epoch_mod'] == 0 and i != 0:
                 self.mt.report('epoch: %d'%i)
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
