@@ -47,8 +47,8 @@ def test(infile,outfile, top_k):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--topk',default=None)
-    parser.add_argument('--mod',default='coarse')
+    parser.add_argument('--topk',type=int,default=None)
+    parser.add_argument('--mod',type=str,default='coarse')
     args = parser.parse_args()
     top_k = args.topk
     mod = args.mod
