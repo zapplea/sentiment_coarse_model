@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 'lr': lr[args.num],
                 'gpu_num':2,
                 'batch_size':20,
-                'epoch': 6,
+                'epoch': 3,
                 'attributes_num':12,
                 'words_num':242,
                 'epoch_mod':1,
