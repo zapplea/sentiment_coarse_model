@@ -10,7 +10,7 @@ def train(infile,outfile, top_k):
         print('shape of sentence: ',sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
-        
+
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
@@ -21,7 +21,6 @@ def train(infile,outfile, top_k):
         print('senti labels shape: ',senti_labels.shape)
         print('attr labels shape: ',attr_labels.shape)
         print('sentence shape: ',sentence.shape)
-        return
     with open(outfile,'wb') as f:
         pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed),f)
     print('train successful\n')
@@ -44,7 +43,6 @@ def test(infile,outfile, top_k):
         print('senti labels shape: %s'%str(senti_labels.shape))
         print('attr labels shape: %s'%str(attr_labels.shape))
         print('sentence shape: %s'%str(sentence.shape))
-        return
     with open(outfile,'wb') as f:
         pickle.dump((attr_labels, senti_labels, sentence),f)
     print('test success')
@@ -56,6 +54,7 @@ def fine_train(infile,outfile, top_k):
         print('shape of sentence: ',sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
+        senti_labels = senti_labels[:,:,:-1]
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
@@ -77,6 +76,7 @@ def fine_test(infile,outfile, top_k):
         print('shape of sentence: ', sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
+        senti_labels = senti_labels[:, :, :-1]
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
