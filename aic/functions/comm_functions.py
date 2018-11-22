@@ -26,7 +26,7 @@ class FineCommFunction:
         Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num']+1, self.nn_config['sentiment_num']),
                                  dtype='float32')
         # TODO: add non-attribute
-        graph.append('Y_senti', Y_senti)
+        graph.add_to_collection('Y_senti', Y_senti)
         return Y_senti
 
     def sequence_length(self, X, graph):
