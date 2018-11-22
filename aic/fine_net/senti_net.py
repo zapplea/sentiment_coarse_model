@@ -61,8 +61,6 @@ class SentimentNet:
         reg_list = []
         for reg in self.reg['attr_reg']:
             reg_list.append(reg)
-        for reg in self.reg['comm_reg']:
-            reg_list.append(reg)
         attr_loss = self.af.sigmoid_loss('attr_loss',score, Y_att, reg_list,self.graph)
         attr_pred_labels = self.af.prediction('attr_pred_labels',score, self.graph)
 
