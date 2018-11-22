@@ -10,6 +10,7 @@ def train(infile,outfile, top_k):
         print('shape of sentence: ',sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
+        exit()
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
@@ -31,6 +32,7 @@ def test(infile,outfile, top_k):
         print('shape of sentence: ', sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
+        exit()
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
@@ -48,7 +50,7 @@ def test(infile,outfile, top_k):
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--topk',type=int,default=None)
-    parser.add_argument('--mod',type=str,default='coarse')
+    parser.add_argument('--mod',type=str,default='fine')
     args = parser.parse_args()
     top_k = args.topk
     mod = args.mod

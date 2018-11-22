@@ -15,7 +15,6 @@ from pathlib import Path
 import math
 
 from aic.functions.metrics import Metrics
-from aic.functions.tfb_utils import Tfb
 
 
 class FineSentiTrain:
@@ -25,8 +24,8 @@ class FineSentiTrain:
                            'keep_prob_lstm': 0.5,
                            'top_k_data': -1,
                            'early_stop_limit': 100,
-                           'report_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/senti_report/',
-                            'sr_path':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
+                           'report_filePath':'/hdd/lujunyu/model/meituan/fine_nn/model/sentiment/senti_report/',
+                            'sr_path':'/hdd/lujunyu/model/meituan/fine_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
                                       % ('1e-5', '0.0001', '3'),
 
                         }

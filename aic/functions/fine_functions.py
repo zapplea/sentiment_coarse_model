@@ -49,15 +49,30 @@ class AttributeFunction:
         :param graph: 
         :return: shape = (batch size, number of words, number of attributes, attribute dim(=lstm cell dim))
         """
-        # H.shape = (batch size, words number, attribute number, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
-        # H.shape = (batch size, words number, attribute number, attribute mat size, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # H.shape = (batch size, words number, attribute number, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'], 1])
+        # # H.shape = (batch size, words number, attribute number, attribute mat size, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size)
+        # attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+
         # attention.shape = (batch size, words number, attribute number, attribute mat size)
-        attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
-        # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
-        words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        attention = tf.nn.softmax(tf.tensordot(H, A_mat, axes=[[2], [2]]))
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        attention_ls = tf.split(attention, num_or_size_splits=self.nn_config['attributes_num'], axis=2)
+        A_mat_ls = tf.split(A_mat, num_or_size_splits=self.nn_config['attributes_num'], axis=0)
+        # att.shape = (batch size, words num, 1, attribute mat size)
+        # mat.shape = (1, attribute mat size, attribute dim)
+        words_A_ls = []
+        for att, mat in zip(attention_ls, A_mat_ls):
+            # scalar.shape=(batch size, words num,1, attribute dim)
+            words_A_ls.append(tf.expand_dims(tf.tensordot(att, mat, axes=[[2, 3], [0, 1]]), axis=2))
+        words_A = tf.concat(words_A_ls, axis=2)
         return words_A
 
     def words_nonattribute_mat2vec(self, H, o_mat, graph):
@@ -68,18 +83,24 @@ class AttributeFunction:
         :param graph: 
         :return: batch size, number of words, attributes num, attribute dim( =word dim)
         """
-        # H.shape = (batch size, words number, 1, word dim)
-        H = tf.expand_dims(H, axis=2)
-        # H.shape = (batch size, words number, 1, attribute mat size, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # H.shape = (batch size, words number, 1, word dim)
+        # H = tf.expand_dims(H, axis=2)
+        # # H.shape = (batch size, words number, 1, attribute mat size, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # attention.shape = (batch size, words number, 1, attribute mat size)
+        # attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, o_mat), axis=4))
+        # # attention.shape = (batch size, words number, 1, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # # words_A.shape = (batch size, number of words, 1, attribute dim( =word dim))
+        # words_o = tf.reduce_sum(tf.multiply(attention, o_mat), axis=3)
+        # # words_A.shape = (batch size, number of words, attributes number, attribute dim( =word dim))
+        # words_o = tf.tile(words_o, multiples=[1, 1, self.nn_config['attributes_num'], 1])
+
         # attention.shape = (batch size, words number, 1, attribute mat size)
-        attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, o_mat), axis=4))
-        # attention.shape = (batch size, words number, 1, attribute mat size, attribute dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
-        # words_A.shape = (batch size, number of words, 1, attribute dim( =word dim))
-        words_o = tf.reduce_sum(tf.multiply(attention, o_mat), axis=3)
-        # words_A.shape = (batch size, number of words, attributes number, attribute dim( =word dim))
-        words_o = tf.tile(words_o, multiples=[1, 1, self.nn_config['attributes_num'], 1])
+        attention = tf.nn.softmax(tf.tensordot(H, o_mat, axes=[[2], [2]]))
+        # att.shape = (batch size, words num, 1, attribute mat size)
+        # mat.shape = (1, attribute mat size, attribute dim)
+        words_o = tf.expand_dims(tf.tensordot(attention, o_mat, axes=[[2, 3], [0, 1]]), axis=2)
         return words_o
 
     def score(self, A, X, mask, graph):
@@ -326,15 +347,31 @@ class SentimentFunction:
         :param graph: 
         :return: shape = (batch size, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
         """
-        # H.shape = (batch size, words number, attribute number+1, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'] + 1, 1])
-        # H.shape = (batch size, words number, attribute number+1, attribute mat size, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # H.shape = (batch size, words number, attribute number+1, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['attributes_num'] + 1, 1])
+        # # H.shape = (batch size, words number, attribute number+1, attribute mat size, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size)
+        # attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+
         # attention.shape = (batch size, words number, attribute number, attribute mat size)
-        attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, A_mat), axis=4))
-        # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
-        words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        attention = tf.nn.softmax(tf.tensordot(H, A_mat, axes=[[2], [2]]))
+        # # attention.shape = (batch size, words number, attribute number, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # words_A = tf.reduce_sum(tf.multiply(attention, A_mat), axis=3)
+        attention_ls = tf.split(attention, num_or_size_splits=self.nn_config['attributes_num'] + 1, axis=2)
+        A_mat_ls = tf.split(A_mat, num_or_size_splits=self.nn_config['attributes_num'] + 1, axis=0)
+        # att.shape = (batch size, words num, 1, attribute mat size)
+        # mat.shape = (1, attribute mat size, attribute dim)
+        words_A_ls = []
+        for att, mat in zip(attention_ls, A_mat_ls):
+            # scalar.shape=(batch size, words num,1, attribute dim)
+            words_A_ls.append(tf.expand_dims(tf.tensordot(att, mat, axes=[[2, 3], [0, 1]]), axis=2))
+        words_A = tf.concat(words_A_ls, axis=2)
+
         return words_A
 
     # association between attribute and sentiment: towards specific attribute

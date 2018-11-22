@@ -24,16 +24,25 @@ if __name__ == "__main__":
     parser.add_argument('--num', type=int, default=0)
     args = parser.parse_args()
 
-    reg_rate = [1E-5, ]
-    lr =       [1E-4, ]
+    reg_rate = [1E-5, 1E-3, 1E-2, 1E-1]
+    lr = [1E-4, 1E-4, 1E-4, 1E-4]
     config = {
                 'attribute_mat_size': 5,
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
+                'batch_size': 10,
+                'gpu_num': 2,
+                'attributes_num': None,
+                'epoch': 51,
+                'epoch_mod': 10,
+                'early_stop_limit': 5
             }
-    config['tfb_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/model/ckpt_reg%s_lr%s_mat%s' \
-                            % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['report_filePath']='/datastore/liu121/sentidata2/resultdata/fine_nn/report/report_reg%s_lr%s_mat%s.info' \
-                              % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
+
+    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/train_fine.pkl'
+    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl'
+
+    config['sr_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s/' \
+                        % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
+    config['report_filePath'] = '/datastore/liu121/sentidata2/report/fine_nn/'
 
     main(config)

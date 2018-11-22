@@ -25,12 +25,9 @@ class CoarseSentiTrain:
                            'keep_prob_lstm': 0.5,
                            'top_k_data': -1,
                            'early_stop_limit': 2,
-                           'init_model':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
-                                          % ('1e-5', '0.0001', '3'),
                            'report_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment2/senti_report/',
                             'sr_path':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
                                       % ('1e-5', '0.0001', '3'),
-
                         }
         self.train_config.update(config)
         for name in ['report_filePath','sr_path']:

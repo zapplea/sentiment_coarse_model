@@ -41,6 +41,7 @@ if __name__ == "__main__":
                 'epoch_mod':2,
                 'early_stop_limit':2
             }
+
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'
 

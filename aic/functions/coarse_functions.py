@@ -70,18 +70,25 @@ class AttributeFunction:
         :param graph: 
         :return: batch size, number of words, attributes num, attribute dim( =word dim)
         """
-        # H.shape = (batch size, words number, 1, word dim)
-        H = tf.expand_dims(H, axis=2)
-        # H.shape = (batch size, words number, 1, attribute mat size, word dim)
-        H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # H.shape = (batch size, words number, 1, word dim)
+        # H = tf.expand_dims(H, axis=2)
+        # # H.shape = (batch size, words number, 1, attribute mat size, word dim)
+        # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['attribute_mat_size'], 1])
+        # # attention.shape = (batch size, words number, 1, attribute mat size)
+        # attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, o_mat), axis=4))
+        # # attention.shape = (batch size, words number, 1, attribute mat size, attribute dim)
+        # attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
+        # # words_A.shape = (batch size, number of words, 1, attribute dim( =word dim))
+        # words_o = tf.reduce_sum(tf.multiply(attention, o_mat), axis=3)
+        # # words_A.shape = (batch size, number of words, attributes number, attribute dim( =word dim))
+        # words_o = tf.tile(words_o, multiples=[1, 1, self.nn_config['attributes_num'], 1])
+
         # attention.shape = (batch size, words number, 1, attribute mat size)
-        attention = tf.nn.softmax(tf.reduce_sum(tf.multiply(H, o_mat), axis=4))
-        # attention.shape = (batch size, words number, 1, attribute mat size, attribute dim)
-        attention = tf.tile(tf.expand_dims(attention, axis=4), multiples=[1, 1, 1, 1, self.nn_config['attribute_dim']])
-        # words_A.shape = (batch size, number of words, 1, attribute dim( =word dim))
-        words_o = tf.reduce_sum(tf.multiply(attention, o_mat), axis=3)
-        # words_A.shape = (batch size, number of words, attributes number, attribute dim( =word dim))
-        words_o = tf.tile(words_o, multiples=[1, 1, self.nn_config['attributes_num'], 1])
+        attention = tf.nn.softmax(tf.tensordot(H, o_mat, axes=[[2], [2]]))
+        # att.shape = (batch size, words num, 1, attribute mat size)
+        # mat.shape = (1, attribute mat size, attribute dim)
+        words_o = tf.expand_dims(tf.tensordot(attention,o_mat,axes=[[2,3],[0,1]]),axis=2)
+
         return words_o
 
     def sentence_score(self, A, X, mask, graph):

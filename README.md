@@ -54,3 +54,6 @@ notes:
 1. length of sentence is different, so need to pad the sentence to the same length. Check the longest length of a sentence,
 and pad all sentence to the same length.
 2. batch size is the number of sentences.
+
+# Current problems:
+1. There is NaN. So, the result is pretty strange.
