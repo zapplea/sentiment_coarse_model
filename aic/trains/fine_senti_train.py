@@ -29,6 +29,7 @@ class FineSentiTrain:
                                       % ('1e-5', '0.0001', '3'),
 
                         }
+        self.train_config.update(config)
         for name in ['report_filePath','sr_path']:
             path = Path(self.train_config[name])
             if not path.exists():
@@ -40,7 +41,7 @@ class FineSentiTrain:
                                                                                        str(self.train_config[
                                                                                                'attribute_mat_size']))
         self.train_config['sr_path'] = self.train_config['sr_path'] + 'model'
-        self.train_config.update(config)
+
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
