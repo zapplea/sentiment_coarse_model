@@ -40,6 +40,8 @@ if __name__ == "__main__":
                 'words_num':242,
                 'epoch_mod':20,
                 'early_stop_limit':10,
+                'lookup_table_words_num': 5075,
+                'padding_word_index': 5074,
             }
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/train_fine.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl'
