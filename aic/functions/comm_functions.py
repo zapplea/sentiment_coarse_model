@@ -74,7 +74,7 @@ class FineCommFunction:
         outputs, _ = tf.nn.dynamic_rnn(cell=cell, inputs=X, time_major=False, sequence_length=seq_len, dtype='float32')
         return outputs
 
-    def sentence_bilstm(self,name, X, seq_len, reg, graph):
+    def sentence_bilstm(self,name, X, seq_len, reg, graph,scope_name=''):
         """
         return a lstm of a sentence
         :param X: shape = (batch size, words number, word dim)
@@ -83,7 +83,7 @@ class FineCommFunction:
         :return: 
         """
         keep_prob_bilstm = tf.placeholder(dtype='float32')
-        graph.add_to_collection('keep_prob_bilstm',keep_prob_bilstm)
+        graph.add_to_collection('keep_prob_bilstm', keep_prob_bilstm)
 
         fw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size'] / 2))
         bw_cell = tf.nn.rnn_cell.BasicLSTMCell(int(self.nn_config['lstm_cell_size'] / 2))
@@ -92,7 +92,6 @@ class FineCommFunction:
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
-        scope_name = tf.contrib.framework.get_name_scope()
         reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
         reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
