@@ -18,7 +18,6 @@ from aic.data_process.senti_datafeeder import DataFeeder
 
 def main(config):
     datafeeder = DataFeeder(config)
-    exit()
     model_dic = SentimentNet.build(config)
     train = FineSentiTrain(config,datafeeder)
     train.train(model_dic)
