@@ -65,7 +65,6 @@ def fine_train(infile,outfile, top_k):
         print('senti labels shape: ',senti_labels.shape)
         print('attr labels shape: ',attr_labels.shape)
         print('sentence shape: ',sentence.shape)
-        return
     with open(outfile,'wb') as f:
         pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed),f)
     print('train successful\n')
@@ -88,7 +87,6 @@ def fine_test(infile,outfile, top_k):
         print('senti labels shape: %s'%str(senti_labels.shape))
         print('attr labels shape: %s'%str(attr_labels.shape))
         print('sentence shape: %s'%str(sentence.shape))
-        return
     with open(outfile,'wb') as f:
         pickle.dump((attr_labels, senti_labels, sentence),f)
     print('test success')
