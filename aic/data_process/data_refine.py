@@ -114,5 +114,5 @@ if __name__=='__main__':
         train(path['coarse_train_in'],path['coarse_train_out'],top_k)
         test(path['coarse_test_in'],path['coarse_test_out'], top_k)
     else:
-        train(path['fine_train_in'],path['fine_train_out'], top_k)
-        test(path['fine_test_in'],path['fine_test_out'], top_k)
+        fine_train(path['fine_train_in'],path['fine_train_out'], top_k)
+        fine_test(path['fine_test_in'],path['fine_test_out'], top_k)
