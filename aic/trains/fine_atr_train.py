@@ -40,7 +40,7 @@ class FineAtrTrain:
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
-        self.mt = Metrics()
+        self.mt = Metrics(self.)
         self.tfb = Tfb(self.train_config)
 
 

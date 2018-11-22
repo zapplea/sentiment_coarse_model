@@ -35,19 +35,22 @@ if __name__ == "__main__":
                 'lr': lr[args.num],
                 'gpu_num':2,
                 'batch_size':20,
-                'epoch': 101,
+                'epoch': 6,
                 'attributes_num':12,
                 'words_num':242,
-                'epoch_mod':20,
-                'early_stop_limit':10,
+                'epoch_mod':1,
+                'early_stop_limit':2,
                 'lookup_table_words_num': 5075,
                 'padding_word_index': 5074,
             }
-    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/train_fine.pkl'
-    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl'
+    if getpass.getuser() == 'liu121':
+        config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/train_fine.pkl'
+        config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl'
 
-    config['sr_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s/'\
-                        %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
-    config['report_filePath']='/datastore/liu121/sentidata2/report/fine_nn/'
+        config['sr_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s/'\
+                            %(str(reg_rate[args.num]),str(lr[args.num]),str(config['attribute_mat_size']))
+        config['report_filePath']='/datastore/liu121/sentidata2/report/fine_nn/'
+    else:
+        pass
 
     main(config)
