@@ -10,7 +10,7 @@ def train(infile,outfile, top_k):
         print('shape of sentence: ',sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
-        exit()
+        return
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
@@ -32,7 +32,7 @@ def test(infile,outfile, top_k):
         print('shape of sentence: ', sentence.shape)
         print('shape of attributes: ', attr_labels.shape)
         print('shape of senti labels: ', senti_labels.shape)
-        exit()
+        return
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
         non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
