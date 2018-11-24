@@ -93,10 +93,10 @@ def fine_test(infile,outfile, top_k):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--topk',type=int,default=None)
+    parser.add_argument('--trk',type=int,default=None)
+    parser.add_argument('--tek', type=int, default=None)
     parser.add_argument('--mod',type=str,default='fine')
     args = parser.parse_args()
-    top_k = args.topk
     mod = args.mod
 
     path = {'coarse_train_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/train_coarse.pkl',
@@ -109,8 +109,8 @@ if __name__=='__main__':
             'fine_test_out':'/datastore/liu121/sentidata2/data/aic2018/fine_data/dev_fine.pkl',
            }
     if mod == 'coarse':
-        train(path['coarse_train_in'],path['coarse_train_out'],top_k)
-        test(path['coarse_test_in'],path['coarse_test_out'], top_k)
+        train(path['coarse_train_in'],path['coarse_train_out'],args.trk)
+        test(path['coarse_test_in'],path['coarse_test_out'], args.tek)
     else:
-        fine_train(path['fine_train_in'],path['fine_train_out'], top_k)
-        fine_test(path['fine_test_in'],path['fine_test_out'], top_k)
+        fine_train(path['fine_train_in'],path['fine_train_out'], args.trk)
+        fine_test(path['fine_test_in'],path['fine_test_out'], args.tek)
