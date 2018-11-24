@@ -37,8 +37,8 @@ if __name__ == "__main__":
                 'batch_size':10,
                 'gpu_num':2,
                 'attributes_num':20,
-                'epoch': 11,
-                'epoch_mod':2,
+                'epoch': 5,
+                'epoch_mod':1,
                 'early_stop_limit':2
             }
 

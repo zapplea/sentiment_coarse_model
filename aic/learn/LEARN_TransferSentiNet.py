@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     config['sr_path'] = '/datastore/liu121/sentidata2/result/transfer_nn/ckpt_reg%s_lr%s_mat%s' \
                         % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['initial_file_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s' % ('1E-5', '0.0001', '5')
+    config['initial_file_path'] = '/datastore/liu121/sentidata2/result/fine_nn/ckpt_reg%s_lr%s_mat%s/' % (reg_rate[args.num], lr[args.num], config['attribute_mat_size'])
     config['report_filePath'] = '/datastore/liu121/sentidata2/report/transfer_nn/report_reg%s_lr%s_mat%s.info' \
                                 % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
 
