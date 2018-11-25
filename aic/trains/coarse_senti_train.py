@@ -87,7 +87,7 @@ class CoarseSentiTrain:
                 self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
                 self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
 
-            if i % self.train_config['epoch_mod'] == 0 and i != 0:
+            if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
                 attr_loss_vec = []
