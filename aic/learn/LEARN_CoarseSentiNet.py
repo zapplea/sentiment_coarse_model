@@ -28,8 +28,8 @@ if __name__ == "__main__":
     parser.add_argument('--num', type=int, default=0)
     args = parser.parse_args()
 
-    reg_rate = [1E-5, 1E-3, 1E-2, 1E-1]
-    lr =       [1E-4, 1E-4, 1E-4, 1E-4]
+    reg_rate = [1E-5, 1E-5, 1E-5, 1E-5]
+    lr =       [1E-4, 1E-3, 1E-2, 1E-1]
     config = {
                 'attribute_mat_size': 5,
                 'reg_rate': reg_rate[args.num],
