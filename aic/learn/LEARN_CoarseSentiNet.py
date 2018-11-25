@@ -26,6 +26,7 @@ def main(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
+    parser.add_argument('--epoch',type=int,default=3)
     args = parser.parse_args()
 
     reg_rate = [1E-5, 1E-5, 1E-5, 1E-5]
@@ -37,7 +38,7 @@ if __name__ == "__main__":
                 'batch_size':10,
                 'gpu_num':2,
                 'attributes_num':20,
-                'epoch': 5,
+                'epoch': args.epoch,
                 'epoch_mod':1,
                 'early_stop_limit':2
             }
