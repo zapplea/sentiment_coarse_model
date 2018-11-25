@@ -74,10 +74,19 @@ class CoarseSentiTrain:
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-                # print('sentence_data shape:',sentences_data.shape)
-                # print('attr_labels_data shape: ',attr_labels_data.shape)
-                # print('attr_train_loss: ',attr_train_loss)
-                # print('senti_train_loss: ', senti_train_loss)
+                sa_ls,ra_ls,jf_ls,jc_ls =sess.run([graph.get_collection('sentence_attr_score'),
+                                                   graph.get_collection('review_attr_score'),
+                                                   graph.get_collection('joint_fine_score'),
+                                                   graph.get_collection('joint_coarse_score')],
+                                                 feed_dict=feed_dict)
+                self.mt.report('#########################',self.outf,'report')
+                self.mt.report('sa: %.5f'%np.sum(sa_ls),self.outf,'report')
+                self.mt.report('ra: %.5f'%np.sum(ra_ls),self.outf,'report')
+                self.mt.report('jf: %.5f' % np.sum(jf_ls),self.outf,'report')
+                self.mt.report('jc: %.5f' % np.sum(jc_ls),self.outf,'report')
+                self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
+                self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
+
             if i % self.train_config['epoch_mod'] == 0 and i != 0:
                 self.mt.report('epoch: %d'%i)
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
@@ -124,7 +133,7 @@ class CoarseSentiTrain:
                 FP_vec = np.sum(attr_FP_vec, axis=0)
                 FN_vec = np.sum(attr_FN_vec, axis=0)
                 loss_value = np.mean(attr_loss_vec)
-                self.mt.report('attribute metrics\n',self.outf,'report')
+                self.mt.report('\n#####attribute metrics#####\n',self.outf,'report')
                 self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
                 _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='attr')
 
@@ -133,7 +142,7 @@ class CoarseSentiTrain:
                 FN_vec = np.sum(senti_FN_vec, axis=0)
                 loss_value = np.mean(senti_loss_vec)
                 if dic['test_mod'] !='attr':
-                    self.mt.report('sentiment metrics\n', self.outf, 'report')
+                    self.mt.report('\n#####sentiment metrics#####\n', self.outf, 'report')
                     self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
                     _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='senti')
 

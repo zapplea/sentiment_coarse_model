@@ -63,6 +63,7 @@ class SentimentNet:
         score = tf.add(score_lstm, score_e)
         # score.shape = (batch size*max review length, attributes num)
         score = tf.reduce_max(score, axis=2)
+        tf.add_to_collection('sentence_attr_score',score)
         # shape = (batch size*max review length, attributes num)
         sentence_prob = self.af.sentence_sigmoid(score, self.graph)
         # shape = (batch size*max review length, coarse attributes num)
@@ -70,11 +71,13 @@ class SentimentNet:
         # shape = (batch size, coarse_attributes_num)
         # highlight: the coarse model use the review score, but the fine model use sentence score.
         review_score = self.af.review_score(sentence_prob, mask, review_len, self.reg, self.graph)
+        tf.add_to_collection('review_attr_score',review_score)
         attr_pred_labels = self.af.prediction('attr_pred_labels', review_score, self.graph)
         reg_list = []
         for reg in self.reg['attr_reg']:
             reg_list.append(reg)
         attr_loss = self.af.sigmoid_loss('attr_loss', review_score, Y_att, reg_list, self.graph)
+
         # #################### #
         # sentiment extraction #
         # #################### #
@@ -154,11 +157,13 @@ class SentimentNet:
         attr_pred_labels = self.sf.expand_attr_labels(attr_pred_labels,self.graph)
         # score.shape = (batch size, number of attributes+1,3)
         joint_fine_score = tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, self.nn_config['sentiment_num']))
+        tf.add_to_collection('joint_fine_score',joint_fine_score)
         # in here the mask use predicted attribute label as input. This is different from the above.
         # shape=(batch size, attributes num+1, 3)
         mask = tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3])
         # sahpe = (batch size, coarse attr num + 1, 3)
         joint_coarse_score = tf.multiply(self.sf.coarse_score(joint_fine_score,self.reg,self.graph),mask)
+        tf.add_to_collection('joint_coarse_score',joint_coarse_score)
         # softmax loss
         senti_loss_of_joint = self.sf.softmax_loss(name='senti_loss_of_joint', labels=Y_senti, logits=joint_coarse_score,
                                                    reg_list=reg_list, graph=self.graph)
