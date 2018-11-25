@@ -80,10 +80,10 @@ class CoarseSentiTrain:
                                                    graph.get_collection('joint_coarse_score')],
                                                  feed_dict=feed_dict)
                 self.mt.report('#########################',self.outf,'report')
-                self.mt.report('sa: %.5f'%np.sum(sa_ls),self.outf,'report')
-                self.mt.report('ra: %.5f'%np.sum(ra_ls),self.outf,'report')
-                self.mt.report('jf: %.5f' % np.sum(jf_ls),self.outf,'report')
-                self.mt.report('jc: %.5f' % np.sum(jc_ls),self.outf,'report')
+                self.mt.report('sa: %s'%str(sa_ls),self.outf,'report')
+                self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
+                self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
+                self.mt.report('jc: %s' % str(jc_ls),self.outf,'report')
                 self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
                 self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
 
