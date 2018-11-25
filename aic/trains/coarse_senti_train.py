@@ -11,6 +11,7 @@ elif getpass.getuser() == "lizhou":
 
 import tensorflow as tf
 import numpy as np
+np.set_printoptions(threshold=np.inf)
 from pathlib import Path
 import math
 
