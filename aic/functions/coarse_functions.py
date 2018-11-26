@@ -578,6 +578,7 @@ class SentimentFunction:
         Y_att = tf.concat([Y_att, non_attr], axis=1)
         return Y_att
 
+    # TODO: the prediction method might be wrong.
     def prediction(self,name, score, Y_att, graph):
         """
         :param score: shape = (batch size, attributes numbers+1,3)
