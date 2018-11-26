@@ -349,6 +349,10 @@ class LanguageModel(object):
             print("USING SKIP CONNECTIONS")
 
         lstm_outputs = []
+        # ############# #
+        #    biLSTM     #
+        # ############# #
+        # The code use two LSTM to implement the bilstm
         # lstm_num: for bidirectional, there are two complete lstm system,
         # eg. forward lstm: X-->lstm-->lstm-->...-->last lstm
         #     backward lstm: X-->lstm-->lstm-->...-->last lstm
