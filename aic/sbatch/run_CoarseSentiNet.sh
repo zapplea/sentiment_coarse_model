@@ -9,7 +9,7 @@
 #SBATCH --gres=gpu:2
 echo "loading"
 module load python/3.6.1
-module load tensorflow/1.9.0-py36-gpu
+module load tensorflow/1.6.0-py36-gpu
 echo "loaded"
 
 python ../learn/LEARN_CoarseSentiNet.py --num $1 --epoch $2
