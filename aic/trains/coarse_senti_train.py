@@ -80,13 +80,13 @@ class CoarseSentiTrain:
                                                    graph.get_collection('joint_fine_score'),
                                                    graph.get_collection('joint_coarse_score')],
                                                  feed_dict=feed_dict)
-                # self.mt.report('#########################',self.outf,'report')
-                # self.mt.report('sa: %s'%str(sa_ls),self.outf,'report')
-                # self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
-                # self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
-                # self.mt.report('jc: %s' % str(jc_ls),self.outf,'report')
-                # self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
-                # self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
+                self.mt.report('#########################',self.outf,'report')
+                self.mt.report('sa: %s'%str(sa_ls),self.outf,'report')
+                self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
+                self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
+                self.mt.report('jc: %s' % str(jc_ls),self.outf,'report')
+                self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
+                self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
@@ -178,13 +178,13 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            self.mt.report('attr in training')
-            self.mt.report('===========attr============',self.outf,'report')
-            dic['train_step'] = model_dic['train_step']['attr']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            dic['test_mod'] = 'attr'
-            self.__train__(dic, graph, model_dic['gpu_num'])
+            # self.mt.report('attr in training')
+            # self.mt.report('===========attr============',self.outf,'report')
+            # dic['train_step'] = model_dic['train_step']['attr']
+            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            # dic['test_mod'] = 'attr'
+            # self.__train__(dic, graph, model_dic['gpu_num'])
 
             # ##########################
             # train senti (optional)   #
