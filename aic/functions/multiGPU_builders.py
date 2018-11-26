@@ -13,7 +13,7 @@ class SentiNetBuilder:
             'attributes_num': 20,  # fine attributes number
             'coarse_attributes_num': 20,
             'atr_pred_threshold': 0,
-            'review_atr_pred_threshold': 0,
+            'review_atr_pred_threshold': 0.5,
             'max_review_len': 19,
             'normal_senti_prototype_num': 4,
             'attribute_senti_prototype_num': 4,
