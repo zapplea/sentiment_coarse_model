@@ -75,12 +75,12 @@ class CoarseSentiTrain:
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-                sa_ls,ra_ls,jf_ls,jc_ls =sess.run([graph.get_collection('sentence_attr_score'),
-                                                   graph.get_collection('review_attr_score'),
-                                                   graph.get_collection('joint_fine_score'),
-                                                   graph.get_collection('joint_coarse_score')],
-                                                 feed_dict=feed_dict)
-                self.mt.report('#########################',self.outf,'report')
+                # sa_ls,ra_ls,jf_ls,jc_ls =sess.run([graph.get_collection('sentence_attr_score'),
+                #                                    graph.get_collection('review_attr_score'),
+                #                                    graph.get_collection('joint_fine_score'),
+                #                                    graph.get_collection('joint_coarse_score')],
+                #                                  feed_dict=feed_dict)
+                # self.mt.report('#########################',self.outf,'report')
                 # self.mt.report('sa: %s'%str(sa_ls),self.outf,'report')
                 # self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
                 # self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
