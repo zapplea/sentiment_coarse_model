@@ -200,10 +200,10 @@ class CoarseSentiTrain:
             # ##########################
             # train joint              #
             # ##########################
-            # self.mt.report('joint in training')
-            # self.mt.report('===========joint============',self.outf,'report')
-            # dic['train_step'] = model_dic['train_step']['joint']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            # dic['test_mod'] = 'joint'
-            # self.__train__(dic, graph, model_dic['gpu_num'])
+            self.mt.report('joint in training')
+            self.mt.report('===========joint============',self.outf,'report')
+            dic['train_step'] = model_dic['train_step']['joint']
+            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['test_mod'] = 'joint'
+            self.__train__(dic, graph, model_dic['gpu_num'])
