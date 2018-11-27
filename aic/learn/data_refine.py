@@ -116,7 +116,7 @@ def few_shot(infile,outfile, k_shot,mod):
             for i in range(20):
                 if attr[i] ==1:
                     freq[i]+=1
-            if np.any(np.less_equal(freq,k_shot)):
+            if np.any(np.logical_and(np.equal(attr,1),np.less_equal(freq,k_shot))):
                 shotted_attr_labels.append(attr)
                 shotted_senti_labels.append(senti)
                 shotted_sentences.append(sentence)
