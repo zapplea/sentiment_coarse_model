@@ -66,7 +66,7 @@ class CoarseSentiTrain:
         saver = dic['saver']
         early_stop_count = 0
         best_f1_score = 0
-
+        print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
