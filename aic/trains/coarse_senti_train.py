@@ -85,8 +85,8 @@ class CoarseSentiTrain:
                 # self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
                 # self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
                 # self.mt.report('jc: %s' % str(jc_ls),self.outf,'report')
-                self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
-                self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
+                # self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
+                # self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
@@ -200,10 +200,10 @@ class CoarseSentiTrain:
             # ##########################
             # train joint              #
             # ##########################
-            self.mt.report('joint in training')
-            self.mt.report('===========joint============',self.outf,'report')
-            dic['train_step'] = model_dic['train_step']['joint']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            dic['test_mod'] = 'joint'
-            self.__train__(dic, graph, model_dic['gpu_num'])
+            # self.mt.report('joint in training')
+            # self.mt.report('===========joint============',self.outf,'report')
+            # dic['train_step'] = model_dic['train_step']['joint']
+            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            # dic['test_mod'] = 'joint'
+            # self.__train__(dic, graph, model_dic['gpu_num'])
