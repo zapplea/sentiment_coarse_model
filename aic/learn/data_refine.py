@@ -137,28 +137,6 @@ def few_shot(infile,outfile, k_shot,mod):
             pickle.dump((attr_labels, senti_labels, sentence), f)
     print('train successful\n')
 
-def test_few_shot(infile,outfile, top_k):
-    print('test:')
-    with open(infile,'rb') as f:
-        attr_labels, senti_labels, sentence = pickle.load(f)
-        print('shape of sentence: ', sentence.shape)
-        print('shape of attributes: ', attr_labels.shape)
-        print('shape of senti labels: ', senti_labels.shape)
-
-        non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
-        non_attr_senti = np.tile(non_attr,reps=[1,3])
-        non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
-        senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
-        attr_labels = attr_labels[:top_k]
-        senti_labels = senti_labels[:top_k]
-        sentence = sentence[:top_k]
-        print('senti labels shape: %s'%str(senti_labels.shape))
-        print('attr labels shape: %s'%str(attr_labels.shape))
-        print('sentence shape: %s'%str(sentence.shape))
-    with open(outfile,'wb') as f:
-        pickle.dump((attr_labels, senti_labels, sentence),f)
-    print('test success')
-
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--trk',type=int,default=None)
