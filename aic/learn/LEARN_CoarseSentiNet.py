@@ -40,7 +40,7 @@ if __name__ == "__main__":
                 'attributes_num':20,
                 'epoch': args.epoch,
                 'epoch_mod':1,
-                'early_stop_limit':2
+                'early_stop_limit':float('nan')
             }
 
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
