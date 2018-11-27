@@ -134,7 +134,7 @@ def few_shot(infile,outfile, k_shot,mod):
         if mod == 'train':
             pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed),f)
         else:
-            pickle.dump((attr_labels, senti_labels, sentence), f)
+            pickle.dump((attr_labels, senti_labels, sentences), f)
     print('train successful\n')
 
 if __name__=='__main__':
