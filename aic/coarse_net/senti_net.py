@@ -49,7 +49,7 @@ class SentimentNet:
             # lstm
             #with tf.variable_scope('sentence_bilstm', reuse=tf.AUTO_REUSE):
             # H.shape = (batch size*max review length, max_time, cell size)
-            attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, reg=self.reg,graph=self.graph,scope_name='sentiment/attriExtr')
+            attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, reg=self.reg,graph=self.graph,scope_name='sentiment/attrExtr')
             A, o = self.af.attribute_mat(self.reg,self.graph)
             # A.shape = (batch size*max review length, words num, attributes number, attribute dim)
             A_lstm = self.af.words_attribute_mat2vec(attr_H, A, self.graph)
