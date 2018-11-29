@@ -172,7 +172,7 @@ class SentimentNet:
             # softmax loss
             senti_loss_of_joint = self.sf.softmax_loss(name='senti_loss_of_joint', labels=Y_senti, logits=joint_coarse_score,
                                                        reg_list=reg_list, graph=self.graph)
-            joint_loss = senti_loss_of_joint + attr_loss
+            joint_loss = senti_loss_of_joint
             self.graph.add_to_collection('joint_loss', joint_loss)
             # TODO: in coarse, should mask the prediction of padded sentences.
             joint_pred_labels = self.sf.prediction(name='joint_pred_labels',score=joint_coarse_score, Y_att=attr_pred_labels, graph=self.graph)
