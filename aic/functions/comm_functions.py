@@ -222,6 +222,9 @@ class CoarseCommFunction:
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
+        for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+            print(var.name)
+        exit()
         reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
                                     graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
         reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
