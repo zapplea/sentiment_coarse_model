@@ -159,13 +159,16 @@ class SentiNetBuilder:
                             model = Model(self.nn_config, graph=graph,table=table)
                             models.append(model)
                             # attribute
-                            grad = opt.compute_gradients(graph.get_collection('attr_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
+                            var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,scope='sentiment/attrExtr')
+                            grad = opt.compute_gradients(graph.get_collection('attr_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE,var_list=var_list)
                             attr_tower_grads.append(grad)
                             # sentiment
-                            grad = opt.compute_gradients(graph.get_collection('senti_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
+                            var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,scope='sentiment/sentiExtr')
+                            grad = opt.compute_gradients(graph.get_collection('senti_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE,var_list=var_list)
                             senti_tower_grads.append(grad)
                             # joint
-                            grad = opt.compute_gradients(graph.get_collection('joint_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
+                            var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,scope='sentiment/sentiExtr')
+                            grad = opt.compute_gradients(graph.get_collection('joint_loss')[-1], aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE,var_list=var_list)
                             joint_tower_grads.append(grad)
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
