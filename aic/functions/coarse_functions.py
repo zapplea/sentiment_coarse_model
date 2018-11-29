@@ -23,6 +23,7 @@ class AttributeFunction:
                                                                     self.nn_config['attribute_mat_size'],
                                                                     self.nn_config['attribute_dim']),
                                                             dtype='float32'))
+        tf.add_to_collection('A_mat',A_mat)
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(A_mat))
         o_mat = tf.get_variable(name='o_mat',initializer=self.initializer(shape=(1,
                                                                    self.nn_config['attribute_mat_size'],

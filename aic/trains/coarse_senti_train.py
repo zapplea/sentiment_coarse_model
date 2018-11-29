@@ -67,6 +67,7 @@ class CoarseSentiTrain:
         early_stop_count = 0
         best_f1_score = 0
         print('epoch num: ',self.train_config['epoch'])
+        pre_A = sess.run(graph.get_collection('A_mat')[0])
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
@@ -90,6 +91,9 @@ class CoarseSentiTrain:
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
+                cur_A=sess.run(graph.get_collection('A_mat')[0])
+                print('cur_A == pre_A?: ',np.all(np.equal(cur_A,pre_A)))
+                pre_A = cur_A
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
                 attr_loss_vec = []
                 attr_TP_vec = []
