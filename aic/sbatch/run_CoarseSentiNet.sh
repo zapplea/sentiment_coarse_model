@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --get-user-env
 #SBATCH --job-name="sentiment net"
-#SBATCH --time=15:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
 #SBATCH --mem=50GB
 #SBATCH --ntasks-per-node=1
