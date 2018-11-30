@@ -69,12 +69,16 @@ class CoarseSentiTrain:
         print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
+            attr_train_loss_ls = []
+            senti_train_loss_ls = []
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
                 data_dict = {'X_data':sentences_data,'Y_att_data':attr_labels_data,
                              'Y_senti_data':senti_labels_data,'keep_prob':self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
+                attr_train_loss_ls.append(attr_train_loss)
+                senti_train_loss_ls.append(senti_train_loss)
                 # sa_ls,ra_ls,jf_ls,jc_ls =sess.run([graph.get_collection('sentence_attr_score'),
                 #                                    graph.get_collection('review_attr_score'),
                 #                                    graph.get_collection('joint_fine_score'),
@@ -85,8 +89,8 @@ class CoarseSentiTrain:
                 # self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
                 # self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
                 # self.mt.report('jc: %s' % str(jc_ls),self.outf,'report')
-                # self.mt.report('attr_train_loss: %.5f'%attr_train_loss,self.outf,'report')
-                # self.mt.report('senti_train_loss: %.5f'%senti_train_loss, self.outf, 'report')
+            self.mt.report('attr_train_loss: %.5f'%np.sum(attr_train_loss_ls),self.outf,'report')
+            self.mt.report('senti_train_loss: %.5f'%np.sum(senti_train_loss_ls), self.outf, 'report')
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
