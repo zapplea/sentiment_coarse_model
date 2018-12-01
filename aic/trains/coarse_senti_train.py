@@ -79,18 +79,20 @@ class CoarseSentiTrain:
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 attr_train_loss_ls.append(attr_train_loss)
                 senti_train_loss_ls.append(senti_train_loss)
-                # sa_ls,ra_ls,jf_ls,jc_ls =sess.run([graph.get_collection('sentence_attr_score'),
-                #                                    graph.get_collection('review_attr_score'),
-                #                                    graph.get_collection('joint_fine_score'),
-                #                                    graph.get_collection('joint_coarse_score')],
-                #                                  feed_dict=feed_dict)
-                # self.mt.report('#########################',self.outf,'report')
-                # self.mt.report('sa: %s'%str(sa_ls),self.outf,'report')
-                # self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
-                # self.mt.report('jf: %s' % str(jf_ls),self.outf,'report')
-                # self.mt.report('jc: %s' % str(jc_ls),self.outf,'report')
-            self.mt.report('attr_train_loss: %.5f'%np.sum(attr_train_loss_ls),self.outf,'report')
-            self.mt.report('senti_train_loss: %.5f'%np.sum(senti_train_loss_ls), self.outf, 'report')
+                sa_ls,ra_ls,jf_ls,jc_ls =sess.run([graph.get_collection('sentence_attr_score'),
+                                                   graph.get_collection('review_attr_score'),
+                                                   graph.get_collection('joint_fine_score'),
+                                                   graph.get_collection('joint_coarse_score')],
+                                                 feed_dict=feed_dict)
+            senti_coarse_W = sess.run(graph.get_collection('senti_coarse_W'))
+            self.mt.report('#########################',self.outf,'report')
+            # self.mt.report('sa: %s'%str(sa_ls),self.outf,'report')
+            # self.mt.report('ra: %s'%str(ra_ls),self.outf,'report')
+            self.mt.report('jf:\n%s' % str(jf_ls),self.outf,'report')
+            self.mt.report('jc:\n%s' % str(jc_ls),self.outf,'report')
+            self.mt.report('senti_coarse_W:\n%s'%str(senti_coarse_W),self.outf,'report')
+            self.mt.report('attr_train_loss:\n%s'%str(attr_train_loss_ls),self.outf,'report')
+            self.mt.report('senti_train_loss:\n%s'%str(senti_train_loss_ls), self.outf, 'report')
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)

@@ -535,6 +535,7 @@ class SentimentFunction:
             W = tf.get_variable(name='fine2coarse',
                                 initializer=self.initializer(shape=(self.nn_config['attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num'], self.nn_config['coarse_attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num']), dtype='float32'))
             reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
+        tf.add_to_collection('senti_coarse_W',W)
         # shape = (batch size * max review length, attr num*3 + 3)
         fine_score = tf.reshape(fine_score,shape=(-1, self.nn_config['attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num']))
         # shape = (batch size * max review length, coarse attr num*3 + 3)
