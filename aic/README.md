@@ -48,3 +48,5 @@ how to process number? convert to NUM4 format?
 A: no
 
 2. Why nan? check train loss and score
+
+3. change fine net. stop training parameter in attr when in senti.
