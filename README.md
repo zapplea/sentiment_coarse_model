@@ -57,3 +57,4 @@ and pad all sentence to the same length.
 
 # Current problems:
 1. There is NaN. So, the result is pretty strange.
+2. the prediction for coarse senti might be wrong.

@@ -1,13 +1,3 @@
-"""
-In this design, the sentiment label will be [pos, neu, neg, not mention].
-It can be split into 2 stages: (1) train attribute detect
-                               (2) train sentiment detect
-To implement this design, there will be the following changes:
-                               (1) the sentiment and attribute should use the same bilstm
-                               (2) the non attribute should be deleted (acutally, it is not reasonable)
-                               
-"""
-
 import getpass
 import sys
 if getpass.getuser() == 'yibing':
@@ -25,7 +15,7 @@ from aic.functions.coarse_functions import AttributeFunction
 from aic.functions.multiGPU_builders import SentiNetBuilder
 
 class SentimentNet:
-    def __init__(self,config, graph, table):
+    def __init__(self,config, graph, table, elmo):
         self.nn_config = config
         self.sf = SentimentFunction(self.nn_config)
         self.comm = CoarseCommFunction(self.nn_config)
@@ -33,12 +23,15 @@ class SentimentNet:
         self.graph = graph
         self.table = table
         self.reg = {'attr_reg': [], 'senti_reg': []}
+        self.elmo = elmo
         self.classifier()
 
 
     def classifier(self):
-        # shape = (batch size, max review length, words num)
-        X_ids = self.comm.sentences_input(graph=self.graph)
+        # # shape = (batch size, max review length, words num)
+        # X_ids = self.comm.sentences_input(graph=self.graph)
+        # TODO: X_ids shape should be (batch size, max review length, words num)
+        X_ids = self.elmo.token_ids
         # Y_att.shape = (batch size, number of attributes)
         Y_att = self.comm.attribute_labels_input(graph=self.graph)
         # shape = (batch size,)
@@ -47,15 +40,18 @@ class SentimentNet:
         reshaped_X_ids = tf.reshape(X_ids, shape=(-1, self.nn_config['words_num']))
         # shape = (batch size*max review length,)
         seq_len = self.comm.sequence_length(reshaped_X_ids, self.graph)
-        # shape = (batch size*max review length, words num)
-        words_pad_M = self.comm.is_word_padding_input(reshaped_X_ids, self.graph)
-        # shape = (batch size*max review length,words num, feature dim)
-        X = self.comm.lookup_table(reshaped_X_ids, words_pad_M, self.table, self.graph)
+        # # shape = (batch size*max review length, words num)
+        # words_pad_M = self.comm.is_word_padding_input(reshaped_X_ids, self.graph)
+        # # shape = (batch size*max review length,words num, feature dim)
+        # X = self.comm.lookup_table(reshaped_X_ids, words_pad_M, self.table, self.graph)
+        # shape = (batch size, max sentence len, word dim)
+        X = self.elmo.lstm_outputs
+        # TODO: need to add weight layers.
 
         # lstm
-        with tf.variable_scope('sentence_bilstm', reuse=tf.AUTO_REUSE):
+        with tf.variable_scope('sentence_bilstm'):
             # H.shape = (batch size*max review length, max_time, cell size)
-            attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, reg=self.reg,graph=self.graph,scope_name='sentiment/sentence_bilstm')
+            attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, reg=self.reg,graph=self.graph)
         A, o = self.af.attribute_mat(self.reg,self.graph)
         # A.shape = (batch size*max review length, words num, attributes number, attribute dim)
         A_lstm = self.af.words_attribute_mat2vec(attr_H, A, self.graph)
@@ -90,9 +86,9 @@ class SentimentNet:
         # sentiment extraction #
         # #################### #
         # sentiment lstm
-        with tf.variable_scope('senti_sentence_bilstm',reuse=tf.AUTO_REUSE):
+        with tf.variable_scope('senti_sentence_bilstm'):
             # H.shape = (batch size * max review length, max_time, cell size)
-            senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, graph=self.graph, scope_name='sentiment/senti_sentence_bilstm')
+            senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, graph=self.graph)
         # Y_senti.shape = [batch_size, number of attributes + 1, 3]
         Y_senti = self.comm.sentiment_labels_input(graph=self.graph)
         # sentiment expression prototypes matrix

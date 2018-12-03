@@ -164,23 +164,43 @@ class CoarseSentiTrain:
                     break
         saver.save(sess, self.train_config['sr_path'])
 
-    def train(self,model_dic):
+    def transfer(self,model_dic):
+        graph = model_dic['graph']
+        saver = model_dic['saver']
+        with graph.as_default():
+            var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
+        init = {}
+        with graph.device('/gpu:0'):
+            config = tf.ConfigProto(allow_soft_placement=True)
+            config.gpu_options.allow_growth = True
+            with tf.Session(graph=graph, config=config) as sess:
+                model_file = tf.train.latest_checkpoint(self.train_config['initial_file_path'])
+                saver.restore(sess, model_file)
+                for var in var_list:
+                    value = sess.run(var)
+                    init[var.name]=value
+        return init
+
+    def train(self,model_dic,init_data):
         graph = model_dic['graph']
         with graph.as_default():
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
-        table_data = self.dg.table
-
+            var_list = graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+            var_dic = []
+            for name in init_data:
+                for var in var_list:
+                    if var.name.find(name)>=0:
+                        var_dic[var] = init_data[name]
+        table_data = init_data['table']
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         with tf.Session(graph=graph, config=config) as sess:
             sess.run(init, feed_dict={table: table_data})
-            # if self.train_config['init_model']:
-            #     # model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
-            #     # saver.restore(sess, model_path)
-            #     print("sucess init %s" % self.train_config['init_model'])
+            for var in var_dic:
+                var.load(var_dic[var],sess)
             dic = {'sess': sess, 'saver': model_dic['saver']}
-
             # ##############
             # train attr   #
             # ##############

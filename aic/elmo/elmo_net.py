@@ -73,10 +73,12 @@ class LanguageModel(object):
                                         name='token_ids')
         # the word embeddings
         with tf.device("/cpu:0"):
+            # the word embeddings table
             self.embedding_weights = tf.get_variable(
                 "embedding", [n_tokens_vocab, projection_dim],
                 dtype=DTYPE,
             )
+            # shape=(batch_size, unroll_steps)
             self.embedding = tf.nn.embedding_lookup(self.embedding_weights,
                                                     self.token_ids)
 
@@ -334,6 +336,7 @@ class LanguageModel(object):
         self.final_lstm_state = []
 
         # get the LSTM inputs
+        # self.embedding.shape = (batch_size, unroll_steps, words dim)
         if self.bidirectional:
             lstm_inputs = [self.embedding, self.embedding_reverse]
         else:
@@ -349,6 +352,10 @@ class LanguageModel(object):
             print("USING SKIP CONNECTIONS")
 
         lstm_outputs = []
+        # ############# #
+        #    biLSTM     #
+        # ############# #
+        # The code use two LSTM to implement the bilstm
         # lstm_num: for bidirectional, there are two complete lstm system,
         # eg. forward lstm: X-->lstm-->lstm-->...-->last lstm
         #     backward lstm: X-->lstm-->lstm-->...-->last lstm
@@ -394,6 +401,7 @@ class LanguageModel(object):
                     lstm_cell.zero_state(batch_size, DTYPE))
                 # NOTE: this variable scope is for backward compatibility
                 # with existing models...
+                # TODO: need to add sequence length to the lstm
                 if self.bidirectional:
                     with tf.variable_scope('RNN_%s' % lstm_num):
                         _lstm_output_unpacked, final_state = tf.nn.static_rnn(
@@ -559,6 +567,7 @@ class LanguageModel(object):
                 return 0.0
 
         # Get ops for computing LM embeddings and mask
+        # lm_embeddings.shape = (max sentence length, bilstm layers, bilstm output layer dims)
         lm_embeddings = bilm_ops['lm_embeddings']
         mask = bilm_ops['mask']
 

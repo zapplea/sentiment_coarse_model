@@ -26,7 +26,7 @@ def main(args):
     options = {
         'bidirectional': True,
 
-        'dropout': 0.1,
+        'dropout': 1.0,
 
         'lstm': {
             'cell_clip': 3,
@@ -35,9 +35,7 @@ def main(args):
             'proj_clip': 3,
             'projection_dim': 512,
             'use_skip_connections': True},
-
         'all_clip_norm_val': 10.0,
-
         'n_epochs': 10,
         'n_train_tokens': n_train_tokens,
         'batch_size': batch_size,
@@ -50,6 +48,7 @@ def main(args):
     d = list(next(gen))
     print(d[0])
     exit()
+
     # TODO: analyze data
     data_gen = data.iter_batches(128 * 3, 20)
     for batch_no, batch in enumerate(data_gen, start=1):

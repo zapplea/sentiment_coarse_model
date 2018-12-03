@@ -45,3 +45,8 @@ how to process number? convert to NUM4 format?
 
 # Question:
 1. we use sentiment_bilstm twice for sentiment and attribute seperately, should I combine them to one?
+A: no
+
+2. Why nan? check train loss and score
+
+3. change fine net. stop training parameter in attr when in senti.

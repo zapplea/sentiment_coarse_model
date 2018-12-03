@@ -347,6 +347,7 @@ class LanguageModel(object):
         self.final_lstm_state = []
 
         # get the LSTM inputs
+        # self.embedding.shape = (batch size, unroll steps, word dim)
         if self.bidirectional:
             lstm_inputs = [self.embedding, self.embedding_reverse]
         else:
