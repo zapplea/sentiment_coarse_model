@@ -450,6 +450,7 @@ class BidirectionalLMDataset(object):
             shuffle_on_load=shuffle_on_load)
 
     def iter_batches(self, batch_size, num_steps):
+        # max word length is the maximum number of characters in a word
         max_word_length = self._data_forward.max_word_length
 
         for X, Xr in zip(

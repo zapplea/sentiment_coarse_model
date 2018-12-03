@@ -119,7 +119,7 @@ class BidirectionalLanguageModel(object):
             layers = [
                 tf.concat([token_embeddings, token_embeddings], axis=2)
             ]
-
+            # lstm_outputs['forward'].shape = (lstm layers, batch size, max sentence length, lstm dim)
             n_lm_layers = len(lm_graph.lstm_outputs['forward'])
             for i in range(n_lm_layers):
                 layers.append(
@@ -132,7 +132,9 @@ class BidirectionalLanguageModel(object):
 
             # The layers include the BOS/EOS tokens.  Remove them
             sequence_length_wo_bos_eos = lm_graph.sequence_lengths - 2
+            # layers.shape=(lstm layers+1, batch size, max sentence length, 2*lstm dim)
             layers_without_bos_eos = []
+            # layers.shape=(lstm layers+1, batch size, max sentence length, 2*lstm dim)
             for layer in layers:
                 layer_wo_bos_eos = layer[:, 1:, :]
                 layer_wo_bos_eos = tf.reverse_sequence(
@@ -159,6 +161,7 @@ class BidirectionalLanguageModel(object):
             # get the mask op without bos/eos.
             # tf doesn't support reversing boolean tensors, so cast
             # to int then back
+            # lm_graph.mask.shape = (batch, max sentence length)
             mask_wo_bos_eos = tf.cast(lm_graph.mask[:, 1:], 'int32')
             mask_wo_bos_eos = tf.reverse_sequence(
                 mask_wo_bos_eos,
@@ -492,6 +495,7 @@ class BidirectionalLanguageModelGraph(object):
 
         # the sequence lengths from input mask
         if self.use_character_inputs:
+            # shape = (batch, max sentence length)
             mask = tf.reduce_any(self.ids_placeholder > 0, axis=2)
         else:
             mask = self.ids_placeholder > 0
@@ -506,6 +510,7 @@ class BidirectionalLanguageModelGraph(object):
 
         update_ops = []
         for direction in ['forward', 'backward']:
+            # layer_input.shape=(batch size, max sentence length, word dim)
             if direction == 'forward':
                 layer_input = self.embedding
             else:
@@ -561,6 +566,7 @@ class BidirectionalLanguageModelGraph(object):
                 variable_scope_name = 'RNN_{0}/RNN/MultiRNNCell/Cell{1}'.format(
                     i_direction, i)
                 with tf.variable_scope(variable_scope_name):
+                    # shape = (batch size, max sentence length, lstm dim)
                     layer_output, final_state = tf.nn.dynamic_rnn(
                         lstm_cell,
                         layer_input,
