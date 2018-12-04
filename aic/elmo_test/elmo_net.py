@@ -6,7 +6,7 @@ import numpy as np
 
 from tensorflow.python.ops.init_ops import glorot_uniform_initializer
 
-from aic.elmo.data import InvalidNumberOfCharacters
+from aic.elmo_test.data import InvalidNumberOfCharacters
 
 DTYPE = 'float32'
 DTYPE_INT = 'int64'
