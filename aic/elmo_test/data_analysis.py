@@ -67,10 +67,12 @@ def store(args,filepath):
         batchs.append(batch)
     print('batchs.shape: ', len(batchs))
     with open(filepath,'wb') as f:
+        pickle.dump(vocab,f)
         pickle.dump(batchs,f)
 
 def analysis(filepath):
     with open(filepath,'rb') as f:
+        vocab = pickle.load(f)
         batches = pickle.load(f)
 
     for batch in batches:
