@@ -261,7 +261,7 @@ class TokenBatcher(object):
 
 
 ##### for training
-def _get_batch(generator, batch_size, num_steps, max_word_length):
+def _get_batch(generator, batch_size, num_steps, max_word_length, vocab):
     """Read batches of input."""
     # the expected shape = (batch size, unroll steps)
     cur_stream = [None] * batch_size
@@ -310,7 +310,16 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
         X = {'token_ids': inputs, 'tokens_characters': char_inputs,
                  'next_token_id': targets}
         print('inputs.shape: ',inputs.shape)
+        sentence = []
+        for scalar in inputs[0]:
+            sentence.append(vocab._id_to_word[scalar])
+        print('inputs[0]: ',sentence)
+
         print('targets.shape: ', targets.shape)
+        sentence = []
+        for scalar in targets[0]:
+            sentence.append(vocab._id_to_word[scalar])
+        print('targets[0]:',sentence)
         exit()
         yield X
 
@@ -445,6 +454,7 @@ class BidirectionalLMDataset(object):
         self._data_reverse = LMDataset(
             filepattern, vocab, reverse=True, test=test,
             shuffle_on_load=shuffle_on_load)
+        self.vocab = vocab
 
     def iter_batches(self, batch_size, num_steps):
         # max word length is the maximum number of characters in a word
@@ -452,9 +462,9 @@ class BidirectionalLMDataset(object):
 
         for X, Xr in zip(
             _get_batch(self._data_forward.get_sentence(), batch_size,
-                      num_steps, max_word_length),
+                      num_steps, max_word_length, self.vocab),
             _get_batch(self._data_reverse.get_sentence(), batch_size,
-                      num_steps, max_word_length)
+                      num_steps, max_word_length, self.vocab)
             ):
 
             for k, v in Xr.items():
