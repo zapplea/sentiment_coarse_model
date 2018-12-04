@@ -1,5 +1,6 @@
 import getpass
 import sys
+
 if getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model/')
 elif getpass.getuser() == 'lujunyu':
@@ -11,19 +12,16 @@ import numpy as np
 
 from aic.elmo_test.elmo_train import train, load_options_latest_checkpoint, load_vocab
 from aic.elmo_test.data import BidirectionalLMDataset
+import pickle
 
-
-def main(args):
+def store(args,filepath):
     # load the vocab
     vocab = load_vocab(args.vocab_file, 50)
-
     # define the options
     batch_size = 128  # batch size for each GPU
     n_gpus = 3
-
     # number of tokens in training data (this for 1B Word Benchmark)
     n_train_tokens = 768648884
-
     options = {
         'bidirectional': True,
 
@@ -67,10 +65,15 @@ def main(args):
     batchs = []
     for batch_no, batch in enumerate(data_gen, start=1):
         batchs.append(batch)
+    print('batchs.shape: ', len(batchs))
+    with open(filepath,'wb') as f:
+        pickle.dump(batchs,f)
 
-    print('batchs.shape: ',len(batchs))
+def analysis(filepath):
+    with open(filepath,'rb') as f:
+        batches = pickle.load(f)
 
-    for batch in batchs:
+    for batch in batches:
         print('#########################################')
         inputs = batch['token_ids']
         targets = batch['next_token_id']
@@ -96,10 +99,6 @@ def main(args):
                 sentence.append(vocab._id_to_word[scalar])
             print('targets[%d]: %d' % (i, len(sentence)), sentence)
         exit()
-    exit()
-    tf_save_dir = args.save_dir
-    tf_log_dir = args.save_dir
-    train(options, data, n_gpus, tf_save_dir, tf_log_dir)
 
 
 if __name__ == '__main__':
@@ -109,5 +108,5 @@ if __name__ == '__main__':
     parser.add_argument('--train_prefix', help='Prefix for train files')
 
     args = parser.parse_args()
-    main(args)
+    store(args,'/datastore/liu121/sentidata2/data/bilm/data.pkl')
 
