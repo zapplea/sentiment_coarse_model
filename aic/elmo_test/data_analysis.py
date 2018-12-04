@@ -50,7 +50,7 @@ def store(args,filepath):
 
         'all_clip_norm_val': 10.0,
 
-        'n_epochs': 10,
+        'n_epochs': 1,
         'n_train_tokens': n_train_tokens,
         'batch_size': batch_size,
         'n_tokens_vocab': vocab.size,
