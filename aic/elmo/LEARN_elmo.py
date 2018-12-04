@@ -63,7 +63,8 @@ def main(args):
     prefix = args.train_prefix
     data = BidirectionalLMDataset(prefix, vocab, test=False,
                                   shuffle_on_load=True)
-
+    data_gen = data.iter_batches(batch_size * n_gpus, 20)
+    exit()
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
     train(options, data, n_gpus, tf_save_dir, tf_log_dir)
