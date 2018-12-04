@@ -9,8 +9,8 @@ elif getpass.getuser() == 'liu121':
 import argparse
 import numpy as np
 
-from aic.elmo.elmo_train import train, load_options_latest_checkpoint, load_vocab
-from aic.elmo.data import BidirectionalLMDataset
+from aic.elmo_test.elmo_train import train, load_options_latest_checkpoint, load_vocab
+from aic.elmo_test.data import BidirectionalLMDataset
 
 
 def main(args):
