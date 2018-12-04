@@ -322,7 +322,7 @@ def _get_batch(generator, batch_size, num_steps, max_word_length, vocab):
             for scalar in targets[i]:
                 sentence.append(vocab._id_to_word[scalar])
             print('targets[%d]: '%i,sentence)
-            exit()
+        exit()
         yield X
 
 class LMDataset(object):
