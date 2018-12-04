@@ -65,8 +65,10 @@ def main(args):
                                   shuffle_on_load=True)
     print('data gen')
     data_gen = data.iter_batches(batch_size * n_gpus, 20)
+    batchs = []
     for batch_no, batch in enumerate(data_gen, start=1):
-        pass
+        batchs.append(batch)
+        exit()
     exit()
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
