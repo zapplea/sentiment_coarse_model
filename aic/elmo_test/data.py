@@ -309,30 +309,6 @@ def _get_batch(generator, batch_size, num_steps, max_word_length, vocab):
 
         X = {'token_ids': inputs, 'tokens_characters': char_inputs,
                  'next_token_id': targets}
-        print('inputs.shape: ',inputs.shape)
-        print('targets.shape: ', targets.shape)
-
-        for i in range(5):
-            sentence = []
-            for scalar in inputs[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('inputs[%d]: '%i,sentence)
-
-            sentence = []
-            for scalar in targets[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('targets[%d]: '%i,sentence)
-        print('==================')
-        for i in range(-5,-1):
-            sentence = []
-            for scalar in inputs[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('inputs[%d]: %d'%(i,len(sentence)),sentence)
-
-            sentence = []
-            for scalar in targets[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('targets[%d]: %d'%(i,len(sentence)),sentence)
         yield X
 
 class LMDataset(object):

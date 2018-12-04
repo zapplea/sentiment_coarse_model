@@ -68,7 +68,33 @@ def main(args):
     batchs = []
     for batch_no, batch in enumerate(data_gen, start=1):
         batchs.append(batch)
-        exit()
+    print('batchs.shape: ',np.array(batchs).shape)
+
+    for batch in batchs:
+        print('#########################################')
+        inputs = batch['token_ids']
+        targets = batch['next_token_id']
+        for i in range(5):
+            sentence = []
+            for scalar in inputs[i]:
+                sentence.append(vocab._id_to_word[scalar])
+            print('inputs[%d]: %d' % (i, len(sentence)), sentence)
+
+            sentence = []
+            for scalar in targets[i]:
+                sentence.append(vocab._id_to_word[scalar])
+            print('targets[%d]: %d' % (i, len(sentence)), sentence)
+        print('==================')
+        for i in range(-5, -1):
+            sentence = []
+            for scalar in inputs[i]:
+                sentence.append(vocab._id_to_word[scalar])
+            print('inputs[%d]: %d' % (i, len(sentence)), sentence)
+
+            sentence = []
+            for scalar in targets[i]:
+                sentence.append(vocab._id_to_word[scalar])
+            print('targets[%d]: %d' % (i, len(sentence)), sentence)
     exit()
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
