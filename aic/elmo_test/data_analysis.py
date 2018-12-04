@@ -57,14 +57,25 @@ def store(args,filepath):
         'unroll_steps': 20,
         'n_negative_samples_batch': 8192,
     }
-
     prefix = args.train_prefix
     data = BidirectionalLMDataset(prefix, vocab, test=False,
                                   shuffle_on_load=True)
     data_gen = data.iter_batches(batch_size * n_gpus, 20)
+
+    batch_size = options['batch_size']
+    unroll_steps = options['unroll_steps']
+    n_train_tokens = options.get('n_train_tokens', 768648884)
+    n_tokens_per_batch = batch_size * unroll_steps * n_gpus
+    n_batches_per_epoch = int(n_train_tokens / n_tokens_per_batch)
+    n_batches_total = options['n_epochs'] * n_batches_per_epoch
+    print('batches num total: ',n_batches_total)
+
     batchs = []
     for batch_no, batch in enumerate(data_gen, start=1):
         batchs.append(batch)
+        if batch_no == n_batches_total:
+            # done training!
+            break
     print('batchs.shape: ', len(batchs))
     with open(filepath,'wb') as f:
         pickle.dump(vocab,f)
