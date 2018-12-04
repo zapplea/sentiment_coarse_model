@@ -263,6 +263,7 @@ class TokenBatcher(object):
 ##### for training
 def _get_batch(generator, batch_size, num_steps, max_word_length):
     """Read batches of input."""
+    # the expected shape = (batch size, unroll steps, word dim)
     cur_stream = [None] * batch_size
 
     no_more_data = False
@@ -308,12 +309,8 @@ def _get_batch(generator, batch_size, num_steps, max_word_length):
 
         X = {'token_ids': inputs, 'tokens_characters': char_inputs,
                  'next_token_id': targets}
-        print('len X: ',len(X))
-        print(inputs[0])
-        print(inputs[1])
-        print('==========')
-        print(targets[0])
-        print(targets[1])
+        print('inputs.shape: ',inputs.shape)
+        print('targets.shape: ', targets.shape)
         exit()
         yield X
 
