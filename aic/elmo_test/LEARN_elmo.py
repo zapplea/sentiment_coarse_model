@@ -68,7 +68,7 @@ def main(args):
     batchs = []
     for batch_no, batch in enumerate(data_gen, start=1):
         batchs.append(batch)
-    print('batchs.shape: ',np.array(batchs).shape)
+    print('batchs.shape: ',len(batchs))
 
     for batch in batchs:
         print('#########################################')
@@ -95,6 +95,7 @@ def main(args):
             for scalar in targets[i]:
                 sentence.append(vocab._id_to_word[scalar])
             print('targets[%d]: %d' % (i, len(sentence)), sentence)
+        exit()
     exit()
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
