@@ -39,7 +39,7 @@ def main(args):
         'n_epochs': 10,
         'n_train_tokens': n_train_tokens,
         'batch_size': batch_size,
-        'n_tokens_vocab': vocab.size,
+        # 'n_tokens_vocab': vocab.size,
         'unroll_steps': 20,
         'n_negative_samples_batch': 8192,
     }
