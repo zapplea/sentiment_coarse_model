@@ -539,7 +539,7 @@ class LanguageModel(object):
 
             lstm_outputs.append(lstm_output_flat)
 
-        self._build_loss(lstm_outputs)
+        # self._build_loss(lstm_outputs)
 
     # This step build the model
     def _build_loss(self, lstm_outputs):
