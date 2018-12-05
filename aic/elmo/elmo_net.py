@@ -477,6 +477,12 @@ class LanguageModel(object):
         if use_skip_connections:
             print("USING SKIP CONNECTIONS")
 
+        print('variables before lstm: ')
+        for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+            print(var.name)
+            print(var.get_shape())
+        print('=========================')
+
         lstm_outputs = []
         # ############# #
         #    biLSTM     #
@@ -487,6 +493,7 @@ class LanguageModel(object):
         #     backward lstm: X-->lstm-->lstm-->...-->last lstm
         #     forward lstm-->softmax
         #     backward lstm --> softmax
+        print('variables after lstm')
         for lstm_num, lstm_input in enumerate(lstm_inputs):
             print('lstm input.shape: ',lstm_input.get_shape())
             outputs = lstm_input
