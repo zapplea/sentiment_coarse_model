@@ -37,7 +37,7 @@ def main(args):
             'dim': 4096,
             'n_layers': 2,
             'proj_clip': 3,
-            'projection_dim': 300,
+            'projection_dim': 512,
             'use_skip_connections': True},
 
         'all_clip_norm_val': 10.0,
@@ -53,7 +53,6 @@ def main(args):
     prefix = args.train_prefix
     data = BidirectionalLMDataset(prefix, vocab, test=False,
                                   shuffle_on_load=True)
-    data_gen = data.iter_batches(batch_size * n_gpus, 20)
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
     train(options, data, n_gpus, tf_save_dir, tf_log_dir)
