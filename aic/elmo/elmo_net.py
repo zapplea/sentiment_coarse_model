@@ -366,6 +366,7 @@ class LanguageModel(object):
         #     forward lstm-->softmax
         #     backward lstm --> softmax
         for lstm_num, lstm_input in enumerate(lstm_inputs):
+            print('lstm_input.shape: ', lstm_input.get_shape())
             lstm_cells = []
             for i in range(n_lstm_layers):
                 if projection_dim < lstm_dim:
