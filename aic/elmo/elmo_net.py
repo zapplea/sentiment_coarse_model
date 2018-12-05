@@ -496,7 +496,6 @@ class LanguageModel(object):
         print('variables after lstm')
         for lstm_num, lstm_input in enumerate(lstm_inputs):
             print('lstm_num: %d'%lstm_num)
-            print('lstm input.shape: ',lstm_input.get_shape())
             outputs = lstm_input
             if lstm_num == 0:
                 scope_name = "bilstm/fw"
@@ -504,15 +503,16 @@ class LanguageModel(object):
                 scope_name = "bilstm/bw"
             for i in range(n_lstm_layers):
                 print('layers: %d'%i)
+                print('lstm inputs.shape: ', outputs.get_shape())
                 if projection_dim < lstm_dim:
                     # are projecting down output
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim, num_proj=projection_dim,
-                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d' % i)
+                        name='layer%d' % i)
                 else:
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim,
-                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d' % i)
+                        name='layer%d' % i)
 
                 if use_skip_connections:
                     # ResidualWrapper adds inputs to outputs
