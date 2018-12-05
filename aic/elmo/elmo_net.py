@@ -495,6 +495,7 @@ class LanguageModel(object):
         #     backward lstm --> softmax
         print('variables after lstm')
         for lstm_num, lstm_input in enumerate(lstm_inputs):
+            print('lstm_num: %d'%lstm_num)
             print('lstm input.shape: ',lstm_input.get_shape())
             outputs = lstm_input
             if lstm_num == 0:
@@ -502,6 +503,7 @@ class LanguageModel(object):
             else:
                 scope_name = "bilstm/bw"
             for i in range(n_lstm_layers):
+                print('layers: %d'%i)
                 if projection_dim < lstm_dim:
                     # are projecting down output
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
