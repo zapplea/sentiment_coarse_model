@@ -58,10 +58,6 @@ class LanguageModel(object):
         self.sample_softmax = options.get('sample_softmax', True)
 
         self._build()
-        for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-            print(var.name)
-            print(var.get_shape())
-        exit()
 
     def _build_word_embeddings(self):
         n_tokens_vocab = self.options['n_tokens_vocab']
@@ -477,12 +473,6 @@ class LanguageModel(object):
         if use_skip_connections:
             print("USING SKIP CONNECTIONS")
 
-        print('variables before lstm: ')
-        for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-            print(var.name)
-            print(var.get_shape())
-        print('=========================')
-
         lstm_outputs = []
         # ############# #
         #    biLSTM     #
@@ -493,17 +483,13 @@ class LanguageModel(object):
         #     backward lstm: X-->lstm-->lstm-->...-->last lstm
         #     forward lstm-->softmax
         #     backward lstm --> softmax
-        print('variables after lstm')
         for lstm_num, lstm_input in enumerate(lstm_inputs):
-            print('lstm_num: %d'%lstm_num)
             outputs = lstm_input
             if lstm_num == 0:
                 scope_name = "bilstm/fw"
             else:
                 scope_name = "bilstm/bw"
             for i in range(n_lstm_layers):
-                print('layers: %d'%i)
-                print('lstm inputs.shape: ', outputs.get_shape())
                 if projection_dim < lstm_dim:
                     # are projecting down output
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
@@ -532,12 +518,6 @@ class LanguageModel(object):
                 # outputs.shape = (batch size, words num, lstm_dim)
                 outputs, _ = tf.nn.dynamic_rnn(lstm_cell, inputs=outputs,
                                                dtype='float32', scope=scope_name)
-                print('outputs.shape: ', outputs.get_shape())
-                for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-                    print(var.name)
-                    print(var.get_shape())
-                print('=====================')
-            print('#################################')
 
             # (batch_size * unroll_steps, 512)
             lstm_output_flat = tf.reshape(
@@ -548,8 +528,6 @@ class LanguageModel(object):
                 lstm_output_flat = tf.nn.dropout(lstm_output_flat,
                                                  keep_prob)
             _lstm_output_unpacked = tf.unstack(outputs,axis=1)
-            print('unpacked len: ',len(_lstm_output_unpacked))
-            print('unpacked shape: ',_lstm_output_unpacked[0].get_shape())
             tf.add_to_collection('lstm_output_embeddings',
                                  _lstm_output_unpacked)
 
