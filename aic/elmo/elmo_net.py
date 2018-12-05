@@ -415,7 +415,8 @@ class LanguageModel(object):
                     tf.unstack(lstm_input, axis=1),
                     initial_state=self.init_lstm_state[-1],
                 scope=scope_name)
-                print('unpacked: ',_lstm_output_unpacked.get_shape())
+                print('len upacked: ',len(_lstm_output_unpacked))
+                print('unpacked scalar: ',_lstm_output_unpacked[0].get_shape())
                 self.final_lstm_state.append(final_state)
 
 
