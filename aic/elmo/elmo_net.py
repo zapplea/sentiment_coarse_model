@@ -409,7 +409,7 @@ class LanguageModel(object):
                     scope_name = 'bilstm/fw'
                 else:
                     scope_name = 'bilstm/bw'
-                _lstm_output_unpacked, final_state = tf.nn.dynamic_rnn(
+                _lstm_output_unpacked, final_state = tf.nn.static_rnn(
                     lstm_cell,
                     tf.unstack(lstm_input, axis=1),
                     initial_state=self.init_lstm_state[-1],
