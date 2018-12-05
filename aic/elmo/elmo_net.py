@@ -58,6 +58,9 @@ class LanguageModel(object):
         self.sample_softmax = options.get('sample_softmax', True)
 
         self._build()
+        for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+            print(var.name)
+        exit()
 
     def _build_word_embeddings(self):
         n_tokens_vocab = self.options['n_tokens_vocab']
@@ -368,11 +371,11 @@ class LanguageModel(object):
                     # are projecting down output
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim, num_proj=projection_dim,
-                        cell_clip=cell_clip, proj_clip=proj_clip)
+                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d'%i)
                 else:
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim,
-                        cell_clip=cell_clip, proj_clip=proj_clip)
+                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d'%i)
 
                 if use_skip_connections:
                     # ResidualWrapper adds inputs to outputs
@@ -402,17 +405,15 @@ class LanguageModel(object):
                 # NOTE: this variable scope is for backward compatibility
                 # with existing models...
                 # TODO: need to add sequence length to the lstm
-                if self.bidirectional:
-                    with tf.variable_scope('RNN_%s' % lstm_num):
-                        _lstm_output_unpacked, final_state = tf.nn.static_rnn(
-                            lstm_cell,
-                            tf.unstack(lstm_input, axis=1),
-                            initial_state=self.init_lstm_state[-1])
+                if lstm_num == 0:
+                    scope_name = 'bilstm/fw'
                 else:
-                    _lstm_output_unpacked, final_state = tf.nn.static_rnn(
-                        lstm_cell,
-                        tf.unstack(lstm_input, axis=1),
-                        initial_state=self.init_lstm_state[-1])
+                    scope_name = 'bilstm/bw'
+                _lstm_output_unpacked, final_state = tf.nn.dynamic_rnn(
+                    lstm_cell,
+                    tf.unstack(lstm_input, axis=1),
+                    initial_state=self.init_lstm_state[-1],
+                scope=scope_name)
                 self.final_lstm_state.append(final_state)
 
 
