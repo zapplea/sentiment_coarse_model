@@ -82,8 +82,6 @@ def few_shot(infile,outfile, k_shot,mod):
 def elmo_text(infile=''):
     with open(infile,'rb') as f:
         attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed = pickle.load(f)
-    print(sentences.shape)
-    exit()
     vocab_path='/datastore/liu121/sentidata2/data/bilm/vocab_aic.txt'
     with open(vocab_path,'w+') as f:
         f.write('<S>\n')
@@ -96,7 +94,15 @@ def elmo_text(infile=''):
     for key in word_dic:
         value = word_dic[key]
         id_to_word[value]=key
-    for review in sentences:
+
+    outfile_path = '/datastore/liu121/sentidata2/data/bilm/aic2018/'
+    num = 1
+    for i in range(sentences.shape[0]):
+        if i%5000 == 0:
+            file_name =outfile_path+'review.cn-%.5d'%num
+            f = open(file_name,'w+')
+            num+=1
+        review = sentences[i]
         line = ''
         for sentence in review:
             for token_id in sentence:
@@ -108,7 +114,7 @@ def elmo_text(infile=''):
                         line+=word
                     else:
                         line+=' '+word
-
+        f.write(line+'\n')
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
