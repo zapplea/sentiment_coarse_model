@@ -79,25 +79,36 @@ def few_shot(infile,outfile, k_shot,mod):
             pickle.dump((attr_labels, senti_labels, sentences), f)
     print('train successful\n')
 
-def elmo_text(infile='',outfile=''):
+def elmo_text(infile=''):
     with open(infile,'rb') as f:
         attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed = pickle.load(f)
-    # vocab_path='/datastore/liu121/sentidata2/data/bilm/vocab_aic.txt'
-    # with open(vocab_path,'w+') as f:
-    #     f.write('<S>\n')
-    #     f.write('</S>\n')
-    #     f.write('<UNK>\n')
-    #     for word in word_dic:
-    #         f.write(word+'\n')
-    #         f.flush()
+    print(sentences.shape)
+    exit()
+    vocab_path='/datastore/liu121/sentidata2/data/bilm/vocab_aic.txt'
+    with open(vocab_path,'w+') as f:
+        f.write('<S>\n')
+        f.write('</S>\n')
+        f.write('<UNK>\n')
+        for word in word_dic:
+            f.write(word+'\n')
+            f.flush()
     id_to_word={}
     for key in word_dic:
         value = word_dic[key]
         id_to_word[value]=key
-    print('#PAD#: ',id_to_word[116140])
-    for sentence in sentences:
-        print(sentence)
-        exit()
+    for review in sentences:
+        line = ''
+        for sentence in review:
+            for token_id in sentence:
+                if token_id == 116140:
+                    continue
+                else:
+                    word = id_to_word[token_id]
+                    if len(line) == 0:
+                        line+=word
+                    else:
+                        line+=' '+word
+
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
