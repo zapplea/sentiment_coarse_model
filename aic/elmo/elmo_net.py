@@ -508,11 +508,11 @@ class LanguageModel(object):
                     # are projecting down output
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim, num_proj=projection_dim,
-                        name='layer%d' % i)
+                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d' % i)
                 else:
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim,
-                        name='layer%d' % i)
+                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d' % i)
 
                 if use_skip_connections:
                     # ResidualWrapper adds inputs to outputs
