@@ -79,6 +79,11 @@ def few_shot(infile,outfile, k_shot,mod):
             pickle.dump((attr_labels, senti_labels, sentences), f)
     print('train successful\n')
 
+def elmo_text(infile='',outfile=''):
+    with open(infile,'rb') as f:
+        attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed = pickle.load(f)
+    print(word_dic.keys())
+
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--trb',type=int,default=0)
@@ -110,11 +115,12 @@ if __name__=='__main__':
         else:
             few_shot(path['fine_train_in'], path['fine_train_out'], args.trf, mod='train')
             few_shot(path['fine_test_in'], path['fine_test_out'], args.tef, mod='test')
-    else:
+    elif args.fmod == 'arrange':
         if args.cmod == 'coarse':
             arrange(path['coarse_train_in'],path['coarse_train_out'],args.trb,args.tru,mod='train')
             arrange(path['coarse_test_in'],path['coarse_test_out'], args.teb, args.teu, mod='test')
         else:
             arrange(path['fine_train_in'],path['fine_train_out'], args.trb,args.tru,mod='train')
             arrange(path['fine_test_in'],path['fine_test_out'], args.teb,args.teu,mod='test')
-
+    else:
+        elmo_text(path['coarse_train_in'])
