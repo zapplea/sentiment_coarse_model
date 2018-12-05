@@ -319,6 +319,7 @@ class LanguageModel(object):
         # size of input options
         n_tokens_vocab = self.options['n_tokens_vocab']
         batch_size = self.options['batch_size']
+        print('batch size: ',batch_size)
         unroll_steps = self.options['unroll_steps']
 
         # LSTM options
