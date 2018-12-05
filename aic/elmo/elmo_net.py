@@ -60,6 +60,7 @@ class LanguageModel(object):
         self._build()
         for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
             print(var.name)
+            print(var.get_shape())
         exit()
 
     def _build_word_embeddings(self):

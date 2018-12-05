@@ -194,7 +194,7 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
             norm_summaries = []
             for k in range(n_gpus):
                 with tf.device('/gpu:%d' % k):
-                    with tf.variable_scope('lm', reuse=k > 0):
+                    with tf.variable_scope('elmo', reuse=k > 0):
                         # calculate the loss for one model replica and get
                         #   lstm states
                         model = LanguageModel(options, True)

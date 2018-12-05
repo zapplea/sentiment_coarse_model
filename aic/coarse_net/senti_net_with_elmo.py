@@ -44,7 +44,7 @@ class SentimentNet:
         # shape = (batch size*max review length,words num, feature dim)
         X = self.comm.lookup_table(reshaped_X_ids, words_pad_M, self.table, self.graph)
 
-        with tf.variable_scope('elmo_bilstm', reuse=tf.AUTO_REUSE):
+        with tf.variable_scope('elmo', reuse=tf.AUTO_REUSE):
             # lm_embeddings.shape=(batch size, lstm layers+1, max sentence length, 2*lstm dim)
             lm_embeddings = self.lm.bilstm(X,seq_len)
         mask_for_elmo = self.lm.mask_for_token_ids(reshaped_X_ids)
