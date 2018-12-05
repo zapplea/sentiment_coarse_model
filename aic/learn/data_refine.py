@@ -82,7 +82,7 @@ def few_shot(infile,outfile, k_shot,mod):
 def elmo_text(infile='',outfile=''):
     with open(infile,'rb') as f:
         attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed = pickle.load(f)
-    print(word_dic['#UNK#'])
+    print(word_dic['<UNK>'])
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
