@@ -123,8 +123,8 @@ class LanguageModel(object):
                 lstm_cell_ls.append(lstm_cell)
             # TODO: check how to control name of kernel
             # outputs_fw.shape = (batch size, words num, lstm_dim)
-            outputs_fw = tf.nn.dynamic_rnn(lstm_cell_ls[0],inputs=outputs_fw,sequence_length=seq_len,dtype='float32',scope='bilstm/fw')
-            outputs_bw = tf.nn.dynamic_rnn(lstm_cell_ls[1],inputs=outputs_bw,sequence_length=seq_len,dtype='float32',scope='bilstm/bw')
+            outputs_fw, _ = tf.nn.dynamic_rnn(lstm_cell_ls[0],inputs=outputs_fw,sequence_length=seq_len,dtype='float32',scope='bilstm/fw')
+            outputs_bw, _ = tf.nn.dynamic_rnn(lstm_cell_ls[1],inputs=outputs_bw,sequence_length=seq_len,dtype='float32',scope='bilstm/bw')
             # shape = (n_lstm_layers+1,batch size, words num, 2*lstm_dim)
             lm_embeddings.append(tf.concat([outputs_fw, outputs_bw], axis=2))
             # lm_embeddings.shape=(batch size, lstm layers+1, max sentence length, 2*lstm dim)

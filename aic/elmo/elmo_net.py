@@ -520,7 +520,7 @@ class LanguageModel(object):
                                                                   input_keep_prob=keep_prob)
                 print('outputs.shape: ', outputs.get_shape())
                 # outputs.shape = (batch size, words num, lstm_dim)
-                outputs = tf.nn.dynamic_rnn(lstm_cell, inputs=outputs,
+                outputs, _ = tf.nn.dynamic_rnn(lstm_cell, inputs=outputs,
                                                dtype='float32', scope=scope_name)
 
             # (batch_size * unroll_steps, 512)
