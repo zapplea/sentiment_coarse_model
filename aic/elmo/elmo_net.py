@@ -488,6 +488,7 @@ class LanguageModel(object):
         #     forward lstm-->softmax
         #     backward lstm --> softmax
         for lstm_num, lstm_input in enumerate(lstm_inputs):
+            print('lstm input.shape: ',lstm_input.get_shape())
             outputs = lstm_input
             if lstm_num == 0:
                 scope_name = "bilstm/fw"
