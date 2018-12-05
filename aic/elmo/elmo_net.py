@@ -314,6 +314,124 @@ class LanguageModel(object):
         if self.bidirectional:
             self.embedding_reverse = embedding_reverse
 
+    # def _build(self):
+    #     # size of input options
+    #     n_tokens_vocab = self.options['n_tokens_vocab']
+    #     batch_size = self.options['batch_size']
+    #     unroll_steps = self.options['unroll_steps']
+    #
+    #     # LSTM options
+    #     lstm_dim = self.options['lstm']['dim']
+    #     projection_dim = self.options['lstm']['projection_dim']
+    #     n_lstm_layers = self.options['lstm'].get('n_layers', 1)
+    #     dropout = self.options['dropout']
+    #     keep_prob = 1.0 - dropout
+    #
+    #     if self.char_inputs:
+    #         self._build_word_char_embeddings()
+    #     else:
+    #         self._build_word_embeddings()
+    #
+    #     # now the LSTMs
+    #     # these will collect the initial states for the forward
+    #     #   (and reverse LSTMs if we are doing bidirectional)
+    #     self.init_lstm_state = []
+    #     self.final_lstm_state = []
+    #
+    #     # get the LSTM inputs
+    #     # self.embedding.shape = (batch_size, unroll_steps, words dim)
+    #     if self.bidirectional:
+    #         lstm_inputs = [self.embedding, self.embedding_reverse]
+    #     else:
+    #         lstm_inputs = [self.embedding]
+    #
+    #     # now compute the LSTM outputs
+    #     cell_clip = self.options['lstm'].get('cell_clip')
+    #     proj_clip = self.options['lstm'].get('proj_clip')
+    #
+    #     use_skip_connections = self.options['lstm'].get(
+    #         'use_skip_connections')
+    #     if use_skip_connections:
+    #         print("USING SKIP CONNECTIONS")
+    #
+    #     lstm_outputs = []
+    #     # ############# #
+    #     #    biLSTM     #
+    #     # ############# #
+    #     # The code use two LSTM to implement the bilstm
+    #     # lstm_num: for bidirectional, there are two complete lstm system,
+    #     # eg. forward lstm: X-->lstm-->lstm-->...-->last lstm
+    #     #     backward lstm: X-->lstm-->lstm-->...-->last lstm
+    #     #     forward lstm-->softmax
+    #     #     backward lstm --> softmax
+    #     for lstm_num, lstm_input in enumerate(lstm_inputs):
+    #         lstm_cells = []
+    #         for i in range(n_lstm_layers):
+    #             if projection_dim < lstm_dim:
+    #                 # are projecting down output
+    #                 lstm_cell = tf.nn.rnn_cell.LSTMCell(
+    #                     lstm_dim, num_proj=projection_dim,
+    #                     cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d'%i)
+    #             else:
+    #                 lstm_cell = tf.nn.rnn_cell.LSTMCell(
+    #                     lstm_dim,
+    #                     cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d'%i)
+    #
+    #             if use_skip_connections:
+    #                 # ResidualWrapper adds inputs to outputs
+    #                 if i == 0:
+    #                     # don't add skip connection from token embedding to
+    #                     # 1st layer output
+    #                     pass
+    #                 else:
+    #                     # add a skip connection
+    #                     lstm_cell = tf.nn.rnn_cell.ResidualWrapper(lstm_cell)
+    #
+    #             # add dropout
+    #             if self.is_training:
+    #                 lstm_cell = tf.nn.rnn_cell.DropoutWrapper(lstm_cell,
+    #                                                           input_keep_prob=keep_prob)
+    #
+    #             lstm_cells.append(lstm_cell)
+    #
+    #         if n_lstm_layers > 1:
+    #             lstm_cell = tf.nn.rnn_cell.MultiRNNCell(lstm_cells)
+    #         else:
+    #             lstm_cell = lstm_cells[0]
+    #
+    #         with tf.control_dependencies([lstm_input]):
+    #             self.init_lstm_state.append(
+    #                 lstm_cell.zero_state(batch_size, DTYPE))
+    #             # NOTE: this variable scope is for backward compatibility
+    #             # with existing models...
+    #             # TODO: need to add sequence length to the lstm
+    #             if lstm_num == 0:
+    #                 scope_name = 'bilstm/fw'
+    #             else:
+    #                 scope_name = 'bilstm/bw'
+    #             _lstm_output_unpacked, final_state = tf.nn.static_rnn(
+    #                 lstm_cell,
+    #                 tf.unstack(lstm_input, axis=1),
+    #                 initial_state=self.init_lstm_state[-1],
+    #             scope=scope_name)
+    #             self.final_lstm_state.append(final_state)
+    #
+    #
+    #         # (batch_size * unroll_steps, 512)
+    #         lstm_output_flat = tf.reshape(
+    #             tf.stack(_lstm_output_unpacked, axis=1), [-1, projection_dim])
+    #
+    #         if self.is_training:
+    #             # add dropout to output
+    #             lstm_output_flat = tf.nn.dropout(lstm_output_flat,
+    #                                              keep_prob)
+    #         tf.add_to_collection('lstm_output_embeddings',
+    #                              _lstm_output_unpacked)
+    #
+    #         lstm_outputs.append(lstm_output_flat)
+    #
+    #     self._build_loss(lstm_outputs)
+
     def _build(self):
         # size of input options
         n_tokens_vocab = self.options['n_tokens_vocab']
@@ -365,7 +483,7 @@ class LanguageModel(object):
         #     forward lstm-->softmax
         #     backward lstm --> softmax
         for lstm_num, lstm_input in enumerate(lstm_inputs):
-            lstm_cells = []
+            outputs = lstm_input
             for i in range(n_lstm_layers):
                 if projection_dim < lstm_dim:
                     # are projecting down output
@@ -392,14 +510,6 @@ class LanguageModel(object):
                     lstm_cell = tf.nn.rnn_cell.DropoutWrapper(lstm_cell,
                                                               input_keep_prob=keep_prob)
 
-                lstm_cells.append(lstm_cell)
-
-            if n_lstm_layers > 1:
-                lstm_cell = tf.nn.rnn_cell.MultiRNNCell(lstm_cells)
-            else:
-                lstm_cell = lstm_cells[0]
-
-            with tf.control_dependencies([lstm_input]):
                 self.init_lstm_state.append(
                     lstm_cell.zero_state(batch_size, DTYPE))
                 # NOTE: this variable scope is for backward compatibility
@@ -411,15 +521,15 @@ class LanguageModel(object):
                     scope_name = 'bilstm/bw'
                 _lstm_output_unpacked, final_state = tf.nn.static_rnn(
                     lstm_cell,
-                    tf.unstack(lstm_input, axis=1),
+                    tf.unstack(outputs, axis=1),
                     initial_state=self.init_lstm_state[-1],
                 scope=scope_name)
                 self.final_lstm_state.append(final_state)
-
+                outputs = tf.stack(_lstm_output_unpacked, axis=1)
 
             # (batch_size * unroll_steps, 512)
             lstm_output_flat = tf.reshape(
-                tf.stack(_lstm_output_unpacked, axis=1), [-1, projection_dim])
+                outputs, [-1, projection_dim])
 
             if self.is_training:
                 # add dropout to output

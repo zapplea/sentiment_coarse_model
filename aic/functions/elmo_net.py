@@ -92,7 +92,6 @@ class LanguageModel(object):
         lm_embeddings=[]
         lm_embeddings.append(tf.concat([X,X],axis=2))
         outputs_fw=X
-        # TODO: check whether tf.reverse_sequence performs as you want
         outputs_bw=tf.reverse_sequence(X,seq_len,seq_axis=1,batch_axis=0)
         for i in range(n_lstm_layers):
             lstm_cell_ls = []
