@@ -83,13 +83,13 @@ def elmo_text(infile=''):
     with open(infile,'rb') as f:
         attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed = pickle.load(f)
     vocab_path='/datastore/liu121/sentidata2/data/bilm/vocab_aic.txt'
-    with open(vocab_path,'w+') as f:
-        f.write('<S>\n')
-        f.write('</S>\n')
-        f.write('<UNK>\n')
-        for word in word_dic:
-            f.write(word+'\n')
-            f.flush()
+    # with open(vocab_path,'w+') as f:
+    #     f.write('<S>\n')
+    #     f.write('</S>\n')
+    #     f.write('<UNK>\n')
+    #     for word in word_dic:
+    #         f.write(word+'\n')
+    #         f.flush()
     id_to_word={}
     for key in word_dic:
         value = word_dic[key]
@@ -97,6 +97,7 @@ def elmo_text(infile=''):
 
     outfile_path = '/datastore/liu121/sentidata2/data/bilm/aic2018/'
     num = 1
+    words_num = 0
     for i in range(sentences.shape[0]):
         if i%5000 == 0:
             file_name =outfile_path+'review.cn-%.5d'%num
@@ -107,14 +108,16 @@ def elmo_text(infile=''):
         for sentence in review:
             for token_id in sentence:
                 if token_id == 116140:
-                    continue
+                    break
                 else:
+                    words_num+=1
                     word = id_to_word[token_id]
                     if len(line) == 0:
                         line+=word
                     else:
                         line+=' '+word
         f.write(line+'\n')
+    print('words num: %d'%words_num)
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
