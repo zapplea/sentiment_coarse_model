@@ -18,27 +18,17 @@ def main(args):
     vocab = load_vocab(args.vocab_file, 50)
 
     # define the options
-    batch_size = 128  # batch size for each GPU
-    n_gpus = 3
+    batch_size = 5  # batch size for each GPU
+    n_gpus = 2
 
     # number of tokens in training data (this for 1B Word Benchmark)
-    n_train_tokens = 768648884
+    # n_train_tokens = 768648884
+    n_train_tokens = 20539032
 
     options = {
         'bidirectional': True,
 
-        'char_cnn': {'activation': 'relu',
-                     'embedding': {'dim': 16},
-                     'filters': [[1, 32],
-                                 [2, 32],
-                                 [3, 64],
-                                 [4, 128],
-                                 [5, 256],
-                                 [6, 512],
-                                 [7, 1024]],
-                     'max_characters_per_token': 50,
-                     'n_characters': 261,
-                     'n_highway': 2},
+        'share_embedding_softmax':True,
 
         'dropout': 0.1,
 
@@ -56,7 +46,7 @@ def main(args):
         'n_train_tokens': n_train_tokens,
         'batch_size': batch_size,
         'n_tokens_vocab': vocab.size,
-        'unroll_steps': 20,
+        'unroll_steps': 210,
         'n_negative_samples_batch': 8192,
     }
 
@@ -64,39 +54,6 @@ def main(args):
     data = BidirectionalLMDataset(prefix, vocab, test=False,
                                   shuffle_on_load=True)
     data_gen = data.iter_batches(batch_size * n_gpus, 20)
-    batchs = []
-    for batch_no, batch in enumerate(data_gen, start=1):
-        batchs.append(batch)
-
-    print('batchs.shape: ',len(batchs))
-
-    for batch in batchs:
-        print('#########################################')
-        inputs = batch['token_ids']
-        targets = batch['next_token_id']
-        for i in range(5):
-            sentence = []
-            for scalar in inputs[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('inputs[%d]: %d' % (i, len(sentence)), sentence)
-
-            sentence = []
-            for scalar in targets[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('targets[%d]: %d' % (i, len(sentence)), sentence)
-        print('==================')
-        for i in range(-5, -1):
-            sentence = []
-            for scalar in inputs[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('inputs[%d]: %d' % (i, len(sentence)), sentence)
-
-            sentence = []
-            for scalar in targets[i]:
-                sentence.append(vocab._id_to_word[scalar])
-            print('targets[%d]: %d' % (i, len(sentence)), sentence)
-        exit()
-    exit()
     tf_save_dir = args.save_dir
     tf_log_dir = args.save_dir
     train(options, data, n_gpus, tf_save_dir, tf_log_dir)
