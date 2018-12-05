@@ -502,7 +502,7 @@ class LanguageModel(object):
                 else:
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         lstm_dim,
-                        cell_clip=cell_clip, proj_clip=proj_clip)
+                        cell_clip=cell_clip, proj_clip=proj_clip, name='layer%d' % i)
 
                 if use_skip_connections:
                     # ResidualWrapper adds inputs to outputs
