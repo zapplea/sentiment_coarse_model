@@ -519,6 +519,10 @@ class LanguageModel(object):
                     if self.is_training:
                         lstm_cell = tf.nn.rnn_cell.DropoutWrapper(lstm_cell,
                                                                   input_keep_prob=keep_prob)
+                for var in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+                    print(var.name)
+                    print(var.get_shape())
+                print('=====================')
                 print('outputs.shape: ', outputs.get_shape())
                 # outputs.shape = (batch size, words num, lstm_dim)
                 outputs, _ = tf.nn.dynamic_rnn(lstm_cell, inputs=outputs,
