@@ -67,7 +67,6 @@ class SentimentNet:
             score = tf.add(score_lstm, score_e)
             # score.shape = (batch size*max review length, attributes num)
             score = tf.reduce_max(score, axis=2)
-            tf.add_to_collection('sentence_attr_score',score)
             # shape = (batch size*max review length, attributes num)
             sentence_prob = self.af.sentence_sigmoid(score, self.graph)
             # shape = (batch size*max review length, coarse attributes num)
@@ -75,7 +74,6 @@ class SentimentNet:
             # shape = (batch size, coarse_attributes_num)
             # highlight: the coarse model use the review score, but the fine model use sentence score.
             review_score = self.af.review_score(sentence_prob, mask, review_len, self.reg, self.graph)
-            tf.add_to_collection('review_attr_score',review_score)
             attr_pred_labels = self.af.prediction('attr_pred_labels', review_score, self.graph)
             reg_list = []
             for reg in self.reg['attr_reg']:
@@ -110,33 +108,39 @@ class SentimentNet:
             # extract sentiment expression corresponding to sentiment and attribute from W for all attributes
             # W.shape=(number of attributes*3+3, size of original W); shape of original W =(3*normal sentiment prototypes + attribute number * attribute sentiment prototypes, sentiment dim)
             W = tf.multiply(extors_mat, W)
+            tf.add_to_collection('senti_W',W)
             # shape = (batch size*max review length, number of words, 3+3*attributes number, number of sentiment prototypes)
             attention = self.sf.sentiment_attention(senti_H, W, extors_mask_mat, self.graph)
             # attended_W.shape = (batch size*max review length,number of words, 3+3*attributes number, sentiment dim)
             attended_W = self.sf.attended_sentiment(W, attention, self.graph)
+            tf.add_to_collection('attended_senti_W',attended_W)
             # shape = (batch size*max review length,number of words, 3+3*attributes number)
             item1 = self.sf.item1(attended_W, senti_H, self.graph)
+            tf.add_to_collection('item1',item1)
             # A_dist.shape = (batch size*max review length, number of attributes+1, wrods number)
             if self.nn_config['is_mat']:
                 A = tf.concat([A, o], axis=0)
                 # A.shape = shape = (batch size * max review length, number of words, number of attributes + 1, attribute dim(=lstm cell dim))
                 A = self.sf.words_attribute_mat2vec(H=attr_H, A_mat=A, graph=self.graph)
-
             # shape = (batch size*max review length, number of attributes+1, wrods number)
             A_dist = self.sf.attribute_distribution(A=A, H=attr_H, graph=self.graph)
             # A_Vi.shape = (batch size*max review length, number of attributes+1, number of words, relative position dim)
             A_Vi = self.sf.rd_Vi(A_dist=A_dist, V=V, rp_ids=rp_ids, graph=self.graph)
+            tf.add_to_collection('A_Vi',A_Vi)
             # item2.shape=(batch size, number of attributes+1, number of words)
             item2 = tf.reduce_sum(tf.multiply(A_Vi, beta), axis=3)
+            tf.add_to_collection('item2',item2)
             # mask for score to eliminate the influence of padding word
             mask = self.sf.mask_for_pad_in_score(X_ids, self.graph)
             # senti_socre.shape = (batch size, 3*number of attributes+3, words num)
             score = self.sf.score(item1, item2, mask, self.graph)
+            tf.add_to_collection('senti_score_with_inf', score)
             # score.shape = (batch size, 3*number of attributes+3)
             score = tf.reduce_max(score, axis=2)
             # in coarse model, when the whole sentence is padded, there will be -inf, so need to convert them to 0
             condition = tf.is_inf(score)
             score = tf.where(condition, tf.zeros_like(score), score)
+            tf.add_to_collection('senti_score',score)
 
             # pure senti loss
             # mask the situation when attribute doesn't appear
@@ -162,13 +166,11 @@ class SentimentNet:
             attr_pred_labels = self.sf.expand_attr_labels(attr_pred_labels,self.graph)
             # score.shape = (batch size, number of attributes+1,3)
             joint_fine_score = tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, self.nn_config['sentiment_num']))
-            tf.add_to_collection('joint_fine_score',joint_fine_score)
             # in here the mask use predicted attribute label as input. This is different from the above.
             # shape=(batch size, attributes num+1, 3)
             mask = tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3])
             # sahpe = (batch size, coarse attr num + 1, 3)
             joint_coarse_score = tf.multiply(self.sf.coarse_score(joint_fine_score,self.reg,self.graph),mask)
-            tf.add_to_collection('joint_coarse_score',joint_coarse_score)
             # softmax loss
             senti_loss_of_joint = self.sf.softmax_loss(name='senti_loss_of_joint', labels=Y_senti, logits=joint_coarse_score,
                                                        reg_list=reg_list, graph=self.graph)
