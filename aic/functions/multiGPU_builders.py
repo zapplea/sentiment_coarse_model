@@ -145,7 +145,7 @@ class SentiNetBuilder:
         vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         # attribute
         var_list = []
-        for var in vars():
+        for var in vars:
             flag=True
             for expt in exception_list:
                 if var.name.find(expt)>=0:
