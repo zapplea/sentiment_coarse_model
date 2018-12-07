@@ -14,6 +14,7 @@ import numpy as np
 np.set_printoptions(threshold=np.inf)
 from pathlib import Path
 import math
+import pickle
 
 from aic.functions.metrics import Metrics
 from aic.functions.tfb_utils import Tfb
@@ -44,7 +45,7 @@ class CoarseSentiTrain:
         self.mt = Metrics(self.train_config)
         self.outf=open(self.train_config['report_filePath'],'w+')
         self.analf = open('/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg%s_lr%s_mat%s.info'%
-                          (str(self.train_config['reg_rate']), str(self.train_config['lr']), str(self.train_config['attribute_mat_size'])),'w+')
+                          (str(self.train_config['reg_rate']), str(self.train_config['lr']), str(self.train_config['attribute_mat_size'])),'wb')
 
     def generate_feed_dict(self,graph, gpu_num, data_dict):
         feed_dict = {}
@@ -58,6 +59,10 @@ class CoarseSentiTrain:
             feed_dict[graph.get_collection('keep_prob_bilstm')[k]] = data_dict['keep_prob']
         return feed_dict
 
+    def write_to_pkl(self,file,dic):
+        pickle.dump(dic,file)
+        file.flush()
+
     def __train__(self, dic, graph, gpu_num):
         sess = dic['sess']
         train_step = dic['train_step']
@@ -68,6 +73,7 @@ class CoarseSentiTrain:
         saver = dic['saver']
         early_stop_count = 0
         best_f1_score = 0
+        anal_dic = {}
         print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
@@ -87,16 +93,18 @@ class CoarseSentiTrain:
                                        tf.get_collection('item2')[0],],
                                      feed_dict=feed_dict)
                 senti_coarse_W = sess.run(graph.get_collection('senti_coarse_W'))
-                self.mt.report('========================',self.analf,'analysis')
-                self.mt.report('%s epoch: %d\n'%(dic['test_mod'],i),self.analf,'analysis')
-                self.mt.report('senti_W:\n%s'%str(senti_W),self.analf,'analysis')
-                self.mt.report('attended_senti_W:\n%s' % str(attended_senti_W),self.analf,'analysis')
-                self.mt.report('item1:\n%s'%str(item1),self.analf,'analysis')
-                self.mt.report('A_Vi:\n%s' % str(A_Vi), self.analf, 'analysis')
-                self.mt.report('item2:\n%s' % str(item2), self.analf, 'analysis')
-                self.mt.report('senti_score_with_inf:\n%s' % str(senti_score_with_inf), self.analf, 'analysis')
-                self.mt.report('senti_score:\n%s' % str(senti_score), self.analf, 'analysis')
-                self.mt.report('senti_coarse_W:\n%s'%str(senti_coarse_W),self.analf,'analysis')
+                # self.mt.report('========================',self.analf,'analysis')
+                anal_dic={'%s epoch: %d'%(dic['test_mod'],i):{'senti_W':senti_W,'senti_score_with_inf':senti_score_with_inf}}
+                self.write_to_pkl(self.analf,anal_dic)
+                # self.mt.report('%s epoch: %d\n'%(dic['test_mod'],i),self.analf,'analysis')
+                # self.mt.report('senti_W:\n%s'%str(senti_W),self.analf,'analysis')
+                # self.mt.report('attended_senti_W:\n%s' % str(attended_senti_W),self.analf,'analysis')
+                # self.mt.report('item1:\n%s'%str(item1),self.analf,'analysis')
+                # self.mt.report('A_Vi:\n%s' % str(A_Vi), self.analf, 'analysis')
+                # self.mt.report('item2:\n%s' % str(item2), self.analf, 'analysis')
+                # self.mt.report('senti_score_with_inf:\n%s' % str(senti_score_with_inf), self.analf, 'analysis')
+                # self.mt.report('senti_score:\n%s' % str(senti_score), self.analf, 'analysis')
+                # self.mt.report('senti_coarse_W:\n%s'%str(senti_coarse_W),self.analf,'analysis')
 
 
             if i % self.train_config['epoch_mod'] == 0:
