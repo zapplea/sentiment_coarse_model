@@ -42,19 +42,27 @@ class LanguageModel(object):
     def __init__(self, options, is_training):
         self.options = {
             'bidirectional': True,
-            'dropout': 0.0,
+
+            'share_embedding_softmax':True,
+
+            'dropout': 0.1,
+
             'lstm': {
                 'cell_clip': 3,
                 'dim': 4096,
                 'n_layers': 2,
                 'proj_clip': 3,
-                'projection_dim': 512,
-                'use_skip_connections': False},
+                'projection_dim': 300,
+                'use_skip_connections': True},
 
             'all_clip_norm_val': 10.0,
-            'n_tokens_vocab': 116140,
-            'unroll_steps': 20,
-            'n_negative_samples_batch': 8192,
+
+            'n_epochs': 10,
+            'n_train_tokens': n_train_tokens,
+            'batch_size': batch_size,
+            'n_tokens_vocab': vocab.size,
+            'unroll_steps': 210,
+            'n_negative_samples_batch': 4800,
         }
         self.options.update(options)
         self.is_training = is_training
