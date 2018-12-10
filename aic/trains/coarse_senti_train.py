@@ -63,7 +63,7 @@ class CoarseSentiTrain:
         pickle.dump(dic,file)
         file.flush()
 
-    def __train__(self, dic, graph, gpu_num):
+    def __train__(self, dic, graph, gpu_num,global_step):
         sess = dic['sess']
         train_step = dic['train_step']
         attr_loss = dic['loss']['attr']
@@ -170,7 +170,7 @@ class CoarseSentiTrain:
                 else:
                     early_stop_count = 0
                     best_f1_score = _f1_score
-                    saver.save(sess, self.train_config['sr_path'])
+                    saver.save(sess, self.train_config['sr_path'],global_step=global_step)
                 if early_stop_count > self.train_config['early_stop_limit']:
                     break
         saver.save(sess, self.train_config['sr_path'])
@@ -201,7 +201,7 @@ class CoarseSentiTrain:
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
             dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'attr'
-            self.__train__(dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
@@ -212,7 +212,7 @@ class CoarseSentiTrain:
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
             dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
             dic['test_mod'] = 'senti'
-            self.__train__(dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train joint              #
@@ -223,4 +223,4 @@ class CoarseSentiTrain:
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
             dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'joint'
-            self.__train__(dic, graph, model_dic['gpu_num'])
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])

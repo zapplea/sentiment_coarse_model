@@ -111,6 +111,60 @@ class SentiNetBuilder:
             tf.shape(unique_indices)[0])
         return (summed_values, unique_indices)
 
+    def clip_by_global_norm_summary(self, t_list, clip_norm, norm_name, variables):
+        # wrapper around tf.clip_by_global_norm that also does summary ops of norms
+
+        # compute norms
+        # use global_norm with one element to handle IndexedSlices vs dense
+        norms = [tf.global_norm([t]) for t in t_list]
+
+        # summary ops before clipping
+        summary_ops = []
+        for ns, v in zip(norms, variables):
+            name = 'norm_pre_clip/' + v.name.replace(":", "_")
+            summary_ops.append(tf.summary.scalar(name, ns))
+
+        # clip
+        clipped_t_list, tf_norm = tf.clip_by_global_norm(t_list, clip_norm)
+
+        # summary ops after clipping
+        norms_post = [tf.global_norm([t]) for t in clipped_t_list]
+        for ns, v in zip(norms_post, variables):
+            name = 'norm_post_clip/' + v.name.replace(":", "_")
+            summary_ops.append(tf.summary.scalar(name, ns))
+
+        summary_ops.append(tf.summary.scalar(norm_name, tf_norm))
+
+        return clipped_t_list, tf_norm, summary_ops
+
+    def clip_grads(self, grads, options, do_summaries, global_step):
+        # grads = [(grad1, var1), (grad2, var2), ...]
+        def _clip_norms(grad_and_vars, val, name):
+            # grad_and_vars is a list of (g, v) pairs
+            grad_tensors = [g for g, v in grad_and_vars]
+            vv = [v for g, v in grad_and_vars]
+            scaled_val = val
+            if do_summaries:
+                clipped_tensors, g_norm, so = self.clip_by_global_norm_summary(
+                    grad_tensors, scaled_val, name, vv)
+            else:
+                so = []
+                clipped_tensors, g_norm = tf.clip_by_global_norm(
+                    grad_tensors, scaled_val)
+
+            ret = []
+            for t, (g, v) in zip(clipped_tensors, grad_and_vars):
+                ret.append((t, v))
+
+            return ret, so
+
+        all_clip_norm_val = options['all_clip_norm_val']
+        ret, summary_ops = _clip_norms(grads, all_clip_norm_val, 'norm_grad')
+
+        assert len(ret) == len(grads)
+
+        return ret, summary_ops
+
     def concat_pred_labels(self, graph, gpu_num):
         attr_total_pred_labels = []
         senti_total_pred_labels = []
@@ -193,11 +247,16 @@ class SentiNetBuilder:
                                                graph=graph)
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
-                attr_train_step = opt.apply_gradients(attr_avg_grads,global_step=global_step)
+                attr_clipped_grads, _ = self.clip_grads(attr_avg_grads,self.nn_config,False,global_step)
+                attr_train_step = opt.apply_gradients(attr_clipped_grads,global_step=global_step)
+
                 senti_avg_grads = self.average_gradients(senti_tower_grads)
-                senti_train_step = opt.apply_gradients(senti_avg_grads, global_step=global_step)
+                senti_clipped_grads,_ = self.clip_grads(senti_avg_grads,self.nn_config,False,global_step)
+                senti_train_step = opt.apply_gradients(senti_clipped_grads, global_step=global_step)
+
                 joint_avg_grads = self.average_gradients(joint_tower_grads)
-                joint_train_step = opt.apply_gradients(joint_avg_grads,global_step=global_step)
+                joint_clipped_grads, _ = self.clip_grads(joint_avg_grads, self.nn_config, False, global_step)
+                joint_train_step = opt.apply_gradients(joint_clipped_grads,global_step=global_step)
                 # label
                 attr_pred_labels, senti_pred_labels, joint_pred_labels = self.concat_pred_labels(graph, self.nn_config['gpu_num'])
                 # loss
@@ -206,4 +265,4 @@ class SentiNetBuilder:
         return {'train_step':{'attr':attr_train_step, 'senti':senti_train_step, 'joint':joint_train_step},
                 'pred_labels':{'attr':attr_pred_labels, 'senti':senti_pred_labels, 'joint':joint_pred_labels},
                 'loss':{'attr':attr_loss, 'senti':senti_loss, 'joint':joint_loss},
-                'saver':saver,'graph':graph, 'gpu_num':self.nn_config['gpu_num']}
+                'saver':saver,'graph':graph, 'gpu_num':self.nn_config['gpu_num'],'global_step':global_step}
