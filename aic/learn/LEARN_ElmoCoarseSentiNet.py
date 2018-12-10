@@ -27,22 +27,28 @@ def main(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num', type=int, default=0)
+    parser.add_argument('--epoch', type=int, default=3)
     args = parser.parse_args()
 
-    reg_rate = [1E-5, ]
-    lr =       [1E-4, ]
+    reg_rate = [1E-6, 1E-5, 1E-4, 1E-4]
+    lr = [1E-3, 1E-3, 1E-2, 1E-1]
     config = {
-                'attribute_mat_size': 5,
-                'reg_rate': reg_rate[args.num],
-                'lr': lr[args.num],
-            }
+        'attribute_mat_size': 5,
+        'reg_rate': reg_rate[args.num],
+        'lr': lr[args.num],
+        'batch_size': 10,
+        'gpu_num': 2,
+        'attributes_num': 20,
+        'epoch': args.epoch,
+        'epoch_mod': 1,
+        'early_stop_limit': float('nan')
+    }
+
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_fine.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_fine.pkl'
 
-    config['sr_path'] = '/datastore/liu121/sentidata2/result/transfer_nn/ckpt_reg%s_lr%s_mat%s' \
+    config['sr_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg%s_lr%s_mat%s/' \
                         % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['initial_file_path'] = '/datastore/liu121/sentidata2/result/bilm'
-    config['report_filePath'] = '/datastore/liu121/sentidata2/report/transfer_nn/report_reg%s_lr%s_mat%s.info' \
-                                % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-
+    config['initial_file_path'] = '/datastore/liu121/sentidata2/result/bilm/'
+    config['report_filePath'] = '/datastore/liu121/sentidata2/report/elmo_nn/'
     main(config)
