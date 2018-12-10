@@ -12,7 +12,7 @@ import argparse
 from aic.coarse_net.senti_net import SentimentNet as CoarseSentiNet
 from aic.trains.coarse_senti_train_with_elmo import CoarseSentiTrain
 from aic.elmo.elmo_net import LanguageModel
-from aic.data_process.attr_datafeeder import DataFeeder
+from aic.data_process.senti_datafeeder import DataFeeder
 
 def main(config):
     datafeeder = DataFeeder(config)
