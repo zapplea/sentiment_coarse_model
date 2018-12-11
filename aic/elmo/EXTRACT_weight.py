@@ -1,8 +1,12 @@
+import getpass
+import sys
+if getpass.getuser() == 'yibing':
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model/')
 import tensorflow as tf
 import argparse
 import pickle
 
-from aic.elmo.elmo_train import train, load_options_latest_checkpoint, load_vocab
+from aic.elmo.elmo_train import load_vocab
 from aic.elmo.elmo_net import LanguageModel
 
 def build(args):
