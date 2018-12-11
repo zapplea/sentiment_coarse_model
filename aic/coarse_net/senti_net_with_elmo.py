@@ -25,7 +25,9 @@ class SentimentNet:
         self.table = table
         self.reg = {'attr_reg': [], 'senti_reg': [],'elmo':[]}
         self.classifier()
+        print('lm:')
         self.lm = LanguageModel(config['elmo'],is_training=False)
+        print(self.lm)
 
 
     def classifier(self):
