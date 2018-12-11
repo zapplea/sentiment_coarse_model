@@ -93,19 +93,8 @@ class CoarseSentiTrain:
                                        tf.get_collection('item2')[0],],
                                      feed_dict=feed_dict)
                 senti_coarse_W = sess.run(graph.get_collection('senti_coarse_W'))
-                # self.mt.report('========================',self.analf,'analysis')
                 anal_dic={'%s epoch: %d'%(dic['test_mod'],i):{'senti_W':senti_W,'senti_score_with_inf':senti_score_with_inf}}
                 self.write_to_pkl(self.analf,anal_dic)
-                # self.mt.report('%s epoch: %d\n'%(dic['test_mod'],i),self.analf,'analysis')
-                # self.mt.report('senti_W:\n%s'%str(senti_W),self.analf,'analysis')
-                # self.mt.report('attended_senti_W:\n%s' % str(attended_senti_W),self.analf,'analysis')
-                # self.mt.report('item1:\n%s'%str(item1),self.analf,'analysis')
-                # self.mt.report('A_Vi:\n%s' % str(A_Vi), self.analf, 'analysis')
-                # self.mt.report('item2:\n%s' % str(item2), self.analf, 'analysis')
-                # self.mt.report('senti_score_with_inf:\n%s' % str(senti_score_with_inf), self.analf, 'analysis')
-                # self.mt.report('senti_score:\n%s' % str(senti_score), self.analf, 'analysis')
-                # self.mt.report('senti_coarse_W:\n%s'%str(senti_coarse_W),self.analf,'analysis')
-
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)

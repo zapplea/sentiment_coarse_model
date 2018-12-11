@@ -192,9 +192,13 @@ class SentiNetBuilder:
         joint_loss = tf.reduce_mean(joint_total_loss, axis=0)
         return attr_loss, senti_loss, joint_loss
 
-    def compute_grads(self,exception_list,opt,tower_grads,graph):
+    def compute_grads(self,mod,opt,tower_grads,graph):
+        if mod == "attr":
+            exception_list=['sentiExtr']
+        else:
+            exception_list = ['attrExtr']
         if self.nn_config['with_elmo']:
-            exception_list.append('elmo_bilstm')
+            exception_list.append('elmo')
         # all var
         vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         # attribute
@@ -208,8 +212,9 @@ class SentiNetBuilder:
 
             if flag:
                 var_list.append(var)
-        grad = opt.compute_gradients(graph.get_collection('attr_loss')[-1],
-                                     aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE, var_list=var_list)
+
+        grad = opt.compute_gradients(graph.get_collection(mod+'_loss')[-1],var_list=var_list,
+                                     aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
         tower_grads.append(grad)
 
     def build_models(self, Model):
@@ -237,13 +242,13 @@ class SentiNetBuilder:
                             models.append(model)
 
                             # attribute
-                            self.compute_grads(exception_list=['sentiExtr'], opt=opt, tower_grads=attr_tower_grads, graph=graph)
+                            self.compute_grads(mod = 'attr', opt=opt, tower_grads=attr_tower_grads, graph=graph)
 
                             # sentiment
-                            self.compute_grads(exception_list=['attrExtr'], opt=opt, tower_grads=senti_tower_grads,
+                            self.compute_grads(mod = 'senti', opt=opt, tower_grads=senti_tower_grads,
                                                graph=graph)
                             # joint
-                            self.compute_grads(exception_list=['attrExtr'], opt=opt, tower_grads=joint_tower_grads,
+                            self.compute_grads(mod = 'joint', opt=opt, tower_grads=joint_tower_grads,
                                                graph=graph)
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
