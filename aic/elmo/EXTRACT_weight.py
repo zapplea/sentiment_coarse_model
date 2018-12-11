@@ -54,7 +54,7 @@ def build(args):
     graph = tf.Graph()
     options['graph'] = graph
     with graph.as_default():
-        with tf.device('/gpu:0'), tf.variable_scope('lm'):
+        with tf.device('/gpu:0'), tf.variable_scope('elmo'):
             LanguageModel(options, False)
             # we use the "Saver" class to load the variables
             loader = tf.train.Saver()
