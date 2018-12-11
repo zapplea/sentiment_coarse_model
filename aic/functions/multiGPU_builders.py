@@ -252,16 +252,16 @@ class SentiNetBuilder:
                                                graph=graph)
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
-                attr_clipped_grads, _ = self.clip_grads(attr_avg_grads,self.nn_config,False,global_step)
-                attr_train_step = opt.apply_gradients(attr_clipped_grads,global_step=global_step)
+                # attr_clipped_grads, _ = self.clip_grads(attr_avg_grads,self.nn_config,False,global_step)
+                attr_train_step = opt.apply_gradients(attr_avg_grads,global_step=global_step)
 
                 senti_avg_grads = self.average_gradients(senti_tower_grads)
-                senti_clipped_grads,_ = self.clip_grads(senti_avg_grads,self.nn_config,False,global_step)
-                senti_train_step = opt.apply_gradients(senti_clipped_grads, global_step=global_step)
+                # senti_clipped_grads,_ = self.clip_grads(senti_avg_grads,self.nn_config,False,global_step)
+                senti_train_step = opt.apply_gradients(senti_avg_grads, global_step=global_step)
 
                 joint_avg_grads = self.average_gradients(joint_tower_grads)
-                joint_clipped_grads, _ = self.clip_grads(joint_avg_grads, self.nn_config, False, global_step)
-                joint_train_step = opt.apply_gradients(joint_clipped_grads,global_step=global_step)
+                # joint_clipped_grads, _ = self.clip_grads(joint_avg_grads, self.nn_config, False, global_step)
+                joint_train_step = opt.apply_gradients(joint_avg_grads,global_step=global_step)
                 # label
                 attr_pred_labels, senti_pred_labels, joint_pred_labels = self.concat_pred_labels(graph, self.nn_config['gpu_num'])
                 # loss
