@@ -25,10 +25,6 @@ class SentimentNet:
         self.table = table
         self.reg = {'attr_reg': [], 'senti_reg': [],'elmo':[]}
         self.classifier()
-        print('lm:')
-        self.lm = LanguageModel(config['elmo'],is_training=False)
-        print(self.lm)
-
 
     def classifier(self):
         # shape = (batch size, max review length, words num)
@@ -45,13 +41,13 @@ class SentimentNet:
         words_pad_M = self.comm.is_word_padding_input(reshaped_X_ids, self.graph)
         # shape = (batch size*max review length,words num, feature dim)
         X = self.comm.lookup_table(reshaped_X_ids, words_pad_M, self.table, self.graph)
-
+        lm = LanguageModel(self.nn_config['elmo'], is_training=False)
         with tf.variable_scope('elmo', reuse=tf.AUTO_REUSE):
             # lm_embeddings.shape=(batch size, lstm layers+1, max sentence length, 2*lstm dim)
-            lm_embeddings = self.lm.bilstm(X,seq_len)
-        mask_for_elmo = self.lm.mask_for_token_ids(reshaped_X_ids)
+            lm_embeddings = lm.bilstm(X,seq_len)
+        mask_for_elmo = lm.mask_for_token_ids(reshaped_X_ids)
         # shape = (batch size, max sentence length, 2*lstm dim)
-        X = self.lm.weight_layers(name='outputs',bilm_ops={'mask':mask_for_elmo,'lm_embeddings':lm_embeddings},reg=self.reg, l2_coef=0.0)
+        X = lm.weight_layers(name='outputs',bilm_ops={'mask':mask_for_elmo,'lm_embeddings':lm_embeddings},reg=self.reg, l2_coef=0.0)
 
         # #################### #
         # attribute extraction #

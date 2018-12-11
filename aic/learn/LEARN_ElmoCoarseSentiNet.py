@@ -14,13 +14,16 @@ from aic.trains.coarse_senti_train_with_elmo import CoarseSentiTrain
 from aic.data_process.senti_datafeeder import DataFeeder
 
 def main(config):
+    print('data feeder: ')
     datafeeder = DataFeeder(config)
+    print('coarse senti train: ')
     train = CoarseSentiTrain(config, datafeeder)
+    print('initial data: ')
     init_data = train.transfer()
-    model_dic = CoarseSentiNet.build(config)
     for key in init_data:
         print(key)
     print('========================')
+    model_dic = CoarseSentiNet.build(config)
     train.train(model_dic,init_data)
 
 if __name__ == "__main__":
