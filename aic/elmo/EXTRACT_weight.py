@@ -2,6 +2,10 @@ import getpass
 import sys
 if getpass.getuser() == 'yibing':
     sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model/')
+elif getpass.getuser() == 'lujunyu':
+    sys.path.append('/home/lujunyu/repository/sentiment_coarse_model/')
+elif getpass.getuser() == 'liu121':
+    sys.path.append('/home/liu121/sentiment_coarse_model/')
 import tensorflow as tf
 import argparse
 import pickle
