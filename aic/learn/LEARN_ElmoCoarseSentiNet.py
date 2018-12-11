@@ -9,7 +9,7 @@ elif getpass.getuser() == 'liu121':
 
 import argparse
 
-from aic.coarse_net.senti_net import SentimentNet as CoarseSentiNet
+from aic.coarse_net.senti_net_with_elmo import SentimentNet as CoarseSentiNet
 from aic.trains.coarse_senti_train_with_elmo import CoarseSentiTrain
 from aic.data_process.senti_datafeeder import DataFeeder
 
@@ -20,6 +20,7 @@ def main(config):
     model_dic = CoarseSentiNet.build(config)
     for key in init_data:
         print(key)
+    print('========================')
     train.train(model_dic,init_data)
 
 if __name__ == "__main__":
