@@ -17,9 +17,9 @@ def main(config):
     datafeeder = DataFeeder(config)
     train = CoarseSentiTrain(config, datafeeder)
     init_data = train.transfer()
-    print('get init_data')
-    exit()
     model_dic = CoarseSentiNet.build(config)
+    for key in init_data:
+        print(key)
     train.train(model_dic,init_data)
 
 if __name__ == "__main__":
@@ -47,6 +47,6 @@ if __name__ == "__main__":
 
     config['sr_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg%s_lr%s_mat%s/' \
                         % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['initial_file_path'] = '/datastore/liu121/sentidata2/result/bilm/'
+    config['initial_filePath'] = '/datastore/liu121/sentidata2/data/aic2018/elmo_weights/elmo_weights.pkl'
     config['report_filePath'] = '/datastore/liu121/sentidata2/report/elmo_nn/'
     main(config)
