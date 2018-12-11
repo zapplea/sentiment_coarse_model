@@ -62,7 +62,7 @@ def build(args):
     with tf.Session(graph =graph ,config=config) as sess:
         model_file = tf.train.latest_checkpoint(options['initial_file_dir'])
         loader.restore(sess, model_file)
-        return graph, sess
+        extract(graph,sess)
 
 def extract(model,sess):
     vars_dic = {}
@@ -78,5 +78,4 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--vocab_file', help='Vocabulary file',default='/datastore/liu121/sentidata2/data/bilm/vocab_aic.txt')
     args = parser.parse_args()
-    model,sess = build(args)
-    extract(model,sess)
+    build(args)
