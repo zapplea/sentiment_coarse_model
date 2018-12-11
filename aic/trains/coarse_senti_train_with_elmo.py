@@ -14,6 +14,7 @@ import numpy as np
 np.set_printoptions(threshold=np.inf)
 from pathlib import Path
 import math
+import pickle
 
 from aic.functions.metrics import Metrics
 from aic.functions.tfb_utils import Tfb
@@ -164,27 +165,20 @@ class CoarseSentiTrain:
                     break
         saver.save(sess, self.train_config['sr_path'])
 
-    def transfer(self,model_dic):
-        graph = model_dic['graph']
-        saver = model_dic['saver']
-        with graph.as_default():
-            var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-
-        init = {}
-        with graph.device('/gpu:0'):
-            config = tf.ConfigProto(allow_soft_placement=True)
-            config.gpu_options.allow_growth = True
-            with tf.Session(graph=graph, config=config) as sess:
-                model_file = tf.train.latest_checkpoint(self.train_config['initial_file_path'])
-                saver.restore(sess, model_file)
-                for var in var_list:
-                    value = sess.run(var)
-                    init[var.name]=value
+    def transfer(self,):
+        with open(self.train_config['initial_filePath'],'rb') as f:
+            init = pickle.load(f)
         return init
 
     def train(self,model_dic,init_data):
         graph = model_dic['graph']
         with graph.as_default():
+            # elmo vars
+            vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+            for var in vars:
+                if var.name.find('elmo')>=0:
+                    print(var.name)
+            exit()
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
             var_list = graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)

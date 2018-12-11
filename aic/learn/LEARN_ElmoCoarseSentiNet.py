@@ -11,14 +11,12 @@ import argparse
 
 from aic.coarse_net.senti_net import SentimentNet as CoarseSentiNet
 from aic.trains.coarse_senti_train_with_elmo import CoarseSentiTrain
-from aic.functions.elmo_net import LanguageModel
 from aic.data_process.senti_datafeeder import DataFeeder
 
 def main(config):
     datafeeder = DataFeeder(config)
     train = CoarseSentiTrain(config, datafeeder)
-    model_dic = LanguageModel(config, is_training=False)
-    init_data = train.transfer(model_dic)
+    init_data = train.transfer()
     print('get init_data')
     exit()
     model_dic = CoarseSentiNet.build(config)
