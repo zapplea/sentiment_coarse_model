@@ -63,6 +63,31 @@ class CoarseSentiTrain:
         pickle.dump(dic,file)
         file.flush()
 
+    def analysis(self,dic,sess,i,feed_dict):
+        if dic['test_mod'] != 'attr':
+            senti_score_with_inf, senti_score, senti_W, attended_senti_W, item1, A_Vi, item2 = sess.run(
+                [tf.get_collection('senti_score_with_inf')[0],
+                 tf.get_collection('senti_score')[0],
+                 tf.get_collection('senti_W')[0],
+                 tf.get_collection('attended_senti_W')[0],
+                 tf.get_collection('item1')[0],
+                 tf.get_collection('A_Vi')[0],
+                 tf.get_collection('item2')[0], ],
+                feed_dict=feed_dict)
+            senti_coarse_W = sess.run(tf.get_collection('senti_coarse_W'))
+            A_mat = sess.run(tf.get_collection('A_mat')[0])
+            joint_loss = sess.run(tf.get_collection('joint_loss')[0])
+            anal_dic = {'%s epoch: %d' % (dic['test_mod'], i): {'senti_W': senti_W,
+                                                                'senti_score_with_inf': senti_score_with_inf,
+                                                                'attended_senti_W': attended_senti_W,
+                                                                'item1': item1,
+                                                                'A_Vi': A_Vi,
+                                                                'item2': item2,
+                                                                'senti_coarse_W': senti_coarse_W,
+                                                                'A_mat': A_mat,
+                                                                'joint_loss':joint_loss}}
+            self.write_to_pkl(self.analf, anal_dic)
+
     def __train__(self, dic, graph, gpu_num,global_step):
         sess = dic['sess']
         train_step = dic['train_step']
@@ -73,28 +98,18 @@ class CoarseSentiTrain:
         saver = dic['saver']
         early_stop_count = 0
         best_f1_score = 0
-        anal_dic = {}
         print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
+
             dataset = self.dg.data_generator('train')
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
-                data_dict = {'X_data':sentences_data,'Y_att_data':attr_labels_data,
-                             'Y_senti_data':senti_labels_data,'keep_prob':self.train_config['keep_prob_lstm']}
-                feed_dict = self.generate_feed_dict(graph=graph,gpu_num=gpu_num,data_dict=data_dict)
+                data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
+                             'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
+                feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
+                # self.analysis(dic, sess, i, feed_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-            if dic['test_mod'] != 'attr':
-                senti_score_with_inf, senti_score, senti_W, attended_senti_W, item1, A_Vi, item2 =sess.run([tf.get_collection('senti_score_with_inf')[0],
-                                       tf.get_collection('senti_score')[0],
-                                       tf.get_collection('senti_W')[0],
-                                       tf.get_collection('attended_senti_W')[0],
-                                       tf.get_collection('item1')[0],
-                                       tf.get_collection('A_Vi')[0],
-                                       tf.get_collection('item2')[0],],
-                                     feed_dict=feed_dict)
-                senti_coarse_W = sess.run(graph.get_collection('senti_coarse_W'))
-                anal_dic={'%s epoch: %d'%(dic['test_mod'],i):{'senti_W':senti_W,'senti_score_with_inf':senti_score_with_inf}}
-                self.write_to_pkl(self.analf,anal_dic)
+
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
@@ -195,13 +210,13 @@ class CoarseSentiTrain:
             # ##########################
             # train senti (optional)   #
             # ##########################
-            self.mt.report('senti in training')
-            self.mt.report('===========senti============',self.outf,'report')
-            dic['train_step'] = model_dic['train_step']['senti']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
-            dic['test_mod'] = 'senti'
-            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            # self.mt.report('senti in training')
+            # self.mt.report('===========senti============',self.outf,'report')
+            # dic['train_step'] = model_dic['train_step']['senti']
+            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
+            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
+            # dic['test_mod'] = 'senti'
+            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train joint              #

@@ -517,7 +517,7 @@ class SentimentFunction:
                            shape=(-1, self.nn_config['sentiment_num'] * self.nn_config['attributes_num'] + self.nn_config['sentiment_num'], self.nn_config['words_num']))
         # score.shape = (batch size, 3+3*attributes number, number of words)
         score = tf.add(item1, item2)
-        # mask.shape = (batch size, attributes number, words num)
+        # mask.shape = (batch size, 3+3*attributes number, words num)
         mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['sentiment_num'] + self.nn_config['sentiment_num'] * self.nn_config['attributes_num'], 1])
         # eliminate influence of #PAD#
         score = tf.add(score, mask)

@@ -40,6 +40,7 @@ class SentimentNet:
         # shape = (batch size*max review length, words num)
         words_pad_M = self.comm.is_word_padding_input(reshaped_X_ids, self.graph)
         # shape = (batch size*max review length,words num, feature dim)
+        print('lookup table')
         X = self.comm.lookup_table(reshaped_X_ids, words_pad_M, self.table, self.graph)
         lm = LanguageModel(self.nn_config['elmo'], is_training=False)
         with tf.variable_scope('elmo', reuse=tf.AUTO_REUSE):
@@ -47,11 +48,13 @@ class SentimentNet:
             lm_embeddings = lm.bilstm(X,seq_len)
         mask_for_elmo = lm.mask_for_token_ids(reshaped_X_ids)
         # shape = (batch size, max sentence length, 2*lstm dim)
+        print('lm.weight layers')
         X = lm.weight_layers(name='outputs',bilm_ops={'mask':mask_for_elmo,'lm_embeddings':lm_embeddings},reg=self.reg, l2_coef=0.0)
 
         # #################### #
         # attribute extraction #
         # #################### #
+        print('attr')
         with tf.variable_scope('attrExtr', reuse=tf.AUTO_REUSE):
             # lstm
             #with tf.variable_scope('sentence_bilstm', reuse=tf.AUTO_REUSE):
@@ -95,6 +98,7 @@ class SentimentNet:
         # sentiment extraction #
         # #################### #
         # sentiment lstm
+        print('senti')
         with tf.variable_scope('sentiExtr', reuse= tf.AUTO_REUSE):
             # with tf.variable_scope('senti_sentence_bilstm',reuse=tf.AUTO_REUSE):
             # H.shape = (batch size * max review length, max_time, cell size)

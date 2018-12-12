@@ -51,6 +51,7 @@ class SentimentNet:
             # H.shape = (batch size*max review length, max_time, cell size)
             attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, reg=self.reg,graph=self.graph,scope_name='sentiment/attrExtr')
             A, o = self.af.attribute_mat(self.reg,self.graph)
+            tf.add_to_collection('A_mat',A)
             # A.shape = (batch size*max review length, words num, attributes number, attribute dim)
             A_lstm = self.af.words_attribute_mat2vec(attr_H, A, self.graph)
             o_lstm = self.af.words_nonattribute_mat2vec(attr_H, o, self.graph)
@@ -165,7 +166,7 @@ class SentimentNet:
             # mask the situation when attribute doesn't appear
             attr_pred_labels = self.sf.expand_attr_labels(attr_pred_labels,self.graph)
             # score.shape = (batch size, number of attributes+1,3)
-            joint_fine_score = tf.reshape(score, shape=(-1, self.nn_config['coarse_attributes_num'] + 1, self.nn_config['sentiment_num']))
+            joint_fine_score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, self.nn_config['sentiment_num']))
             # in here the mask use predicted attribute label as input. This is different from the above.
             # shape=(batch size, attributes num+1, 3)
             mask = tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3])

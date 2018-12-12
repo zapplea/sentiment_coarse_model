@@ -46,7 +46,8 @@ if __name__ == "__main__":
         'early_stop_limit': float('nan'),
         'with_elmo':True
     }
-
+    # TODO: the problem is that: the attribute mat size and the X from lm.weight_layers have different dims.
+    # TODO: Just need to adjuct the parameters.
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'
 
