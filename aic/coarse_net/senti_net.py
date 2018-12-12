@@ -169,7 +169,7 @@ class SentimentNet:
             joint_fine_score = tf.reshape(score, shape=(-1, self.nn_config['attributes_num'] + 1, self.nn_config['sentiment_num']))
             # in here the mask use predicted attribute label as input. This is different from the above.
             # shape=(batch size, attributes num+1, 3)
-            mask = tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3])
+            mask = tf.tile(tf.expand_dims(Y_att, axis=2), multiples=[1, 1, 3])
             # sahpe = (batch size, coarse attr num + 1, 3)
             joint_coarse_score = tf.multiply(self.sf.coarse_score(joint_fine_score,None,self.graph),mask)
             # softmax loss
@@ -178,7 +178,7 @@ class SentimentNet:
             joint_loss = senti_loss_of_joint
             tf.add_to_collection('joint_loss', joint_loss)
             # TODO: in coarse, should mask the prediction of padded sentences.
-            joint_pred_labels = self.sf.prediction(name='joint_pred_labels',score=joint_coarse_score, Y_att=attr_pred_labels, graph=self.graph)
+            joint_pred_labels = self.sf.prediction(name='joint_pred_labels',score=joint_coarse_score, Y_att=Y_att, graph=self.graph)
 
     @staticmethod
     def build(config):

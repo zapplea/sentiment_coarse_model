@@ -210,13 +210,13 @@ class CoarseSentiTrain:
             # ##########################
             # train senti (optional)   #
             # ##########################
-            # self.mt.report('senti in training')
-            # self.mt.report('===========senti============',self.outf,'report')
-            # dic['train_step'] = model_dic['train_step']['senti']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
-            # dic['test_mod'] = 'senti'
-            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            self.mt.report('senti in training')
+            self.mt.report('===========senti============',self.outf,'report')
+            dic['train_step'] = model_dic['train_step']['senti']
+            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
+            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
+            dic['test_mod'] = 'senti'
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train joint              #
