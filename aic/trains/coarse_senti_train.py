@@ -72,12 +72,15 @@ class CoarseSentiTrain:
                  tf.get_collection('attended_senti_W')[0],
                  tf.get_collection('item1')[0],
                  tf.get_collection('A_Vi')[0],
-                 tf.get_collection('item2')[0], ],
+                 tf.get_collection('item2')[0],],
                 feed_dict=feed_dict)
             senti_coarse_W = sess.run(tf.get_collection('senti_coarse_W'))
             A_mat = sess.run(tf.get_collection('A_mat')[0])
             joint_loss = sess.run(tf.get_collection('joint_loss')[0],feed_dict=feed_dict)
-            anal_dic = {'%s epoch: %d' % (dic['test_mod'], i): {'senti_W': senti_W,
+            attr_pred_labels_with_nonattr = sess.run(tf.get_collection('attr_pred_labels_with_nonattr')[0],feed_dict=feed_dict)
+            joint_coarse_score = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
+            anal_dic = {'%s epoch: %d' % (dic['test_mod'], i): {'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
+                                                                'senti_W': senti_W,
                                                                 'senti_score_with_inf': senti_score_with_inf,
                                                                 'attended_senti_W': attended_senti_W,
                                                                 'item1': item1,
@@ -85,7 +88,8 @@ class CoarseSentiTrain:
                                                                 'item2': item2,
                                                                 'senti_coarse_W': senti_coarse_W,
                                                                 'A_mat': A_mat,
-                                                                'joint_loss':joint_loss}}
+                                                                'joint_loss':joint_loss,
+                                                                'joint_coarse_score':joint_coarse_score}}
             self.write_to_pkl(self.analf, anal_dic)
 
     def __train__(self, dic, graph, gpu_num,global_step):
@@ -102,15 +106,19 @@ class CoarseSentiTrain:
         for i in range(self.train_config['epoch']):
 
             dataset = self.dg.data_generator('train')
+            count = 0
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 # print('analysis')
-                # self.analysis(dic, sess, i, feed_dict)
+                self.analysis(dic, sess, i, feed_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-
+                if count == 20:
+                    exit()
+                else:
+                    count+=1
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
