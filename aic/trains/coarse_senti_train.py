@@ -76,7 +76,7 @@ class CoarseSentiTrain:
                 feed_dict=feed_dict)
             senti_coarse_W = sess.run(tf.get_collection('senti_coarse_W'))
             A_mat = sess.run(tf.get_collection('A_mat')[0])
-            joint_loss = sess.run(tf.get_collection('joint_loss')[0])
+            joint_loss = sess.run(tf.get_collection('joint_loss')[0],feed_dict=feed_dict)
             anal_dic = {'%s epoch: %d' % (dic['test_mod'], i): {'senti_W': senti_W,
                                                                 'senti_score_with_inf': senti_score_with_inf,
                                                                 'attended_senti_W': attended_senti_W,
