@@ -106,7 +106,8 @@ class CoarseSentiTrain:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
-                self.analysis(dic, sess, i, feed_dict)
+                print('analysis')
+                # self.analysis(dic, sess, i, feed_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
 
@@ -199,13 +200,13 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            # self.mt.report('attr in training')
-            # self.mt.report('===========attr============',self.outf,'report')
-            # dic['train_step'] = model_dic['train_step']['attr']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            # dic['test_mod'] = 'attr'
-            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            self.mt.report('attr in training')
+            self.mt.report('===========attr============',self.outf,'report')
+            dic['train_step'] = model_dic['train_step']['attr']
+            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['test_mod'] = 'attr'
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
