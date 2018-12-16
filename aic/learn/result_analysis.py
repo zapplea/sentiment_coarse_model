@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # new_pickle(anal_filePath,newpkl_filePath)
     dic = load(newpkl_filePath)
     s = '%s epoch: %d'
-    keys = [s%('joint',0)]
+    keys = [s%('joint',0),s%('joint',1),s%('joint',2),s%('joint',3)]
     for key in keys:
         ls = key.split(' ')
         out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%'_'.join([ls[0],ls[2]])
