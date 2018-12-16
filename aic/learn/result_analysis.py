@@ -33,11 +33,11 @@ def analysis(dic,key,out_filePath):
 
 if __name__ == "__main__":
     newpkl_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/newpkl_reg1e-06_lr0.001_mat5.info'
-    anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-06_lr0.001_mat5.info'
-    new_pickle(anal_filePath,newpkl_filePath)
-    # dic = load(newpkl_filePath)
-    # s = '%s epoch: %d'
-    # keys = [s%('joint',0)]
-    # for key in keys:
-    #     out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result(%s).txt'%key
-    #     analysis(dic,key,out_filePath)
+    # anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-06_lr0.001_mat5.info'
+    # new_pickle(anal_filePath,newpkl_filePath)
+    dic = load(newpkl_filePath)
+    s = '%s epoch: %d'
+    keys = [s%('joint',0)]
+    for key in keys:
+        out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result(%s).txt'%key
+        analysis(dic,key,out_filePath)
