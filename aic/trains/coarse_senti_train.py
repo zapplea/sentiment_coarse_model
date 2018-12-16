@@ -115,7 +115,7 @@ class CoarseSentiTrain:
                     self.analysis(dic, sess, count, feed_dict)
                     if count==76:
                         exit()
-                    count+=1
+                count+=1
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
 
@@ -200,6 +200,7 @@ class CoarseSentiTrain:
             if not self.train_config['is_restore']:
                 sess.run(init, feed_dict={table: table_data})
             else:
+                print('initial path: %s'%self.train_config['initial_path'])
                 model_file = tf.train.latest_checkpoint(self.train_config['initial_path'])
                 model_dic['saver'].restore(sess, model_file)
             # if self.train_config['init_model']:
