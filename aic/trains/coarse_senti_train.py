@@ -202,7 +202,11 @@ class CoarseSentiTrain:
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         with tf.Session(graph=graph, config=config) as sess:
-            sess.run(init, feed_dict={table: table_data})
+            if not self.train_config['is_restore']:
+                sess.run(init, feed_dict={table: table_data})
+            else:
+                model_file = tf.train.latest_checkpoint(self.train_config['initial_path'])
+                model_dic['saver'].restore(sess, model_file)
             # if self.train_config['init_model']:
             #     # model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
             #     # saver.restore(sess, model_path)
