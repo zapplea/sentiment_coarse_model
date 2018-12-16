@@ -39,5 +39,6 @@ if __name__ == "__main__":
     s = '%s epoch: %d'
     keys = [s%('joint',0)]
     for key in keys:
-        out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result(%s).txt'%key
+        ls = key.split(' ')
+        out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%'_'.join([ls[0],ls[2]])
         analysis(dic,key,out_filePath)
