@@ -112,7 +112,7 @@ class CoarseSentiTrain:
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 # print('analysis')
                 if dic['test_mod'] != 'attr':
-                    self.analysis(dic, sess, i, feed_dict)
+                    self.analysis(dic, sess, count, feed_dict)
                     if count==20:
                         exit()
                     count+=1

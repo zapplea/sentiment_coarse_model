@@ -7,6 +7,7 @@ def new_pickle(in_filePath,out_filePath):
             try:
                 data = pickle.load(f)
                 for key in data:
+                    print(key)
                     dic[key]=data[key]
             except Exception:
                 break
