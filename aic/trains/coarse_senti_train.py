@@ -111,13 +111,18 @@ class CoarseSentiTrain:
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 # print('analysis')
-                if dic['test_mod'] != 'attr':
-                    self.analysis(dic, sess, count, feed_dict)
-                    if count==20:
-                        exit()
-                    count+=1
+                # if dic['test_mod'] != 'attr':
+                #     self.analysis(dic, sess, count, feed_dict)
+                #     if count==20:
+                #         exit()
+                #     count+=1
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
+                if np.isnan(senti_train_loss):
+                    print('batch No.: %d'%count)
+                    exit()
+                else:
+                    count+=1
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
