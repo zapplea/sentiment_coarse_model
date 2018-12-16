@@ -32,8 +32,8 @@ def analysis(dic,key,out_filePath):
     # TODO: two ways to check 1. change attr pred labe to Y_att in joint 2. eliminate step2, only preserve step1 and 3.
 
 if __name__ == "__main__":
-    newpkl_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/newpkl_reg1e-05_lr0.001_mat5.info'
-    anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-05_lr0.001_mat5.info'
+    newpkl_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/newpkl_reg1e-06_lr0.001_mat5.info'
+    anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-06_lr0.001_mat5.info'
     new_pickle(anal_filePath,newpkl_filePath)
     # dic = load(newpkl_filePath)
     # s = '%s epoch: %d'
