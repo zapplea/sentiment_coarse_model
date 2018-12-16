@@ -15,8 +15,11 @@ def new_pickle(in_filePath,out_filePath):
                     count+=1
             except Exception:
                 break
+    print('load successfully')
     with open(out_filePath,'wb') as f:
         pickle.dump(dic,f)
+        f.flush()
+        print('dump successfully')
 
 def load(filePath):
     with open(filePath,'rb') as f:
