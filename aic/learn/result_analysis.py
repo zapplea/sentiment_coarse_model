@@ -9,9 +9,9 @@ def new_pickle(in_filePath,out_filePath):
                 data = pickle.load(f)
                 for key in data:
                     ls = key.split()
-                    key = ' '.join([ls[0],ls[1],str(count)])
-                    print(key)
-                    dic[key]=data[key]
+                    new_key = ' '.join([ls[0],ls[1],str(count)])
+                    print(new_key)
+                    dic[new_key]=data[key]
                     count+=1
             except Exception:
                 break
