@@ -6,9 +6,13 @@ def new_pickle(in_filePath,out_filePath):
         while True:
             try:
                 data = pickle.load(f)
+                count = 0
                 for key in data:
+                    ls = key.split()
+                    key = ' '.join([ls[0],ls[1],str(count)])
                     print(key)
                     dic[key]=data[key]
+                    count+=1
             except Exception:
                 break
     with open(out_filePath,'wb') as f:
