@@ -45,8 +45,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--mod',type=str,default='new')
     args = parser.parse_args()
-    newpkl_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/newpkl_reg1e-06_lr0.001_mat5.info'
-    anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-06_lr0.001_mat5.info'
+    newpkl_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/newpkl_reg1e-05_lr0.001_mat5.info'
+    anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-05_lr0.001_mat5.info'
     if args.mod == "new":
         new_pickle(anal_filePath,newpkl_filePath)
     else:
