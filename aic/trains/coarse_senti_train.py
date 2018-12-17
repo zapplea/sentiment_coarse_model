@@ -95,6 +95,7 @@ class CoarseSentiTrain:
         if np.isnan(joint_loss):
             for dic in result_ls:
                 self.write_to_pkl(self.analf, dic)
+            exit()
 
     def __train__(self, dic, graph, gpu_num,global_step):
         sess = dic['sess']
