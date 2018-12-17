@@ -48,11 +48,6 @@ if __name__ == "__main__":
         new_pickle(anal_filePath,newpkl_filePath)
     else:
         dic = load(newpkl_filePath)
-        s = '%s epoch: %d'
-        keys = []
-        for i in range(205,214):
-            keys.append(s%('joint',i))
-        for key in keys:
-            ls = key.split(' ')
-            out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%'_'.join([ls[0],ls[2]])
+        for key in dic:
+            out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%key
             analysis(dic,key,out_filePath)

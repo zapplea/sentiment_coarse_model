@@ -78,7 +78,7 @@ class CoarseSentiTrain:
         A_mat = sess.run(tf.get_collection('A_mat')[0])
         attr_pred_labels_with_nonattr = sess.run(tf.get_collection('attr_pred_labels_with_nonattr')[0],feed_dict=feed_dict)
         joint_coarse_score = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
-        anal_dic = {'%s epoch: %d' % (dic['test_mod'], i): {'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
+        anal_dic = {'%s_%d' % (dic['test_mod'], i): {'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
                                                             'senti_W': senti_W,
                                                             'senti_score_with_inf': senti_score_with_inf,
                                                             'attended_senti_W': attended_senti_W,
