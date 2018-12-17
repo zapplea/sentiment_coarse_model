@@ -191,7 +191,7 @@ class CoarseSentiTrain:
         graph = model_dic['graph']
         with graph.as_default():
             if self.train_config['is_restore']:
-                loader = tf.train.import_meta_graph(self.train_config['sr_path'] + '.meta')
+                loader = tf.train.import_meta_graph(self.train_config['initial_path'] + 'model.meta')
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
         table_data = self.dg.table
