@@ -95,11 +95,12 @@ class CoarseSentiTrain:
             result_ls.pop(0)
         for key in anal_dic:
             data = anal_dic[key]
-            if np.any(np.isnan(data)):
-                print('NaN batch No.: %d'%i)
-                for dic in result_ls:
-                    self.write_to_pkl(self.analf, dic)
-                exit()
+            for dkey in data:
+                if np.any(np.isnan(data[dkey])):
+                    print('NaN batch No.: %d'%i)
+                    for dic in result_ls:
+                        self.write_to_pkl(self.analf, dic)
+                    exit()
 
     def __train__(self, dic, graph, gpu_num,global_step):
         sess = dic['sess']
