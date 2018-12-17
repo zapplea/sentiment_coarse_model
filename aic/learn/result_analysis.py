@@ -50,7 +50,7 @@ if __name__ == "__main__":
         dic = load(newpkl_filePath)
         s = '%s epoch: %d'
         keys = []
-        for i in range(65,77):
+        for i in range(205,214):
             keys.append(s%('joint',i))
         for key in keys:
             ls = key.split(' ')
