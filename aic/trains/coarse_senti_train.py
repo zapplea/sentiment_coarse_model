@@ -190,6 +190,8 @@ class CoarseSentiTrain:
     def train(self,model_dic):
         graph = model_dic['graph']
         with graph.as_default():
+            if self.train_config['is_restore']:
+                loader = tf.train.import_meta_graph(self.train_config['sr_path'] + '.meta')
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
         table_data = self.dg.table
@@ -202,12 +204,12 @@ class CoarseSentiTrain:
             else:
                 print('initial path: %s'%self.train_config['initial_path'])
                 model_file = tf.train.latest_checkpoint(self.train_config['initial_path'])
-                model_dic['saver'].restore(sess, model_file)
+                loader.restore(sess, model_file)
             # if self.train_config['init_model']:
             #     # model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
             #     # saver.restore(sess, model_path)
             #     print("sucess init %s" % self.train_config['init_model'])
-            dic = {'sess': sess, 'saver': model_dic['saver']}
+            dic = {'sess': sess, 'saver': model_dic['saver'], 'global_step':global_step}
 
             # ##############
             # train attr   #
