@@ -79,7 +79,8 @@ class DataFeeder():
         """
         assert len(a) == len(b)
         assert len(a) == len(c)
-        p = np.random.permutation(len(a))
+        # p = np.random.permutation(len(a))
+        p = np.arange(len(a))
         return a[p], b[p], c[p]
 
     def load_train_data(self):
