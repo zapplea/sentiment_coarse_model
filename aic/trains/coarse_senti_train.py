@@ -207,7 +207,7 @@ class CoarseSentiTrain:
             #     # model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
             #     # saver.restore(sess, model_path)
             #     print("sucess init %s" % self.train_config['init_model'])
-            dic = {'sess': sess, 'saver': model_dic['saver'], 'global_step':global_step}
+            dic = {'sess': sess, 'saver': model_dic['saver']}
 
             # ##############
             # train attr   #
