@@ -111,14 +111,18 @@ class CoarseSentiTrain:
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 # print('analysis')
-                if dic['test_mod'] != 'attr' and count in range(65,77):
-                    self.analysis(dic, sess, count, feed_dict)
-                    print('batch No.: %d'%count)
-                    if count==76:
-                        exit()
+                # if dic['test_mod'] != 'attr' and count in range(65,77):
+                #     self.analysis(dic, sess, count, feed_dict)
+                #     print('batch No.: %d'%count)
+                #     if count==76:
+                #         exit()
+
                 count+=1
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
+                if np.isnan(senti_train_loss):
+                    print('batch No.: %d'%count)
+                    exit()
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
@@ -213,14 +217,14 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            if not self.train_config['is_restore']:
-                self.mt.report('attr in training')
-                self.mt.report('===========attr============',self.outf,'report')
-                dic['train_step'] = model_dic['train_step']['attr']
-                dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-                dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-                dic['test_mod'] = 'attr'
-                self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            # if not self.train_config['is_restore']:
+            #     self.mt.report('attr in training')
+            #     self.mt.report('===========attr============',self.outf,'report')
+            #     dic['train_step'] = model_dic['train_step']['attr']
+            #     dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            #     dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            #     dic['test_mod'] = 'attr'
+            #     self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
