@@ -78,6 +78,7 @@ class CoarseSentiTrain:
         attr_pred_labels_with_nonattr = sess.run(tf.get_collection('attr_pred_labels_with_nonattr')[0],feed_dict=feed_dict)
         senti_W_attention = sess.run(tf.get_collection('senti_W_attention')[0],feed_dict=feed_dict)
         joint_coarse_score = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
+
         anal_dic = {'%s_%d' % (dic['test_mod'], i): {'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
                                                      'senti_W': senti_W,
                                                      'senti_W_attention': senti_W_attention,
@@ -92,11 +93,13 @@ class CoarseSentiTrain:
         result_ls.append(anal_dic)
         if len(result_ls)>=10:
             result_ls.pop(0)
-        if np.isnan(joint_loss):
-            print('NaN batch No.: %d'%i)
-            for dic in result_ls:
-                self.write_to_pkl(self.analf, dic)
-            exit()
+        for key in anal_dic:
+            data = anal_dic[key]
+            if np.any(np.isnan(data)):
+                print('NaN batch No.: %d'%i)
+                for dic in result_ls:
+                    self.write_to_pkl(self.analf, dic)
+                exit()
 
     def __train__(self, dic, graph, gpu_num,global_step):
         sess = dic['sess']
