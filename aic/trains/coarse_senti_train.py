@@ -93,6 +93,7 @@ class CoarseSentiTrain:
         if len(result_ls)>=10:
             result_ls.pop(0)
         if np.isnan(joint_loss):
+            print('batch No.: %d'%i)
             for dic in result_ls:
                 self.write_to_pkl(self.analf, dic)
             exit()
