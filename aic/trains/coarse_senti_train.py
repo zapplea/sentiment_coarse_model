@@ -113,6 +113,7 @@ class CoarseSentiTrain:
                 # print('analysis')
                 if dic['test_mod'] != 'attr' and count in range(65,77):
                     self.analysis(dic, sess, count, feed_dict)
+                    print('batch No.: %d'%count)
                     if count==76:
                         exit()
                 count+=1

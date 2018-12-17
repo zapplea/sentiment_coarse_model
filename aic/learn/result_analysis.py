@@ -11,9 +11,6 @@ def new_pickle(in_filePath,out_filePath):
                 for key in data:
                     print(key)
                     dic[key]=data[key]
-                    count+=1
-                if count == 10:
-                    break
             except Exception:
                 break
     print('load successfully')
