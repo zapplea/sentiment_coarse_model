@@ -34,6 +34,8 @@ def analysis(dic,key,out_filePath):
         data = dic[key]
         for key in data:
             write(outfile,key+':\n'+str(data[key])+'\n')
+            outfile.flush()
+            print(key)
     # TODO: whether the nan is caused by non-attribute.
     # TODO: check each operation, to see whether they get the expected value.
     # TODO: whehter it is caused by softmax loss when all label is 0
@@ -50,6 +52,7 @@ if __name__ == "__main__":
         new_pickle(anal_filePath,newpkl_filePath)
     else:
         dic = load(newpkl_filePath)
+        print(dic.keys())
         for key in dic:
             out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%key
             analysis(dic,key,out_filePath)
