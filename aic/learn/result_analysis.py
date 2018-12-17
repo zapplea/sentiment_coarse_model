@@ -52,7 +52,9 @@ if __name__ == "__main__":
     else:
         dic = load(newpkl_filePath)
         s = '%s epoch: %d'
-        keys = [s%('joint',0),s%('joint',1),s%('joint',2),s%('joint',3)]
+        keys = []
+        for i in range(65,77):
+            keys.append(s%('joint',i))
         for key in keys:
             ls = key.split(' ')
             out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%'_'.join([ls[0],ls[2]])
