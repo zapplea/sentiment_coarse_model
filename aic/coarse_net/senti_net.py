@@ -89,6 +89,7 @@ class SentimentNet:
             # with tf.variable_scope('senti_sentence_bilstm',reuse=tf.AUTO_REUSE):
             # H.shape = (batch size * max review length, max_time, cell size)
             senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, graph=self.graph, scope_name='sentiment/sentiExtr')
+            tf.add_to_collection('senti_H',senti_H)
 
             # Y_senti.shape = [batch_size, number of attributes + 1, 3]
             Y_senti = self.comm.sentiment_labels_input(graph=self.graph)
@@ -100,6 +101,7 @@ class SentimentNet:
             extors_mat = self.sf.senti_extors_mat(self.graph)
             # extors_mask_mat.shape = (3*attributes number+3, sentiment prototypes number)
             extors_mask_mat = self.sf.extors_mask(extors=extors_mat, graph=self.graph)
+            tf.add_to_collection('extors_mask_mat',extors_mask_mat)
             # relative position matrix
             V = self.sf.relative_pos_matrix(self.reg,self.graph)
             # relative position ids
@@ -112,7 +114,9 @@ class SentimentNet:
             tf.add_to_collection('senti_W',W)
             # shape = (batch size*max review length, number of words, 3+3*attributes number, number of sentiment prototypes)
             attention = self.sf.sentiment_attention(senti_H, W, extors_mask_mat, self.graph)
+            tf.add_to_collection('senti_W_attention',attention)
             # attended_W.shape = (batch size*max review length,number of words, 3+3*attributes number, sentiment dim)
+            # TODO: find NaN in here
             attended_W = self.sf.attended_sentiment(W, attention, self.graph)
             tf.add_to_collection('attended_senti_W',attended_W)
             # shape = (batch size*max review length,number of words, 3+3*attributes number)
@@ -134,6 +138,7 @@ class SentimentNet:
             # mask for score to eliminate the influence of padding word
             mask = self.sf.mask_for_pad_in_score(X_ids, self.graph)
             # senti_socre.shape = (batch size, 3*number of attributes+3, words num)
+            # TODO: the nan is from here, it get nan very early.
             score = self.sf.score(item1, item2, mask, self.graph)
             tf.add_to_collection('senti_score_with_inf', score)
             # score.shape = (batch size, 3*number of attributes+3)
@@ -171,6 +176,7 @@ class SentimentNet:
             # in here the mask use predicted attribute label as input. This is different from the above.
             # shape=(batch size, attributes num+1, 3)
             mask = tf.tile(tf.expand_dims(attr_pred_labels, axis=2), multiples=[1, 1, 3])
+            tf.add_to_collection('mask_of_joint',mask)
             # sahpe = (batch size, coarse attr num + 1, 3)
             joint_coarse_score = tf.multiply(self.sf.coarse_score(joint_fine_score,None,self.graph),mask)
             tf.add_to_collection('joint_coarse_score',joint_coarse_score)

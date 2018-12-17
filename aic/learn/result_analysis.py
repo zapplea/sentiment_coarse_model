@@ -1,5 +1,7 @@
 import pickle
 import argparse
+import numpy as np
+np.set_printoptions(threshold=np.inf)
 
 def new_pickle(in_filePath,out_filePath):
     dic = {}
