@@ -93,9 +93,9 @@ class FineCommFunction:
         # outputs.shape = (batch size, max time step, lstm cell size)
         outputs = tf.concat(outputs, axis=2, name='bilstm_outputs')
         reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/fw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/fw/lstm_cell/kernel:0')))
         reg[name].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(
-                                    graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/bw/basic_lstm_cell/kernel:0')))
+                                    graph.get_tensor_by_name(scope_name+'/bidirectional_rnn/bw/lstm_cell/kernel:0')))
         return outputs
 
     # def optimizer(self, loss, graph):
