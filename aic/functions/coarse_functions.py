@@ -338,7 +338,7 @@ class SentimentFunction:
 
         # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
         denominator = tf.reduce_sum(temp, axis=3, keepdims=True)
-
+        tf.add_to_collection('denominator',denominator)
         denominator = tf.tile(denominator, multiples=[1, 1, 1,
                                                       self.nn_config['normal_senti_prototype_num'] * self.nn_config['sentiment_num'] +
                                                       self.nn_config['attribute_senti_prototype_num'] * self.nn_config[

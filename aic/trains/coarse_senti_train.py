@@ -97,7 +97,7 @@ class CoarseSentiTrain:
                                                      # 'joint_coarse_score':joint_coarse_score,
                                                      }}
         result_ls.append(anal_dic)
-        if len(result_ls)>=4:
+        if len(result_ls)>=2:
             result_ls.pop(0)
         for key in anal_dic:
             data = anal_dic[key]
