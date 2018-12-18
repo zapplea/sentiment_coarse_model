@@ -65,6 +65,21 @@ def sentiment_attention(H, W, mask,):
     # H.shape = (batch size, number of words, lstm cell size)
     # W.shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size)
     # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
+    print('H shape: ',H.shape)
+    print('W shape: ',W.shape)
+    print('H is inf: ',np.any(np.isinf(H)))
+    print('W is inf: ',np.any(np.isinf(W)))
+    check_temp1 = np.tensordot(H, W,axes=[[-1],[-1]])
+    for i in range(check_temp1.shape[0]):
+        for j in range(check_temp1.shape[1]):
+            for m in range(check_temp1.shape[2]):
+                for l in range(check_temp1.shape[3]):
+                    if np.isinf(np.exp(check_temp1[i,j,m,l]-30)):
+                        print('check_temp1 inf: ',check_temp1[i,j,m,l])
+                        print(np.exp(check_temp1[i,j,m,l]))
+                        exit()
+    check_temp = np.exp(check_temp1)
+    print('check temp is inf: ',np.any(np.isinf(check_temp)))
     temp = np.multiply(mask, np.exp(np.tensordot(H, W,axes=[[-1],[-1]])))
 
     # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
@@ -72,7 +87,19 @@ def sentiment_attention(H, W, mask,):
     denominator = np.tile(denominator, reps=[1, 1, 1,
                                              4 * 3 +
                                              4 * 20])
+    print('denominator isnan:',np.any(np.isnan(denominator)))
+    for i in range(denominator.shape[0]):
+        for j in range(denominator.shape[1]):
+            for m in range(denominator.shape[2]):
+                for l in range(denominator.shape[3]):
+                    result = temp[i,j,m,l]/denominator[i,j,m,l]
+                    if np.isnan(result):
+                        print('[%d, %d, %d, %d]'%(i,j,m,l))
+                        print('temp: ',temp[i,j,m,l])
+                        print('denominator: ',denominator[i,j,m,l])
+                        exit()
     attention = np.true_divide(temp, denominator)
+    print('attention isnan: ',np.any(np.isnan(attention)))
     print('attention shape: ',attention.shape)
     return attention
 
@@ -97,6 +124,7 @@ if __name__ == "__main__":
             out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%key
             analysis(dic,key,out_filePath)
     elif args.mod == 'anal2':
+        newpkl_filePath = '/home/yibing/report/12.18/newpkl_reg1e-05_lr0.001_mat5.info'
         dic = load(newpkl_filePath)
         print('length of dic: %d'%len(dic))
         for key in dic:

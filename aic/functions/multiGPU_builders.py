@@ -5,6 +5,7 @@ class SentiNetBuilder:
         self.nn_config = {
             'words_num': 210,
             'lstm_cell_size': 300,
+            'cell_clip': 3.0,
             'word_dim': 300,
             'attribute_dim': 300,
             'lookup_table_words_num': 116141,  # 34934,2074276 for Chinese word embedding
