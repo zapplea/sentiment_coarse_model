@@ -44,6 +44,44 @@ def analysis(dic,key,out_filePath):
     # TODO: the "senti_W_attention" get nan at first, so let's check which value lead to this.
     # highlight: batch No. 75 lead to nan
 
+def sentiment_attention(H, W, mask,):
+    """
+    :param H: shape = (batch size, number of words, lstm cell size)
+    :param W: shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size). 3*attribute numbers is
+    3 sentiment for each attributes; 3 is sentiment for non-attribute entity, it only has normal sentiment, not attribute
+    specific sentiment.
+    :param mask: mask to eliminate influence of 0; (3*attributes number+3, number of sentiment expression prototypes)
+    :return: shape = (batch size,number of words, 3+3*attributes number, number of sentiment prototypes).
+    """
+    # # H.shape = (batch size, words num, 3+3*attributes number, word dim)
+    # H = tf.tile(tf.expand_dims(H, axis=2), multiples=[1, 1, self.nn_config['sentiment_num'] * self.nn_config[
+    #     'attributes_num'] + self.nn_config['sentiment_num'], 1])
+    # # H.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes, word dim)
+    # H = tf.tile(tf.expand_dims(H, axis=3), multiples=[1, 1, 1, self.nn_config['normal_senti_prototype_num'] * self.nn_config['sentiment_num'] +
+    #                                                   self.nn_config['attribute_senti_prototype_num'] *
+    #                                                   self.nn_config['attributes_num'],
+    #                                                   1])
+
+    # H.shape = (batch size, number of words, lstm cell size)
+    # W.shape = (3*attribute numbers + 3,number of sentiment prototypes, lstm cell size)
+    # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
+    temp = np.multiply(mask, np.exp(np.tensordot(H, W,axes=[[-1],[-1]])))
+
+    # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
+    denominator = np.sum(temp, axis=3, keepdims=True)
+    denominator = np.tile(denominator, reps=[1, 1, 1,
+                                             4 * 3 +
+                                             4 * 20])
+    attention = np.true_divide(temp, denominator)
+    print('attention shape: ',attention.shape)
+    return attention
+
+def analysis2(dic):
+    H = dic['senti_H']
+    mask = dic['extors_mask_mat']
+    W = dic['senti_W']
+    attention = sentiment_attention(H,W,mask)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--mod',type=str,default='new')
@@ -52,9 +90,15 @@ if __name__ == "__main__":
     anal_filePath = '/datastore/liu121/sentidata2/report/coarse_nn/analysis_reg1e-05_lr0.001_mat5.info'
     if args.mod == "new":
         new_pickle(anal_filePath,newpkl_filePath)
-    else:
+    elif args.mod == 'anal':
         dic = load(newpkl_filePath)
         print(dic.keys())
         for key in dic:
             out_filePath ='/datastore/liu121/sentidata2/report/coarse_nn/result_%s.txt'%key
             analysis(dic,key,out_filePath)
+    elif args.mod == 'anal2':
+        dic = load(newpkl_filePath)
+        print('length of dic: %d'%len(dic))
+        for key in dic:
+            data = dic[key]
+            analysis2(data)
