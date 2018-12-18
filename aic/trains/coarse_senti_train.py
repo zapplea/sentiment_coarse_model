@@ -78,18 +78,24 @@ class CoarseSentiTrain:
         attr_pred_labels_with_nonattr = sess.run(tf.get_collection('attr_pred_labels_with_nonattr')[0],feed_dict=feed_dict)
         senti_W_attention = sess.run(tf.get_collection('senti_W_attention')[0],feed_dict=feed_dict)
         joint_coarse_score = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
+        senti_H = sess.run(tf.get_collection('senti_H')[0],feed_dict=feed_dict)
+        extors_mask_mat = sess.run(tf.get_collection('extors_mask_mat')[0])
 
-        anal_dic = {'%s_%d' % (dic['test_mod'], i): {'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
+        anal_dic = {'%s_%d' % (dic['test_mod'], i): {
+                                                     # 'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
+                                                     'senti_H': senti_H,
+                                                     'extors_mask_mat':extors_mask_mat,
                                                      'senti_W': senti_W,
                                                      'senti_W_attention': senti_W_attention,
-                                                     'attended_senti_W': attended_senti_W,
-                                                     'senti_score_with_inf': senti_score_with_inf,
-                                                     'item1': item1,
-                                                     'A_Vi': A_Vi,
-                                                     'item2': item2,
-                                                     'senti_coarse_W': senti_coarse_W,
-                                                     'joint_loss':joint_loss,
-                                                     'joint_coarse_score':joint_coarse_score,}}
+                                                     # 'attended_senti_W': attended_senti_W,
+                                                     # 'senti_score_with_inf': senti_score_with_inf,
+                                                     # 'item1': item1,
+                                                     # 'A_Vi': A_Vi,
+                                                     # 'item2': item2,
+                                                     # 'senti_coarse_W': senti_coarse_W,
+                                                     # 'joint_loss':joint_loss,
+                                                     # 'joint_coarse_score':joint_coarse_score,
+                                                     }}
         result_ls.append(anal_dic)
         if len(result_ls)>=4:
             result_ls.pop(0)

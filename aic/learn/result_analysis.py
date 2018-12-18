@@ -33,13 +33,15 @@ def analysis(dic,key,out_filePath):
     with open(out_filePath,'w+') as outfile:
         data = dic[key]
         for key in data:
-            write(outfile,key+':\n'+str(data[key])+'\n')
+            write(outfile,key+'_'+str(data[key].shape)+':\n'+str(data[key])+'\n')
             outfile.flush()
             print(key)
     # TODO: whether the nan is caused by non-attribute.
     # TODO: check each operation, to see whether they get the expected value.
     # TODO: whehter it is caused by softmax loss when all label is 0
     # TODO: two ways to check 1. change attr pred labe to Y_att in joint 2. eliminate step2, only preserve step1 and 3.
+    # TODO: cancel the others just presever the one which lead to nan at first
+    # TODO: the "senti_W_attention" get nan at first, so let's check which value lead to this.
     # highlight: batch No. 75 lead to nan
 
 if __name__ == "__main__":
