@@ -54,15 +54,23 @@ def few_shot(infile,outfile, k_shot,mod):
         freq = []
         for i in range(20):
             freq.append(0)
+        non_attr_freq=0
         for attr,senti,sentence in zip(attr_labels,senti_labels,sentences):
-            if np.any(np.logical_and(np.equal(attr,1),np.less_equal(freq,k_shot))):
+            if np.any(np.logical_and(np.equal(attr,1),np.less(freq,k_shot))):
                 shotted_attr_labels.append(attr)
                 shotted_senti_labels.append(senti)
                 shotted_sentences.append(sentence)
                 for i in range(20):
                     if attr[i] == 1:
                         freq[i] += 1
-            if np.all(np.greater(freq,k_shot)):
+            elif not np.any(np.equal(attr,1)):
+                if np.less(non_attr_freq,k_shot):
+                    shotted_attr_labels.append(attr)
+                    shotted_senti_labels.append(senti)
+                    shotted_sentences.append(sentence)
+                    non_attr_freq+=1
+
+            if np.all(np.greater_equal(freq,k_shot)) and np.greater_equal(non_attr_freq,k_shot):
                 print('break')
                 break
 
