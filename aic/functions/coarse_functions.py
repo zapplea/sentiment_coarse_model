@@ -334,7 +334,7 @@ class SentimentFunction:
         #                                                   self.nn_config['attributes_num'],
         #                                                   1])
         # temp.shape = (batch size, words num, 3+3*attributes number, sentiment prototypes num)
-        temp = tf.multiply(mask, tf.exp(tf.tensordot(H, W,axes=[[-1],[-1]])))
+        temp = tf.multiply(mask, tf.exp(tf.clip_by_value(tf.tensordot(H, W,axes=[[-1],[-1]]),clip_value_max=tf.constant(self.nn_config['clip_value']))))
 
         # denominator.shape = (batch size, words num, 3+3*attributes number, 1)
         denominator = tf.reduce_sum(temp, axis=3, keepdims=True)
