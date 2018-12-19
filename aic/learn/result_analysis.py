@@ -74,9 +74,10 @@ def sentiment_attention(H, W, mask,):
         for j in range(check_temp1.shape[1]):
             for m in range(check_temp1.shape[2]):
                 for l in range(check_temp1.shape[3]):
-                    if np.isinf(np.exp(check_temp1[i,j,m,l]-30)):
+                    if np.isinf(np.exp(check_temp1[i,j,m,l])):
                         print('check_temp1 inf: ',check_temp1[i,j,m,l])
                         print(np.exp(check_temp1[i,j,m,l]))
+                        print(np.exp(5))
                         exit()
     check_temp = np.exp(check_temp1)
     print('check temp is inf: ',np.any(np.isinf(check_temp)))
