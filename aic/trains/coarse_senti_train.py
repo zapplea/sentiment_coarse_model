@@ -127,8 +127,8 @@ class CoarseSentiTrain:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
-                # if dic['test_mod'] != 'attr':
-                #     self.analysis(dic, sess, count, feed_dict,result_ls)
+                if dic['test_mod'] != 'attr':
+                    self.analysis(dic, sess, count, feed_dict,result_ls)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 count += 1
