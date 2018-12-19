@@ -77,6 +77,7 @@ def few_shot(infile,outfile, k_shot,mod):
         senti_labels = np.array(shotted_senti_labels,dtype='int32')
         attr_labels = np.array(shotted_attr_labels, dtype='int32')
         sentences = np.array(shotted_sentences,dtype='int32')
+        freq.append(non_attr_freq)
         print('freq:\n%s\n%s'%(str(np.sum(freq)),str(freq)))
         print('senti labels shape: ',senti_labels.shape)
         print('attr labels shape: ',attr_labels.shape)
@@ -153,7 +154,7 @@ if __name__=='__main__':
 
     if args.fmod == 'few_shot':
         if args.cmod == 'coarse':
-            # few_shot(path['coarse_train_in'], path['coarse_train_out'], args.trf, mod='train')
+            few_shot(path['coarse_train_in'], path['coarse_train_out'], args.trf, mod='train')
             few_shot(path['coarse_test_in'], path['coarse_test_out'], args.tef, mod='test')
         else:
             few_shot(path['fine_train_in'], path['fine_train_out'], args.trf, mod='train')
