@@ -64,6 +64,8 @@ def few_shot(infile,outfile, k_shot,mod):
                 print(count)
                 if count_total !=count:
                     print('not equal')
+                    print(np.equal(attr,1))
+                    print(np.any(np.equal(attr,1)))
                     exit()
                 shotted_attr_labels.append(attr)
                 shotted_senti_labels.append(senti)
