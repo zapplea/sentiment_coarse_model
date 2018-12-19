@@ -226,14 +226,14 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            if not self.train_config['is_restore']:
-                self.mt.report('attr in training')
-                self.mt.report('===========attr============',self.outf,'report')
-                dic['train_step'] = model_dic['train_step']['attr']
-                dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-                dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-                dic['test_mod'] = 'attr'
-                self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            # if not self.train_config['is_restore']:
+            #     self.mt.report('attr in training')
+            #     self.mt.report('===========attr============',self.outf,'report')
+            #     dic['train_step'] = model_dic['train_step']['attr']
+            #     dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            #     dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            #     dic['test_mod'] = 'attr'
+            #     self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
