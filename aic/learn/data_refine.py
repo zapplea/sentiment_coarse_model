@@ -55,10 +55,16 @@ def few_shot(infile,outfile, k_shot,mod):
         for i in range(20):
             freq.append(0)
         count = 0
+        count_total = 0
         for attr,senti,sentence in zip(attr_labels,senti_labels,sentences):
+            count_total+=1
+            print('count_total: ',count_total)
             if np.any(np.logical_and(np.equal(attr,1),np.less_equal(freq,k_shot))):
                 count+=1
                 print(count)
+                if count_total !=count:
+                    print('not equal')
+                    exit()
                 shotted_attr_labels.append(attr)
                 shotted_senti_labels.append(senti)
                 shotted_sentences.append(sentence)
