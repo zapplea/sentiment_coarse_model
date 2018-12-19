@@ -54,8 +54,11 @@ def few_shot(infile,outfile, k_shot,mod):
         freq = []
         for i in range(20):
             freq.append(0)
+        count = 0
         for attr,senti,sentence in zip(attr_labels,senti_labels,sentences):
             if np.any(np.logical_and(np.equal(attr,1),np.less_equal(freq,k_shot))):
+                count+=1
+                print(count)
                 shotted_attr_labels.append(attr)
                 shotted_senti_labels.append(senti)
                 shotted_sentences.append(sentence)
@@ -63,6 +66,7 @@ def few_shot(infile,outfile, k_shot,mod):
                     if attr[i] == 1:
                         freq[i] += 1
             if np.all(np.greater(freq,k_shot)):
+                print('break')
                 break
 
         senti_labels = np.array(shotted_senti_labels,dtype='int32')
@@ -77,7 +81,6 @@ def few_shot(infile,outfile, k_shot,mod):
             pickle.dump((attribute_dic, word_dic, attr_labels, senti_labels, sentences, word_embed),f)
         else:
             pickle.dump((attr_labels, senti_labels, sentences), f)
-    print('train successful\n')
 
 def elmo_text(infile=''):
     with open(infile,'rb') as f:
@@ -145,7 +148,7 @@ if __name__=='__main__':
 
     if args.fmod == 'few_shot':
         if args.cmod == 'coarse':
-            few_shot(path['coarse_train_in'], path['coarse_train_out'], args.trf, mod='train')
+            # few_shot(path['coarse_train_in'], path['coarse_train_out'], args.trf, mod='train')
             few_shot(path['coarse_test_in'], path['coarse_test_out'], args.tef, mod='test')
         else:
             few_shot(path['fine_train_in'], path['fine_train_out'], args.trf, mod='train')
