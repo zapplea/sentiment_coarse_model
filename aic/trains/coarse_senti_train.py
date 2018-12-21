@@ -129,29 +129,29 @@ class CoarseSentiTrain:
         early_stop_count = 0
         best_f1_score = 0
 
-        if dic['test_mod'] != 'attr':
-            origin_attrW_dic = self.get_attr_W(sess)
+        # used to test whether the parameter is changed.
+        # if dic['test_mod'] != 'attr':
+        #     origin_attrW_dic = self.get_attr_W(sess)
 
         print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
-            count = 0
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
-                if dic['test_mod'] != 'attr':
-                    attrW_dic = self.get_attr_W(sess)
-                    for key in attrW_dic:
-                        org_W = origin_attrW_dic[key]
-                        cur_W = attrW_dic[key]
-                        print('%s: %s'%(key,str(np.all(np.equal(org_W,cur_W)))))
-                    print('#########################')
-                    count+=1
-                    if count>=20:
-                        exit()
+                # if dic['test_mod'] != 'attr':
+                #     attrW_dic = self.get_attr_W(sess)
+                #     for key in attrW_dic:
+                #         org_W = origin_attrW_dic[key]
+                #         cur_W = attrW_dic[key]
+                #         print('%s: %s'%(key,str(np.all(np.equal(org_W,cur_W)))))
+                #     print('#########################')
+                #     count+=1
+                #     if count>=20:
+                #         exit()
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
