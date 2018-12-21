@@ -109,7 +109,7 @@ class CoarseSentiTrain:
                     exit()
 
     def get_attr_W(self,sess):
-        W_dic=[]
+        W_dic={}
         var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         for var in var_list:
             if var.name.find('attrExtr')>=0:
