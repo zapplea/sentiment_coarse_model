@@ -114,6 +114,8 @@ class CoarseSentiTrain:
         for var in var_list:
             if var.name.find('attrExtr')>=0:
                 W_dic[var.name]=sess.run(var)
+            if var.name.find('table')>=0:
+                W_dic[var.name] = sess.run(var)
         return W_dic
 
     def __train__(self, dic, graph, gpu_num,global_step):
@@ -133,6 +135,7 @@ class CoarseSentiTrain:
         print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
             dataset = self.dg.data_generator('train')
+            count = 0
             for attr_labels_data, senti_labels_data, sentences_data in dataset:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
@@ -146,7 +149,9 @@ class CoarseSentiTrain:
                         cur_W = attrW_dic[key]
                         print('%s: %s'%(key,str(np.all(np.equal(org_W,cur_W)))))
                     print('#########################')
-                    exit()
+                    count+=1
+                    if count>=30:
+                        exit()
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('epoch: %d'%i)
