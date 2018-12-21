@@ -205,7 +205,7 @@ class CoarseSentiTrain:
                     self.mt.report('\n#####attribute metrics#####\n',self.outf,'report')
                     self.mt.report('Train_loss:%.10f'%np.sum(attr_trainLoss_list),self.outf,'report')
                     self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-                    # _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='attr')
+                    _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='attr')
 
                 TP_vec = np.sum(senti_TP_vec, axis=0)
                 FP_vec = np.sum(senti_FP_vec, axis=0)
@@ -215,7 +215,7 @@ class CoarseSentiTrain:
                     self.mt.report('\n#####sentiment metrics#####\n', self.outf, 'report')
                     self.mt.report('Train_loss:%.10f' % np.sum(senti_trainLoss_list), self.outf, 'report')
                     self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
-                    # _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='senti')
+                    _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='senti')
 
 
                 if best_f1_score >= _f1_score:
