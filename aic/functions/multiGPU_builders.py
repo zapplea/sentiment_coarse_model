@@ -200,6 +200,7 @@ class SentiNetBuilder:
             exception_list = ['attrExtr']
         if self.nn_config['with_elmo']:
             exception_list.append('elmo')
+        print('exception list: ',exception_list)
         # all var
         vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         # attribute
@@ -213,6 +214,9 @@ class SentiNetBuilder:
 
             if flag:
                 var_list.append(var)
+        for var in var_list:
+            print(var.name)
+        print('==========================')
 
         grad = opt.compute_gradients(graph.get_collection(mod+'_loss')[-1],var_list=var_list,
                                      aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
@@ -267,7 +271,7 @@ class SentiNetBuilder:
                 attr_pred_labels, senti_pred_labels, joint_pred_labels = self.concat_pred_labels(graph, self.nn_config['gpu_num'])
                 # loss
                 attr_loss, senti_loss, joint_loss = self.average_loss(graph, self.nn_config['gpu_num'])
-                saver = tf.train.Saver()
+                saver = tf.train.Saver(tf.global_variables(), max_to_keep=2)
         return {'train_step':{'attr':attr_train_step, 'senti':senti_train_step, 'joint':joint_train_step},
                 'pred_labels':{'attr':attr_pred_labels, 'senti':senti_pred_labels, 'joint':joint_pred_labels},
                 'loss':{'attr':attr_loss, 'senti':senti_loss, 'joint':joint_loss},
