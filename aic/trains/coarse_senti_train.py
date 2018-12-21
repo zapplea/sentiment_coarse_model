@@ -150,7 +150,7 @@ class CoarseSentiTrain:
                         print('%s: %s'%(key,str(np.all(np.equal(org_W,cur_W)))))
                     print('#########################')
                     count+=1
-                    if count>=30:
+                    if count>=20:
                         exit()
 
             if i % self.train_config['epoch_mod'] == 0:
