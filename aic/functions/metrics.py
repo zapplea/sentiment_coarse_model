@@ -73,24 +73,24 @@ class Metrics:
         _f1_score = self.macro_f1_score(per_precision, per_recall)
         self.report('Macro F1 score: %.5f\nMacro precision:%.5f\nMacro recall:%.5f'
                        % (_f1_score, _precision, _recall), outf, 'report')
-        #
-        # # per class metrics
-        # per_f1_score = self.per_f1_score(per_precision, per_recall)
-        # if mod == 'attr':
-        #     for i in range(per_f1_score.shape[0]):
-        #         self.report('%s f1 score: %.5f          precision: %.5f           recall: %.5f'
-        #                        % (id_to_aspect_dic[i], per_f1_score[i], per_precision[i], per_recall[i]), outf,
-        #                        'report')
-        # else:
-        #     per_precision = np.reshape(per_precision,
-        #                               newshape=(self.config['attributes_num'], 4))
-        #     per_recall = np.reshape(per_recall,
-        #                             newshape=(self.config['attributes_num'], 4))
-        #     per_f1_score = np.reshape(per_f1_score,newshape=(self.config['attributes_num'], 4))
-        #     sentiment=['pos','neu','neg','nmt']
-        #     for i in range(per_f1_score.shape[0]):
-        #         for j in range(per_f1_score.shape[1]):
-        #             self.report('%s.%s f1 score: %.5f          precision: %.5f         recall: %.5f'
-        #                         % (id_to_aspect_dic[i],sentiment[j], per_f1_score[i][j], per_precision[i][j], per_recall[i][j]), outf,
-        #                         'report')
+
+        # per class metrics
+        per_f1_score = self.per_f1_score(per_precision, per_recall)
+        if mod == 'attr':
+            for i in range(per_f1_score.shape[0]):
+                self.report('%s f1 score: %.5f          precision: %.5f           recall: %.5f'
+                               % (id_to_aspect_dic[i], per_f1_score[i], per_precision[i], per_recall[i]), outf,
+                               'report')
+        else:
+            per_precision = np.reshape(per_precision,
+                                      newshape=(self.config['attributes_num'], 4))
+            per_recall = np.reshape(per_recall,
+                                    newshape=(self.config['attributes_num'], 4))
+            per_f1_score = np.reshape(per_f1_score,newshape=(self.config['attributes_num'], 4))
+            sentiment=['pos','neu','neg','nmt']
+            for i in range(per_f1_score.shape[0]):
+                for j in range(per_f1_score.shape[1]):
+                    self.report('%s.%s f1 score: %.5f          precision: %.5f         recall: %.5f'
+                                % (id_to_aspect_dic[i],sentiment[j], per_f1_score[i][j], per_precision[i][j], per_recall[i][j]), outf,
+                                'report')
         return _f1_score
