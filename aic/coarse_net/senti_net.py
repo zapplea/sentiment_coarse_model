@@ -179,7 +179,9 @@ class SentimentNet:
             tf.add_to_collection('mask_of_joint',mask)
             # sahpe = (batch size, coarse attr num + 1, 3)
             # joint_coarse_score = tf.multiply(self.sf.coarse_score(joint_fine_score,None,self.graph),mask)
+            print('before joint coarse score')
             joint_coarse_score = tf.multiply(joint_fine_score, mask)
+            print('after joint coarse score')
             tf.add_to_collection('joint_coarse_score',joint_coarse_score)
             # softmax loss
             senti_loss_of_joint = self.sf.softmax_loss(name='senti_loss_of_joint', labels=Y_senti, logits=joint_coarse_score,
