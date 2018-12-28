@@ -543,7 +543,7 @@ class SentimentFunction:
         coarse_score= tf.matmul(fine_score,W)
         # shape = (batch size, max review length, coarse attr num*3 + 3)
         coarse_score = tf.reshape(coarse_score,shape=(-1,self.nn_config['max_review_len'],self.nn_config['coarse_attributes_num']*self.nn_config['sentiment_num']+self.nn_config['sentiment_num']))
-        # sahpe = (batch size, coarse attr num*3 + 3)
+        # shape = (batch size, coarse attr num*3 + 3)
         coarse_score = tf.reduce_sum(coarse_score,axis=1)
         return tf.reshape(coarse_score,shape=(-1,self.nn_config['coarse_attributes_num']+1,self.nn_config['sentiment_num']))
 

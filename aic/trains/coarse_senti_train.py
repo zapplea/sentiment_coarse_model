@@ -135,6 +135,7 @@ class CoarseSentiTrain:
 
         print('epoch num: ',self.train_config['epoch'])
         for i in range(self.train_config['epoch']):
+            self.mt.report('epoch: %d' % i)
             dataset = self.dg.data_generator('train')
             attr_trainLoss_list = []
             senti_trainLoss_list=[]
@@ -158,7 +159,6 @@ class CoarseSentiTrain:
                 #         exit()
 
             if i % self.train_config['epoch_mod'] == 0:
-                self.mt.report('epoch: %d'%i)
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')
                 attr_loss_vec = []
                 attr_TP_vec = []
