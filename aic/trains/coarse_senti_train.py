@@ -36,7 +36,7 @@ class CoarseSentiTrain:
             path = Path(self.train_config[name])
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
-        self.train_config['report_filePath'] = self.train_config['report_filePath'] +'report_reg%s_lr%s_mat%s_onlyAttr.info'% \
+        self.train_config['report_filePath'] = self.train_config['report_filePath'] +'report_reg%s_lr%s_mat%s.info'% \
                                                (str(self.train_config['reg_rate']), str(self.train_config['lr']), str(self.train_config['attribute_mat_size']))
         self.train_config['sr_path'] = self.train_config['sr_path']+'model.ckpt'
         # self.dg is a class
@@ -253,13 +253,13 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            self.mt.report('attr in training')
-            self.mt.report('===========attr============',self.outf,'report')
-            dic['train_step'] = model_dic['train_step']['attr']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            dic['test_mod'] = 'attr'
-            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            # self.mt.report('attr in training')
+            # self.mt.report('===========attr============',self.outf,'report')
+            # dic['train_step'] = model_dic['train_step']['attr']
+            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            # dic['test_mod'] = 'attr'
+            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
@@ -275,10 +275,10 @@ class CoarseSentiTrain:
             # ##########################
             # train joint              #
             # ##########################
-            # self.mt.report('joint in training')
-            # self.mt.report('===========joint============',self.outf,'report')
-            # dic['train_step'] = model_dic['train_step']['joint']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            # dic['test_mod'] = 'joint'
-            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            self.mt.report('joint in training')
+            self.mt.report('===========joint============',self.outf,'report')
+            dic['train_step'] = model_dic['train_step']['joint']
+            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['test_mod'] = 'joint'
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
