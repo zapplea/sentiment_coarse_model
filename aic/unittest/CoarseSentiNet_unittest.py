@@ -1,0 +1,2 @@
+# TODO: we find that the pure senti works well. The loss will decrease. So, the problem is that the joint loss is not a good loss.
+# TODO: therefore, we train with pure senti loss and predict with joint pred.
