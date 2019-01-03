@@ -43,10 +43,10 @@ if __name__ == "__main__":
                 'early_stop_limit':3,
 
                 'words_num': 210,
-                'lstm_cell_size': 300,
+                'lstm_cell_size': 600,
                 'word_dim': 600,
-                'attribute_dim': 300,
-                'sentiment_dim': 300,
+                'attribute_dim': 600,
+                'sentiment_dim': 600,
             }
 
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
