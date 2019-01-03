@@ -244,6 +244,8 @@ class CoarseSentiTrain:
                 print('initial path: %s'%self.train_config['initial_path'])
                 model_file = tf.train.latest_checkpoint(self.train_config['initial_path'])
                 model_dic['saver'].restore(sess, model_file)
+                print('restore successful')
+                exit()
             # if self.train_config['init_model']:
             #     # model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
             #     # saver.restore(sess, model_path)
@@ -253,13 +255,13 @@ class CoarseSentiTrain:
             # ##############
             # train attr   #
             # ##############
-            # self.mt.report('attr in training')
-            # self.mt.report('===========attr============',self.outf,'report')
-            # dic['train_step'] = model_dic['train_step']['attr']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            # dic['test_mod'] = 'attr'
-            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            self.mt.report('attr in training')
+            self.mt.report('===========attr============',self.outf,'report')
+            dic['train_step'] = model_dic['train_step']['attr']
+            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['test_mod'] = 'attr'
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
