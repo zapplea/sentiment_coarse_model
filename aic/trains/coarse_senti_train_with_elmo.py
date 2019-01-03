@@ -189,11 +189,11 @@ class CoarseSentiTrain:
         graph = model_dic['graph']
         with graph.as_default():
             # elmo vars
+            print('elmo variables:')
             vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             for var in vars:
                 if var.name.find('elmo')>=0:
                     print(var.name)
-            exit()
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
             var_list = graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
