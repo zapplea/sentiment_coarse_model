@@ -200,9 +200,9 @@ class CoarseSentiTrain:
             var_dic = {}
             for name in init_data:
                 for var in var_list:
-                    print('name: ',name)
-                    print('var_name: ',var.name)
                     if var.name.find(name)>=0:
+                        print('name: ', name)
+                        print('var_name: ', var.name)
                         var_dic[var] = init_data[name]
             exit()
         table_data = init_data['elmo/embedding:0']
