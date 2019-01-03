@@ -197,7 +197,7 @@ class CoarseSentiTrain:
             table = graph.get_collection('table')[0]
             init = tf.global_variables_initializer()
             var_list = graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-            var_dic = []
+            var_dic = {}
             for name in init_data:
                 for var in var_list:
                     if var.name.find(name)>=0:
