@@ -202,8 +202,9 @@ class CoarseSentiTrain:
                 for var in var_list:
                     if var.name.find(name)>=0:
                         var_dic[var] = init_data[name]
-        print(init_data.keys())
-        table_data = init_data['table']
+        table_data = init_data['elmo/embedding:0']
+        print('table data.shape: ',table_data.shape)
+        exit()
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         with tf.Session(graph=graph, config=config) as sess:
