@@ -48,8 +48,10 @@ class DataFeeder():
         self.id_to_aspect_dic = dict((v,k) for k,v in self.aspect_dic.items())
         self.test_attr_labels, self.test_senti_labels, self.test_sentences = self.load_test_data()
         self.train_sentences, self.train_attr_labels, self.train_senti_labels = self.unison_shuffled_copies(self.train_sentences, self.train_attr_labels, self.train_senti_labels)
+        print('#################################')
         print('train.shape: ',self.train_sentences.shape)
         print('test.shape: ',self.test_sentences.shape)
+        print('#################################')
         self.train_data_size = len(self.train_attr_labels)
         self.test_data_size = len(self.test_attr_labels)
 

@@ -43,8 +43,8 @@ if __name__ == "__main__":
                 'early_stop_limit':3
             }
 
-    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse_trail.pkl'
-    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse_trail.pkl'
+    config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
+    config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'
 
     config['attr_sr_path'] = '/datastore/liu121/sentidata2/result/coarse_nn/ckpt_reg%s_lr%s_mat%s_attr/' \
                         % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
