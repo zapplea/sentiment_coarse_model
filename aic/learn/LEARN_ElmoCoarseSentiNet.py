@@ -44,7 +44,12 @@ if __name__ == "__main__":
         'epoch': args.epoch,
         'epoch_mod': 1,
         'early_stop_limit': float('nan'),
-        'with_elmo':True
+        'with_elmo':True,
+
+        'lstm_cell_size': 600,
+        'word_dim': 600,
+        'attribute_dim': 600,
+        'sentiment_dim': 600,
     }
     # TODO: the problem is that: the attribute mat size and the X from lm.weight_layers have different dims.
     # TODO: Just need to adjuct the parameters.
