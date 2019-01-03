@@ -50,7 +50,7 @@ class SentimentNet:
         mask_for_elmo = lm.mask_for_token_ids(reshaped_X_ids)
         # shape = (batch size, max sentence length, 2*lstm dim)
         print('lm.weight layers')
-        X = lm.weight_layers(name='outputs',bilm_ops={'mask':mask_for_elmo,'lm_embeddings':lm_embeddings},reg=self.reg, l2_coef=0.0)
+        X = lm.weight_layers(name='outputs',bilm_ops={'mask':mask_for_elmo,'lm_embeddings':lm_embeddings},reg=self.reg,reg_rate=self.nn_config['reg_rate'], l2_coef=0.0)
         print('shape of X: ',X.get_shape())
         # #################### #
         # attribute extraction #

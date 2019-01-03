@@ -137,7 +137,7 @@ class LanguageModel(object):
 
         return lm_embeddings
 
-    def weight_layers(self, name, bilm_ops,reg, l2_coef=None,
+    def weight_layers(self, name, bilm_ops,reg,reg_rate, l2_coef=None,
                       use_top_only=False, do_layer_norm=False):
         '''
         Weight the layers of a biLM with trainable scalar weights to
@@ -215,7 +215,7 @@ class LanguageModel(object):
                     regularizer=_l2_regularizer,
                     trainable=True,
                 )
-                reg['elmo'].append(W)
+                reg['elmo'].append(tf.contrib.layers.l2_regularizer(reg_rate)(W))
                 # normalize the weights
                 normed_weights = tf.split(
                     tf.nn.softmax(W + 1.0 / n_lm_layers), n_lm_layers
