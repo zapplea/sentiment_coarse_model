@@ -47,7 +47,7 @@ if __name__ == "__main__":
         'with_elmo':True,
 
         'lstm_cell_size': 600,
-        'word_dim': 600,
+        'word_dim': 300,
         'attribute_dim': 600,
         'sentiment_dim': 600,
     }

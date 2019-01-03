@@ -46,6 +46,7 @@ class SentimentNet:
         with tf.variable_scope('elmo', reuse=tf.AUTO_REUSE):
             # lm_embeddings.shape=(batch size, lstm layers+1, max sentence length, 2*lstm dim)
             lm_embeddings = lm.bilstm(X,seq_len)
+        print('lm embeddings.shape: ',lm_embeddings.get_shape())
         mask_for_elmo = lm.mask_for_token_ids(reshaped_X_ids)
         # shape = (batch size, max sentence length, 2*lstm dim)
         print('lm.weight layers')
