@@ -227,7 +227,7 @@ class CoarseSentiTrain:
                     best_f1_score = _f1_score
                     print('save path: %s' % dic['sr_path'])
                     saver.save(sess, dic['sr_path'],global_step=global_step)
-                if early_stop_count > self.train_config['early_stop_limit']:
+                if early_stop_count >= self.train_config['early_stop_limit']:
                     break
         if early_stop_count ==0:
             print('save path: %s' % dic['sr_path'])

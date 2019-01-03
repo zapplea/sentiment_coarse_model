@@ -40,7 +40,7 @@ if __name__ == "__main__":
                 'attributes_num':20,
                 'epoch': args.epoch,
                 'epoch_mod':1,
-                'early_stop_limit':1
+                'early_stop_limit':3
             }
 
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse_trail.pkl'
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     config['initial_path'] = config['attr_sr_path']
     config['senti_sr_path'] = '/datastore/liu121/sentidata2/result/coarse_nn/ckpt_reg%s_lr%s_mat%s_senti/' \
                              % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
-    config['is_restore'] = False
+    config['is_restore'] = True
     config['report_filePath'] = '/datastore/liu121/sentidata2/report/coarse_nn/'
     main(config)
 
