@@ -181,7 +181,7 @@ class CoarseSentiTrain:
             saver.save(sess, dic['sr_path'],global_step=global_step)
 
     def transfer(self,):
-        with open(self.train_config['initial_filePath'],'rb') as f:
+        with open(self.train_config['elmo_initial_path'],'rb') as f:
             init = pickle.load(f)
         return init
 
@@ -225,8 +225,8 @@ class CoarseSentiTrain:
                 dic['test_mod'] = 'attr'
                 self.__train__(dic, graph, model_dic['gpu_num'], model_dic['global_step'])
             else:
-                print('initial path: %s' % self.train_config['initial_path'])
-                model_file = tf.train.latest_checkpoint(self.train_config['initial_path'])
+                print('initial path: %s' % self.train_config['attr_initial_path'])
+                model_file = tf.train.latest_checkpoint(self.train_config['attr_initial_path'])
                 model_dic['saver'].restore(sess, model_file)
                 print('restore successful')
 
