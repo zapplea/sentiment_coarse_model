@@ -223,10 +223,13 @@ class CoarseSentiTrain:
                 else:
                     early_stop_count = 0
                     best_f1_score = _f1_score
-                    saver.save(sess, self.train_config['sr_path'],global_step=global_step)
+                    print('save path: %s' % dic['sr_path'])
+                    saver.save(sess, dic['sr_path'],global_step=global_step)
                 if early_stop_count > self.train_config['early_stop_limit']:
                     break
-        saver.save(sess, self.train_config['sr_path'],global_step=global_step)
+        if early_stop_count ==0:
+            print('save path: %s' % dic['sr_path'])
+            saver.save(sess, dic['sr_path'],global_step=global_step)
 
     def train(self,model_dic):
         graph = model_dic['graph']
@@ -238,36 +241,32 @@ class CoarseSentiTrain:
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         with tf.Session(graph=graph, config=config) as sess:
+            dic = {'sess': sess, 'saver': model_dic['saver']}
             if not self.train_config['is_restore']:
                 sess.run(init, feed_dict={table: table_data})
+                # ##############
+                # train attr   #
+                # ##############
+                self.mt.report('attr in training')
+                self.mt.report('===========attr============', self.outf, 'report')
+                dic['sr_path'] = self.train_config['attr_sr_path']
+                dic['train_step'] = model_dic['train_step']['attr']
+                dic['loss'] = {'attr': model_dic['loss']['attr'], 'senti': model_dic['loss']['joint']}
+                dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
+                dic['test_mod'] = 'attr'
+                self.__train__(dic, graph, model_dic['gpu_num'], model_dic['global_step'])
             else:
                 print('initial path: %s'%self.train_config['initial_path'])
                 model_file = tf.train.latest_checkpoint(self.train_config['initial_path'])
                 model_dic['saver'].restore(sess, model_file)
                 print('restore successful')
-                exit()
-            # if self.train_config['init_model']:
-            #     # model_path = tf.train.latest_checkpoint(self.train_config['init_model'])
-            #     # saver.restore(sess, model_path)
-            #     print("sucess init %s" % self.train_config['init_model'])
-            dic = {'sess': sess, 'saver': model_dic['saver']}
-
-            # ##############
-            # train attr   #
-            # ##############
-            self.mt.report('attr in training')
-            self.mt.report('===========attr============',self.outf,'report')
-            dic['train_step'] = model_dic['train_step']['attr']
-            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            dic['test_mod'] = 'attr'
-            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
 
             # ##########################
             # train senti (optional)   #
             # ##########################
             self.mt.report('senti in training')
             self.mt.report('===========senti============',self.outf,'report')
+            dic['sr_path'] = self.train_config['senti_sr_path']
             dic['train_step'] = model_dic['train_step']['senti']
             dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['senti']}
             # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
