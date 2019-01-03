@@ -186,13 +186,14 @@ class AttributeFunction:
         :param score: shape=(batch size*max review length, attributes num)
         :return: 
         """
-        print('temp1')
-        temp2 = tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score)
         print('temp2')
+        temp2 = tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score)
+        print('temp1')
         temp1 = tf.reduce_sum(temp2,axis=1)
+        print('temp3')
+        temp3 = tf.reduce_sum(reg_list)
         print('loss')
-        loss = tf.reduce_mean(tf.add(temp1,
-                                     tf.reduce_sum(reg_list)))
+        loss = tf.reduce_mean(tf.add(temp1,temp3))
         graph.add_to_collection(name,loss)
         return loss
 
