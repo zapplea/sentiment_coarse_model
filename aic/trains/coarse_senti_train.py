@@ -28,17 +28,19 @@ class CoarseSentiTrain:
                            'top_k_data': -1,
                            'early_stop_limit': 2,
                            'report_filePath':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment2/senti_report/',
-                            'sr_path':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
+                            'attr_sr_path':'/hdd/lujunyu/model/meituan/coarse_nn/model/sentiment/ckpt_reg%s_lr%s_mat%s/' \
                                       % ('1e-5', '0.0001', '3'),
+                            'senti_sr_path':'',
                         }
         self.train_config.update(config)
-        for name in ['report_filePath','sr_path']:
+        for name in ['report_filePath','attr_sr_path','senti_sr_path']:
             path = Path(self.train_config[name])
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
         self.train_config['report_filePath'] = self.train_config['report_filePath'] +'report_reg%s_lr%s_mat%s.info'% \
                                                (str(self.train_config['reg_rate']), str(self.train_config['lr']), str(self.train_config['attribute_mat_size']))
-        self.train_config['sr_path'] = self.train_config['sr_path']+'model.ckpt'
+        self.train_config['attr_sr_path'] = self.train_config['attr_sr_path']+'model.ckpt'
+        self.train_config['senti_sr_path'] = self.train_config['senti_sr_path'] + 'model.ckpt'
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
