@@ -93,6 +93,8 @@ class SentimentNet:
                 reg_list.append(reg)
             for reg in self.reg['elmo']:
                 reg_list.append(reg)
+            print('reg_list: ',reg_list)
+            exit()
             attr_loss = self.af.sigmoid_loss('attr_loss', review_score, Y_att, reg_list, self.graph)
 
         # #################### #
