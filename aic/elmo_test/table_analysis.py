@@ -6,7 +6,7 @@ def load_train_data(data_config):
             data_config['train_data_file_path']) > 0:
         with open(data_config['train_data_file_path'], 'rb') as f:
             attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
-        print(word_dic['#UNK#'])
+        # print(word_dic['#UNK#'])
         print(word_dic['双鱼牌'])
         exit()
         return attr_labels, senti_labels, sentence, attribute_dic, word_dic, word_embed
