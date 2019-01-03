@@ -202,6 +202,7 @@ class CoarseSentiTrain:
                 for var in var_list:
                     if var.name.find(name)>=0:
                         var_dic[var] = init_data[name]
+        print(init_data.keys())
         table_data = init_data['table']
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
