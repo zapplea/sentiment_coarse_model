@@ -169,14 +169,29 @@ class AttributeFunction:
 
         return review_score
 
+    # def sigmoid_loss(self, name, score, Y_att, reg_list,graph):
+    #     """
+    #
+    #     :param score: shape=(batch size*max review length, attributes num)
+    #     :return:
+    #     """
+    #     loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score),
+    #                                                axis=1),
+    #                                  tf.reduce_sum(reg_list)))
+    #     graph.add_to_collection(name,loss)
+    #     return loss
     def sigmoid_loss(self, name, score, Y_att, reg_list,graph):
         """
 
         :param score: shape=(batch size*max review length, attributes num)
         :return: 
         """
-        loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score),
-                                                   axis=1),
+        print('temp1')
+        temp2 = tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score)
+        print('temp2')
+        temp1 = tf.reduce_sum(temp2,axis=1)
+        print('loss')
+        loss = tf.reduce_mean(tf.add(temp1,
                                      tf.reduce_sum(reg_list)))
         graph.add_to_collection(name,loss)
         return loss
