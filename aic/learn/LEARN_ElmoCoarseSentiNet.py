@@ -43,7 +43,7 @@ if __name__ == "__main__":
         'attributes_num': 20,
         'epoch': args.epoch,
         'epoch_mod': 1,
-        'early_stop_limit': float('nan'),
+        'early_stop_limit': 2,
         'with_elmo':True,
 
         'lstm_cell_size': 600,
