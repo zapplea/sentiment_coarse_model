@@ -71,6 +71,7 @@ def extract(model,sess):
     for var in vars:
         print(var.name)
         value = sess.run(var)
+        print(value.shape)
         if var.name.find('embedding:0')>=0:
             # shape = value.shape
             # print(shape)
