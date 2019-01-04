@@ -200,6 +200,8 @@ class SentiNetBuilder:
             exception_list = ['attrExtr','table']
         if self.nn_config['with_elmo']:
             exception_list.append('elmo')
+            if mod == "attr":
+                exception_list.append('table')
         print('exception list: ',exception_list)
         # all var
         vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
