@@ -70,9 +70,8 @@ def extract(model,sess):
     vars = model.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     for var in vars:
         print(var.name)
-        continue
         value = sess.run(var)
-        if var.name.find('embedding:0'):
+        if var.name.find('embedding:0')>=0:
             # shape = value.shape
             # print(shape)
             # stdv = 1 / np.sqrt(shape[-1]).astype(str(value.dtype))
