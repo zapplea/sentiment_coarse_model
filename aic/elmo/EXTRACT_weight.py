@@ -9,6 +9,7 @@ elif getpass.getuser() == 'liu121':
 import tensorflow as tf
 import argparse
 import pickle
+import numpy as np
 
 from aic.elmo.elmo_train import load_vocab
 from aic.elmo.elmo_net import LanguageModel
@@ -70,6 +71,13 @@ def extract(model,sess):
     for var in vars:
         print(var.name)
         value = sess.run(var)
+        if var.name.find('embedding:0'):
+            shape = value.shape
+            stdv = 1 / np.sqrt(shape[-1]).astype(str(value.dtype))
+            init = np.random.uniform(size = (shape[-1],), low=-stdv, high=stdv).astype(str(value.dtype))
+            value = np.delete(value,(0,1,2),axis=0)
+            np.insert(value,0,init,0)
+            print(var.name,' : ',value.shape)
         vars_dic[var.name] = value
     with open('/datastore/liu121/sentidata2/data/aic2018/elmo_weights/elmo_weights.pkl','wb') as f:
         pickle.dump(vars_dic,f)
