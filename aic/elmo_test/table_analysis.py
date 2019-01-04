@@ -17,6 +17,7 @@ def load_train_data(data_config):
         print('116140: ',repr(id_to_word[116140]))
         # print('-1: ',id_to_word[-1])
         print(word_dic['双鱼牌'])
+        print(sentence[0])
         exit()
         return attr_labels, senti_labels, sentence, attribute_dic, word_dic, word_embed
 
