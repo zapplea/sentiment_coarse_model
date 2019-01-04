@@ -208,7 +208,11 @@ def train(options, data, n_gpus, tf_save_dir, tf_log_dir,
                         tower_grads.append(grads)
                         # keep track of loss across all GPUs
                         train_perplexity += loss
-
+            vars = graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+            for var in vars:
+                print(var.name)
+                print(var.get_shape())
+            exit()
             print_variable_summary()
 
             # calculate the mean of each gradient across all GPUs
