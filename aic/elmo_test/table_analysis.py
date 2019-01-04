@@ -11,6 +11,9 @@ def load_train_data(data_config):
             id_to_word[word_dic[key]] = key
         print('len: ',len(id_to_word))
         print('0: ',repr(id_to_word[0]))
+        print('0: ', repr(id_to_word[1]))
+        print('0: ',repr(id_to_word[2]))
+        print('0: ', repr(id_to_word[3]))
         print('116140: ',repr(id_to_word[116140]))
         # print('-1: ',id_to_word[-1])
         print(word_dic['双鱼牌'])
