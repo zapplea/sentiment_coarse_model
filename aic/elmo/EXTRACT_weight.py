@@ -78,9 +78,8 @@ def extract(model,sess):
             init = np.random.uniform(size = (shape[-1],), low=-stdv, high=stdv).astype(str(value.dtype))
             value = np.delete(value,(0,1,2),axis=0)
             print(value.shape)
-            np.insert(value,0,init,0)
+            value = np.insert(value,0,init,0)
             print(var.name,' : ',value.shape)
-            exit()
         vars_dic[var.name] = value
     with open('/datastore/liu121/sentidata2/data/aic2018/elmo_weights/elmo_weights.pkl','wb') as f:
         pickle.dump(vars_dic,f)
