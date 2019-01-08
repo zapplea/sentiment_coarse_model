@@ -211,8 +211,24 @@ class CoarseSentiTrain:
                 var.load(var_dic[var],sess)
 
             dic = {'sess': sess, 'saver': model_dic['saver']}
-            if not self.train_config['is_restore']:
+            if not self.train_config['attr_is_restore'] and not self.train_config['senti_is_restore']:
                 sess.run(init, feed_dict={table: table_data})
+                # ##############
+                # train attr   #
+                # ##############
+                self.mt.report('attr in training')
+                self.mt.report('===========attr============', self.outf, 'report')
+                dic['sr_path'] = self.train_config['attr_sr_path']
+                dic['train_step'] = model_dic['train_step']['attr']
+                dic['loss'] = {'attr': model_dic['loss']['attr'], 'senti': model_dic['loss']['joint']}
+                dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
+                dic['test_mod'] = 'attr'
+                self.__train__(dic, graph, model_dic['gpu_num'], model_dic['global_step'])
+            elif self.train_config['attr_is_restore']:
+                print('initial path: %s' % self.train_config['attr_initial_path'])
+                model_file = tf.train.latest_checkpoint(self.train_config['attr_initial_path'])
+                model_dic['saver'].restore(sess,model_file)
+                print('restore successful')
                 # ##############
                 # train attr   #
                 # ##############

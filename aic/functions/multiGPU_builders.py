@@ -195,12 +195,12 @@ class SentiNetBuilder:
 
     def compute_grads(self,mod,opt,tower_grads,graph):
         if mod == "attr":
-            exception_list=['sentiExtr']
+            exception_list=['sentiExtr','table']
         else:
             exception_list = ['attrExtr','table']
         if self.nn_config['with_elmo']:
             exception_list.append('elmo')
-            if mod == "attr":
+            if mod == "attr" and 'table' not in exception_list:
                 exception_list.append('table')
         print('exception list: ',exception_list)
         # all var
