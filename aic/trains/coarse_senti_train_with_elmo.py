@@ -33,10 +33,7 @@ class CoarseSentiTrain:
             'senti_sr_path': '',
         }
         self.train_config.update(config)
-        if not self.train_config['is_restore']:
-            dir_ls = ['report_filePath', 'attr_sr_path', 'senti_sr_path']
-        else:
-            dir_ls = ['report_filePath', 'senti_sr_path']
+        dir_ls = ['report_filePath', 'attr_sr_path','senti_sr_path']
         for name in dir_ls:
             path = Path(self.train_config[name])
             if not path.exists():
