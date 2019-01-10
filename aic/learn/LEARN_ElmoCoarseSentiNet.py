@@ -64,7 +64,7 @@ if __name__ == "__main__":
     config['attr_initial_path'] = config['attr_sr_path']
     config['elmo_initial_path'] = '/datastore/liu121/sentidata2/data/aic2018/elmo_weights/elmo_weights.pkl'
 
-    config['attr_is_restore'] = False
+    config['attr_is_restore'] = True
     config['senti_is_restore'] = False
     config['report_filePath'] = '/datastore/liu121/sentidata2/report/elmo_nn/'
     main(config)
