@@ -40,7 +40,7 @@ class SentimentNet:
         with tf.variable_scope('attrExtr',reuse=tf.AUTO_REUSE):
             seq_len = self.comm.sequence_length(X_ids,self.graph)
             # H.shape = (batch size, max_time, cell size)
-            attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, self.reg,self.graph, scope_name='sentiment/sentence_bilstm')
+            attr_H = self.comm.sentence_bilstm('attr_reg',X, seq_len, self.reg,self.graph, scope_name='sentiment/attrExtr')
             A, o = self.af.attribute_mat(self.reg,self.graph)
             # A.shape = (batch size, words num, attributes number, attribute dim)
             A_lstm = self.af.words_attribute_mat2vec(attr_H, A, self.graph)
@@ -72,7 +72,7 @@ class SentimentNet:
         # sentiment lstm
         with tf.variable_scope('sentiExtr',reuse=tf.AUTO_REUSE):
             # H.shape = (batch size, max_time, cell size)
-            senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, self.graph, scope_name='sentiment/sentence_bilstm')
+            senti_H = self.comm.sentence_bilstm('senti_reg',X, seq_len, self.reg, self.graph, scope_name='sentiment/sentiExtr')
             # Y_senti.shape = [batch_size, number of attributes + 1, 3]
             Y_senti = self.comm.sentiment_labels_input(self.graph)
             # sentiment expression prototypes matrix
