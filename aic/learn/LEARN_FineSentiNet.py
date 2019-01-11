@@ -39,7 +39,7 @@ if __name__ == "__main__":
                 'epoch': args.epoch,
                 'attributes_num':12,
                 'epoch_mod':100,
-                'early_stop_limit':50,
+                'early_stop_limit':100,
                 'lookup_table_words_num': 5075,
                 'padding_word_index': 5074,
             }
