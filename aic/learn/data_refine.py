@@ -17,6 +17,7 @@ def arrange(infile,outfile, bottom, up, mod,is_coarse=False):
 
         if not is_coarse:
             senti_labels=senti_labels[:,:,:3]
+            sentence = sentence[:,:210]
 
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
@@ -49,6 +50,7 @@ def few_shot(infile,outfile, k_shot,mod,is_coarse=False):
 
         if not is_coarse:
             senti_labels=senti_labels[:,:,:3]
+            sentences = sentences[:, :210]
 
         non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
         non_attr_senti = np.tile(non_attr,reps=[1,3])
