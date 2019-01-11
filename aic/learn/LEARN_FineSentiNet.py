@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 'attribute_mat_size': 5,
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
-                'gpu_num':2,
+                'gpu_num':1,
                 'batch_size':10,
                 'epoch': args.epoch,
                 'attributes_num':12,
