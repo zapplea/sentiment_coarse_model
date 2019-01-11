@@ -11,6 +11,7 @@ def arrange(infile,outfile, bottom, up, mod):
             # TODO: check fine
             print('#PAD# id: %s'%str(word_dic['#PAD#']))
             condition = np.not_equal(sentence,word_dic['#PAD#'])
+            print(condition[0])
             new_sentence = np.where(condition,np.ones_like(sentence).astype('int32'),np.zeros_like(sentence).astype('int32'))
             print('maximum length of sentence: ',np.max(np.sum(new_sentence,axis=1)))
             exit()
