@@ -35,11 +35,11 @@ if __name__ == "__main__":
                 'reg_rate': reg_rate[args.num],
                 'lr': lr[args.num],
                 'gpu_num':1,
-                'batch_size':10,
+                'batch_size':50,
                 'epoch': args.epoch,
                 'attributes_num':12,
                 'epoch_mod':1,
-                'early_stop_limit':2,
+                'early_stop_limit':20,
                 'lookup_table_words_num': 5075,
                 'padding_word_index': 5074,
             }
