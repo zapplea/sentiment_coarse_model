@@ -38,8 +38,8 @@ if __name__ == "__main__":
                 'batch_size':50,
                 'epoch': args.epoch,
                 'attributes_num':12,
-                'epoch_mod':1,
-                'early_stop_limit':20,
+                'epoch_mod':100,
+                'early_stop_limit':50,
                 'lookup_table_words_num': 5075,
                 'padding_word_index': 5074,
             }
