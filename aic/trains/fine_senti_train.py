@@ -30,23 +30,23 @@ class FineSentiTrain:
 
                         }
         self.train_config.update(config)
-        for name in ['report_filePath','sr_path']:
+        if not self.train_config['is_restore']:
+            dir_ls = ['report_filePath','attr_sr_path','senti_sr_path']
+        else:
+            dir_ls = ['report_filePath', 'senti_sr_path']
+        for name in dir_ls:
             path = Path(self.train_config[name])
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
-        self.train_config['report_filePath'] = self.train_config['report_filePath'] + 'report_reg%s_lr%s_mat%s.info' % \
-                                                                                      (str(self.train_config[
-                                                                                               'reg_rate']),
-                                                                                       str(self.train_config['lr']),
-                                                                                       str(self.train_config[
-                                                                                               'attribute_mat_size']))
-        self.train_config['sr_path'] = self.train_config['sr_path'] + 'model.ckpt'
-
+        self.train_config['report_filePath'] = self.train_config['report_filePath'] +'report_reg%s_lr%s_mat%s.info'% \
+                                               (str(self.train_config['reg_rate']), str(self.train_config['lr']), str(self.train_config['attribute_mat_size']))
+        self.train_config['attr_sr_path'] = self.train_config['attr_sr_path']+'model.ckpt'
+        self.train_config['senti_sr_path'] = self.train_config['senti_sr_path'] + 'model.ckpt'
         # self.dg is a class
         self.dg = data_feeder
         # self.cl is a class
         self.mt = Metrics(self.train_config)
-        self.outf = open(self.train_config['report_filePath'], 'w+')
+        self.outf=open(self.train_config['report_filePath'],'w+')
 
     def generate_feed_dict(self, graph, gpu_num, data_dict):
         feed_dict = {}
