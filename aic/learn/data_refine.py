@@ -8,6 +8,9 @@ def arrange(infile,outfile, bottom, up, mod):
         if mod == 'train':
             print('train:')
             attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
+            # TODO: check fine
+            print('#PAD# id: %s'%str(word_dic['#PAD#']))
+            exit()
         else:
             print('test:')
             attr_labels, senti_labels, sentence = pickle.load(f)
