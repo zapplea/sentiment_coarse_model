@@ -85,8 +85,8 @@ class FineCommFunction:
         keep_prob_bilstm = tf.placeholder(dtype='float32')
         graph.add_to_collection('keep_prob_bilstm', keep_prob_bilstm)
 
-        fw_cell = tf.nn.rnn_cell.LSTMCell(int(self.nn_config['lstm_cell_size'] / 2),cell_clip=self.nn_config['cell_clip'])
-        bw_cell = tf.nn.rnn_cell.LSTMCell(int(self.nn_config['lstm_cell_size'] / 2),cell_clip=self.nn_config['cell_clip'])
+        fw_cell = tf.nn.rnn_cell.LSTMCell(int(self.nn_config['lstm_cell_size'] / 2), )
+        bw_cell = tf.nn.rnn_cell.LSTMCell(int(self.nn_config['lstm_cell_size'] / 2), )
 
         # outputs.shape = [(batch size, max time step, lstm cell size/2),(batch size, max time step, lstm cell size/2)]
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=fw_cell,cell_bw=bw_cell,inputs=X,sequence_length=seq_len,dtype='float32')
