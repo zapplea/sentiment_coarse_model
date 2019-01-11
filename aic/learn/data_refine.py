@@ -10,6 +10,9 @@ def arrange(infile,outfile, bottom, up, mod):
             attribute_dic, word_dic, attr_labels, senti_labels, sentence, word_embed = pickle.load(f)
             # TODO: check fine
             print('#PAD# id: %s'%str(word_dic['#PAD#']))
+            condition = np.not_equal(sentence,word_dic['#PAD#'])
+            new_sentence = np.where(condition,np.ones_like(sentence).astype('int32'),np.zeros_like(sentence).astype('int32'))
+            print('maximum length of sentence: ',np.max(np.sum(new_sentence,axis=1)))
             exit()
         else:
             print('test:')
