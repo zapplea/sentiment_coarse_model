@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --get-user-env
-#SBATCH --job-name="sentiment net"
+#SBATCH --job-name="coarse_nn"
 #SBATCH --time=140:00:00
 #SBATCH --nodes=1
 #SBATCH --mem=60GB
