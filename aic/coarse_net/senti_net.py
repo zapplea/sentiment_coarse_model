@@ -66,6 +66,7 @@ class SentimentNet:
             score_e = self.af.sentence_score(A_e, X, mask, self.graph)
             # score.shape = (batch size*max review length, attributes num, words num)
             score = tf.add(score_lstm, score_e)
+            tf.add_to_collection('attr_score',score)
             # score.shape = (batch size*max review length, attributes num)
             score = tf.reduce_max(score, axis=2)
             # shape = (batch size*max review length, attributes num)
@@ -107,6 +108,7 @@ class SentimentNet:
             # relative position ids
             # shape = (number of words, number of words)
             rp_ids = self.sf.relative_pos_ids(self.graph)
+            # shape = (relative position dim,)
             beta = self.sf.beta(self.reg,self.graph)
             # extract sentiment expression corresponding to sentiment and attribute from W for all attributes
             # W.shape=(number of attributes*3+3, size of original W); shape of original W =(3*normal sentiment prototypes + attribute number * attribute sentiment prototypes, sentiment dim)
@@ -129,6 +131,7 @@ class SentimentNet:
                 A = self.sf.words_attribute_mat2vec(H=attr_H, A_mat=A, graph=self.graph)
             # shape = (batch size*max review length, number of attributes+1, wrods number)
             A_dist = self.sf.attribute_distribution(A=A, H=attr_H, graph=self.graph)
+            tf.add_to_collection('A_dist',A_dist)
             # A_Vi.shape = (batch size*max review length, number of attributes+1, number of words, relative position dim)
             A_Vi = self.sf.rd_Vi(A_dist=A_dist, V=V, rp_ids=rp_ids, graph=self.graph)
             tf.add_to_collection('A_Vi',A_Vi)
@@ -138,7 +141,6 @@ class SentimentNet:
             # mask for score to eliminate the influence of padding word
             mask = self.sf.mask_for_pad_in_score(X_ids, self.graph)
             # senti_socre.shape = (batch size, 3*number of attributes+3, words num)
-            # TODO: the nan is from here, it get nan very early.
             score = self.sf.score(item1, item2, mask, self.graph)
             tf.add_to_collection('senti_score_with_inf', score)
             # score.shape = (batch size, 3*number of attributes+3)
