@@ -56,12 +56,12 @@ if __name__ == "__main__":
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse.pkl'
     config['test_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/dev_coarse.pkl'
 
-    config['attr_sr_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg%s_lr%s_mat%s_attr2/' \
+    config['attr_sr_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg%s_lr%s_mat%s_attr3/' \
                              % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
     config['senti_sr_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg%s_lr%s_mat%s_senti/' \
                               % (str(reg_rate[args.num]), str(lr[args.num]), str(config['attribute_mat_size']))
 
-    config['attr_initial_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg1e-05_lr0.001_mat5_attr'
+    config['attr_initial_path'] = '/datastore/liu121/sentidata2/result/elmo_nn/ckpt_reg1e-05_lr0.001_mat5_attr2/'
     config['elmo_initial_path'] = '/datastore/liu121/sentidata2/data/aic2018/elmo_weights/elmo_weights.pkl'
 
     config['attr_is_restore'] = False
