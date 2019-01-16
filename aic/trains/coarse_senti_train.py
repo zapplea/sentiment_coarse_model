@@ -149,9 +149,6 @@ class CoarseSentiTrain:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
-                A_Vi = sess.run(tf.get_collection('A_Vi'),feed_dict=feed_dict)
-                print(np.concatenate(A_Vi,axis=0).shape)
-                exit()
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 attr_trainLoss_list.append(attr_train_loss)

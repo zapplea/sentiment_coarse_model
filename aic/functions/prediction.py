@@ -35,6 +35,13 @@ class SentiPrediction:
                          'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
             feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
             attr_pred_data, senti_pred_data = sess.run([attr_pred, senti_pred],feed_dict=feed_dict)
+            # (batch size, number of words, 3+3*attributes number)
+            item1_value = np.concatenate(sess.run(tf.get_collection('item1'),feed_dict=feed_dict),axis=0)
+            # (batch size, 3+3*attributes number, number of words)
+            item1_value = np.transpose(item1_value,[0,2,1])
+            # (batch size, number of attributes+1, number of words)
+            item2_value = np.concatenate(sess.run(tf.get_collection('item2'),feed_dict = feed_dict),axis=0)
+
             if dic['pred_mod'] == 'attr':
                 pred_data.append(attr_pred_data)
                 label_data.append(attr_labels_data)
