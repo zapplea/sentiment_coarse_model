@@ -7,9 +7,16 @@ from aic.functions.metrics import Metrics
 class SentiPrediction:
     def __init__(self,config, data_feeder):
         self.pred_config ={'initial_filePath':'',
-                           'report_filePath':'',}
+                           'report_filePath':'',
+                           'padding_word_index': 116140,
+                           'attributes_num':20}
         self.pred_config.update(config)
         self.dg = data_feeder
+        train_dataset = self.dg('train')
+        self.aspect_dic = train_dataset.aspect_dic
+        # TODO: check the dictionary is id to word or word to id
+        self.dictionary = train_dataset.dictionary
+        self.outf = open(self.pred_config['report_filePath'],'w+')
 
     def generate_feed_dict(self,graph, gpu_num, data_dict):
         feed_dict = {}
@@ -23,42 +30,129 @@ class SentiPrediction:
             feed_dict[graph.get_collection('keep_prob_bilstm')[k]] = data_dict['keep_prob']
         return feed_dict
 
+    def TP(self,true_labels,pred_labels):
+        result = true_labels*pred_labels
+        return np.count_nonzero(result,axis=0).astype('float32')
+
+    def TN(self,true_labels,pred_labels):
+        result = (pred_labels-1)*(true_labels-1)
+        return np.count_nonzero(result,axis=0).astype('float32')
+
+    def FP(self,true_labels, pred_labels):
+        result = pred_labels*(true_labels-1)
+        return np.count_nonzero(result, axis=0).astype('float32')
+
+    def FN(self,true_labels, pred_labels):
+        result = (pred_labels-1)*true_labels
+        return np.count_nonzero(result,axis=0).astype('float32')
+
     def __prediction__(self,dic, graph, gpu_num):
         sess = dic['sess']
         attr_pred = dic['pred']['attr']
         senti_pred = dic['pred']['senti']
         dataset = self.dg.data_generator('val')
-        pred_data = []
-        label_data = []
+        attr_pred_value_ls = []
+        attr_label_value_ls = []
+        senti_pred_value_ls = []
+        senti_label_value_ls = []
+        item1_value_ls = []
+        item2_value_ls = []
+        attr_score_value_ls = []
+        sent_value_ls = []
         for attr_labels_data, senti_labels_data, sentences_data in dataset:
+            sent_value_ls.append(sentences_data)
             data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                          'Y_senti_data': senti_labels_data, 'keep_prob': 1.0}
             feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
-            attr_pred_data, senti_pred_data = sess.run([attr_pred, senti_pred],feed_dict=feed_dict)
-            # (batch size, number of words, 3+3*attributes number)
-            item1_value = np.concatenate(sess.run(tf.get_collection('item1'),feed_dict=feed_dict),axis=0)
-            # (batch size, 3+3*attributes number, number of words)
-            item1_value = np.transpose(item1_value,[0,2,1])
-            # (batch size, number of attributes+1, number of words)
-            item2_value = np.concatenate(sess.run(tf.get_collection('item2'),feed_dict = feed_dict),axis=0)
+            attr_pred_value, senti_pred_value = sess.run([attr_pred, senti_pred],feed_dict=feed_dict)
 
-            if dic['pred_mod'] == 'attr':
-                pred_data.append(attr_pred_data)
-                label_data.append(attr_labels_data)
-            else:
-                pred_data.append(senti_pred_data)
-                label_data.append(senti_labels_data)
-        pred_data = np.concatenate(pred_data,axis=0)
-        label_data = np.concatenate(label_data,axis=0)
+            ## attribute ##
+            attr_pred_value_ls.append(attr_pred_value)
+            attr_label_value_ls.append(attr_labels_data)
+            # (batch size*19, attributes num, words num)
+            attr_score_value = np.concatenate(sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict),axis=0)
+            shape = attr_score_value.shape
+            # (batch size, 19, attributes num, words num)
+            attr_score_value = np.reshape(attr_score_value,newshape=(shape[0]/19,19,shape[1],shape[2]))
+            attr_score_value_ls.append(attr_score_value)
+
+            ## sentiment ##
+            senti_pred_value_ls.append(senti_pred_value)
+            senti_label_value_ls.append(senti_labels_data)
+
+            # (batch size, number of words, 3+3*attributes number)
+            item1_value = np.concatenate(sess.run(tf.get_collection('item1'), feed_dict=feed_dict), axis=0)
+            # (batch size, 3+3*attributes number, number of words)
+            item1_value = np.transpose(item1_value, [0, 2, 1])
+            shape = item1_value.shape
+            # (batch size, 1+attributes number, 3, number of words)
+            item1_value = np.reshape(item1_value, newshape=(shape[0], shape[1] / 3, 3, shape[2]))
+            shape = item1_value.shape
+            # (batch size, 1+attributes number, 3, number of words)
+            item1_value = np.reshape(item1_value,newshape=(shape[0]/19,19,shape[1],shape[2],shape[3]))
+            # (batch size, number of attributes+1, number of words)
+            item2_value = np.concatenate(sess.run(tf.get_collection('item2'), feed_dict=feed_dict), axis=0)
+            shape = item2_value.shape
+            item2_value = np.reshape(item2_value,newshape=(shape[0]/19,19,shape[1],shape[2]))
+
+            item1_value_ls.append(item1_value)
+            item2_value_ls.append(item2_value)
+
+
+        attr_pred_data = np.concatenate(attr_pred_value_ls,axis=0)
+        attr_label_data = np.concatenate(attr_label_value_ls,axis=0)
+        sent_data = np.concatenate(sent_value_ls,axis=0)
+        attr_score_data = np.concatenate(attr_score_value_ls,axis=0)
+
+        senti_pred_data = np.concatenate(senti_pred_value_ls, axis=0)
+        senti_label_data = np.concatenate(senti_label_value_ls, axis=0)
+        item1_data = np.concatenate(item1_value_ls,axis=0)
+        item2_data = np.concatenate(item2_value_ls,axis=0)
+
+        return attr_pred_data,attr_label_data, attr_score_data, senti_pred_data, senti_label_data,item1_data,item2_data, sent_data
+
+    def metrics(self,true_label,pred_label):
+        tp = self.TP(true_label, pred_label)
+        fp = self.FP(true_label, pred_label)
+        fn = self.FN(true_label, pred_label)
+        precision = tp / (tp + fp + 1e-10)
+        recall = tp / (tp + fn + 1e-10)
+        f1 = 2*precision*recall/(precision+recall+1e-10)
+        return f1
+
+    def report(self,info,):
+        self.outf.write(info)
+
+    def review_len(self,review):
+        condition = np.equal(review,self.pred_config['padding_word_index'])
+        condition = np.greater(np.sum(np.where(condition,np.zeros_like(review).astype('int32'),np.ones_like(review).astype('int32')),axis=1),0)
+        return np.sum(np.where(condition,np.ones_like(condition).astype('int32'),np.zeros_like(condition).astype('int32'))).astype('int32')
+
+    def sent_translate(self,review,):
+
+        # TODO: elimiate padded sentence
+        review_length = self.review_len(review)
+        review_txt = []
+        for i in range(review_length):
+            sentence = review[i]
+            sentence_txt = []
+            for word_id in sentence:
+                if word_id == self.pred_config['padding_word_index']:
+                    break
+                word = self.dictionary[word_id]
+                sentence_txt.append(word)
+            review_txt.append(sentence_txt)
+        return review_txt
+
+    def aspect_translate(self,label):
+        label_txt = []
+        for i in range(label.shape[0]):
+            if label[i] == 1:
+                label_txt.append(self.aspect_dic[i])
+        return label_txt
 
     def prediction(self,model_dic):
         graph = model_dic['graph']
-        with graph.as_default():
-            # shape = (batch size*max review length, attributes num, words num)
-            attr_score_list = tf.get_collection('attr_score')
-            # shape =
-
-
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         with tf.Session(graph=graph, config=config) as sess:
@@ -69,15 +163,35 @@ class SentiPrediction:
 
             dic = {'sess': sess,}
             # ##############
-            # pred attr    #
+            # joint    #
             # ##############
             dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
-            dic['pred_mod'] = 'attr'
-            self.__prediction__(dic, graph, model_dic['gpu_num'])
+            attr_pred_data, attr_label_data, attr_score_data, senti_pred_data, senti_label_data, item1_data, item2_data, sent_data = self.__prediction__(dic, graph, model_dic['gpu_num'])
+
+            shape = attr_pred_data.shape
+            for i in range(shape[0]):
+                pred_label = attr_pred_data[i]
+                true_label = attr_label_data[i]
+                f1 = self.metrics(true_label,pred_label)
+                if f1>0.7:
+                    # shape=(19, word num)
+                    sentence_txt = self.sent_translate(sent_data[i])
+                    # (19, attributes num, words num)
+                    # TODO: need to eliminate influence of paded word in a sentence for attr_score
+                    attr_score = attr_score_data[i]
+                    # attr percent is a list
+                    pred_label_txt = self.aspect_translate(attr_pred_data[i])
+                    true_label_txt = self.aspect_translate(attr_label_data[i])
+                    self.report('pred label: %s\n'%(' ,'.join(pred_label_txt)))
+                    self.report('true label: %s\n'%(' ,'.join(true_label_txt)))
+                    for j in range(len(sentence_txt)):
+                        self.report('sentence_%d: %s\n'%(j,sentence_txt[j]))
+                        length = len(sentence_txt[j])
+                        for l in range(self.pred_config['attributes_num']):
+                            self.report('aspect: %s\n'%self.aspect_dic[l])
+                            self.report('attr_percent: %s\n'%str(attr_score[j,l,:length]))
             # ##############
-            # pred senti   #
+            # senti   #
             # ##############
             dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['senti']}
             # dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
-            dic['pred_mod'] = 'senti'
-            self.__prediction__(dic, graph, model_dic['gpu_num'])
