@@ -239,7 +239,10 @@ class CoarseSentiTrain:
                 self.__train__(dic, graph, model_dic['gpu_num'], model_dic['global_step'])
             else:
                 print('initial path: %s' % self.train_config['attr_initial_path'])
-                model_file = tf.train.latest_checkpoint(self.train_config['attr_initial_path'])
+                if tf.train.latest_checkpoint(self.train_config['senti_initial_path']):
+                    model_file = tf.train.latest_checkpoint(self.train_config['senti_initial_path'])
+                else:
+                    model_file = tf.train.latest_checkpoint(self.train_config['attr_initial_path'])
                 model_dic['saver'].restore(sess, model_file)
                 print('restore successful')
 
@@ -252,7 +255,7 @@ class CoarseSentiTrain:
             dic['train_step'] = model_dic['train_step']['senti']
             dic['loss'] = {'attr': model_dic['loss']['attr'], 'senti': model_dic['loss']['senti']}
             # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['senti']}
-            dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['senti']}
+            dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}
             dic['test_mod'] = 'senti'
             self.__train__(dic, graph, model_dic['gpu_num'], model_dic['global_step'])
 
