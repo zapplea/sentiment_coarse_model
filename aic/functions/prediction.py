@@ -1,6 +1,7 @@
 import tensorflow as tf
 import math
 import numpy as np
+from pathlib import Path
 
 from aic.functions.metrics import Metrics
 
@@ -11,6 +12,13 @@ class SentiPrediction:
                            'padding_word_index': 116140,
                            'attributes_num':20}
         self.pred_config.update(config)
+        dir_ls = ['report_filePath',]
+        for name in dir_ls:
+            path = Path(self.pred_config[name])
+            if not path.exists():
+                path.mkdir(parents=True, exist_ok=True)
+        self.pred_config['report_filePath']=self.pred_config['report_filePath']+'report_reg%s_lr%s_mat%s.info'% \
+                                               (str(self.pred_config['reg_rate']), str(self.pred_config['lr']), str(self.pred_config['attribute_mat_size']))
         self.dg = data_feeder
         train_dataset = self.dg('train')
         self.aspect_dic = train_dataset.aspect_dic
@@ -130,7 +138,7 @@ class SentiPrediction:
 
     def sent_translate(self,review,):
 
-        # TODO: elimiate padded sentence
+        # Done:TODO: elimiate padded sentence
         review_length = self.review_len(review)
         review_txt = []
         for i in range(review_length):
@@ -177,7 +185,7 @@ class SentiPrediction:
                     # shape=(19, word num)
                     sentence_txt = self.sent_translate(sent_data[i])
                     # (19, attributes num, words num)
-                    # TODO: need to eliminate influence of paded word in a sentence for attr_score
+                    # DONE:TODO: need to eliminate influence of paded word in a sentence for attr_score
                     attr_score = attr_score_data[i]
                     # attr percent is a list
                     pred_label_txt = self.aspect_translate(attr_pred_data[i])
@@ -191,7 +199,7 @@ class SentiPrediction:
                             self.report('aspect: %s\n'%self.aspect_dic[l])
                             self.report('attr_percent: %s\n'%str(attr_score[j,l,:length]))
             # ##############
-            # senti   #
+            # senti        #
             # ##############
             dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['senti']}
             # dic['pred'] = {'attr': model_dic['pred_labels']['attr'], 'senti': model_dic['pred_labels']['joint']}

@@ -194,7 +194,6 @@ class AttributeFunction:
         graph.add_to_collection(name, pred)
         return pred
 
-
 class SentimentFunction:
     def __init__(self,nn_config):
         self.nn_config = nn_config
