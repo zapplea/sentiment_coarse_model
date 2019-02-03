@@ -1,7 +1,7 @@
 import getpass
 import sys
 if getpass.getuser() == 'yibing':
-    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
+    sys.path.append('/home/yibing/Documents/code/nlp/sentiment_coarse_model')
 elif getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
 elif getpass.getuser() == 'liu121':
