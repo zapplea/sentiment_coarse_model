@@ -182,7 +182,7 @@ class CoarseCommFunction:
         paddings = tf.ones_like(X, dtype='int32') * self.nn_config['padding_word_index']
         condition = tf.equal(paddings, X)
         mask = tf.where(condition, tf.ones_like(X, dtype='float32') * (-np.inf), tf.zeros_like(X, dtype='float32'))
-        mask =  tf.reshape(mask, shape=[-1,self.nn_config['words_num']])
+        mask = tf.reshape(mask, shape=[-1,self.nn_config['words_num']])
         return mask
 
         # should use variable share

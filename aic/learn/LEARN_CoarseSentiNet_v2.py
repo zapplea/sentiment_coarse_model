@@ -2,7 +2,7 @@ import getpass
 import sys
 import os
 if getpass.getuser() == 'yibing':
-    sys.path.append('/home/yibing/Documents/code/nlp/sentiment_coarse_model')
+    sys.path.append('/home/yibing/Documents/csiro/sentiment_coarse_model')
 elif getpass.getuser() == 'lujunyu':
     sys.path.append('/home/lujunyu/repository/sentiment_coarse_model')
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -40,7 +40,8 @@ if __name__ == "__main__":
                 'attributes_num':20,
                 'epoch': args.epoch,
                 'epoch_mod':1,
-                'early_stop_limit':2,
+                'early_stop_limit':1,
+                'CoarseSenti_v2':{'bilstm':{'n_layers':2}}
             }
 
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse_trail.pkl'
