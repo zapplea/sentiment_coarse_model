@@ -221,7 +221,7 @@ class AttributeFunction:
         """
         # shape = (batch size*max review length, words num, n_layers * lstm cell size)
         H = tf.concat(layers,axis=2)
-        batch_size = self.nn_config['batch_size']*self.nn_config['max_review_len']
+        batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])*self.nn_config['max_review_len']
         # shape of each scalar is: (1, attributes num, words num)
         attention_ls = tf.split(attention,num_or_size_splits=batch_size,axis=0)
         # shape of each scalar is: (1, words num, n_layers * lstm cell size)
@@ -262,7 +262,7 @@ class AttributeFunction:
         # att.shape=(batch size, context num, max review length)
         # repr.shape=(1, batch size, max review length, n_layers*lstm cell size)
         for att,sent_repr in zip(document_attention_ls,attr_sentence_repr_ls):
-            batch_size = self.nn_config['batch_size']
+            batch_size = int(self.nn_config['batch_size']/self.nn_configp['gpu_num'])
             # shape of each scalar: ( 1,context num, max review length)
             att_ls = tf.split(att,num_or_size_splits=batch_size,axis=0)
             # shape of each scalar: (1,1, max review length, n_layers*lstm cell size)
@@ -743,7 +743,7 @@ class SentimentFunction:
         senti_sentence_repr = tf.reshape(senti_sentence_repr, shape=(-1,
                                                                    self.nn_config['max_review_len'],
                                                                    repr_dim))
-        batch_size = self.nn_config['batch_size']
+        batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
         # shape of each scalar: (1, max review length, lstm cell size)
         senti_sentence_repr_ls = tf.split(senti_sentence_repr, num_or_size_splits=batch_size)
 
@@ -752,7 +752,7 @@ class SentimentFunction:
         # att.shape=(batch size, context num, max review length)
         for att in document_attention_ls:
             # (batch size, context num, n_layers*lstm cell size)
-            batch_size = self.nn_config['batch_size']
+            batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
             # shape of each scalar: (1,context num, max review length)
             att_ls = tf.split(att, num_or_size_splits=batch_size, axis=0)
 

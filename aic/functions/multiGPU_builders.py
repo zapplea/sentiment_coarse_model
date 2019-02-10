@@ -25,7 +25,7 @@ class SentiNetBuilder:
             'reg_rate': 1E-5,
             'lr': 1E-4,
             'is_mat': True,
-            'gpu_num':4,
+            'gpu_num':2,
             'with_elmo':False,
             'elmo':{}
         }
