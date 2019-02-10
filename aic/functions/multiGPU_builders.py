@@ -245,6 +245,7 @@ class SentiNetBuilder:
                 for k in range(self.nn_config['gpu_num']):
                     with tf.device('/gpu:%d'%k):
                         with tf.variable_scope('sentiment', reuse=k > 0):
+                            print('============ multiGPU %d ============' % k)
                             model = Model(self.nn_config, graph=graph,table=table)
                             models.append(model)
 
@@ -257,7 +258,6 @@ class SentiNetBuilder:
                             # joint
                             self.compute_grads(mod = 'joint', opt=opt, tower_grads=joint_tower_grads,
                                                graph=graph)
-                    print('============ multiGPU %d ============'%k)
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
                 # attr_clipped_grads, _ = self.clip_grads(attr_avg_grads,self.nn_config,False,global_step)
