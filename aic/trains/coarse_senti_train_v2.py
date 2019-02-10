@@ -70,49 +70,7 @@ class CoarseSentiTrain:
         file.flush()
 
     def analysis(self,dic,sess,i,feed_dict,result_ls):
-        joint_loss = sess.run(tf.get_collection('joint_loss')[0], feed_dict=feed_dict)
-        senti_score_with_inf, senti_score, senti_W, attended_senti_W, item1, A_Vi, item2 = sess.run(
-            [tf.get_collection('senti_score_with_inf')[0],
-             tf.get_collection('senti_score')[0],
-             tf.get_collection('senti_W')[0],
-             tf.get_collection('attended_senti_W')[0],
-             tf.get_collection('item1')[0],
-             tf.get_collection('A_Vi')[0],
-             tf.get_collection('item2')[0],],
-            feed_dict=feed_dict)
-        senti_coarse_W = sess.run(tf.get_collection('senti_coarse_W'))
-        attr_pred_labels_with_nonattr = sess.run(tf.get_collection('attr_pred_labels_with_nonattr')[0],feed_dict=feed_dict)
-        senti_W_attention = sess.run(tf.get_collection('senti_W_attention')[0],feed_dict=feed_dict)
-        joint_coarse_score = sess.run(tf.get_collection('joint_coarse_score')[0],feed_dict=feed_dict)
-        senti_H = sess.run(tf.get_collection('senti_H')[0],feed_dict=feed_dict)
-        extors_mask_mat = sess.run(tf.get_collection('extors_mask_mat')[0])
-
-        anal_dic = {'%s_%d' % (dic['test_mod'], i): {
-                                                     # 'attr_pred_labels_with_nonattr':attr_pred_labels_with_nonattr,
-                                                     'senti_H': senti_H,
-                                                     'extors_mask_mat':extors_mask_mat,
-                                                     'senti_W': senti_W,
-                                                     'senti_W_attention': senti_W_attention,
-                                                     # 'attended_senti_W': attended_senti_W,
-                                                     # 'senti_score_with_inf': senti_score_with_inf,
-                                                     # 'item1': item1,
-                                                     # 'A_Vi': A_Vi,
-                                                     # 'item2': item2,
-                                                     # 'senti_coarse_W': senti_coarse_W,
-                                                     # 'joint_loss':joint_loss,
-                                                     # 'joint_coarse_score':joint_coarse_score,
-                                                     }}
-        result_ls.append(anal_dic)
-        if len(result_ls)>=2:
-            result_ls.pop(0)
-        for key in anal_dic:
-            data = anal_dic[key]
-            for dkey in data:
-                if np.any(np.isnan(data[dkey])):
-                    print('NaN batch No.: %d'%i)
-                    for dic in result_ls:
-                        self.write_to_pkl(self.analf, dic)
-                    exit()
+        pass
 
     def get_attr_W(self,sess):
         W_dic={}
@@ -273,10 +231,10 @@ class CoarseSentiTrain:
             # ##########################
             # train joint              #
             # ##########################
-            # self.mt.report('joint in training')
-            # self.mt.report('===========joint============',self.outf,'report')
-            # dic['train_step'] = model_dic['train_step']['joint']
-            # dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
-            # dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
-            # dic['test_mod'] = 'joint'
-            # self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
+            self.mt.report('joint in training')
+            self.mt.report('===========joint============',self.outf,'report')
+            dic['train_step'] = model_dic['train_step']['joint']
+            dic['loss'] = {'attr':model_dic['loss']['attr'],'senti':model_dic['loss']['joint']}
+            dic['pred'] = {'attr':model_dic['pred_labels']['attr'],'senti':model_dic['pred_labels']['joint']}
+            dic['test_mod'] = 'joint'
+            self.__train__(dic, graph, model_dic['gpu_num'],model_dic['global_step'])
