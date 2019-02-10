@@ -257,6 +257,8 @@ class SentiNetBuilder:
                             # joint
                             self.compute_grads(mod = 'joint', opt=opt, tower_grads=joint_tower_grads,
                                                graph=graph)
+                    scope_name = tf.get_default_graph().get_name_scope()
+                    print('scope name: ',scope_name)
                     print('============ multiGPU %d ============'%k)
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
