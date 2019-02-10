@@ -14,7 +14,7 @@ elif getpass.getuser() == 'root':
 
 import argparse
 from aic.coarse_net_v2.senti_net import SentimentNet
-from aic.trains.coarse_senti_train import CoarseSentiTrain
+from aic.trains.coarse_senti_train_v2 import CoarseSentiTrain
 from aic.data_process.senti_datafeeder import DataFeeder
 
 def main(config):
