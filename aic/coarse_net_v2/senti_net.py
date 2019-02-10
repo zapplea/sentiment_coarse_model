@@ -58,7 +58,6 @@ class SentimentNet:
             for i in range(self.nn_config['CoarseSenti_v2']['bilstm']['n_layers']):
                 with tf.variable_scope('bilstm_layer_'+str(i),reuse=tf.AUTO_REUSE):
                     scope_name = tf.get_default_graph().get_name_scope()
-                    print('=============scope name: ', scope_name)
                     # attr_H.shape = (batch size*max review length, max time step, lstm cell size)
                     attr_H = self.comm.sentence_bilstm('attr_reg',
                                                        pre_H,
@@ -105,7 +104,7 @@ class SentimentNet:
             # shape = (n_layers, batch size * max review length, max_time, cell size)
             for i in range(self.nn_config['CoarseSenti_v2']['bilstm']['n_layers']):
                 with tf.variable_scope('bilstm_layer_' + str(i), reuse=tf.AUTO_REUSE):
-                    scope_name = 'sentiment/sentiExtr'
+                    scope_name = tf.get_default_graph().get_name_scope()
                     # H.shape = (batch size * max review length, max_time, cell size)
                     senti_H = self.comm.sentence_bilstm('senti_reg',
                                                         pre_H,
