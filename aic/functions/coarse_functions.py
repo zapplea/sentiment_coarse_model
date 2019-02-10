@@ -262,7 +262,7 @@ class AttributeFunction:
         # att.shape=(batch size, context num, max review length)
         # repr.shape=(1, batch size, max review length, n_layers*lstm cell size)
         for att,sent_repr in zip(document_attention_ls,attr_sentence_repr_ls):
-            batch_size = int(self.nn_config['batch_size']/self.nn_configp['gpu_num'])
+            batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
             # shape of each scalar: ( 1,context num, max review length)
             att_ls = tf.split(att,num_or_size_splits=batch_size,axis=0)
             # shape of each scalar: (1,1, max review length, n_layers*lstm cell size)
