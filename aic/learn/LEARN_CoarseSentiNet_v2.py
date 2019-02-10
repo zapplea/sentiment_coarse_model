@@ -41,7 +41,8 @@ if __name__ == "__main__":
                 'epoch': args.epoch,
                 'epoch_mod':1,
                 'early_stop_limit':1,
-                'CoarseSenti_v2':{'bilstm':{'n_layers':2}}
+                'CoarseSenti_v2':{'bilstm':{'n_layers':2},
+                                  'context_mat_size':4}
             }
 
     config['train_data_file_path'] = '/datastore/liu121/sentidata2/data/aic2018/coarse_data/train_coarse_trail.pkl'
