@@ -92,6 +92,8 @@ class SentimentNet:
             # for the padded sentence, all words have the same attention. for patially paded sentence, the padded
             # words' attention will be 0.
             attr_sentence_repr = self.af.sentence_repr(sentence_attention,[sentence_ls[0],sentence_ls[-1]])
+            # n_layers is decided by number of input layers in self.af.sentence_repr()
+            n_layers = 2
 
         # #################### #
         # sentiment extraction #
@@ -118,7 +120,7 @@ class SentimentNet:
 
         with tf.variable_scope('document',reuse=tf.AUTO_REUSE):
             # shape = (attributes num, context num, sentence_repr dim)
-            Z_mat = self.comm.context_matrix(self.reg,attr_sentence_repr)
+            Z_mat = self.comm.context_matrix(self.reg,n_layers*self.nn_config['lstm_cell_size'])
             # shape = (attributes num, batch size*max review length, context num)
             document_attention_ls = self.comm.document_attention(self, Z_mat, attr_sentence_repr,mask)
             # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
