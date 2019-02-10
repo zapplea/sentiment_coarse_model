@@ -55,7 +55,7 @@ class SentimentNet:
             pre_H = X
             score_ls = []
             sentence_ls = [X]
-            for i in range(self.nn_config['CoarseSenti_v2']['n_layers']):
+            for i in range(self.nn_config['CoarseSenti_v2']['bilstm']['n_layers']):
                 with tf.variable_scope('bilstm_layer_'+str(i),reuse=tf.AUTO_REUSE):
                     scope_name = tf.get_default_graph().get_name_scope()
                     # attr_H.shape = (batch size*max review length, max time step, lstm cell size)
