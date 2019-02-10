@@ -244,7 +244,7 @@ class SentiNetBuilder:
                 opt = tf.train.AdamOptimizer(self.nn_config['lr'])
                 for k in range(self.nn_config['gpu_num']):
                     with tf.device('/gpu:%d'%k):
-                        with tf.variable_scope('sentiment', reuse=tf.AUTO_REUSE):
+                        with tf.variable_scope('sentiment', reuse=k > 0):
                             model = Model(self.nn_config, graph=graph,table=table)
                             models.append(model)
 
