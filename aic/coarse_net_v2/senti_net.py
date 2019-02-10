@@ -100,7 +100,7 @@ class SentimentNet:
         with tf.variable_scope('sentiExtr', reuse= tf.AUTO_REUSE):
             pre_H = X
             # shape = (n_layers, batch size * max review length, max_time, cell size)
-            for i in range(self.nn_config['CoarseSenti_v2']['n_layers']):
+            for i in range(self.nn_config['CoarseSenti_v2']['bilstm']['n_layers']):
                 with tf.variable_scope('bilstm_layer_' + str(i), reuse=tf.AUTO_REUSE):
                     scope_name = tf.get_default_graph().get_name_scope()
                     # H.shape = (batch size * max review length, max_time, cell size)

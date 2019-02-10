@@ -742,7 +742,7 @@ class SentimentFunction:
         senti_sentence_repr = tf.reshape(senti_sentence_repr, shape=(-1,
                                                                    self.nn_config['max_review_len'],
                                                                    repr_dim))
-        batch_size = tf.shape(senti_sentence_repr)[0]
+        batch_size = self.nn_config['batch_size']
         # shape of each scalar: (1, max review length, lstm cell size)
         senti_sentence_repr_ls = tf.split(senti_sentence_repr, num_or_size_splits=batch_size)
 
@@ -753,11 +753,11 @@ class SentimentFunction:
             # (batch size, context num, n_layers*lstm cell size)
             batch_size = self.nn_config['batch_size']
             # shape of each scalar: (1,context num, max review length)
-            att_ls = tf.split(att, num_or_size_splits=batch_size, axis=1)
+            att_ls = tf.split(att, num_or_size_splits=batch_size, axis=0)
 
             # shape = (batch size, context num, lstm cell size)
             da_ls = []
-            # att2.shape = (1, 1,context num, max review length)
+            # att2.shape = (1,context num, max review length)
             # sent_repr2.shape = (1, max review length, lstm cell size)
             for att2, sent_repr2 in zip(att_ls, senti_sentence_repr_ls):
                 # shape = (context num, max review length)
