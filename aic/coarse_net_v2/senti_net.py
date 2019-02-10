@@ -122,7 +122,7 @@ class SentimentNet:
             # shape = (attributes num, context num, sentence_repr dim)
             Z_mat = self.comm.context_matrix(self.reg,n_layers*self.nn_config['lstm_cell_size'])
             # shape = (attributes num, batch size*max review length, context num)
-            document_attention_ls = self.comm.document_attention(self, Z_mat, attr_sentence_repr,mask)
+            document_attention_ls = self.comm.document_attention(Z_mat, attr_sentence_repr,mask)
             # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
             attr_D_repr = self.af.attr_document_repr(document_attention_ls, attr_sentence_repr)
             # shape = (attributes num, batch size, context num*lstm cell size)
