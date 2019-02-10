@@ -59,7 +59,6 @@ class SentimentNet:
                 with tf.variable_scope('bilstm_layer_'+str(i),reuse=tf.AUTO_REUSE):
                     scope_name = tf.get_default_graph().get_name_scope()
                     print('=============scope name: ', scope_name)
-                    scope_name = 'sentiment/attrExtr'
                     # attr_H.shape = (batch size*max review length, max time step, lstm cell size)
                     attr_H = self.comm.sentence_bilstm('attr_reg',
                                                        pre_H,
