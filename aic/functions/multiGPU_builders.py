@@ -257,6 +257,7 @@ class SentiNetBuilder:
                             # joint
                             self.compute_grads(mod = 'joint', opt=opt, tower_grads=joint_tower_grads,
                                                graph=graph)
+                print('============ multiGPU 1 ============')
                 # gradient and train step
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
                 # attr_clipped_grads, _ = self.clip_grads(attr_avg_grads,self.nn_config,False,global_step)
