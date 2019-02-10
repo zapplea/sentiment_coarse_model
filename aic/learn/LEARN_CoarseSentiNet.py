@@ -13,7 +13,7 @@ elif getpass.getuser() == 'root':
     sys.path.append('/root/sentiment_coarse_model')
 
 import argparse
-from aic.coarse_net_v2.senti_net import SentimentNet
+from aic.coarse_net.senti_net import SentimentNet
 from aic.trains.coarse_senti_train import CoarseSentiTrain
 from aic.data_process.senti_datafeeder import DataFeeder
 
