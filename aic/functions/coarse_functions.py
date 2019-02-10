@@ -221,7 +221,7 @@ class AttributeFunction:
         """
         # shape = (batch size*max review length, words num, n_layers * lstm cell size)
         H = tf.concat(layers,axis=2)
-        batch_size = tf.shape(H)[0]
+        batch_size = self.nn_config['batch_size']*self.nn_config['max_review_len']
         # shape of each scalar is: (1, attributes num, words num)
         attention_ls = tf.split(attention,num_or_size_splits=batch_size,axis=0)
         # shape of each scalar is: (1, words num, n_layers * lstm cell size)
@@ -259,13 +259,12 @@ class AttributeFunction:
         attr_sentence_repr_ls = tf.split(attr_sentence_repr,num_or_size_splits=self.nn_config['coarse_attributes_num'])
         # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
         D_ls = []
-        # att.shape=(1,batch size, context num, max review length)
+        # att.shape=(batch size, context num, max review length)
         # repr.shape=(1, batch size, max review length, n_layers*lstm cell size)
         for att,sent_repr in zip(document_attention_ls,attr_sentence_repr_ls):
-            # (batch size, context num, n_layers*lstm cell size)
-            batch_size = tf.shape(att)[1]
+            batch_size = self.nn_config['batch_size']
             # shape of each scalar: ( 1,context num, max review length)
-            att_ls = tf.split(att,num_or_size_splits=batch_size,axis=1)
+            att_ls = tf.split(att,num_or_size_splits=batch_size,axis=0)
             # shape of each scalar: (1,1, max review length, n_layers*lstm cell size)
             sent_repr_ls = tf.split(sent_repr,num_or_size_splits=batch_size,axis=1)
             # shape = (batch size, context num, n_layers*lstm cell size)
@@ -734,7 +733,7 @@ class SentimentFunction:
     def senti_document_repr(self, document_attention_ls, senti_sentence_repr):
         """
 
-        :param docuemnt_attention_ls: shape = (attributes num, 1, batch size, context num, max review length)
+        :param docuemnt_attention_ls: shape = (attributes num, batch size, context num, max review length)
         :param senti_sentence_repr: (batch size * max review length, lstm cell size)
         :return:
         """
@@ -749,11 +748,11 @@ class SentimentFunction:
 
         # shape = (attributes num, batch size, context num*lstm cell size)
         D_ls = []
-        # att.shape=(1,batch size, context num, max review length)
+        # att.shape=(batch size, context num, max review length)
         for att in document_attention_ls:
             # (batch size, context num, n_layers*lstm cell size)
-            batch_size = tf.shape(att)[1]
-            # shape of each scalar: (1, 1,context num, max review length)
+            batch_size = self.nn_config['batch_size']
+            # shape of each scalar: (1,context num, max review length)
             att_ls = tf.split(att, num_or_size_splits=batch_size, axis=1)
 
             # shape = (batch size, context num, lstm cell size)
