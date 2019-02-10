@@ -60,7 +60,7 @@ class SentimentNet:
                     scope_name = tf.get_default_graph().get_name_scope()
                     scope_name_ls = scope_name.split('/')
                     scope_name_ls[0] = 'sentiment'
-                    scope_name = '/'.jion(scope_name_ls)
+                    scope_name = '/'.join(scope_name_ls)
                     # attr_H.shape = (batch size*max review length, max time step, lstm cell size)
                     attr_H = self.comm.sentence_bilstm('attr_reg',
                                                        pre_H,
