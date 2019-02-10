@@ -722,11 +722,12 @@ class SentimentFunction:
         dim = tf.shape(sentence)[-1]
         # padded words is -inf, and others are 0
         # shape = (batch size*review length,max words num, cell size)
-        mask = tf.reshape(tf.tile(tf.expand_dims(mask,axis=2),multiples=[1,1,dim]),)
+        mask = tf.tile(tf.expand_dims(mask,axis=2),multiples=[1,1,dim])
 
         # the paddes words will be -inf
+        # shape = (batch size*review length,max words num, cell size)
+        sentence = tf.add(sentence, mask)
         # shape = (batch size * max review length, cell size)
-        sentence = tf.add(sentence,mask)
         sentence = tf.reduce_max(sentence,axis=1)
         return sentence
 
