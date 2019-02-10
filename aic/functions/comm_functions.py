@@ -274,14 +274,14 @@ class CoarseCommFunction:
     # ######################### #
     # CoarseSenti Net Version 2 #
     # ######################### #
-    def context_matrix(self,reg,last_dim):
+    def context_matrix(self,reg,n_layers):
         """
 
         :param reg:
         :param attr_sentence_repr: shape=(batch size*max review length, attributes num, n_layers*lstm cell size)
         :return:
         """
-        shape = (self.nn_config['coarse_attributes_num'],self.nn_config['CoarseSenti_v2']['context_mat_size'],last_dim)
+        shape = (self.nn_config['coarse_attributes_num'],self.nn_config['CoarseSenti_v2']['context_mat_size'],n_layers*self.nn_config['lstm_cell_size'])
         # shape = (attributes num, context num, sentence_repr dim)
         Z_mat = tf.get_variable(name='context_matrix',initializer=self.initializer(shape=shape,dtype='float32'))
         for key in reg:

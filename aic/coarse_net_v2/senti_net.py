@@ -120,7 +120,7 @@ class SentimentNet:
 
         with tf.variable_scope('document',reuse=tf.AUTO_REUSE):
             # shape = (attributes num, context num, sentence_repr dim)
-            Z_mat = self.comm.context_matrix(self.reg,n_layers*self.nn_config['lstm_cell_size'])
+            Z_mat = self.comm.context_matrix(self.reg,n_layers)
             # shape = (attributes num, batch size*max review length, context num)
             document_attention_ls = self.comm.document_attention(Z_mat, attr_sentence_repr,mask)
             # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
@@ -129,7 +129,7 @@ class SentimentNet:
             senti_D_repr = self.sf.senti_document_repr(document_attention_ls, senti_sentence_repr)
 
             # shape = (batch size, attributes num)
-            attr_score = self.af.review_score_v2(attr_D_repr,self.reg)
+            attr_score = self.af.review_score_v2(attr_D_repr,n_layers,self.reg)
             # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.review_score_v2(senti_D_repr,self.reg)
 

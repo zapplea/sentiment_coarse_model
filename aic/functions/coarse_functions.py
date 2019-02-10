@@ -286,13 +286,13 @@ class AttributeFunction:
         D = tf.convert_to_tensor(D_ls)
         return D
 
-    def review_score_v2(self,D,reg):
+    def review_score_v2(self,D,n_layers,reg):
         """
 
         :param D: shape = (attributes num, batch size, context num*n_layers*lstm cell size)
         :return:
         """
-        d_repr_dim = tf.shape(D)[-1]
+        d_repr_dim = self.nn_config['CoarseSenti_v2']['context_mat_size']*n_layers*self.nn_config['lstm_cell_size']
         # shape = (attributes num, context num*n_layers*lstm cell size)
         W = tf.get_variable(name = 'attr_W_score',
                             initializer= self.initializer(shape=(self.nn_config['coarse_attributes_num'],d_repr_dim),
@@ -783,7 +783,7 @@ class SentimentFunction:
         :param D: shape = (attributes num, batch size, context num*lstm cell size)
         :return:
         """
-        d_repr_dim = tf.shape(D)[-1]
+        d_repr_dim = self.nn_config['CoarseSenti_v2']['context_mat_size']*self.nn_config['lstm_cell_size']
         # shape = (attributes num, sentiment num,context num*lstm cell size)
         W = tf.get_variable(name = 'senti_W_score',
                             initializer= self.initializer(shape=(self.nn_config['coarse_attributes_num'],
