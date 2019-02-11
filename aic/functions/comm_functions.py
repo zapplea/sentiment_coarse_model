@@ -281,6 +281,7 @@ class CoarseCommFunction:
         """
         Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num'], self.nn_config['sentiment_num']),
                                  dtype='float32')
+        tf.add_to_collection('Y_senti', Y_senti)
         return Y_senti
 
     def context_matrix(self,reg,n_layers):
