@@ -145,6 +145,7 @@ class SentimentNet:
             for reg in self.reg['attr_reg']:
                 reg_list.append(reg)
             attr_loss = self.af.sigmoid_loss('attr_loss', attr_score, Y_att, reg_list, self.graph)
+
             attr_pred_labels = self.af.prediction('attr_pred_labels', attr_score, self.graph)
 
             # TODO: need to add attr pred to senti loss

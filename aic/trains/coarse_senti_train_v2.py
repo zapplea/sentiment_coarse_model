@@ -73,7 +73,9 @@ class CoarseSentiTrain:
         senti_score=sess.run(dic['senti_score'],feed_dict=feed_dict)
         print('senti score: \n',senti_score)
         attr_score = sess.run(dic['attr_score'],feed_dict=feed_dict)
-        print('attr_score: ',attr_score)
+        print('attr_score: \n',attr_score)
+        attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict-feed_dict)
+        print('attr loss: \n', attr_loss)
         exit()
 
     def get_attr_W(self,sess):
