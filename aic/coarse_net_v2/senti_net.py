@@ -153,13 +153,17 @@ class SentimentNet:
 
             # pure senti
             # masked senti score
+            # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.mask_senti_score(senti_score,attr_label=Y_att)
+            tf.add_to_collection('senti_score',senti_score)
+            tf.add_to_collection('Y_senti',Y_senti)
             senti_loss = self.sf.softmax_loss(name='senti_loss',labels=Y_senti, logits=senti_score, reg_list=reg_list,
                                               graph=self.graph)
             senti_pred_labels = self.sf.prediction(name='senti_pred_labels', score=senti_score, Y_att=Y_att,
                                                    graph=self.graph)
 
             # joint senti
+            # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.mask_senti_score(senti_score, attr_label=attr_pred_labels)
             joint_loss = self.sf.softmax_loss(name='joint_loss', labels=Y_senti, logits=senti_score, reg_list=reg_list,
                                               graph=self.graph)

@@ -69,8 +69,12 @@ class CoarseSentiTrain:
         pickle.dump(dic,file)
         file.flush()
 
-    def analysis(self,dic,sess,i,feed_dict,result_ls):
-        pass
+    def analysis(self,dic,sess,i,feed_dict):
+        senti_score=sess.run(dic['senti_score'],feed_dict=feed_dict)
+        print('senti score.shape: ',np.shape(senti_score))
+        Y_senti = sess.run(dic['Y_senti'],feed_dict=feed_dict)
+        print('Y senti.shape: ',np.shape(Y_senti))
+        exit()
 
     def get_attr_W(self,sess):
         W_dic={}
@@ -107,6 +111,10 @@ class CoarseSentiTrain:
                 data_dict = {'X_data': sentences_data, 'Y_att_data': attr_labels_data,
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
+                # analysis
+                self.analysis({'senti_score':tf.get_collection('senti_score')[0],
+                               'Y_senti':tf.get_collection('Y_senti')[0]},
+                              sess,i,feed_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 attr_trainLoss_list.append(attr_train_loss)
