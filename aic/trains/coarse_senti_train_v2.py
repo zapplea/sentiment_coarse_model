@@ -76,6 +76,10 @@ class CoarseSentiTrain:
         print('attr_score: \n',attr_score)
         attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
         print('attr loss: \n', attr_loss)
+        attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
+        print('attr loss without reg: ',attr_loss_without_reg)
+        attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
+        print('attr reg: ',attr_reg)
         exit()
 
     def get_attr_W(self,sess):

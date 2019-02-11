@@ -176,6 +176,8 @@ class AttributeFunction:
         loss = tf.reduce_mean(tf.add(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score),
                                                    axis=1),
                                      tf.reduce_sum(reg_list)))
+        tf.add_to_collection('attr_reg: ',tf.reduce_sum(reg_list))
+        tf.add_to_collection('attr_loss_without_reg',tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_att, logits=score))
         graph.add_to_collection(name,loss)
         return loss
 
