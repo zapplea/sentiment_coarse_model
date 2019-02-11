@@ -33,7 +33,7 @@ class SentimentNet:
         Y_att = self.comm.attribute_labels_input(graph=self.graph)
         # TODO: need to regenerate Y_senti to elinminate non-attribute
         # Y_senti.shape = [batch_size, number of attributes, 3]
-        Y_senti = self.comm.sentiment_labels_input(graph=self.graph)
+        Y_senti = self.comm.sentiment_labels_input_v2()
         # shape = (batch size,)
         review_len = self.comm.review_length(X_ids, self.graph)
         # shape = (batch size*max review length, words num)

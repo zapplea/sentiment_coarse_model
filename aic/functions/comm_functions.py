@@ -274,6 +274,15 @@ class CoarseCommFunction:
     # ######################### #
     # CoarseSenti Net Version 2 #
     # ######################### #
+    def sentiment_labels_input_v2(self,):
+        """
+        :param graph:
+        :return: shape=[batch_size, number of attributes, 3], thus ys=[...,sentence[...,attj_senti[0,1,0],...],...]
+        """
+        Y_senti = tf.placeholder(shape=(None, self.nn_config['attributes_num'], self.nn_config['sentiment_num']),
+                                 dtype='float32')
+        return Y_senti
+
     def context_matrix(self,reg,n_layers):
         """
 
