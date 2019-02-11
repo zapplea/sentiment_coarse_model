@@ -82,6 +82,8 @@ class CoarseSentiTrain:
         print('attr reg: ',attr_reg)
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: ',attr_reg_sum)
+        attr_self_reg = sess.run(tf.get_collection('attr_self_reg'),feed_dict=feed_dict)
+        print('attr self reg: ',attr_self_reg)
         exit()
 
     def get_attr_W(self,sess):
