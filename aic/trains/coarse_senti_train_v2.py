@@ -71,20 +71,21 @@ class CoarseSentiTrain:
 
     def analysis(self,sess,feed_dict):
         senti_score=sess.run(tf.get_collection('senti_score'),feed_dict=feed_dict)
-        print('senti score: \n',senti_score)
+        print('senti score: \n',np.any(np.isnan(senti_score)))
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
-        print('attr_score: \n',attr_score)
+        print('attr_score: \n',np.any(np.isnan(attr_score)))
         attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
-        print('attr loss: \n', attr_loss)
+        print('attr loss: \n', np.any(np.isnan(attr_loss)))
         attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
-        print('attr loss without reg: \n',attr_loss_without_reg)
+        print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
         attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
-        for var in tf.get_collection('attr_reg')[0]:
-            print(var.name)
-        print('attr reg: \n',attr_reg)
+        # for var in tf.get_collection('attr_reg')[0]:
+        #     print(var.name)
+        print('attr reg: \n',np.any(np.isnan(attr_reg)))
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
-        print('attr_reg_sum: \n',attr_reg_sum)
+        print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
         A_mat = sess.run(tf.get_collection('A_mat'),feed_dict=feed_dict)
+        print('A_mat is nan: ',np.any(np.isnan(A_mat)))
 
     def get_attr_W(self,sess):
         W_dic={}
