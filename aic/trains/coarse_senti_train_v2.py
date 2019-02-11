@@ -79,6 +79,8 @@ class CoarseSentiTrain:
         attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
         print('attr loss without reg: ',attr_loss_without_reg)
         attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
+        for var in tf.get_collection('attr_reg')[0]:
+            print(var.name)
         print('attr reg: ',attr_reg)
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: ',attr_reg_sum)
