@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 
 
-def arrange(infile,outfile, bottom, up, mod,is_coarse=False):
+def arrange(infile,outfile, bottom, up, mod,is_coarse=False,ver='v2'):
     with open(infile,'rb') as f:
         if mod == 'train':
             print('train:')
@@ -18,11 +18,11 @@ def arrange(infile,outfile, bottom, up, mod,is_coarse=False):
         if not is_coarse:
             senti_labels=senti_labels[:,:,:3]
             sentence = sentence[:,:210]
-
-        non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
-        non_attr_senti = np.tile(non_attr,reps=[1,3])
-        non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
-        senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
+        if ver=='v1':
+            non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
+            non_attr_senti = np.tile(non_attr,reps=[1,3])
+            non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
+            senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
         attr_labels=attr_labels[bottom:up]
         senti_labels=senti_labels[bottom:up]
         sentence=sentence[bottom:up]
@@ -37,7 +37,7 @@ def arrange(infile,outfile, bottom, up, mod,is_coarse=False):
             pickle.dump((attr_labels, senti_labels, sentence),f)
             print('test successful\n')
 
-def few_shot(infile,outfile, k_shot,mod,is_coarse=False):
+def few_shot(infile,outfile, k_shot,mod,is_coarse=False,ver='v2'):
     print('%s:'%mod)
     with open(infile,'rb') as f:
         if mod == 'train':
@@ -51,11 +51,11 @@ def few_shot(infile,outfile, k_shot,mod,is_coarse=False):
         if not is_coarse:
             senti_labels=senti_labels[:,:,:3]
             sentences = sentences[:, :210]
-
-        non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
-        non_attr_senti = np.tile(non_attr,reps=[1,3])
-        non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
-        senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
+        if ver == 'v1':
+            non_attr = np.zeros((attr_labels.shape[0],1),dtype='float32')
+            non_attr_senti = np.tile(non_attr,reps=[1,3])
+            non_attr_senti = np.expand_dims(non_attr_senti,axis=1)
+            senti_labels = np.concatenate([senti_labels,non_attr_senti],axis=1)
         shotted_attr_labels = []
         shotted_senti_labels = []
         shotted_sentences = []
@@ -149,6 +149,7 @@ if __name__=='__main__':
 
     parser.add_argument('--cmod',type=str,default='coarse')
     parser.add_argument('--fmod',type=str,default='few_shot')
+    parser.add_argument('--ver',type=str,default='v2',help='version of coarse senti net')
     args = parser.parse_args()
 
     path = {'coarse_train_in':'/datastore/liu121/sentidata2/data/aic2018/coarse_data_backup/train_coarse.pkl',
@@ -163,17 +164,17 @@ if __name__=='__main__':
 
     if args.fmod == 'few_shot':
         if args.cmod == 'coarse':
-            few_shot(path['coarse_train_in'], path['coarse_train_out'], args.trf, mod='train',is_coarse=True)
-            few_shot(path['coarse_test_in'], path['coarse_test_out'], args.tef, mod='test',is_coarse=True)
+            few_shot(path['coarse_train_in'], path['coarse_train_out'], args.trf, mod='train',is_coarse=True,ver=args.ver)
+            few_shot(path['coarse_test_in'], path['coarse_test_out'], args.tef, mod='test',is_coarse=True,ver=args.ver)
         else:
-            few_shot(path['fine_train_in'], path['fine_train_out'], args.trf, mod='train',is_coarse=False)
-            few_shot(path['fine_test_in'], path['fine_test_out'], args.tef, mod='test',is_coarse=False)
+            few_shot(path['fine_train_in'], path['fine_train_out'], args.trf, mod='train',is_coarse=False,ver=args.ver)
+            few_shot(path['fine_test_in'], path['fine_test_out'], args.tef, mod='test',is_coarse=False,ver=args.ver)
     elif args.fmod == 'arrange':
         if args.cmod == 'coarse':
-            arrange(path['coarse_train_in'],path['coarse_train_out'],args.trb,args.tru,mod='train',is_coarse=True)
-            arrange(path['coarse_test_in'],path['coarse_test_out'], args.teb, args.teu, mod='test',is_coarse=True)
+            arrange(path['coarse_train_in'],path['coarse_train_out'],args.trb,args.tru,mod='train',is_coarse=True,ver=args.ver)
+            arrange(path['coarse_test_in'],path['coarse_test_out'], args.teb, args.teu, mod='test',is_coarse=True,ver=args.ver)
         else:
-            arrange(path['fine_train_in'],path['fine_train_out'], args.trb,args.tru,mod='train',is_coarse=False)
-            arrange(path['fine_test_in'],path['fine_test_out'], args.teb,args.teu,mod='test',is_coarse=False)
+            arrange(path['fine_train_in'],path['fine_train_out'], args.trb,args.tru,mod='train',is_coarse=False,ver=args.ver)
+            arrange(path['fine_test_in'],path['fine_test_out'], args.teb,args.teu,mod='test',is_coarse=False,ver=args.ver)
     else:
         elmo_text(path['coarse_train_in'])
