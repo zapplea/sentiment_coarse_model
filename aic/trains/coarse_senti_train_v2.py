@@ -82,9 +82,6 @@ class CoarseSentiTrain:
         print('attr reg: ',attr_reg)
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: ',attr_reg_sum)
-        attr_self_reg = sess.run(tf.get_collection('attr_self_reg'),feed_dict=feed_dict)
-        print('attr self reg: ',attr_self_reg)
-        exit()
 
     def get_attr_W(self,sess):
         W_dic={}
@@ -127,6 +124,8 @@ class CoarseSentiTrain:
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 attr_trainLoss_list.append(attr_train_loss)
                 senti_trainLoss_list.append(senti_train_loss)
+                self.analysis(sess, feed_dict)
+                exit()
 
             if i % self.train_config['epoch_mod'] == 0:
                 self.mt.report('\nepoch: %d'%i,self.outf,'report')

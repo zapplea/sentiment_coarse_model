@@ -144,7 +144,6 @@ class SentimentNet:
             for reg in self.reg['attr_reg']:
                 reg_list.append(reg)
 
-            tf.add_to_collection('attr_self_reg',self.reg['attr_reg'])
             tf.add_to_collection('attr_reg',reg_list)
             tf.add_to_collection('attr_reg_sum', tf.reduce_sum(reg_list))
             attr_loss = self.af.sigmoid_loss('attr_loss', attr_score, Y_att, reg_list, self.graph)
