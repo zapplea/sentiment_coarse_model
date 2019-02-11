@@ -136,6 +136,7 @@ class SentimentNet:
 
             # shape = (batch size, attributes num)
             attr_score = self.af.review_score_v2(attr_D_repr,n_layers,self.reg)
+            tf.add_to_collection('attr_score',attr_score)
             # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.review_score_v2(senti_D_repr,self.reg)
 
@@ -156,7 +157,6 @@ class SentimentNet:
             # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.mask_senti_score(senti_score,attr_label=Y_att)
             tf.add_to_collection('senti_score',senti_score)
-            tf.add_to_collection('Y_senti',Y_senti)
             senti_loss = self.sf.softmax_loss(name='senti_loss',labels=Y_senti, logits=senti_score, reg_list=reg_list,
                                               graph=self.graph)
             senti_pred_labels = self.sf.prediction(name='senti_pred_labels', score=senti_score, Y_att=Y_att,

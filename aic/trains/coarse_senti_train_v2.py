@@ -71,9 +71,9 @@ class CoarseSentiTrain:
 
     def analysis(self,dic,sess,i,feed_dict):
         senti_score=sess.run(dic['senti_score'],feed_dict=feed_dict)
-        print('senti score.shape: ',np.shape(senti_score))
-        Y_senti = sess.run(dic['Y_senti'],feed_dict=feed_dict)
-        print('Y senti.shape: ',np.shape(Y_senti))
+        print('senti score: \n',senti_score)
+        attr_score = sess.run(dic['attr_score'],feed_dict=feed_dict)
+        print('attr_score: ',attr_score)
         exit()
 
     def get_attr_W(self,sess):
@@ -112,9 +112,9 @@ class CoarseSentiTrain:
                              'Y_senti_data': senti_labels_data, 'keep_prob': self.train_config['keep_prob_lstm']}
                 feed_dict = self.generate_feed_dict(graph=graph, gpu_num=gpu_num, data_dict=data_dict)
                 # analysis
-                # self.analysis({'senti_score':tf.get_collection('senti_score')[0],
-                #                'Y_senti':tf.get_collection('Y_senti')[0]},
-                #               sess,i,feed_dict)
+                self.analysis({'senti_score':tf.get_collection('senti_score')[0],
+                               'attr_score':tf.get_collection('attr_score')[0]},
+                              sess,i,feed_dict)
                 _, attr_train_loss, senti_train_loss, attr_pred_data, senti_pred_data \
                     = sess.run([train_step, attr_loss, senti_loss, attr_pred, senti_pred],feed_dict=feed_dict)
                 attr_trainLoss_list.append(attr_train_loss)
@@ -178,7 +178,6 @@ class CoarseSentiTrain:
                     self.mt.report('Train_loss:%.10f' % np.mean(senti_trainLoss_list), self.outf, 'report')
                     self.mt.report('Val_loss:%.10f' % loss_value, self.outf, 'report')
                     _f1_score = self.mt.calculate_metrics_score(TP_vec=TP_vec, FP_vec=FP_vec, FN_vec=FN_vec,outf=self.outf,id_to_aspect_dic=self.dg.id_to_aspect_dic,mod='senti')
-
 
                 if best_f1_score >= _f1_score:
                     early_stop_count += 1
