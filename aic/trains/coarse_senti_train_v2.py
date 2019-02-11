@@ -70,6 +70,9 @@ class CoarseSentiTrain:
         file.flush()
 
     def analysis(self,sess,feed_dict):
+        print('===================================')
+        A_mat = sess.run(tf.get_collection('A_mat'), feed_dict=feed_dict)
+        print('A_mat is nan: ', np.any(np.isnan(A_mat)))
         senti_score=sess.run(tf.get_collection('senti_score'),feed_dict=feed_dict)
         print('senti score: \n',np.any(np.isnan(senti_score)))
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
