@@ -115,17 +115,21 @@ class CoarseSentiTrain:
 
         print('============ check grads and vars ============')
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
-        new_grads_and_vars = []
+        new_grads_and_vars = [[],[]]
         for k in range(len(tf.get_collection('attr_grads_and_vars'))):
             print('gpu: %d'%k)
-            attr_vars = tf.get_collection('attr_grads_and_vars')[k]
+            attr_grads_and_vars_gpuk = tf.get_collection('attr_grads_and_vars')[k]
+            attr_vars = attr_grads_and_vars_gpuk[0]
+            attr_grads = attr_grads_and_vars_gpuk[1]
             for i in range(len(attr_vars)):
                 for j in range(len(attr_vars[i])):
                     if attr_vars[i][j] is None:
                         continue
                     if 'A_mat:' in attr_vars[i][j].name:
+                        new_grads_and_vars[0].append(attr_grads[i][j])
+                        new_grads_and_vars[1].append(attr_vars[i][j])
                         print('%s : \n%s'%(attr_vars[i][j].name,
-                                           str(np.any(np.isnan(sess.run(tf.get_collection('attr_grads_and_vars')[0][i][j],feed_dict=feed_dict))))))
+                                           str(np.any(np.isnan(sess.run(attr_grads[i][j],feed_dict=feed_dict))))))
                         print('#################')
             # if 'A_mat' in attr_vars[i].name:
             #     print(attr_grads)
