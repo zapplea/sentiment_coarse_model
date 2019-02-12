@@ -72,23 +72,23 @@ class CoarseSentiTrain:
     def analysis(self,sess,feed_dict):
         print('===================================')
 
-        A_mat = sess.run(tf.get_collection('A_mat'), feed_dict=feed_dict)
-        print('A_mat is nan: ', np.any(np.isnan(A_mat)))
+        A_mat = sess.run(tf.get_collection('A_mat'))
+        print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
 
         score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
-        print('score ls is nan: ',np.any(np.isnan(score_ls)))
+        print('score ls is nan: \n',np.any(np.isnan(score_ls)))
 
         sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
-        print('sentence attention is nan: ',np.any(np.isnan(sentence_attention)))
+        print('sentence attention is nan: \n',np.any(np.isnan(sentence_attention)))
 
         attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
-        print('attr_sentence_repr is nan: ',np.any(np.isnan(attr_sentence_repr)))
+        print('attr_sentence_repr is nan: \n',np.any(np.isnan(attr_sentence_repr)))
 
         document_attention_ls = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
-        print('document_attention_ls is nan: ',np.any(np.isnan(document_attention_ls)))
+        print('document_attention_ls is nan: \n',np.any(np.isnan(document_attention_ls)))
 
         attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
-        print('attr_D_repr is nan: ',np.any(np.isnan(attr_D_repr)))
+        print('attr_D_repr is nan: \n',np.any(np.isnan(attr_D_repr)))
 
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
         print('attr_score is nan: \n',np.any(np.isnan(attr_score)))
