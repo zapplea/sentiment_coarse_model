@@ -118,6 +118,7 @@ class CoarseSentiTrain:
         attr_vars = tf.get_collection('attr_grads_and_vars')[0]
         for i in range(len(attr_vars)):
             print(attr_vars[i])
+            print('#################')
             # if 'A_mat' in attr_vars[i].name:
             #     print(attr_grads)
 
