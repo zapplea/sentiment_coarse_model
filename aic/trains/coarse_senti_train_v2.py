@@ -114,11 +114,13 @@ class CoarseSentiTrain:
         print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
 
         print('============ check grads and vars ============')
-        # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0][0],feed_dict=feed_dict)
+        attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         attr_vars = tf.get_collection('attr_grads_and_vars')[0]
         for i in range(len(attr_vars)):
-            print(attr_vars[i])
-            print('#################')
+            for j in range(len(attr_vars[i])):
+                if 'A_mat:' in attr_vars[i][j].name:
+                    print('%s : \n%s'%(attr_vars[i][j].name,str(attr_grads[i][j])))
+                    print('#################')
             # if 'A_mat' in attr_vars[i].name:
             #     print(attr_grads)
 
