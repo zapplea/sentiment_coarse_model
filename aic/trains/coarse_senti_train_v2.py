@@ -125,7 +125,7 @@ class CoarseSentiTrain:
                         continue
                     if 'A_mat:' in attr_vars[i][j].name:
                         print('%s : \n%s'%(attr_vars[i][j].name,
-                                           str(sess.run(tf.get_collection('attr_grads_and_vars')[0][i][j],feed_dict=feed_dict))))
+                                           str(np.any(np.isnan(sess.run(tf.get_collection('attr_grads_and_vars')[0][i][j],feed_dict=feed_dict))))))
                         print('#################')
             # if 'A_mat' in attr_vars[i].name:
             #     print(attr_grads)
