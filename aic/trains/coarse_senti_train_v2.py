@@ -119,8 +119,8 @@ class CoarseSentiTrain:
         for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
             print('attr_grads_and_vars_gpuk',attr_grads_and_vars_gpuk)
             for i in range(len(attr_grads_and_vars_gpuk)):
-                attr_vars = attr_grads_and_vars_gpuk[i][0]
-                attr_grads = attr_grads_and_vars_gpuk[i][1]
+                attr_grads = attr_grads_and_vars_gpuk[i][0]
+                attr_vars = attr_grads_and_vars_gpuk[i][1]
                 if attr_vars is None:
                     continue
                 if 'A_mat:' in attr_vars.name:
