@@ -73,6 +73,10 @@ class CoarseSentiTrain:
         print('===================================')
         A_mat = sess.run(tf.get_collection('A_mat'), feed_dict=feed_dict)
         print('A_mat is nan: ', np.any(np.isnan(A_mat)))
+        score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
+        print('score ls is nan: ',np.any(np.isnan(score_ls)))
+        sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
+        print('sentence attention is nan: ',np.any(np.isnan(sentence_attention)))
         senti_score=sess.run(tf.get_collection('senti_score'),feed_dict=feed_dict)
         print('senti score: \n',np.any(np.isnan(senti_score)))
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
@@ -87,8 +91,6 @@ class CoarseSentiTrain:
         print('attr reg: \n',np.any(np.isnan(attr_reg)))
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
-        A_mat = sess.run(tf.get_collection('A_mat'),feed_dict=feed_dict)
-        print('A_mat is nan: ',np.any(np.isnan(A_mat)))
 
     def get_attr_W(self,sess):
         W_dic={}

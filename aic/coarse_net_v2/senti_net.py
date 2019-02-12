@@ -90,13 +90,16 @@ class SentimentNet:
                     score = tf.add(score_lstm, score_e)
                     # score_ls.shape = (bilstm n_layers,batch size*max review length, attributes num, words num)
                     score_ls.append(score)
+                    tf.add_to_collection('score_ls',score_ls)
             # Done: need to careful the padded sentence, there will be nan because all exp('-inf')=0 then 0/0 = nan
             # attention.shape = (batch size*max review length, attributes num, words num)
             sentence_attention = self.af.sentence_attention(score_ls)
+            tf.add_to_collection('sentence_attention',sentence_attention)
             # sentence_repr.shape = (batch size*max review length, attributes num, n_layers*lstm cell size)
             # for the padded sentence, all words have the same attention. for patially paded sentence, the padded
             # words' attention will be 0.
             attr_sentence_repr = self.af.sentence_repr(sentence_attention,[sentence_ls[0],sentence_ls[-1]])
+            tf.add_to_collection('attr_sentence_repr',attr_sentence_repr)
             # n_layers is decided by number of input layers in self.af.sentence_repr()
             n_layers = 2
 
