@@ -131,11 +131,12 @@ class CoarseSentiTrain:
                         print('%s : \n%s'%(attr_vars[i][j].name,
                                            str(np.any(np.isnan(sess.run(attr_grads[i][j],feed_dict=feed_dict))))))
                         print('#################')
-            # if 'A_mat' in attr_vars[i].name:
-            #     print(attr_grads)
+            opt = tf.train.AdamOptimizer(0.0001)
+            opt.apply_gradients(new_grads_and_vars,global_step=tf.get_collection('global_step')[0])
 
-        # senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
-        # print('senti score: \n', np.any(np.isnan(senti_score)))
+        A_mat = sess.run(tf.get_collection('A_mat'))
+        print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
+        # TODO: calcualte gradient manually.
 
     def get_attr_W(self,sess):
         W_dic={}

@@ -237,6 +237,7 @@ class SentiNetBuilder:
                 global_step = tf.get_variable(
                     'global_step', [],
                     initializer=tf.constant_initializer(0), trainable=False)
+                tf.add_to_collection('global_step',global_step)
                 table = tf.placeholder(
                     shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
                     dtype='float32')
