@@ -237,7 +237,6 @@ class SentiNetBuilder:
                 global_step = tf.get_variable(
                     'global_step', [],
                     initializer=tf.constant_initializer(0), trainable=False)
-                tf.add_to_collection('global_step',global_step)
                 table = tf.placeholder(
                     shape=(self.nn_config['lookup_table_words_num'], self.nn_config['word_dim']),
                     dtype='float32')
@@ -265,7 +264,7 @@ class SentiNetBuilder:
                 attr_avg_grads = self.average_gradients(attr_tower_grads)
                 # attr_clipped_grads, _ = self.clip_grads(attr_avg_grads,self.nn_config,False,global_step)
                 attr_train_step = opt.apply_gradients(attr_avg_grads,global_step=global_step)
-
+                tf.add_to_collection('global_step', global_step)
                 senti_avg_grads = self.average_gradients(senti_tower_grads)
                 # senti_clipped_grads,_ = self.clip_grads(senti_avg_grads,self.nn_config,False,global_step)
                 senti_train_step = opt.apply_gradients(senti_avg_grads, global_step=global_step)
