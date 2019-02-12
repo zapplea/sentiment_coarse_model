@@ -298,7 +298,7 @@ class AttributeFunction:
         W = tf.get_variable(name = 'attr_score_W',
                             initializer= self.initializer(shape=(self.nn_config['coarse_attributes_num'],d_repr_dim),
                                                           dtype='float32'))
-        tf.add_to_collection('attr_score_W')
+        tf.add_to_collection('attr_score_W',W)
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
         # shape = (batch size, attributes num, context num*n_layers*lstm cell size)
         D = tf.transpose(D,perm=(1,0,2))
