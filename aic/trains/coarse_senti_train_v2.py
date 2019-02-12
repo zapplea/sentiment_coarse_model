@@ -116,9 +116,7 @@ class CoarseSentiTrain:
         print('============ check grads and vars ============')
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         new_grads_and_vars = []
-        for k in range(len(tf.get_collection('attr_grads_and_vars'))):
-            print('gpu: %d'%k)
-            attr_grads_and_vars_gpuk = tf.get_collection('attr_grads_and_vars')[k]
+        for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
             for i in range(len(attr_grads_and_vars_gpuk)):
                 attr_vars = attr_grads_and_vars_gpuk[i][0]
                 attr_grads = attr_grads_and_vars_gpuk[i][1]
@@ -129,8 +127,9 @@ class CoarseSentiTrain:
                     print('%s : \n%s'%(attr_vars.name,
                                        str(np.any(np.isnan(sess.run(attr_grads,feed_dict=feed_dict))))))
                     print('#################')
-            opt = tf.train.AdamOptimizer(0.0001)
-            step = opt.apply_gradients(new_grads_and_vars,global_step=tf.get_collection('global_step')[0])
+        opt = tf.train.AdamOptimizer(0.0001)
+        print('global step: \n',tf.get_collection('global_step'))
+        step = opt.apply_gradients(new_grads_and_vars,global_step=tf.get_collection('global_step')[0])
             sess.run(step,feed_dict=feed_dict)
         # A_mat after update
         A_mat = sess.run(tf.get_collection('A_mat'))
