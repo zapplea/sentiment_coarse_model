@@ -117,7 +117,6 @@ class CoarseSentiTrain:
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         new_grads_and_vars = []
         for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
-            print('attr_grads_and_vars_gpuk',attr_grads_and_vars_gpuk)
             for i in range(len(attr_grads_and_vars_gpuk)):
                 attr_grads = attr_grads_and_vars_gpuk[i][0]
                 attr_vars = attr_grads_and_vars_gpuk[i][1]
