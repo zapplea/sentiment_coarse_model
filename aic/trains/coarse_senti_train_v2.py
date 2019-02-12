@@ -85,16 +85,16 @@ class CoarseSentiTrain:
         print('attr_sentence_repr is nan: ',np.any(np.isnan(attr_sentence_repr)))
 
         document_attention_ls = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
-        print('document_attention_ls is nan: ',document_attention_ls)
+        print('document_attention_ls is nan: ',np.any(np.isnan(document_attention_ls)))
 
         attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
         print('attr_D_repr is nan: ',np.any(np.isnan(attr_D_repr)))
 
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
-        print('attr_score: \n',np.any(np.isnan(attr_score)))
+        print('attr_score is nan: \n',np.any(np.isnan(attr_score)))
 
         attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
-        print('attr loss: \n', np.any(np.isnan(attr_loss)))
+        print('attr loss is nan: \n', np.any(np.isnan(attr_loss)))
 
         attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
         print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
