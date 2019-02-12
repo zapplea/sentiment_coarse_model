@@ -129,8 +129,7 @@ class CoarseSentiTrain:
                     print('#################')
         opt = tf.train.AdamOptimizer(0.0001)
         print('global step: \n',tf.get_collection('global_step'))
-        step = opt.apply_gradients(new_grads_and_vars,
-                                   global_step=tf.get_collection('global_step')[0])
+        step = opt.apply_gradients(new_grads_and_vars,)
         sess.run(step,feed_dict=feed_dict)
         # A_mat after update
         A_mat = sess.run(tf.get_collection('A_mat'))
