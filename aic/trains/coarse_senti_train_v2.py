@@ -113,6 +113,13 @@ class CoarseSentiTrain:
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
 
+        print('============ check grads and vars ============')
+        attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0][0])
+        attr_vars = tf.get_collection('attr_grads_and_vars')[0][1]
+        for i in range(len(attr_vars)):
+            if 'A_mat' in attr_vars[i].name:
+                print(attr_grads)
+
         # senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
         # print('senti score: \n', np.any(np.isnan(senti_score)))
 

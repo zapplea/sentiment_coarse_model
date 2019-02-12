@@ -222,6 +222,8 @@ class SentiNetBuilder:
 
         grad = opt.compute_gradients(graph.get_collection(mod+'_loss')[-1],var_list=var_list,
                                      aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
+        if mod == "attr":
+            tf.add_to_collection('attr_grads_and_vars',grad)
         tower_grads.append(grad)
 
     def build_models(self, Model):
