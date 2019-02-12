@@ -71,26 +71,44 @@ class CoarseSentiTrain:
 
     def analysis(self,sess,feed_dict):
         print('===================================')
+
         A_mat = sess.run(tf.get_collection('A_mat'), feed_dict=feed_dict)
         print('A_mat is nan: ', np.any(np.isnan(A_mat)))
+
         score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
         print('score ls is nan: ',np.any(np.isnan(score_ls)))
+
         sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
         print('sentence attention is nan: ',np.any(np.isnan(sentence_attention)))
-        senti_score=sess.run(tf.get_collection('senti_score'),feed_dict=feed_dict)
-        print('senti score: \n',np.any(np.isnan(senti_score)))
+
+        attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
+        print('attr_sentence_repr is nan: ',np.any(np.isnan(attr_sentence_repr)))
+
+        document_attention_ls = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
+        print('document_attention_ls is nan: ',document_attention_ls)
+
+        attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
+        print('attr_D_repr is nan: ',np.any(np.isnan(attr_D_repr)))
+
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
         print('attr_score: \n',np.any(np.isnan(attr_score)))
+
         attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
         print('attr loss: \n', np.any(np.isnan(attr_loss)))
+
         attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
         print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
+
         attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
         # for var in tf.get_collection('attr_reg')[0]:
         #     print(var.name)
         print('attr reg: \n',np.any(np.isnan(attr_reg)))
+
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
+
+        # senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
+        # print('senti score: \n', np.any(np.isnan(senti_score)))
 
     def get_attr_W(self,sess):
         W_dic={}
