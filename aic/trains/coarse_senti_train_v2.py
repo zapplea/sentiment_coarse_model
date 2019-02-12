@@ -85,11 +85,17 @@ class CoarseSentiTrain:
         attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
         print('attr_sentence_repr is nan: \n',np.any(np.isnan(attr_sentence_repr)))
 
+        Z_mat = sess.run(tf.get_collection('Z_mat'))
+        print('Z_mat is nan: \n',np.any(np.isnan(Z_mat)))
+
         document_attention_ls = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
         print('document_attention_ls is nan: \n',np.any(np.isnan(document_attention_ls)))
 
         attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
         print('attr_D_repr is nan: \n',np.any(np.isnan(attr_D_repr)))
+
+        attr_score_W = sess.run(tf.get_collection('attr_score_W'))
+        print('attr score W is nan: \n',np.any(np.isnan(attr_score_W)))
 
         attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
         print('attr_score is nan: \n',np.any(np.isnan(attr_score)))

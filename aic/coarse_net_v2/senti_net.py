@@ -132,6 +132,7 @@ class SentimentNet:
         with tf.variable_scope('document',reuse=tf.AUTO_REUSE):
             # shape = (attributes num, context num, sentence_repr dim)
             Z_mat = self.comm.context_matrix(self.reg,n_layers)
+            tf.add_to_collection('Z_mat',Z_mat)
             # shape = (attributes num, batch size*max review length, context num)
             document_attention_ls = self.comm.document_attention(Z_mat, attr_sentence_repr,mask)
             tf.add_to_collection('document_attention_ls',document_attention_ls)
