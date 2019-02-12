@@ -74,6 +74,7 @@ class CoarseSentiTrain:
 
         A_mat = sess.run(tf.get_collection('A_mat'))
         print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
+        print('A_mat: \n',A_mat[0])
 
         score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
         print('score ls is nan: \n',np.any(np.isnan(score_ls)))
