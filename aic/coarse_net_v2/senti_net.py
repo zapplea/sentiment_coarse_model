@@ -168,7 +168,7 @@ class SentimentNet:
             # masked senti score
             # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.mask_senti_score(senti_score,attr_label=Y_att)
-            tf.add_to_collection('masked_senti_score',senti_score)
+            tf.add_to_collection('masked_senti_score', senti_score)
             senti_loss = self.sf.softmax_loss(name='senti_loss',labels=Y_senti, logits=senti_score, reg_list=reg_list,
                                               graph=self.graph)
             senti_pred_labels = self.sf.prediction(name='senti_pred_labels', score=senti_score, Y_att=Y_att,
