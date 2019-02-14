@@ -158,6 +158,7 @@ class CoarseSentiTrain:
         senti_loss = sess.run(tf.get_collection('senti_loss'),feed_dict=feed_dict)
         print('senti loss is nan: \n',np.any(np.isnan(senti_loss)))
         # TODO: calcualte gradient manually.
+        print('exit')
         exit()
 
     def get_attr_W(self,sess):
