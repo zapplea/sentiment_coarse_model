@@ -750,7 +750,7 @@ class SentimentFunction:
         sentence = tf.reduce_max(sentence,axis=1)
         return sentence
 
-    def senti_document_repr(self, document_attention, senti_sentence_repr,n_layers):
+    def senti_document_repr(self, document_attention, senti_sentence_repr):
         """
 
         :param docuemnt_attention: shape = (attributes num, batch size, context num, max review length)

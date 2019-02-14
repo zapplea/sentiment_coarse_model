@@ -139,7 +139,7 @@ class SentimentNet:
             attr_D_repr = self.af.attr_document_repr(document_attention, attr_sentence_repr,n_layers)
             tf.add_to_collection('attr_D_repr',attr_D_repr)
             # shape = (attributes num, batch size, context num*lstm cell size)
-            senti_D_repr = self.sf.senti_document_repr(document_attention, senti_sentence_repr,n_layers)
+            senti_D_repr = self.sf.senti_document_repr(document_attention, senti_sentence_repr)
             tf.add_to_collection('senti_D_repr',senti_D_repr)
 
             # shape = (batch size, attributes num)

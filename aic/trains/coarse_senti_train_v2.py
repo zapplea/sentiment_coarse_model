@@ -71,7 +71,7 @@ class CoarseSentiTrain:
 
     def analysis(self,sess,feed_dict):
         print('===================================')
-        # print('++++++++++++++++ attribute part ++++++++++++++++')
+        print('++++++++++++++++ attribute part ++++++++++++++++')
         # A_mat = sess.run(tf.get_collection('A_mat'))
         # print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
         #
@@ -145,8 +145,6 @@ class CoarseSentiTrain:
 
         senti_sentence_repr = sess.run(tf.get_collection('senti_sentence_repr'), feed_dict=feed_dict)
         print('senti_sentence_repr is nan: \n', np.any(np.isnan(senti_sentence_repr)))
-        print('senti_sentence_repr.shape: \n',np.shape(senti_sentence_repr))
-        print('document attention.shape: \n',np.shape(document_attention))
 
         senti_D_repr = sess.run(tf.get_collection('senti_D_repr'), feed_dict=feed_dict)
         print('senti_D_repr is nan: \n', np.any(np.isnan(senti_D_repr)))
@@ -160,6 +158,7 @@ class CoarseSentiTrain:
         senti_loss = sess.run(tf.get_collection('senti_loss'),feed_dict=feed_dict)
         print('senti loss is nan: \n',np.any(np.isnan(senti_loss)))
         # TODO: calcualte gradient manually.
+        exit()
 
     def get_attr_W(self,sess):
         W_dic={}
