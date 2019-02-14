@@ -748,6 +748,9 @@ class SentimentFunction:
         sentence = tf.add(sentence, mask)
         # shape = (batch size * max review length, cell size)
         sentence = tf.reduce_max(sentence,axis=1)
+        # convert -inf to 0, since it will not influence the following calculation
+        condition = tf.is_inf(sentence)
+        sentence = tf.where(condition,tf.zeros_like(sentence),sentence)
         return sentence
 
     def senti_document_repr(self, document_attention, senti_sentence_repr):
