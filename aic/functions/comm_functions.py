@@ -327,7 +327,7 @@ class CoarseCommFunction:
         # shape = (attributes num, batch size, context num, max review length)
         d = tf.transpose(d,perm=(0,2,1,3))
         masked_d = tf.add(d,mask)
-        document_attention = tf.math.softmax(masked_d)
+        document_attention = tf.nn.softmax(masked_d)
 
         return document_attention
         # # shape of each scalar: (1, context num, sentence_repr dim)
