@@ -73,51 +73,58 @@ class CoarseSentiTrain:
         # TODO: check whether there will be inf
         print('===================================')
         print('++++++++++++++++ attribute part ++++++++++++++++')
-        A_mat = sess.run(tf.get_collection('A_mat'))
-        print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
-
-        score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
-        print('score ls is nan: \n',np.any(np.isnan(score_ls)))
-
-        sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
-        print('sentence attention is nan: \n',np.any(np.isnan(sentence_attention)))
-
-        attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
-        print('attr_sentence_repr is nan: \n',np.any(np.isnan(attr_sentence_repr)))
-
-        Z_mat = sess.run(tf.get_collection('Z_mat'))
-        print('Z_mat is nan: \n',np.any(np.isnan(Z_mat)))
-
-        document_attention = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
-        print('document_attention_ls is nan: \n',np.any(np.isnan(document_attention)))
-
-        attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
-        print('attr_D_repr is nan: \n',np.any(np.isnan(attr_D_repr)))
-
-        attr_score_W = sess.run(tf.get_collection('attr_score_W'))
-        print('attr score W is nan: \n',np.any(np.isnan(attr_score_W)))
-
-        attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
-        print('attr_score is nan: \n',np.any(np.isnan(attr_score)))
-
-        attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
-        print('attr loss is nan: \n', np.any(np.isnan(attr_loss)))
-
-        attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
-        print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
-
-        attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
-        print('attr reg: \n',np.any(np.isnan(attr_reg)))
-
-        attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
-        print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
+        # A_mat = sess.run(tf.get_collection('A_mat'))
+        # print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
+        #
+        # score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
+        # print('score ls is nan: \n',np.any(np.isnan(score_ls)))
+        #
+        # sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
+        # print('sentence attention is nan: \n',np.any(np.isnan(sentence_attention)))
+        #
+        # attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
+        # print('attr_sentence_repr is nan: \n',np.any(np.isnan(attr_sentence_repr)))
+        #
+        # Z_mat = sess.run(tf.get_collection('Z_mat'))
+        # print('Z_mat is nan: \n',np.any(np.isnan(Z_mat)))
+        #
+        # document_attention = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
+        # print('document_attention_ls is nan: \n',np.any(np.isnan(document_attention)))
+        #
+        # attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
+        # print('attr_D_repr is nan: \n',np.any(np.isnan(attr_D_repr)))
+        #
+        # attr_score_W = sess.run(tf.get_collection('attr_score_W'))
+        # print('attr score W is nan: \n',np.any(np.isnan(attr_score_W)))
+        #
+        # attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
+        # print('attr_score is nan: \n',np.any(np.isnan(attr_score)))
+        #
+        # attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
+        # print('attr loss is nan: \n', np.any(np.isnan(attr_loss)))
+        #
+        # attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
+        # print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
+        #
+        # attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
+        # print('attr reg: \n',np.any(np.isnan(attr_reg)))
+        #
+        # attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
+        # print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
 
         print('++++++++++++++++ check attr grads and vars ++++++++++++++++')
-        attr_score = tf.get_collection('attr_score')[0]
         attr_loss_without_reg = tf.get_collection('attr_loss_without_reg')[0]
+        attr_loss = tf.get_collection('attr_loss')[0]
+        attr_score = tf.get_collection('attr_score')[0]
+
         g = tf.gradients(attr_loss_without_reg,attr_score)
         result = sess.run(g,feed_dict=feed_dict)
+        print('dattr_loss_without_reg/dattr_score: \n',result)
+
+        g = tf.gradients(attr_loss,attr_score)
+        result = sess.run(g,feed_dict=feed_dict)
         print('dattr_loss/dattr_score: \n',result)
+
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []
         # for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
@@ -136,22 +143,22 @@ class CoarseSentiTrain:
         #         print('#################')
 
         print('++++++++++++++++ sentiment part ++++++++++++++++')
-        senti_sentence_repr = sess.run(tf.get_collection('senti_sentence_repr'), feed_dict=feed_dict)
-        print('senti_sentence_repr is nan: \n', np.any(np.isnan(senti_sentence_repr)))
-
-        senti_D_repr = sess.run(tf.get_collection('senti_D_repr')[0], feed_dict=feed_dict)
-        print('senti_D_repr is nan: \n', np.any(np.isnan(senti_D_repr)))
-
-        senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
-        print('senti_score is nan: \n', np.any(np.isnan(senti_score)))
-
-        masked_senti_score = sess.run(tf.get_collection('masked_senti_score'),feed_dict=feed_dict)
-        print('masked senti score is nan: \n',np.any(np.isnan(masked_senti_score)))
-
-        senti_loss = sess.run(tf.get_collection('senti_loss'),feed_dict=feed_dict)
-        print('senti loss is nan: \n',np.any(np.isnan(senti_loss)))
-
-        print('exit')
+        # senti_sentence_repr = sess.run(tf.get_collection('senti_sentence_repr'), feed_dict=feed_dict)
+        # print('senti_sentence_repr is nan: \n', np.any(np.isnan(senti_sentence_repr)))
+        #
+        # senti_D_repr = sess.run(tf.get_collection('senti_D_repr')[0], feed_dict=feed_dict)
+        # print('senti_D_repr is nan: \n', np.any(np.isnan(senti_D_repr)))
+        #
+        # senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
+        # print('senti_score is nan: \n', np.any(np.isnan(senti_score)))
+        #
+        # masked_senti_score = sess.run(tf.get_collection('masked_senti_score'),feed_dict=feed_dict)
+        # print('masked senti score is nan: \n',np.any(np.isnan(masked_senti_score)))
+        #
+        # senti_loss = sess.run(tf.get_collection('senti_loss'),feed_dict=feed_dict)
+        # print('senti loss is nan: \n',np.any(np.isnan(senti_loss)))
+        #
+        # print('exit')
         exit()
 
     def get_attr_W(self,sess):
