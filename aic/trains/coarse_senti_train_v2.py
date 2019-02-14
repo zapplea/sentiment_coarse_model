@@ -77,7 +77,7 @@ class CoarseSentiTrain:
         size = len(tf.get_collection('A_mat'))
         A_mat_ls = tf.get_collection('A_mat')[:int(size/2)]
         for A_mat in A_mat_ls:
-            print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
+            print('A_mat is nan: \n', np.any(np.isnan(sess.run(A_mat))))
         exit()
         #
         # score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
