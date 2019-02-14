@@ -148,6 +148,8 @@ class CoarseSentiTrain:
 
         senti_D_repr = sess.run(tf.get_collection('senti_D_repr'), feed_dict=feed_dict)
         print('senti_D_repr is nan: \n', np.any(np.isnan(senti_D_repr)))
+        print(senti_D_repr)
+        exit()
 
         senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
         print('senti_score is nan: \n', np.any(np.isnan(senti_score)))
