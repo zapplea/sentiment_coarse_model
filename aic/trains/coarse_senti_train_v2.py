@@ -114,7 +114,7 @@ class CoarseSentiTrain:
         attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
         print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
 
-        print('============ check grads and vars ============')
+        print('++++++++++++++++ check attr grads and vars ++++++++++++++++')
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         new_grads_and_vars = []
         for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
@@ -123,11 +123,11 @@ class CoarseSentiTrain:
                 attr_vars = attr_grads_and_vars_gpuk[i][1]
                 if attr_vars is None:
                     continue
-                if 'A_mat:' in attr_vars.name:
-                    new_grads_and_vars.append((attr_grads,attr_vars))
-                    print('%s : \n%s'%(attr_vars.name,
-                                       str(np.any(np.isnan(sess.run(attr_grads,feed_dict=feed_dict))))))
-                    print('#################')
+                # if 'A_mat:' in attr_vars.name:
+                new_grads_and_vars.append((attr_grads,attr_vars))
+                print('%s : \n%s'%(attr_vars.name,
+                                   str(np.any(np.isnan(sess.run(attr_grads,feed_dict=feed_dict))))))
+                print('#################')
 
 
         # print('new_grads_and_vars: \n',new_grads_and_vars)
@@ -139,8 +139,8 @@ class CoarseSentiTrain:
         # # A_mat after update
         # A_mat = sess.run(tf.get_collection('A_mat'))
         # print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
-        print('++++++++++++++++ sentiment part ++++++++++++++++')
 
+        print('++++++++++++++++ sentiment part ++++++++++++++++')
         # = sess.run(tf.get_collection(''), feed_dict=feed_dict)
         # print('is nan: \n', np.any(np.isnan()))
 
