@@ -132,7 +132,7 @@ class SentimentNet:
             # shape = (attributes num, context num, sentence_repr dim)
             Z_mat = self.comm.context_matrix(self.reg,n_layers)
             tf.add_to_collection('Z_mat',Z_mat)
-            # shape = (attributes num, batch size*max review length, context num)
+            # shape = (attributes num, batch size, context num, max review length)
             document_attention = self.comm.document_attention(Z_mat, attr_sentence_repr,mask)
             tf.add_to_collection('document_attention_ls',document_attention)
             # shape = (attributes num, batch size, context num*n_layers*lstm cell size)

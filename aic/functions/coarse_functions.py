@@ -771,7 +771,7 @@ class SentimentFunction:
         # shape = (batch size, attributes num, context num*lstm cell size)
         senti_D_repr = tf.reshape(senti_D_repr,shape=(-1,
                                                       self.nn_config['attributes_num'],
-                                                      self.nn_config['CoarseSenti_v2']['context_mat_size']*n_layers*self.nn_config['lstm_cell_size']))
+                                                      self.nn_config['CoarseSenti_v2']['context_mat_size']*self.nn_config['lstm_cell_size']))
         return senti_D_repr
         # repr_dim = tf.shape(senti_sentence_repr)[-1]
         # # shape = ( batch size, max review length, lstm cell size)
