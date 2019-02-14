@@ -152,6 +152,16 @@ class CoarseSentiTrain:
         sub_senti_sentence_repr = sess.run(tf.get_collection('sub_senti_sentence_repr')[0], feed_dict=feed_dict)
         print('sub_senti_sentence_repr is nan: \n', np.any(np.isnan(sub_senti_sentence_repr)))
 
+        subsub_document_attention = sub_document_attention[0][0]
+        print(np.shape(subsub_document_attention))
+        subsub_senti_sentence_repr = sub_senti_sentence_repr[0][0]
+        print(np.shape(subsub_senti_sentence_repr))
+        row = subsub_document_attention[0]
+        column = subsub_senti_sentence_repr[:,0]
+        print('row: \n',row)
+        print('column: \n',column)
+        exit()
+
         result = np.matmul(sub_document_attention,sub_senti_sentence_repr)
         print('result: \n',result)
 
