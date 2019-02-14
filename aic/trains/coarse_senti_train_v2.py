@@ -73,12 +73,8 @@ class CoarseSentiTrain:
         # TODO: check whether there will be inf
         print('===================================')
         print('++++++++++++++++ attribute part ++++++++++++++++')
-        A_mat = sess.run(tf.get_collection('A_mat'))
-        size = len(tf.get_collection('A_mat'))
-        A_mat_ls = tf.get_collection('A_mat')[:int(size/2)]
-        for A_mat in A_mat_ls:
-            print('A_mat is nan: \n', np.any(np.isnan(sess.run(A_mat))))
-        exit()
+        # A_mat = sess.run(tf.get_collection('A_mat'))
+        # print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
         #
         # score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
         # print('score ls is nan: \n',np.any(np.isnan(score_ls)))
@@ -120,6 +116,7 @@ class CoarseSentiTrain:
         attr_loss_without_reg = tf.get_collection('attr_loss_without_reg')[0]
         attr_loss = tf.get_collection('attr_loss')[0]
         attr_score = tf.get_collection('attr_score')[0]
+        A_mat_ls = tf.get_collection('A_mat')[:2]
 
 
         g = tf.gradients(attr_loss_without_reg,attr_score,stop_gradients=[attr_score])
@@ -130,7 +127,10 @@ class CoarseSentiTrain:
         result = sess.run(g,feed_dict=feed_dict)
         print('dattr_loss/dattr_score: \n',result)
 
-        g = tf.gradients()
+        for A_mat in A_mat_ls:
+            g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
+            result = sess.run(g,feed_dict=feed_dict)
+            print('dattr_loss/dA_mat: \n',result)
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []
