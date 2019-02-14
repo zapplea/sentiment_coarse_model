@@ -305,6 +305,7 @@ class CoarseCommFunction:
         :param attr_sentence_repr: shape = ( batch size*max review length, attributes num, n_layers*lstm cell size)
         :param mask: shape = (batch size * max review length, max words num)
         :return: attention of padded sentence is (0,0, ..., 0)
+                 shape = (attributes num, batch size, context num, max review length)
         """
         # TODO: need mask to eliminate influence of padded sentence
         # shape = (batch size * max review length,)
@@ -314,33 +315,47 @@ class CoarseCommFunction:
         # shape = (batch size, context num, max review length)
         mask = tf.tile(tf.expand_dims(mask,axis=1),
                        multiples=[1,self.nn_config['CoarseSenti_v2']['context_mat_size'],1])
+        # shape = (attributes num, n_layers*lstm cell size, batch size*max review length,)
+        attr_sentence_repr = tf.transpose(attr_sentence_repr,perm=(1,2,0))
+        # shape = (attributes num, context num, batch size*max review length)
+        d = tf.matmul(Z_mat,attr_sentence_repr)
+        # shape = (attributes num, context num, batch size, max review length)
+        d = tf.reshape(d,shape=(self.nn_config['coarse_attributes_num'],
+                                self.nn_config['CoarseSenti_v2']['context_mat_size'],
+                                -1,
+                                self.nn_config['max_review_len']))
+        # shape = (attributes num, batch size, context num, max review length)
+        d = tf.transpose(d,perm=(0,2,1,3))
+        masked_d = tf.add(d,mask)
+        document_attention = tf.math.softmax(masked_d)
 
-        # shape of each scalar: (1, context num, sentence_repr dim)
-        Z_mat_ls = tf.split(Z_mat,num_or_size_splits=self.nn_config['coarse_attributes_num'],axis=0)
-        # shape of each scalar: (batch size*max review length, 1, n_layers*lstm cell size)
-        attr_sentence_repr_ls = tf.split(attr_sentence_repr,num_or_size_splits=self.nn_config['coarse_attributes_num'],axis=1)
-        # shape = (attributes num, batch size*max review length, context num)
-        document_attention_ls = []
-        for z_mat,sentence_repr in zip(Z_mat_ls,attr_sentence_repr_ls):
-            # shape = (context num, sentence repr dim)
-            z_mat = tf.squeeze(z_mat)
-            # shape = (batch size*max review length, n_layers*lstm cell size)
-            sentence_repr = tf.squeeze(sentence_repr)
-            # shape = (batch size*max review length, context num)
-            d_atti = tf.matmul(sentence_repr,z_mat,transpose_b=True)
-            # shape = (batch size, max review length, context num)
-            d_atti = tf.reshape(d_atti,shape=(-1,self.nn_config['max_review_len'],
-                                          self.nn_config['CoarseSenti_v2']['context_mat_size']))
-            # shape = (batch size, context num, max review length)
-            d_atti = tf.transpose(d_atti,perm=[0,2,1])
-            # the padded sentence will be -inf
-            d_atti = tf.add(d_atti,mask)
-
-            # shape = (batch size, context num, max review length)
-            document_attention = tf.nn.softmax(d_atti)
-            # shape = (attributes num, batch size, context num, max review length)
-            document_attention_ls.append(document_attention)
-        return document_attention_ls
+        return document_attention
+        # # shape of each scalar: (1, context num, sentence_repr dim)
+        # Z_mat_ls = tf.split(Z_mat,num_or_size_splits=self.nn_config['coarse_attributes_num'],axis=0)
+        # # shape of each scalar: (batch size*max review length, 1, n_layers*lstm cell size)
+        # attr_sentence_repr_ls = tf.split(attr_sentence_repr,num_or_size_splits=self.nn_config['coarse_attributes_num'],axis=1)
+        # # shape = (attributes num, batch size*max review length, context num)
+        # document_attention_ls = []
+        # for z_mat,sentence_repr in zip(Z_mat_ls,attr_sentence_repr_ls):
+        #     # shape = (context num, sentence repr dim)
+        #     z_mat = tf.squeeze(z_mat)
+        #     # shape = (batch size*max review length, n_layers*lstm cell size)
+        #     sentence_repr = tf.squeeze(sentence_repr)
+        #     # shape = (batch size*max review length, context num)
+        #     d_atti = tf.matmul(sentence_repr,z_mat,transpose_b=True)
+        #     # shape = (batch size, max review length, context num)
+        #     d_atti = tf.reshape(d_atti,shape=(-1,self.nn_config['max_review_len'],
+        #                                   self.nn_config['CoarseSenti_v2']['context_mat_size']))
+        #     # shape = (batch size, context num, max review length)
+        #     d_atti = tf.transpose(d_atti,perm=[0,2,1])
+        #     # the padded sentence will be -inf
+        #     d_atti = tf.add(d_atti,mask)
+        #
+        #     # shape = (batch size, context num, max review length)
+        #     document_attention = tf.nn.softmax(d_atti)
+        #     # shape = (attributes num, batch size, context num, max review length)
+        #     document_attention_ls.append(document_attention)
+        # return document_attention_ls
 
 
 

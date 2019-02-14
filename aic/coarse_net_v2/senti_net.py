@@ -98,10 +98,8 @@ class SentimentNet:
             # sentence_repr.shape = (batch size*max review length, attributes num, n_layers*lstm cell size)
             # for the padded sentence, all words have the same attention. for patially paded sentence, the padded
             # words' attention will be 0.
-            attr_sentence_repr = self.af.sentence_repr(sentence_attention,[sentence_ls[0],sentence_ls[-1]])
+            attr_sentence_repr,n_layers = self.af.sentence_repr(sentence_attention,[sentence_ls[0],sentence_ls[-1]])
             tf.add_to_collection('attr_sentence_repr',attr_sentence_repr)
-            # n_layers is decided by number of input layers in self.af.sentence_repr()
-            n_layers = 2
 
         # #################### #
         # sentiment extraction #
@@ -134,13 +132,13 @@ class SentimentNet:
             Z_mat = self.comm.context_matrix(self.reg,n_layers)
             tf.add_to_collection('Z_mat',Z_mat)
             # shape = (attributes num, batch size*max review length, context num)
-            document_attention_ls = self.comm.document_attention(Z_mat, attr_sentence_repr,mask)
-            tf.add_to_collection('document_attention_ls',document_attention_ls)
+            document_attention = self.comm.document_attention(Z_mat, attr_sentence_repr,mask)
+            tf.add_to_collection('document_attention_ls',document_attention)
             # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
-            attr_D_repr = self.af.attr_document_repr(document_attention_ls, attr_sentence_repr)
+            attr_D_repr = self.af.attr_document_repr(document_attention, attr_sentence_repr,n_layers)
             tf.add_to_collection('attr_D_repr',attr_D_repr)
             # shape = (attributes num, batch size, context num*lstm cell size)
-            senti_D_repr = self.sf.senti_document_repr(document_attention_ls, senti_sentence_repr)
+            senti_D_repr = self.sf.senti_document_repr(document_attention, senti_sentence_repr,n_layers)
 
             # shape = (batch size, attributes num)
             attr_score = self.af.review_score_v2(attr_D_repr,n_layers,self.reg)

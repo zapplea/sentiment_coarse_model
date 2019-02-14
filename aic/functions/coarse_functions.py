@@ -222,75 +222,94 @@ class AttributeFunction:
         """
         # shape = (batch size*max review length, words num, n_layers * lstm cell size)
         H = tf.concat(layers,axis=2)
-        batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])*self.nn_config['max_review_len']
-        # shape of each scalar is: (1, attributes num, words num)
-        attention_ls = tf.split(attention,num_or_size_splits=batch_size,axis=0)
-        # shape of each scalar is: (1, words num, n_layers * lstm cell size)
-        H_ls = tf.split(H,num_or_size_splits=batch_size,axis=0)
-
+        sentence_repr = tf.matmul(attention,H)
+        return sentence_repr, len(layers)
+        # batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])*self.nn_config['max_review_len']
+        # # shape of each scalar is: (1, attributes num, words num)
+        # attention_ls = tf.split(attention,num_or_size_splits=batch_size,axis=0)
+        # # shape of each scalar is: (1, words num, n_layers * lstm cell size)
+        # H_ls = tf.split(H,num_or_size_splits=batch_size,axis=0)
+        #
+        # # shape = ( batch size*max review length, attributes num, n_layers*lstm cell size)
+        # sentence_repr_ls = []
+        # for att,h in zip(attention_ls,H_ls):
+        #     # shape = (attributes num, words num))
+        #     attention = tf.squeeze(att,axis=[0])
+        #     # shape = (words num, n_layers * lstm cell size)
+        #     H = tf.squeeze(h,axis=[0])
+        #     # shape = (attributes num, n_layers*lstm cell size)
+        #     sentence_repr = tf.matmul(attention,H)
+        #     sentence_repr_ls.append(sentence_repr)
         # shape = ( batch size*max review length, attributes num, n_layers*lstm cell size)
-        sentence_repr_ls = []
-        for att,h in zip(attention_ls,H_ls):
-            # shape = (attributes num, words num))
-            attention = tf.squeeze(att,axis=[0])
-            # shape = (words num, n_layers * lstm cell size)
-            H = tf.squeeze(h,axis=[0])
-            # shape = (attributes num, n_layers*lstm cell size)
-            sentence_repr = tf.matmul(attention,H)
-            sentence_repr_ls.append(sentence_repr)
-        # shape = ( batch size*max review length, attributes num, n_layers*lstm cell size)
-        return tf.convert_to_tensor(sentence_repr_ls,dtype='float32')
+        # return tf.convert_to_tensor(sentence_repr_ls,dtype='float32')
 
-    def attr_document_repr(self, document_attention_ls, attr_sentence_repr):
+    def attr_document_repr(self, document_attention, attr_sentence_repr,n_layers):
         """
 
         :param document_attention_ls: shape = (attributes num, batch size, context num, max review length)
         :param attr_sentence_repr: shape = ( batch size*max review length, attributes num, n_layers*lstm cell size)
-        :return:
+        :return: ( batch size, attributes num, context num*n_layers*lstm cell size)
         """
-        repr_dim = tf.shape(attr_sentence_repr)[-1]
-        # shape = ( batch size, max review length, attributes num, n_layers*lstm cell size)
-        attr_sentence_repr = tf.reshape(attr_sentence_repr,shape=(-1,
-                                                                  self.nn_config['max_review_len'],
-                                                                  self.nn_config['coarse_attributes_num'],
-                                                                  repr_dim))
-        # shape = ( attributes num, batch size, max review length, n_layers*lstm cell size)
-        attr_sentence_repr = tf.transpose(attr_sentence_repr,perm=(2,0,1,3))
-        # shape of each scalar: (1, batch size, max review length, n_layers*lstm cell size)
-        attr_sentence_repr_ls = tf.split(attr_sentence_repr,num_or_size_splits=self.nn_config['coarse_attributes_num'])
-        # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
-        D_ls = []
-        # att.shape=(batch size, context num, max review length)
-        # repr.shape=(1, batch size, max review length, n_layers*lstm cell size)
-        for att,sent_repr in zip(document_attention_ls,attr_sentence_repr_ls):
-            batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
-            # shape of each scalar: ( 1,context num, max review length)
-            att_ls = tf.split(att,num_or_size_splits=batch_size,axis=0)
-            # shape of each scalar: (1,1, max review length, n_layers*lstm cell size)
-            sent_repr_ls = tf.split(sent_repr,num_or_size_splits=batch_size,axis=1)
-            # shape = (batch size, context num, n_layers*lstm cell size)
-            da_ls = []
-            for att2,sent_repr2 in zip(att_ls,sent_repr_ls):
-                # shape = (context num, max review length)
-                att2 = tf.squeeze(att2)
-                # shape = (max review length, n_layers*lstm cell size)
-                sent_repr2 = tf.squeeze(sent_repr2)
-                # shape = (context num, n_layers*lstm cell size)
-                d_ai = tf.matmul(att2,sent_repr2)
-                # shape = (context num*n_layers*lstm cell size)
-                da = tf.reshape(d_ai,shape=[-1])
-                # shape = (batch size, context num*n_layers*lstm cell size)
-                da_ls.append(da)
-            # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
-            D_ls.append(da_ls)
-        # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
-        D = tf.convert_to_tensor(D_ls)
-        return D
+        # (batch size, attributes num, context num, max review length)
+        document_attention = tf.transpose(document_attention,perm=(1,0,2,3))
+        # ( batch size, max review length, attributes num, n_layers*lstm cell size)
+        attr_sentence_repr = tf.reshape(attr_sentence_repr,
+                                        shape=(-1,
+                                             self.nn_config['max_review_len'],
+                                             self.nn_config['attributes_num'],
+                                             n_layers*self.nn_config['lstm_cell_size']))
+        # ( batch size, attributes num, max review length, n_layers*lstm cell size)
+        attr_sentence_repr = tf.transpose(attr_sentence_repr,perm=(0,2,1,3))
+        # ( batch size, attributes num, context num, n_layers*lstm cell size)
+        attr_D_repr = tf.matmul(document_attention,attr_sentence_repr)
+        # ( batch size, attributes num, context num*n_layers*lstm cell size)
+        attr_D_repr = tf.reshape(attr_D_repr,shape = (-1,
+                                        self.nn_config['attributes_num'],
+                                        self.nn_config['CoarseSenti_v2']['context_mat_size']*n_layers*self.nn_config['lstm_cell_size']))
+        return attr_D_repr
+        # repr_dim = tf.shape(attr_sentence_repr)[-1]
+        # # shape = ( batch size, max review length, attributes num, n_layers*lstm cell size)
+        # attr_sentence_repr = tf.reshape(attr_sentence_repr,shape=(-1,
+        #                                                           self.nn_config['max_review_len'],
+        #                                                           self.nn_config['coarse_attributes_num'],
+        #                                                           repr_dim))
+        # # shape = ( attributes num, batch size, max review length, n_layers*lstm cell size)
+        # attr_sentence_repr = tf.transpose(attr_sentence_repr,perm=(2,0,1,3))
+        # # shape of each scalar: (1, batch size, max review length, n_layers*lstm cell size)
+        # attr_sentence_repr_ls = tf.split(attr_sentence_repr,num_or_size_splits=self.nn_config['coarse_attributes_num'])
+        # # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
+        # D_ls = []
+        # # att.shape=(batch size, context num, max review length)
+        # # repr.shape=(1, batch size, max review length, n_layers*lstm cell size)
+        # for att,sent_repr in zip(document_attention_ls,attr_sentence_repr_ls):
+        #     batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
+        #     # shape of each scalar: ( 1,context num, max review length)
+        #     att_ls = tf.split(att,num_or_size_splits=batch_size,axis=0)
+        #     # shape of each scalar: (1,1, max review length, n_layers*lstm cell size)
+        #     sent_repr_ls = tf.split(sent_repr,num_or_size_splits=batch_size,axis=1)
+        #     # shape = (batch size, context num, n_layers*lstm cell size)
+        #     da_ls = []
+        #     for att2,sent_repr2 in zip(att_ls,sent_repr_ls):
+        #         # shape = (context num, max review length)
+        #         att2 = tf.squeeze(att2)
+        #         # shape = (max review length, n_layers*lstm cell size)
+        #         sent_repr2 = tf.squeeze(sent_repr2)
+        #         # shape = (context num, n_layers*lstm cell size)
+        #         d_ai = tf.matmul(att2,sent_repr2)
+        #         # shape = (context num*n_layers*lstm cell size)
+        #         da = tf.reshape(d_ai,shape=[-1])
+        #         # shape = (batch size, context num*n_layers*lstm cell size)
+        #         da_ls.append(da)
+        #     # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
+        #     D_ls.append(da_ls)
+        # # shape = (attributes num, batch size, context num*n_layers*lstm cell size)
+        # D = tf.convert_to_tensor(D_ls)
+        # return D
 
     def review_score_v2(self,D,n_layers,reg):
         """
 
-        :param D: shape = (attributes num, batch size, context num*n_layers*lstm cell size)
+        :param D: shape = ( batch size, attributes num, context num*n_layers*lstm cell size)
         :return:
         """
         d_repr_dim = self.nn_config['CoarseSenti_v2']['context_mat_size']*n_layers*self.nn_config['lstm_cell_size']
@@ -300,8 +319,6 @@ class AttributeFunction:
                                                           dtype='float32'))
         tf.add_to_collection('attr_score_W',W)
         reg['attr_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
-        # shape = (batch size, attributes num, context num*n_layers*lstm cell size)
-        D = tf.transpose(D,perm=(1,0,2))
         # shape = (batch size, attributes num)
         score = tf.reduce_sum(tf.multiply(D,W),axis=2)
         return score
@@ -733,70 +750,88 @@ class SentimentFunction:
         sentence = tf.reduce_max(sentence,axis=1)
         return sentence
 
-    def senti_document_repr(self, document_attention_ls, senti_sentence_repr):
+    def senti_document_repr(self, document_attention, senti_sentence_repr,n_layers):
         """
 
-        :param docuemnt_attention_ls: shape = (attributes num, batch size, context num, max review length)
+        :param docuemnt_attention: shape = (attributes num, batch size, context num, max review length)
         :param senti_sentence_repr: (batch size * max review length, lstm cell size)
-        :return:
+        :return: (batch size, attributes num, context num*lstm cell size)
         """
-        repr_dim = tf.shape(senti_sentence_repr)[-1]
-        # shape = ( batch size, max review length, lstm cell size)
-        senti_sentence_repr = tf.reshape(senti_sentence_repr, shape=(-1,
-                                                                   self.nn_config['max_review_len'],
-                                                                   repr_dim))
-        batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
-        # shape of each scalar: (1, max review length, lstm cell size)
-        senti_sentence_repr_ls = tf.split(senti_sentence_repr, num_or_size_splits=batch_size)
-
-        # shape = (attributes num, batch size, context num*lstm cell size)
-        D_ls = []
-        # att.shape=(batch size, context num, max review length)
-        for att in document_attention_ls:
-            # (batch size, context num, n_layers*lstm cell size)
-            batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
-            # shape of each scalar: (1,context num, max review length)
-            att_ls = tf.split(att, num_or_size_splits=batch_size, axis=0)
-
-            # shape = (batch size, context num, lstm cell size)
-            da_ls = []
-            # att2.shape = (1,context num, max review length)
-            # sent_repr2.shape = (1, max review length, lstm cell size)
-            for att2, sent_repr2 in zip(att_ls, senti_sentence_repr_ls):
-                # shape = (context num, max review length)
-                att2 = tf.squeeze(att2)
-                # shape = (max review length, lstm cell size)
-                sent_repr2 = tf.squeeze(sent_repr2)
-                # shape = (context num, lstm cell size)
-                d_ai = tf.matmul(att2, sent_repr2)
-                # shape = (context num*lstm cell size)
-                da = tf.reshape(d_ai, shape=[-1])
-                # shape = (batch size, context num*lstm cell size)
-                da_ls.append(da)
-            # shape = (attributes num, batch size, context num*lstm cell size)
-            D_ls.append(da_ls)
-        # shape = (attributes num, batch size, context num*lstm cell size)
-        D = tf.convert_to_tensor(D_ls)
-        return D
+        # (batch size, attributes num, context num, max review length)
+        document_attention = tf.transpose(document_attention, perm=(1, 0, 2, 3))
+        # shape = (batch size, max review length, lstm cell size)
+        senti_sentence_repr = tf.reshape(senti_sentence_repr,shape=(-1,
+                                                                  self.nn_config['max_review_len'],
+                                                                  self.nn_config['lstm_cell_size']))
+        # shape = (batch size, attributes_num, max review length, lstm cell size)
+        senti_sentence_repr = tf.tile(tf.expand_dims(senti_sentence_repr,axis=1),
+                                      multiples=(1,self.nn_config['attributes_num'],1,1))
+        # shape = (batch size, attributes num, context num, lstm cell size)
+        senti_D_repr = tf.matmul(document_attention,senti_sentence_repr)
+        # shape = (batch size, attributes num, context num*lstm cell size)
+        senti_D_repr = tf.reshape(senti_D_repr,shape=(-1,
+                                                      self.nn_config['attributes_num'],
+                                                      self.nn_config['CoarseSenti_v2']['context_mat_size']*n_layers*self.nn_config['lstm_cell_size']))
+        return senti_D_repr
+        # repr_dim = tf.shape(senti_sentence_repr)[-1]
+        # # shape = ( batch size, max review length, lstm cell size)
+        # senti_sentence_repr = tf.reshape(senti_sentence_repr, shape=(-1,
+        #                                                            self.nn_config['max_review_len'],
+        #                                                            repr_dim))
+        # batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
+        # # shape of each scalar: (1, max review length, lstm cell size)
+        # senti_sentence_repr_ls = tf.split(senti_sentence_repr, num_or_size_splits=batch_size)
+        #
+        # # shape = (attributes num, batch size, context num*lstm cell size)
+        # D_ls = []
+        # # att.shape=(batch size, context num, max review length)
+        # for att in document_attention_ls:
+        #     # (batch size, context num, n_layers*lstm cell size)
+        #     batch_size = int(self.nn_config['batch_size']/self.nn_config['gpu_num'])
+        #     # shape of each scalar: (1,context num, max review length)
+        #     att_ls = tf.split(att, num_or_size_splits=batch_size, axis=0)
+        #
+        #     # shape = (batch size, context num, lstm cell size)
+        #     da_ls = []
+        #     # att2.shape = (1,context num, max review length)
+        #     # sent_repr2.shape = (1, max review length, lstm cell size)
+        #     for att2, sent_repr2 in zip(att_ls, senti_sentence_repr_ls):
+        #         # shape = (context num, max review length)
+        #         att2 = tf.squeeze(att2)
+        #         # shape = (max review length, lstm cell size)
+        #         sent_repr2 = tf.squeeze(sent_repr2)
+        #         # shape = (context num, lstm cell size)
+        #         d_ai = tf.matmul(att2, sent_repr2)
+        #         # shape = (context num*lstm cell size)
+        #         da = tf.reshape(d_ai, shape=[-1])
+        #         # shape = (batch size, context num*lstm cell size)
+        #         da_ls.append(da)
+        #     # shape = (attributes num, batch size, context num*lstm cell size)
+        #     D_ls.append(da_ls)
+        # # shape = (attributes num, batch size, context num*lstm cell size)
+        # D = tf.convert_to_tensor(D_ls)
+        # return D
 
     def review_score_v2(self,D,reg):
         """
 
-        :param D: shape = (attributes num, batch size, context num*lstm cell size)
+        :param D: shape = (batch size, attributes num, context num*lstm cell size)
         :return:
         """
         d_repr_dim = self.nn_config['CoarseSenti_v2']['context_mat_size']*self.nn_config['lstm_cell_size']
-        # shape = (attributes num, sentiment num,context num*lstm cell size)
+        # shape = (attributes num, sentiment num, context num*lstm cell size)
         W = tf.get_variable(name = 'senti_W_score',
                             initializer= self.initializer(shape=(self.nn_config['coarse_attributes_num'],
                                                                  self.nn_config['sentiment_num'],
                                                                  d_repr_dim),
                                                           dtype='float32'))
         reg['senti_reg'].append(tf.contrib.layers.l2_regularizer(self.nn_config['reg_rate'])(W))
-        # shape = (batch size, attributes num, context num*lstm cell size)
-        D = tf.transpose(D,perm=(1,0,2))
-
-        # shape of each scalar: (1, sentiment num,context num*lstm cell size)
+        # # shape = (batch size, attributes num, sentiment num, context num*lstm cell size)
+        # D = tf.tile(tf.expand_dims(D,axis=2),multiples=(1,1,self.nn_config['sentiment_num'],1))
+        # # shape = (batch size, attributes num, sentiment num)
+        # score = tf.reduce_sum(tf.multiply(D, W), axis=3)
+        # return score
+        # # shape of each scalar: (1, sentiment num,context num*lstm cell size)
         W_ls = tf.split(W,num_or_size_splits=self.nn_config['coarse_attributes_num'],axis=0)
         # shape of each scalar: (batch size, 1, context num*lstm cell size)
         D_ls = tf.split(D,num_or_size_splits=self.nn_config['coarse_attributes_num'],axis=1)
