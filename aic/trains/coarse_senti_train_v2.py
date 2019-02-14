@@ -127,15 +127,15 @@ class CoarseSentiTrain:
                     print('%s : \n%s'%(attr_vars.name,
                                        str(np.any(np.isnan(sess.run(attr_grads,feed_dict=feed_dict))))))
                     print('#################')
-        print('new_grads_and_vars: \n',new_grads_and_vars)
-        opt = tf.train.AdamOptimizer(0.0001)
-        print('global step: \n',tf.get_collection('global_step'))
-        step = opt.apply_gradients(new_grads_and_vars,
-                                   global_step=tf.get_collection('global_step')[0])
-        sess.run(step,feed_dict=feed_dict)
-        # A_mat after update
-        A_mat = sess.run(tf.get_collection('A_mat'))
-        print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
+        # print('new_grads_and_vars: \n',new_grads_and_vars)
+        # opt = tf.train.AdamOptimizer(0.0001)
+        # print('global step: \n',tf.get_collection('global_step'))
+        # step = opt.apply_gradients(new_grads_and_vars,
+        #                            global_step=tf.get_collection('global_step')[0])
+        # sess.run(step,feed_dict=feed_dict)
+        # # A_mat after update
+        # A_mat = sess.run(tf.get_collection('A_mat'))
+        # print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
         exit()
         # TODO: calcualte gradient manually.
 
