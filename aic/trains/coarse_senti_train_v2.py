@@ -73,61 +73,61 @@ class CoarseSentiTrain:
         # TODO: check whether there will be inf
         print('===================================')
         print('++++++++++++++++ attribute part ++++++++++++++++')
-        # A_mat = sess.run(tf.get_collection('A_mat'))
-        # print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
-        #
-        # score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
-        # print('score ls is nan: \n',np.any(np.isnan(score_ls)))
-        #
-        # sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
-        # print('sentence attention is nan: \n',np.any(np.isnan(sentence_attention)))
-        #
-        # attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
-        # print('attr_sentence_repr is nan: \n',np.any(np.isnan(attr_sentence_repr)))
-        #
-        # Z_mat = sess.run(tf.get_collection('Z_mat'))
-        # print('Z_mat is nan: \n',np.any(np.isnan(Z_mat)))
-        #
+        A_mat = sess.run(tf.get_collection('A_mat'))
+        print('A_mat is nan: \n', np.any(np.isnan(A_mat)))
+
+        score_ls = sess.run(tf.get_collection('score_ls'),feed_dict=feed_dict)
+        print('score ls is nan: \n',np.any(np.isnan(score_ls)))
+
+        sentence_attention = sess.run(tf.get_collection('sentence_attention'),feed_dict=feed_dict)
+        print('sentence attention is nan: \n',np.any(np.isnan(sentence_attention)))
+
+        attr_sentence_repr = sess.run(tf.get_collection('attr_sentence_repr'),feed_dict=feed_dict)
+        print('attr_sentence_repr is nan: \n',np.any(np.isnan(attr_sentence_repr)))
+
+        Z_mat = sess.run(tf.get_collection('Z_mat'))
+        print('Z_mat is nan: \n',np.any(np.isnan(Z_mat)))
+
         document_attention = sess.run(tf.get_collection('document_attention_ls'),feed_dict=feed_dict)
         print('document_attention_ls is nan: \n',np.any(np.isnan(document_attention)))
-        #
-        # attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
-        # print('attr_D_repr is nan: \n',np.any(np.isnan(attr_D_repr)))
-        #
-        # attr_score_W = sess.run(tf.get_collection('attr_score_W'))
-        # print('attr score W is nan: \n',np.any(np.isnan(attr_score_W)))
-        #
-        # attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
-        # print('attr_score is nan: \n',np.any(np.isnan(attr_score)))
-        #
-        # attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
-        # print('attr loss is nan: \n', np.any(np.isnan(attr_loss)))
-        #
-        # attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
-        # print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
-        #
-        # attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
-        # # for var in tf.get_collection('attr_reg')[0]:
-        # #     print(var.name)
-        # print('attr reg: \n',np.any(np.isnan(attr_reg)))
-        #
-        # attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
-        # print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
-        #
-        # print('============ check grads and vars ============')
-        # # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
-        # new_grads_and_vars = []
-        # for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
-        #     for i in range(len(attr_grads_and_vars_gpuk)):
-        #         attr_grads = attr_grads_and_vars_gpuk[i][0]
-        #         attr_vars = attr_grads_and_vars_gpuk[i][1]
-        #         if attr_vars is None:
-        #             continue
-        #         if 'A_mat:' in attr_vars.name:
-        #             new_grads_and_vars.append((attr_grads,attr_vars))
-        #             print('%s : \n%s'%(attr_vars.name,
-        #                                str(np.any(np.isnan(sess.run(attr_grads,feed_dict=feed_dict))))))
-        #             print('#################')
+
+        attr_D_repr = sess.run(tf.get_collection('attr_D_repr'),feed_dict=feed_dict)
+        print('attr_D_repr is nan: \n',np.any(np.isnan(attr_D_repr)))
+
+        attr_score_W = sess.run(tf.get_collection('attr_score_W'))
+        print('attr score W is nan: \n',np.any(np.isnan(attr_score_W)))
+
+        attr_score = sess.run(tf.get_collection('attr_score'),feed_dict=feed_dict)
+        print('attr_score is nan: \n',np.any(np.isnan(attr_score)))
+
+        attr_loss = sess.run(tf.get_collection('attr_loss'),feed_dict=feed_dict)
+        print('attr loss is nan: \n', np.any(np.isnan(attr_loss)))
+
+        attr_loss_without_reg = sess.run(tf.get_collection('attr_loss_without_reg'),feed_dict=feed_dict)
+        print('attr loss without reg: \n',np.any(np.isnan(attr_loss_without_reg)))
+
+        attr_reg = sess.run(tf.get_collection('attr_reg'),feed_dict=feed_dict)
+        # for var in tf.get_collection('attr_reg')[0]:
+        #     print(var.name)
+        print('attr reg: \n',np.any(np.isnan(attr_reg)))
+
+        attr_reg_sum = sess.run(tf.get_collection('attr_reg_sum'),feed_dict=feed_dict)
+        print('attr_reg_sum: \n',np.any(np.isnan(attr_reg_sum)))
+
+        print('============ check grads and vars ============')
+        # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
+        new_grads_and_vars = []
+        for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
+            for i in range(len(attr_grads_and_vars_gpuk)):
+                attr_grads = attr_grads_and_vars_gpuk[i][0]
+                attr_vars = attr_grads_and_vars_gpuk[i][1]
+                if attr_vars is None:
+                    continue
+                if 'A_mat:' in attr_vars.name:
+                    new_grads_and_vars.append((attr_grads,attr_vars))
+                    print('%s : \n%s'%(attr_vars.name,
+                                       str(np.any(np.isnan(sess.run(attr_grads,feed_dict=feed_dict))))))
+                    print('#################')
 
 
         # print('new_grads_and_vars: \n',new_grads_and_vars)
