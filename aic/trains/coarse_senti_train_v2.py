@@ -145,14 +145,17 @@ class CoarseSentiTrain:
 
         # senti_sentence_repr = sess.run(tf.get_collection('senti_sentence_repr'), feed_dict=feed_dict)
         # print('senti_sentence_repr is nan: \n', np.any(np.isnan(senti_sentence_repr)))
-
+        # shape = (batch size, attributes num, context num, max review length)
         sub_document_attention = sess.run(tf.get_collection('sub_document_attention')[0], feed_dict=feed_dict)
         print('sub_document_attention is nan: \n', np.any(np.isnan(sub_document_attention)))
-
+        # shape = (batch size, attributes_num, max review length, lstm cell size)
         sub_senti_sentence_repr = sess.run(tf.get_collection('sub_senti_sentence_repr')[0], feed_dict=feed_dict)
         print('sub_senti_sentence_repr is nan: \n', np.any(np.isnan(sub_senti_sentence_repr)))
 
-        senti_D_repr = sess.run(tf.get_collection('senti_D_repr'), feed_dict=feed_dict)
+        result = np.matmul(sub_document_attention,sub_senti_sentence_repr)
+        print('result: \n',result)
+
+        senti_D_repr = sess.run(tf.get_collection('senti_D_repr')[0], feed_dict=feed_dict)
         print('senti_D_repr is nan: \n', np.any(np.isnan(senti_D_repr)))
         exit()
 
