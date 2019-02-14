@@ -685,7 +685,6 @@ class SentimentFunction:
         :param logits: (batch_size, number of attributes + 1, 3)
         :return: 
         """
-
         loss = tf.reduce_mean(tf.add(
             tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels, logits=logits, dim=-1), axis=1),
             tf.reduce_sum(reg_list)))
