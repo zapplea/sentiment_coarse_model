@@ -142,13 +142,13 @@ class CoarseSentiTrain:
         # print('is nan: \n', np.any(np.isnan()))
 
         senti_sentence_repr = sess.run(tf.get_collection('senti_sentence_repr'), feed_dict=feed_dict)
-        print('is nan: \n', np.any(np.isnan(senti_sentence_repr)))
+        print('senti_sentence_repr is nan: \n', np.any(np.isnan(senti_sentence_repr)))
 
         senti_D_repr = sess.run(tf.get_collection('senti_D_repr'), feed_dict=feed_dict)
-        print('is nan: \n', np.any(np.isnan(senti_D_repr)))
+        print('senti_D_repr is nan: \n', np.any(np.isnan(senti_D_repr)))
 
         senti_score = sess.run(tf.get_collection('senti_score'), feed_dict=feed_dict)
-        print('is nan: \n', np.any(np.isnan(senti_score)))
+        print('senti_score is nan: \n', np.any(np.isnan(senti_score)))
 
         masked_senti_score = sess.run(tf.get_collection('masked_senti_score'),feed_dict=feed_dict)
         print('masked senti score is nan: \n',np.any(np.isnan(masked_senti_score)))
