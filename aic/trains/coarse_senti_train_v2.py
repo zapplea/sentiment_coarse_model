@@ -114,8 +114,10 @@ class CoarseSentiTrain:
 
         print('++++++++++++++++ check attr grads and vars ++++++++++++++++')
         attr_score = tf.get_collection('attr_score')[0]
-        attr_loss = tf.get_collection('attr_loss')[0]
-        tf.gradients(attr_loss_without_reg,)
+        attr_loss_without_reg = tf.get_collection('attr_loss_without_reg')[0]
+        g = tf.gradients(attr_loss_without_reg,attr_score)
+        result = sess.run(g,feed_dict=feed_dict)
+        print('dattr_loss/dattr_score: \n',result)
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []
         # for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
