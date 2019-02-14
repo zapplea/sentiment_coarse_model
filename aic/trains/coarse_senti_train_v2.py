@@ -117,13 +117,14 @@ class CoarseSentiTrain:
         print('++++++++++++++++ check attr grads and vars ++++++++++++++++')
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         new_grads_and_vars = []
-        for i in range(len(tf.get_collection('attr_grads_and_vars'))):
-            print('gpu: %d'%i)
-            attr_grads_and_vars_gpuk = tf.get_collection('attr_grads_and_vars')[i]
+        for attr_grads_and_vars_gpuk  in tf.get_collection('attr_grads_and_vars'):
+            print('%%%%%%%%%%%%%%%%%%%%')
             for i in range(len(attr_grads_and_vars_gpuk)):
                 attr_grads = attr_grads_and_vars_gpuk[i][0]
                 attr_vars = attr_grads_and_vars_gpuk[i][1]
                 if attr_vars is None:
+                    continue
+                if attr_grads is None:
                     continue
                 # if 'A_mat:' in attr_vars.name:
                 new_grads_and_vars.append((attr_grads,attr_vars))
