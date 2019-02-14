@@ -116,6 +116,9 @@ class CoarseSentiTrain:
         attr_loss_without_reg = tf.get_collection('attr_loss_without_reg')[0]
         attr_loss = tf.get_collection('attr_loss')[0]
         attr_score = tf.get_collection('attr_score')[0]
+        attr_D_repr = tf.get_collection('attr_D_repr')[0]
+        attr_sentence_repr=tf.get_collection('attr_sentence_repr')[0]
+        sentence_attention = tf.get_collection('sentence_attention')[0]
         A_mat_ls = tf.get_collection('A_mat')[:2]
 
 
@@ -127,10 +130,28 @@ class CoarseSentiTrain:
         result = sess.run(g,feed_dict=feed_dict)
         print('dattr_loss/dattr_score: \n',result)
 
-        for A_mat in A_mat_ls:
-            g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
-            result = sess.run(g,feed_dict=feed_dict)
-            print('dattr_loss/dA_mat: \n',result)
+
+        g = tf.gradients(attr_loss,attr_D_repr)
+        result = sess.run(g, feed_dict=feed_dict)
+        print('dattr_loss/dattr_D_repr: \n',result)
+
+        g = tf.gradients(attr_loss, attr_sentence_repr)
+        result = sess.run(g, feed_dict=feed_dict)
+        print('dattr_loss/dattr_sentence_repr: \n', result)
+
+        g = tf.gradients(attr_loss, sentence_attention)
+        result = sess.run(g, feed_dict=feed_dict)
+        print('dattr_loss/dsentence_attention: \n', result)
+
+        # g = tf.gradients(attr_loss, )
+        # result = sess.run(g, feed_dict=feed_dict)
+        # print('d/d: \n', result)
+
+        # we get gradients of A_mat in the following
+        # for A_mat in A_mat_ls:
+        #     g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
+        #     result = sess.run(g,feed_dict=feed_dict)
+        #     print('dattr_loss/dA_mat: \n',result)
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []
