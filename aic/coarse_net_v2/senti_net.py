@@ -126,6 +126,7 @@ class SentimentNet:
             # padded sentence is (-inf, -inf, ..., -inf)
             # shape = (batch size * max review length, cell size)
             senti_sentence_repr=self.sf.max_pooling(senti_H,mask)
+            tf.add_to_collection('senti_sentence_repr',senti_sentence_repr)
 
         with tf.variable_scope('document',reuse=tf.AUTO_REUSE):
             # shape = (attributes num, context num, sentence_repr dim)
@@ -139,12 +140,14 @@ class SentimentNet:
             tf.add_to_collection('attr_D_repr',attr_D_repr)
             # shape = (attributes num, batch size, context num*lstm cell size)
             senti_D_repr = self.sf.senti_document_repr(document_attention, senti_sentence_repr,n_layers)
+            tf.add_to_collection('senti_D_repr',senti_D_repr)
 
             # shape = (batch size, attributes num)
             attr_score = self.af.review_score_v2(attr_D_repr,n_layers,self.reg)
             tf.add_to_collection('attr_score',attr_score)
             # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.review_score_v2(senti_D_repr,self.reg)
+            tf.add_to_collection('senti_score',senti_score)
             #
             reg_list = []
             for reg in self.reg['attr_reg']:
@@ -165,7 +168,7 @@ class SentimentNet:
             # masked senti score
             # shape = (batch size, attributes num, sentiment num)
             senti_score = self.sf.mask_senti_score(senti_score,attr_label=Y_att)
-            tf.add_to_collection('senti_score',senti_score)
+            tf.add_to_collection('masked_senti_score',senti_score)
             senti_loss = self.sf.softmax_loss(name='senti_loss',labels=Y_senti, logits=senti_score, reg_list=reg_list,
                                               graph=self.graph)
             senti_pred_labels = self.sf.prediction(name='senti_pred_labels', score=senti_score, Y_att=Y_att,
