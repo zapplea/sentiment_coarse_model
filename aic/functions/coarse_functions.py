@@ -766,6 +766,8 @@ class SentimentFunction:
         # shape = (batch size, attributes_num, max review length, lstm cell size)
         senti_sentence_repr = tf.tile(tf.expand_dims(senti_sentence_repr,axis=1),
                                       multiples=(1,self.nn_config['attributes_num'],1,1))
+        tf.add_to_collection('sub_document_attention',document_attention)
+        tf.add_to_collection('sub_senti_sentence_repr',senti_sentence_repr)
         # shape = (batch size, attributes num, context num, lstm cell size)
         senti_D_repr = tf.matmul(document_attention,senti_sentence_repr)
         # shape = (batch size, attributes num, context num*lstm cell size)
