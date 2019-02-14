@@ -117,11 +117,11 @@ class CoarseSentiTrain:
         attr_loss = tf.get_collection('attr_loss')[0]
         attr_score = tf.get_collection('attr_score')[0]
 
-        g = tf.gradients(attr_loss_without_reg,attr_score)
+        g = tf.gradients(attr_loss_without_reg,attr_score,stop_gradients=[attr_score])
         result = sess.run(g,feed_dict=feed_dict)
         print('dattr_loss_without_reg/dattr_score: \n',result)
 
-        g = tf.gradients(attr_loss,attr_score)
+        g = tf.gradients(attr_loss,attr_score,stop_gradients=[attr_score])
         result = sess.run(g,feed_dict=feed_dict)
         print('dattr_loss/dattr_score: \n',result)
 
