@@ -216,6 +216,7 @@ class CoarseSentiTrain:
                 for j in range(np.shape(result)[1]):
                     if np.any(np.isnan(result)):
                         print(result[i][j])
+                        exit()
 
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
