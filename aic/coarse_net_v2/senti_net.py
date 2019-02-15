@@ -86,6 +86,7 @@ class SentimentNet:
                 with tf.variable_scope('score_'+str(i), reuse=tf.AUTO_REUSE):
                     # score.shape = (batch size*max review length, attributes num, words num)
                     score_lstm = self.af.sentence_score(A_lstm, attr_H, mask, self.graph)
+                    tf.add_to_collection('score_lstm',score_lstm)
                     # score.shape = (batch size*max review length, attributes num, words num)
                     score_e = self.af.sentence_score(A_e, X, mask, self.graph)
                     # score.shape = (batch size*max review length, attributes num, words num)

@@ -121,6 +121,7 @@ class CoarseSentiTrain:
         sentence_attention = tf.get_collection('sentence_attention')[0]
         sentence_score = tf.get_collection('sentence_score')[0]
         score_ls = tf.get_collection('score_ls')[0]
+        score_lstm_ls = tf.get_collection('score_lstm')[:2]
         pure_score = tf.get_collection('pure_score')[:2]
         A_lstm_ls = tf.get_collection('A_lstm')[:2]
         A_e_ls = tf.get_collection('A_e')[:2]
@@ -197,10 +198,11 @@ class CoarseSentiTrain:
         #     result = sess.run(g,feed_dict=feed_dict)
         #     print('dattr_loss/d%s: \n'%A_mat.name,np.any(np.isnan(result)))
 
-        for i in range(len(A_mat_ls)):
-            A_mat = A_mat_ls[i]
-            A_lstm = A_lstm_ls[i]
-            A_e = A_e_ls[i]
+        for l in range(len(A_mat_ls)):
+            A_mat = A_mat_ls[l]
+            A_lstm = A_lstm_ls[l]
+            A_e = A_e_ls[l]
+            score_lstm = score_lstm_ls[l]
             g = tf.gradients(A_lstm,A_mat,stop_gradients=A_mat)
             # shape = (20, 5, 300)
             result = sess.run(g, feed_dict=feed_dict)[0]
@@ -212,12 +214,22 @@ class CoarseSentiTrain:
                         exit()
             g = tf.gradients(A_e, A_mat, stop_gradients=A_mat)
             result = sess.run(g, feed_dict=feed_dict)[0]
-            print('D%s / D%s: \n'%(A_e.name,A_mat.name),np.any(np.isnan(result)))
+            print('D_%s / D_%s: \n'%(A_e.name,A_mat.name),np.any(np.isnan(result)))
             for i in range(np.shape(result)[0]):
                 for j in range(np.shape(result)[1]):
                     if np.any(np.isnan(result)):
                         print(result[i][j])
                         exit()
+
+            g = tf.gradients(score_lstm,A_mat)
+            result = sess.run(g,feed_dict=feed_dict)
+            print('D_%s / D_%s: \n'%(score_lstm.name,A_mat.name))
+            for i in range(np.shape(result)[0]):
+                for j in range(np.shape(result)[1]):
+                    if np.any(np.isnan(result)):
+                        print(result[i][j])
+                        exit()
+            print('*************************')
 
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
