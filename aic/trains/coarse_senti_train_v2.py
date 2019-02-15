@@ -169,7 +169,6 @@ class CoarseSentiTrain:
             result = sess.run(g, feed_dict=feed_dict)[0]
             print('dattr_score/dpure_%s: \n' % score.name, np.any(np.isnan(result)))
             print(np.shape(result))
-            exit()
             for i in range(np.shape(result)[0]):
                 for j in range(np.shape(result)[1]):
                     if np.any(np.isnan(result[i][j])):
