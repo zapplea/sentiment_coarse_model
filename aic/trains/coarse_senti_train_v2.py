@@ -258,8 +258,10 @@ class CoarseSentiTrain:
             for i in range(np.shape(result)[0]):
                 for j in range(np.shape(result)[1]):
                     if np.any(np.isnan(result)):
+                        print('batch No.: %d --- attributes No.: %d' % (i, j))
                         print(result[i][j])
                         print(value[i][j])
+
             print('*************************')
 
 
