@@ -225,7 +225,7 @@ class CoarseSentiTrain:
                         exit()
 
             g = tf.gradients(score_lstm,A_mat)
-            result = sess.run(g,feed_dict=feed_dict)
+            result = sess.run(g,feed_dict=feed_dict)[0]
             print('D_%s / D_%s: \n'%(score_lstm.name,A_mat.name), np.any(np.isnan(result)))
             for i in range(np.shape(result)[0]):
                 for j in range(np.shape(result)[1]):
@@ -234,7 +234,7 @@ class CoarseSentiTrain:
                         exit()
 
             g = tf.gradients(score_e,A_mat)
-            result = sess.run(g, feed_dict=feed_dict)
+            result = sess.run(g, feed_dict=feed_dict)[0]
             print('D_%s / D_%s: \n' % (score_e.name, A_mat.name), np.any(np.isnan(result)))
             for i in range(np.shape(result)[0]):
                 for j in range(np.shape(result)[1]):
@@ -243,7 +243,7 @@ class CoarseSentiTrain:
                         exit()
 
             g = tf.gradients(score_ls, A_mat)
-            result = sess.run(g, feed_dict=feed_dict)
+            result = sess.run(g, feed_dict=feed_dict)[0]
             print('D_%s / D_%s: \n' % ('score_ls', A_mat.name), np.any(np.isnan(result)))
             print(np.shape(result))
             for i in range(np.shape(result)[0]):
