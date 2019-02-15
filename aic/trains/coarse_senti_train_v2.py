@@ -148,10 +148,10 @@ class CoarseSentiTrain:
         # print('d/d: \n', result)
 
         # we get gradients of A_mat in the following
-        # for A_mat in A_mat_ls:
-        #     g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
-        #     result = sess.run(g,feed_dict=feed_dict)
-        #     print('dattr_loss/dA_mat: \n',result)
+        for A_mat in A_mat_ls:
+            g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
+            result = sess.run(g,feed_dict=feed_dict)
+            print('dattr_loss/d%s: \n'%A_mat.name,np.any(np.isnan(result)))
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []
