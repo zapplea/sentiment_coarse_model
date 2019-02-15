@@ -148,13 +148,12 @@ class CoarseSentiTrain:
         g = tf.gradients(attr_loss, sentence_score)
         result = sess.run(g, feed_dict=feed_dict)
         print('dattr_score/dsentence_score: \n', np.any(np.isnan(result)))
+        print(np.shape(result))
 
         for score in score_ls:
             g = tf.gradients(attr_loss, score)
             result = sess.run(g, feed_dict=feed_dict)
             print('dattr_score/d%s: \n'%score.name, np.any(np.isnan(result)))
-            print(result)
-            exit()
 
         # g = tf.gradients(attr_loss, )
         # result = sess.run(g, feed_dict=feed_dict)
