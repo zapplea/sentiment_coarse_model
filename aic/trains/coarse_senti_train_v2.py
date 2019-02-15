@@ -124,24 +124,24 @@ class CoarseSentiTrain:
 
         g = tf.gradients(attr_loss_without_reg,attr_score,stop_gradients=[attr_score])
         result = sess.run(g,feed_dict=feed_dict)
-        print('dattr_loss_without_reg/dattr_score: \n',result)
+        print('dattr_loss_without_reg/dattr_score: \n', np.any(np.isnan(result)))
 
         g = tf.gradients(attr_loss,attr_score,stop_gradients=[attr_score])
         result = sess.run(g,feed_dict=feed_dict)
-        print('dattr_loss/dattr_score: \n',result)
+        print('dattr_loss/dattr_score: \n', np.any(np.isnan(result)))
 
 
         g = tf.gradients(attr_loss,attr_D_repr)
         result = sess.run(g, feed_dict=feed_dict)
-        print('dattr_loss/dattr_D_repr: \n',result)
+        print('dattr_loss/dattr_D_repr: \n', np.any(np.isnan(result)))
 
         g = tf.gradients(attr_loss, attr_sentence_repr)
         result = sess.run(g, feed_dict=feed_dict)
-        print('dattr_loss/dattr_sentence_repr: \n', result)
+        print('dattr_loss/dattr_sentence_repr: \n', np.any(np.isnan(result)))
 
         g = tf.gradients(attr_loss, sentence_attention)
         result = sess.run(g, feed_dict=feed_dict)
-        print('dattr_loss/dsentence_attention: \n', result)
+        print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
 
         # g = tf.gradients(attr_loss, )
         # result = sess.run(g, feed_dict=feed_dict)
