@@ -145,47 +145,47 @@ class CoarseSentiTrain:
         # g = tf.gradients(attr_loss, sentence_attention)
         # result = sess.run(g, feed_dict=feed_dict)
         # print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
+
+        g = tf.gradients(attr_loss, sentence_score)
+        sentence_score = sess.run(sentence_score,feed_dict=feed_dict)
+        result = sess.run(g, feed_dict=feed_dict)[0]
+        print('dattr_score/dsentence_score: \n', np.any(np.isnan(result)))
+        print(np.shape(result))
+        for i in range(np.shape(result)[0]):
+            for j in range(np.shape(result)[1]):
+                if np.any(np.isnan(result[i][j])):
+                    print('batch No.: %d --- attributes No.: %d'%(i,j))
+                    print(result[i][j])
+                    print(sentence_score[i][j])
+
+        # for score in score_ls:
+        #     g = tf.gradients(attr_loss, score)
+        #     result = sess.run(g, feed_dict=feed_dict)
+        #     print('dattr_score/d%s: \n'%score.name, np.any(np.isnan(result)))
         #
-        # g = tf.gradients(attr_loss, sentence_score)
-        # sentence_score = sess.run(sentence_score,feed_dict=feed_dict)
-        # result = sess.run(g, feed_dict=feed_dict)[0]
-        # print('dattr_score/dsentence_score: \n', np.any(np.isnan(result)))
-        # print(np.shape(result))
-        # for i in range(np.shape(result)[0]):
-        #     for j in range(np.shape(result)[1]):
-        #         if np.any(np.isnan(result[i][j])):
-        #             print('batch No.: %d --- attributes No.: %d'%(i,j))
-        #             print(result[i][j])
-        #             print(sentence_score[i][j])
-
-        for score in score_ls:
-            g = tf.gradients(attr_loss, score)
-            result = sess.run(g, feed_dict=feed_dict)
-            print('dattr_score/d%s: \n'%score.name, np.any(np.isnan(result)))
-
-        for score in pure_score:
-            g = tf.gradients(attr_loss, score)
-            result = sess.run(g, feed_dict=feed_dict)[0]
-            value = sess.run(score,feed_dict=feed_dict)
-            print('dattr_score/dpure_%s: \n' % score.name, np.any(np.isnan(result)))
-            print(np.shape(result))
-            for i in range(np.shape(result)[0]):
-                for j in range(np.shape(result)[1]):
-                    if np.any(np.isnan(result[i][j])):
-                        print('batch No.: %d --- attributes No.: %d'%(i,j))
-                        print(result[i][j])
-                        print(value[i][j])
-                        exit()
+        # for score in pure_score:
+        #     g = tf.gradients(attr_loss, score)
+        #     result = sess.run(g, feed_dict=feed_dict)[0]
+        #     value = sess.run(score,feed_dict=feed_dict)
+        #     print('dattr_score/dpure_%s: \n' % score.name, np.any(np.isnan(result)))
+        #     print(np.shape(result))
+        #     for i in range(np.shape(result)[0]):
+        #         for j in range(np.shape(result)[1]):
+        #             if np.any(np.isnan(result[i][j])):
+        #                 print('batch No.: %d --- attributes No.: %d'%(i,j))
+        #                 print(result[i][j])
+        #                 print(value[i][j])
+        #                 exit()
 
         # g = tf.gradients(attr_loss, )
         # result = sess.run(g, feed_dict=feed_dict)
         # print('d/d: \n', np.any(np.isnan(result)))
 
         # we get gradients of A_mat in the following
-        for A_mat in A_mat_ls:
-            g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
-            result = sess.run(g,feed_dict=feed_dict)
-            print('dattr_loss/d%s: \n'%A_mat.name,np.any(np.isnan(result)))
+        # for A_mat in A_mat_ls:
+        #     g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
+        #     result = sess.run(g,feed_dict=feed_dict)
+        #     print('dattr_loss/d%s: \n'%A_mat.name,np.any(np.isnan(result)))
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []
