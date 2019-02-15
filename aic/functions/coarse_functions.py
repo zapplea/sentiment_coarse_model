@@ -207,6 +207,7 @@ class AttributeFunction:
         # TODO: the attention is not correct. the padded words' attention is not 0
         # score.shape = (batch size*max review length, attributes num, words num)
         score = tf.reduce_sum(score_ls, axis=0)
+        tf.add_to_collection('sentence_score',score)
         # attention.shape = (batch size*max review length, attributes num, words num)
         attention = tf.nn.softmax(score)
         condition = tf.is_nan(attention)

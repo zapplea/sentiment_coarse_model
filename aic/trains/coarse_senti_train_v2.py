@@ -119,6 +119,8 @@ class CoarseSentiTrain:
         attr_D_repr = tf.get_collection('attr_D_repr')[0]
         attr_sentence_repr=tf.get_collection('attr_sentence_repr')[0]
         sentence_attention = tf.get_collection('sentence_attention')[0]
+        sentence_score = tf.get_collection('sentence_score')[0]
+        score_ls = tf.get_collection('score_ls')[0]
         A_mat_ls = tf.get_collection('A_mat')[:2]
 
 
@@ -142,10 +144,20 @@ class CoarseSentiTrain:
         g = tf.gradients(attr_loss, sentence_attention)
         result = sess.run(g, feed_dict=feed_dict)
         print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
+        print(result)
+
+        g = tf.gradients(attr_loss, sentence_score)
+        result = sess.run(g, feed_dict=feed_dict)
+        print('dattr_score/dsentence_score: \n', np.any(np.isnan(result)))
+
+        for score in score_ls:
+            g = tf.gradients(attr_loss, score)
+            result = sess.run(g, feed_dict=feed_dict)
+            print('dattr_score/d%s: \n'%score.name, np.any(np.isnan(result)))
 
         # g = tf.gradients(attr_loss, )
         # result = sess.run(g, feed_dict=feed_dict)
-        # print('d/d: \n', result)
+        # print('d/d: \n', np.any(np.isnan(result)))
 
         # we get gradients of A_mat in the following
         for A_mat in A_mat_ls:
