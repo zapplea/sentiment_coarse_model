@@ -107,6 +107,7 @@ class AttributeFunction:
         score = tf.reduce_sum(tf.multiply(A, X), axis=3)
         # score.shape = (batch size, attributes num, words num)
         score = tf.transpose(score, [0, 2, 1])
+        tf.add_to_collection('pure_score',score)
         # mask.shape = (batch size, attributes number, words num)
         mask = tf.tile(tf.expand_dims(mask, axis=1), multiples=[1, self.nn_config['attributes_num'],1])
         score = tf.add(score, mask)

@@ -121,6 +121,7 @@ class CoarseSentiTrain:
         sentence_attention = tf.get_collection('sentence_attention')[0]
         sentence_score = tf.get_collection('sentence_score')[0]
         score_ls = tf.get_collection('score_ls')[0]
+        pure_score = tf.get_collection('pure_score')[:2]
         A_mat_ls = tf.get_collection('A_mat')[:2]
 
 
@@ -156,12 +157,16 @@ class CoarseSentiTrain:
                     print('batch No.: %d --- attributes No.: %d'%(i,j))
                     print(result[i][j])
                     print(sentence_score[i][j])
-                    exit()
 
         for score in score_ls:
             g = tf.gradients(attr_loss, score)
             result = sess.run(g, feed_dict=feed_dict)
             print('dattr_score/d%s: \n'%score.name, np.any(np.isnan(result)))
+
+        for score in pure_score:
+            g = tf.gradients(attr_loss, score)
+            result = sess.run(g, feed_dict=feed_dict)
+            print('dattr_score/dpure_%s: \n' % score.name, np.any(np.isnan(result)))
 
         # g = tf.gradients(attr_loss, )
         # result = sess.run(g, feed_dict=feed_dict)
