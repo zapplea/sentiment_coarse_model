@@ -151,9 +151,10 @@ class CoarseSentiTrain:
         print(np.shape(result))
         for i in range(np.shape(result)[0]):
             for j in range(np.shape(result)[1]):
-                print('batch No.: %d --- attributes No.: %d'%(i,j))
-                print(result[i][j])
-                exit()
+                if np.any(np.isnan(result[i][j])):
+                    print('batch No.: %d --- attributes No.: %d'%(i,j))
+                    print(result[i][j])
+                    exit()
 
         for score in score_ls:
             g = tf.gradients(attr_loss, score)
