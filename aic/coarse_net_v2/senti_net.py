@@ -89,6 +89,7 @@ class SentimentNet:
                     tf.add_to_collection('score_lstm',score_lstm)
                     # score.shape = (batch size*max review length, attributes num, words num)
                     score_e = self.af.sentence_score(A_e, X, mask, self.graph)
+                    tf.add_to_collection('score_e',score_e)
                     # score.shape = (batch size*max review length, attributes num, words num)
                     score = tf.add(score_lstm, score_e)
                     # score_ls.shape = (bilstm n_layers,batch size*max review length, attributes num, words num)
