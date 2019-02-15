@@ -163,10 +163,10 @@ class CoarseSentiTrain:
             result = sess.run(g, feed_dict=feed_dict)
             print('dattr_score/d%s: \n'%score.name, np.any(np.isnan(result)))
 
-        sentence_score = sess.run(sentence_score, feed_dict=feed_dict)
         for score in pure_score:
             g = tf.gradients(attr_loss, score)
             result = sess.run(g, feed_dict=feed_dict)[0]
+            value = sess.run(score,feed_dict=feed_dict)
             print('dattr_score/dpure_%s: \n' % score.name, np.any(np.isnan(result)))
             print(np.shape(result))
             for i in range(np.shape(result)[0]):
@@ -174,7 +174,7 @@ class CoarseSentiTrain:
                     if np.any(np.isnan(result[i][j])):
                         print('batch No.: %d --- attributes No.: %d'%(i,j))
                         print(result[i][j])
-                        print(sentence_score[i][j])
+                        print(value[i][j])
                         exit()
 
         # g = tf.gradients(attr_loss, )
