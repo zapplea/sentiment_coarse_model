@@ -122,6 +122,8 @@ class CoarseSentiTrain:
         sentence_score = tf.get_collection('sentence_score')[0]
         score_ls = tf.get_collection('score_ls')[0]
         pure_score = tf.get_collection('pure_score')[:2]
+        A_lstm_ls = tf.get_collection('A_lstm')[:2]
+        A_e_ls = tf.get_collection('A_e')[:2]
         A_mat_ls = tf.get_collection('A_mat')[:2]
 
 
@@ -142,29 +144,29 @@ class CoarseSentiTrain:
         # result = sess.run(g, feed_dict=feed_dict)
         # print('dattr_loss/dattr_sentence_repr: \n', np.any(np.isnan(result)))
         #
-        g = tf.gradients(attr_loss, sentence_attention)
-        result = sess.run(g, feed_dict=feed_dict)
-        print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
-
-        dloss_datt_g = tf.gradients(attr_loss, sentence_attention)
-        datt_dscore_g = tf.gradients(sentence_attention,sentence_score)
-        dloss_datt_g_result = sess.run(dloss_datt_g,feed_dict=feed_dict)[0]
-        datt_dscore_g_result = sess.run(datt_dscore_g,feed_dict=feed_dict)[0]
-
-        g = tf.gradients(attr_loss, sentence_score)
-        sentence_score = sess.run(sentence_score,feed_dict=feed_dict)
-        result = sess.run(g, feed_dict=feed_dict)[0]
-        print('dattr_score/dsentence_score: \n', np.any(np.isnan(result)))
-        print(np.shape(result))
-        for i in range(np.shape(result)[0]):
-            for j in range(np.shape(result)[1]):
-                if np.any(np.isnan(result[i][j])):
-                    print('batch No.: %d --- attributes No.: %d'%(i,j))
-                    print('sentence score: \n', sentence_score[i][j])
-                    print('dattr_loss/dsentence_score: \n',result[i][j])
-                    print('dloss/datt: \n',dloss_datt_g_result[i][j])
-                    print('datt/dscore: \n',datt_dscore_g_result[i][j])
-                    exit()
+        # g = tf.gradients(attr_loss, sentence_attention)
+        # result = sess.run(g, feed_dict=feed_dict)
+        # print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
+        #
+        # dloss_datt_g = tf.gradients(attr_loss, sentence_attention)
+        # datt_dscore_g = tf.gradients(sentence_attention,sentence_score)
+        # dloss_datt_g_result = sess.run(dloss_datt_g,feed_dict=feed_dict)[0]
+        # datt_dscore_g_result = sess.run(datt_dscore_g,feed_dict=feed_dict)[0]
+        #
+        # g = tf.gradients(attr_loss, sentence_score)
+        # sentence_score = sess.run(sentence_score,feed_dict=feed_dict)
+        # result = sess.run(g, feed_dict=feed_dict)[0]
+        # print('dattr_score/dsentence_score: \n', np.any(np.isnan(result)))
+        # print(np.shape(result))
+        # for i in range(np.shape(result)[0]):
+        #     for j in range(np.shape(result)[1]):
+        #         if np.any(np.isnan(result[i][j])):
+        #             print('batch No.: %d --- attributes No.: %d'%(i,j))
+        #             print('sentence score: \n', sentence_score[i][j])
+        #             print('dattr_loss/dsentence_score: \n',result[i][j])
+        #             print('dloss/datt: \n',dloss_datt_g_result[i][j])
+        #             print('datt/dscore: \n',datt_dscore_g_result[i][j])
+        #             exit()
 
         # for score in score_ls:
         #     g = tf.gradients(attr_loss, score)
@@ -194,6 +196,20 @@ class CoarseSentiTrain:
         #     g = tf.gradients(attr_loss,A_mat,stop_gradients=A_mat)
         #     result = sess.run(g,feed_dict=feed_dict)
         #     print('dattr_loss/d%s: \n'%A_mat.name,np.any(np.isnan(result)))
+
+        for i in range(len(A_mat_ls)):
+            A_mat = A_mat_ls[i]
+            A_lstm = A_lstm_ls[i]
+            A_e = A_e_ls[i]
+            g = tf.gradients(A_lstm,A_mat,stop_gradients=A_mat)
+            result = sess.run(g, feed_dict=feed_dict)[0]
+            print(np.shape(result))
+            exit()
+            print('%s/%s: \n' %(A_lstm.name, A_mat.name), np.any(np.isnan(result)))
+            g = tf.gradients(A_e, A_mat, stop_gradients=A_mat)
+            result = sess.run(g, feed_dict=feed_dict)[0]
+            print('%s/%s: \n'%(A_e.name,A_mat.name),result)
+
 
         # attr_grads = sess.run(tf.get_collection('attr_grads_and_vars')[0],feed_dict=feed_dict)
         # new_grads_and_vars = []

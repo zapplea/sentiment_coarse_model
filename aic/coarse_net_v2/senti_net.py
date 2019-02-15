@@ -76,9 +76,11 @@ class SentimentNet:
                     tf.add_to_collection('o_mat',o)
                     # A.shape = (batch size*max review length, words num, attributes number, attribute dim)
                     A_lstm = self.af.words_attribute_mat2vec(attr_H, A, self.graph)
+                    tf.add_to_collection('A_lstm', A_lstm)
                     o_lstm = self.af.words_nonattribute_mat2vec(attr_H, o, self.graph)
                     A_lstm = A_lstm - o_lstm
                     A_e = self.af.words_attribute_mat2vec(X, A, self.graph)
+                    tf.add_to_collection('A_e', A_e)
                     o_e = self.af.words_nonattribute_mat2vec(X, o, self.graph)
                     A_e = A_e - o_e
                 with tf.variable_scope('score_'+str(i), reuse=tf.AUTO_REUSE):
