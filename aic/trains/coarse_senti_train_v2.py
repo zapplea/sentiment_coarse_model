@@ -142,9 +142,9 @@ class CoarseSentiTrain:
         # result = sess.run(g, feed_dict=feed_dict)
         # print('dattr_loss/dattr_sentence_repr: \n', np.any(np.isnan(result)))
         #
-        # g = tf.gradients(attr_loss, sentence_attention)
-        # result = sess.run(g, feed_dict=feed_dict)
-        # print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
+        g = tf.gradients(attr_loss, sentence_attention)
+        result = sess.run(g, feed_dict=feed_dict)
+        print('dattr_loss/dsentence_attention: \n', np.any(np.isnan(result)))
 
         dloss_datt_g = tf.gradients(attr_loss, sentence_attention)
         datt_dscore_g = tf.gradients(sentence_attention,sentence_score)
