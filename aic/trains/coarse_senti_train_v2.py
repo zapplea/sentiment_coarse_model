@@ -148,11 +148,8 @@ class CoarseSentiTrain:
 
         dloss_datt_g = tf.gradients(attr_loss, sentence_attention)
         datt_dscore_g = tf.gradients(sentence_attention,sentence_score)
-        dloss_datt_g_result = sess.run(dloss_datt_g,feed_dict=feed_dict)
-        datt_dscore_g_result = sess.run(datt_dscore_g,feed_dict=feed_dict)
-        print(np.shape(dloss_datt_g_result))
-        print(np.shape(datt_dscore_g_result))
-        exit()
+        dloss_datt_g_result = sess.run(dloss_datt_g,feed_dict=feed_dict)[0]
+        datt_dscore_g_result = sess.run(datt_dscore_g,feed_dict=feed_dict)[0]
 
         g = tf.gradients(attr_loss, sentence_score)
         sentence_score = sess.run(sentence_score,feed_dict=feed_dict)
@@ -163,8 +160,11 @@ class CoarseSentiTrain:
             for j in range(np.shape(result)[1]):
                 if np.any(np.isnan(result[i][j])):
                     print('batch No.: %d --- attributes No.: %d'%(i,j))
-                    print(result[i][j])
-                    print(sentence_score[i][j])
+                    print('sentence score: \n', sentence_score[i][j])
+                    print('dattr_loss/dsentence_score: \n',result[i][j])
+                    print('dloss/datt: \n',dloss_datt_g_result[i][j])
+                    print('datt/dscore: \n',datt_dscore_g_result[i][j])
+                    exit()
 
         # for score in score_ls:
         #     g = tf.gradients(attr_loss, score)
