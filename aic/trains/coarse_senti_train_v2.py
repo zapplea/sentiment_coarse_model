@@ -223,7 +223,7 @@ class CoarseSentiTrain:
 
             g = tf.gradients(score_lstm,A_mat)
             result = sess.run(g,feed_dict=feed_dict)
-            print('D_%s / D_%s: \n'%(score_lstm.name,A_mat.name))
+            print('D_%s / D_%s: \n'%(score_lstm.name,A_mat.name), np.any(np.isnan(result)))
             for i in range(np.shape(result)[0]):
                 for j in range(np.shape(result)[1]):
                     if np.any(np.isnan(result)):
