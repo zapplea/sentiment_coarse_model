@@ -175,6 +175,7 @@ class CoarseSentiTrain:
                         print('batch No.: %d --- attributes No.: %d'%(i,j))
                         print(result[i][j])
                         print(sentence_score[i][j])
+                        exit()
 
         # g = tf.gradients(attr_loss, )
         # result = sess.run(g, feed_dict=feed_dict)
