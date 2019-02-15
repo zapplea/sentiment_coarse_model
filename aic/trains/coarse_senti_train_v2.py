@@ -261,7 +261,7 @@ class CoarseSentiTrain:
                         print('batch No.: %d --- attributes No.: %d' % (i, j))
                         print(result[i][j])
                         print(value[i][j])
-
+            # TODO: the nan is from d sentence_attention / d A_mat
             print('*************************')
 
 
