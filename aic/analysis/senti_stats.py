@@ -18,7 +18,6 @@ def stats(config):
     senti_labels = df.train_senti_labels[:,:20,:]
     shape = np.shape(senti_labels)
     print(shape)
-    exit()
     freq={'pos':0,'neg':0,'neu':0,'nmt':0,'pos_neu':0,'pos_neg':0,'neg_neu':0,'neg_pos_neu':0}
     for i in range(shape[0]):
         result = np.sum(senti_labels[i],axis=0)
