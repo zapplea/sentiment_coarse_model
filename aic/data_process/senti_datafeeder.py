@@ -36,7 +36,7 @@ class Dataset:
             raise StopIteration
         return attr_labels_batch,senti_labels_batch,sentences_batch
 
-class DataFeeder():
+class DataFeeder:
     def __init__(self, config):
         self.data_config = {
                             'train_data_file_path': '/hdd/lujunyu/dataset/meituan/train.pkl',
