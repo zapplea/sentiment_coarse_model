@@ -11,7 +11,9 @@ from aic.data_process.senti_datafeeder import DataFeeder
 import numpy as np
 
 def stats(config):
+    print('stats')
     df = DataFeeder(config)
+    print('after load')
     # shape = (batch size, attributes num, senti num)
     senti_labels = df.train_senti_labels[:,:20,:]
     shape = np.shape(senti_labels)
